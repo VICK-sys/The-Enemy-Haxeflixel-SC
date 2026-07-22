@@ -2,28 +2,28 @@
 
 import flixel.FlxObject;
 import flixel.FlxSprite;
-import flixel.graphics.frames.FlxAtlasFrames;
+import util.Paths;
 
 class SlashProjectile extends FlxSprite
 {
+	public static inline var RADIUS:Float = 125;
+
 	static inline var SPEED:Float = 1100;
 	static inline var RANGE:Float = 420;
 	static inline var FADE_TIME:Float = 0.12;
 	static inline var HITBOX:Float = 250;
 
-	public static inline var RADIUS:Float = 125;
-
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
 	public var fading:Bool = false;
 
-	var life:Float = 0;
-	var hitList:Array<FlxObject> = [];
+	private var life:Float = 0;
+	private var hitList:Array<FlxObject> = [];
 
 	public function new()
 	{
 		super();
-		frames = FlxAtlasFrames.fromSparrow("assets/images/effects/attacks_gfx.png", "assets/images/effects/attacks_gfx.xml");
+		frames = Paths.sparrow("effects/attacks_gfx");
 		animation.addByPrefix("slash", "Sword", 12, false);
 		antialiasing = false;
 		scale.set(4, 4);

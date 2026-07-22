@@ -1,0 +1,12 @@
+{
+	"firstDelay": 2,
+	"breather": 3,
+	"baseCount": 2,
+	"countPerWave": 1,
+	"maxCount": 15,
+	"waves": [
+		{ "types": ["enemy"] },
+		{ "types": ["enemy", "woodster", "woodster"] },
+		{ "types": ["enemy", "woodster", "likwid"] }
+	]
+}

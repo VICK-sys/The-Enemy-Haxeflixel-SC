@@ -3,32 +3,29 @@
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
-import flixel.util.FlxColor;
-import openfl.utils.Assets;
-import flixel.graphics.frames.FlxAtlasFrames;
-import flixel.tweens.FlxTween;
-import flixel.tweens.misc.VarTween;
-import flixel.tweens.FlxEase;
 import flixel.sound.FlxSound;
+import util.Paths;
 
 class Player extends FlxSprite
 {
 
 	static inline var MOVEMENT_SPEED:Float = 450;
-	var intialSpeed:Float = 50;
-
-	private var walkingSound:FlxSound;
-	var walkSound:Bool = false;
+	static inline var DASH_SPEED:Float = 1100;
+	static inline var DASH_TIME:Float = 0.15;
 
 	public var blockMovement:Bool = false;
 	public var isDead:Bool = false;
+	public var dashTimer:Float = 0;
+
+	private var initialSpeed:Float = 50;
+	private var walkingSound:FlxSound;
+	private var walkSound:Bool = false;
 
 	public function new(x:Float = 0, y:Float = 0)
 	{
 		super(x, y);
 
-		this.loadGraphic("assets/images/characters/mufu.png", true, 20, 23);
-		this.frames = FlxAtlasFrames.fromSparrow("assets/images/characters/mufu.png", "assets/images/characters/mufu.xml");
+		this.frames = Paths.sparrow("characters/mufu");
 		this.animation.addByPrefix("idle", "Idle", 12, true);
 		this.animation.addByPrefix("walk", "Run", 12, true);
 		this.animation.addByPrefix("hurt", "Hurt", 12, false);
@@ -41,12 +38,35 @@ class Player extends FlxSprite
 
 		drag.x = drag.y = 700;
 
-		walkingSound = FlxG.sound.load("assets/sounds/walk/wave.ogg", 1, true);
+		walkingSound = FlxG.sound.load(Paths.sound("walk/wave"), 1, true);
+	}
+
+	public function dash():Void
+	{
+		var dx:Float = 0;
+		var dy:Float = 0;
+		if (FlxG.keys.anyPressed([W])) dy -= 1;
+		if (FlxG.keys.anyPressed([S])) dy += 1;
+		if (FlxG.keys.anyPressed([A])) dx -= 1;
+		if (FlxG.keys.anyPressed([D])) dx += 1;
+		if (dx == 0 && dy == 0)
+			dx = flipX ? -1 : 1;
+		var len:Float = Math.sqrt(dx * dx + dy * dy);
+		dx /= len;
+		dy /= len;
+		velocity.set(dx * DASH_SPEED, dy * DASH_SPEED);
+		if (dx > 0) flipX = false;
+		else if (dx < 0) flipX = true;
+		this.animation.play("walk");
+		dashTimer = DASH_TIME;
 	}
 
 	override function update(elapsed:Float)
 	{
-		if (!blockMovement) movement(elapsed);
+		if (dashTimer > 0)
+			dashTimer -= elapsed;
+		else if (!blockMovement)
+			movement(elapsed);
 
 		if(isDead)
 		{
@@ -93,14 +113,14 @@ class Player extends FlxSprite
 				walkSound = true;
 			}
 
-			if(intialSpeed < MOVEMENT_SPEED)
+			if(initialSpeed < MOVEMENT_SPEED)
 			{
-				intialSpeed += 900 * elapsed;
+				initialSpeed += 900 * elapsed;
 			}
 
-			if(intialSpeed >= MOVEMENT_SPEED)
+			if(initialSpeed >= MOVEMENT_SPEED)
 			{
-				intialSpeed = MOVEMENT_SPEED;
+				initialSpeed = MOVEMENT_SPEED;
 			}
 
 			this.animation.play("walk");
@@ -142,7 +162,7 @@ class Player extends FlxSprite
 				this.flipX = false;
 			}
 
-			velocity.set(intialSpeed, 0);
+			velocity.set(initialSpeed, 0);
 			velocity.pivotDegrees(FlxPoint.weak(0, 0), newAngle);
 		}
 		else
@@ -156,7 +176,7 @@ class Player extends FlxSprite
 				walkSound = false;
 			}
 
-			intialSpeed = 100;
+			initialSpeed = 100;
 		}
 	}
 }

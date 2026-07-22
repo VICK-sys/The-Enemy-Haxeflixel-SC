@@ -4,6 +4,8 @@ import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
 import flixel.FlxG;
+import util.Paths;
+import entities.EnemyData.EnemyDataRegistry;
 
 enum State {
 	Wandering;
@@ -19,27 +21,19 @@ class Enemies extends FlxSprite
 	static inline var KNOCKBACK_DRAG:Float = 1600;
 	static inline var STUN_TIME:Float = 0.3;
 	static inline var FLASH_TIME:Float = 0.08;
-	static inline var ATTACK_WINDUP:Float = 0.5;
-	static inline var ATTACK_STEP:Float = 0.2;
 
 	public var speed:Float = 300;
 	public var aggroRange:Float = 200;
 	public var stopThreshold:Float = 170;
 	public var attackRange:Float = 150;
-
-	private var animations:Array<String> = ["sstart", "sloop", "send"];
-	private var currentAnimationIndex:Int = 0;
-
-	private var attackLoopRunning:Bool = false;
-	private var attackWindup:Float = 0;
-	private var attackStepTimer:Float = 0;
-	private var wanderCountdown:Float = 0;
-	private var idleCountdown:Float = 0;
-	private var wanderSpeed:Float = 100 + FlxG.random.float() * 20;
-	private var wanderDirection:FlxPoint = new FlxPoint(FlxG.random.float() * 2 - 1, FlxG.random.float() * 2 - 1);
-	private var currentState:State = Wandering;
+	public var contactDamage:Float = 0.25;
+	public var shotDamage:Float = 0.25;
 
 	public var target:FlxSprite;
+	public var entering:Bool = false;
+	public var pathing:EnemyNav = new EnemyNav();
+	public var attack:AttackBehavior = new ChargeAttack();
+	public var shootRequested:Bool = false;
 
 	public var hp:Int = 3;
 	public var isDead:Bool = false;
@@ -54,13 +48,43 @@ class Enemies extends FlxSprite
 	public var hitOffXFlip:Float = 15;
 	public var hitOffY:Float = 35;
 
-    public function new(x:Float=0, y:Float=0)
+	private var wanderCountdown:Float = 0;
+	private var idleCountdown:Float = 0;
+	private var wanderSpeed:Float = 100 + FlxG.random.float() * 20;
+	private var wanderDirection:FlxPoint = new FlxPoint(FlxG.random.float() * 2 - 1, FlxG.random.float() * 2 - 1);
+	private var currentState:State = Wandering;
+
+    public function new(kind:String, x:Float=0, y:Float=0)
     {
         super(x, y);
 
 		this.antialiasing = false;
-		this.width = 75;
 		this.scale.set(4, 4);
+
+		var data = EnemyDataRegistry.get(kind);
+		this.frames = Paths.sparrow(data.sprite);
+		for (a in data.animations)
+			this.animation.addByPrefix(a.name, a.prefix, a.fps, a.loop);
+		this.width = data.width;
+		this.height = data.height;
+		this.offset.set(data.offsetX, data.offsetY);
+
+		hp = data.hp;
+		speed = data.speed;
+		aggroRange = data.aggroRange;
+		stopThreshold = data.stopThreshold;
+		attackRange = data.attackRange;
+		attack = data.attack == "shoot" ? new ShootAttack() : new ChargeAttack();
+		contactDamage = data.contactDamage;
+		shotDamage = data.shotDamage != null ? data.shotDamage : 0.25;
+
+		shadowOffX = data.shadowOffX;
+		shadowOffXFlip = data.shadowOffXFlip;
+		shadowOffY = data.shadowOffY;
+		shadowScaleX = data.shadowScaleX;
+		hitOffX = data.hitOffX;
+		hitOffXFlip = data.hitOffXFlip;
+		hitOffY = data.hitOffY;
     }
 
 	public function takeHit(pushX:Float, pushY:Float):Void
@@ -70,9 +94,7 @@ class Enemies extends FlxSprite
 
 		wanderCountdown = 0;
 		idleCountdown = 0;
-		attackLoopRunning = false;
-		attackWindup = 0;
-		attackStepTimer = 0;
+		attack.reset();
 
 		hp--;
 		flashTimer = FLASH_TIME;
@@ -83,6 +105,7 @@ class Enemies extends FlxSprite
 			isDead = true;
 			velocity.set(0, 0);
 			drag.set(0, 0);
+			pathing.clear();
 			this.animation.play("death", true);
 			FlxTween.tween(this, {alpha: 0}, 0.6, {startDelay: 1.2, onComplete: function(t:FlxTween) kill()});
 		}
@@ -123,14 +146,31 @@ class Enemies extends FlxSprite
 			return;
 		}
 
+		if (entering)
+		{
+			if (target != null)
+			{
+				var ex:Float = target.x + target.width * 0.5 - (x + width * 0.5);
+				var ey:Float = target.y + target.height * 0.5 - (y + height * 0.5);
+				var el:Float = Math.sqrt(ex * ex + ey * ey);
+				if (el > 0)
+					velocity.set(ex / el * speed, ey / el * speed);
+				flipX = ex < 0;
+				this.animation.play("walk");
+			}
+			else
+			{
+				velocity.set(0, 0);
+			}
+			return;
+		}
+
 		if (target == null && currentState != Wandering)
 		{
 			currentState = Wandering;
 			wanderCountdown = 0;
 			idleCountdown = 0;
-			attackLoopRunning = false;
-			attackWindup = 0;
-			attackStepTimer = 0;
+			attack.reset();
 		}
 
 		var dirX:Float = 0;
@@ -138,9 +178,13 @@ class Enemies extends FlxSprite
 		var distance:Float = 0;
 		if (target != null)
 		{
-			dirX = target.x + target.width * 0.5 - (x + width * 0.5);
-			dirY = target.y + target.height * 0.5 - (y + height * 0.5);
+			var tmx:Float = target.x + target.width * 0.5;
+			var tmy:Float = target.y + target.height * 0.5;
+			dirX = tmx - (x + width * 0.5);
+			dirY = tmy - (y + height * 0.5);
 			distance = Math.sqrt(dirX * dirX + dirY * dirY);
+
+			pathing.tick(elapsed, x + width * 0.5, y + height * 0.5, tmx, tmy);
 		}
 
 		switch (currentState)
@@ -182,7 +226,7 @@ class Enemies extends FlxSprite
 						idleCountdown = 0;
 					}
 				case Following:
-					if (distance <= attackRange)
+					if (distance <= attackRange && pathing.losClear)
 					{
 						currentState = Attacking;
 					}
@@ -192,58 +236,32 @@ class Enemies extends FlxSprite
 					}
 					else
 					{
-						if (dirX > 0) { this.flipX = false; }
-						else if (dirX < 0) { this.flipX = true; }
+						var mvX:Float = dirX;
+						var mvY:Float = dirY;
+						if (distance != 0)
+						{
+							mvX /= distance;
+							mvY /= distance;
+						}
+						pathing.steer(x + width * 0.5, y + height * 0.5, mvX, mvY);
 
-						if (distance <= stopThreshold)
+						if (pathing.moveX > 0) { this.flipX = false; }
+						else if (pathing.moveX < 0) { this.flipX = true; }
+
+						if (distance <= stopThreshold && pathing.losClear)
 						{
 							velocity.set(0, 0);
 							this.animation.play("idle");
 						}
 						else
 						{
-							if (distance != 0)
-							{
-								dirX /= distance;
-								dirY /= distance;
-							}
-							velocity.set(dirX * speed, dirY * speed);
+							velocity.set(pathing.moveX * speed, pathing.moveY * speed);
 							this.animation.play("walk");
 						}
 					}
 				case Attacking:
-					velocity.set(0, 0);
-					if (!attackLoopRunning)
-					{
-						attackLoopRunning = true;
-						currentAnimationIndex = 0;
-						attackWindup = ATTACK_WINDUP;
-						attackStepTimer = 0;
-					}
-					if (attackWindup > 0)
-					{
-						attackWindup -= elapsed;
-						if (attackWindup <= 0)
-						{
-							if (this.animation.getByName("sstart") == null)
-								this.animation.play("idle");
-							else
-								playNextAnimation();
-						}
-					}
-					else if (attackStepTimer > 0)
-					{
-						attackStepTimer -= elapsed;
-						if (attackStepTimer <= 0)
-							playNextAnimation();
-					}
-					if (distance > attackRange)
-					{
+					if (attack.update(this, elapsed, dirX, dirY, distance))
 						currentState = Following;
-						attackLoopRunning = false;
-						attackWindup = 0;
-						attackStepTimer = 0;
-					}
 		}
 	}
 
@@ -258,15 +276,9 @@ class Enemies extends FlxSprite
 		wanderCountdown = WANDER_DURATION;
 	}
 
-	private function playNextAnimation():Void
+	override public function destroy():Void
 	{
-		if (currentAnimationIndex >= animations.length)
-		{
-			currentAnimationIndex = 0;
-		}
-
-		this.animation.play(animations[currentAnimationIndex]);
-		currentAnimationIndex++;
-		attackStepTimer = ATTACK_STEP;
+		pathing.clear();
+		super.destroy();
 	}
 }

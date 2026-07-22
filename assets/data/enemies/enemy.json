@@ -1,0 +1,27 @@
+{
+	"sprite": "enemies/enemy",
+	"width": 75,
+	"height": 95,
+	"offsetX": -15,
+	"offsetY": -19,
+	"animations": [
+		{ "name": "idle", "prefix": "Idle", "fps": 12, "loop": true },
+		{ "name": "walk", "prefix": "Run", "fps": 12, "loop": true },
+		{ "name": "hurt", "prefix": "Hurt", "fps": 12, "loop": false },
+		{ "name": "death", "prefix": "Death", "fps": 12, "loop": false }
+	],
+	"hp": 3,
+	"speed": 300,
+	"aggroRange": 200,
+	"stopThreshold": 170,
+	"attackRange": 260,
+	"attack": "charge",
+	"contactDamage": 0.25,
+	"shadowOffX": 32,
+	"shadowOffXFlip": 22,
+	"shadowOffY": 90,
+	"shadowScaleX": 4,
+	"hitOffX": 15,
+	"hitOffXFlip": 10,
+	"hitOffY": 35
+}

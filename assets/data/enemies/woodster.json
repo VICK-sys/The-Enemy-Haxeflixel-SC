@@ -1,0 +1,31 @@
+{
+	"sprite": "enemies/woodster",
+	"width": 75,
+	"height": 105,
+	"offsetX": -23,
+	"offsetY": 9,
+	"animations": [
+		{ "name": "idle", "prefix": "Idle", "fps": 12, "loop": true },
+		{ "name": "walk", "prefix": "Walk", "fps": 12, "loop": true },
+		{ "name": "sstart", "prefix": "Shoot start", "fps": 12, "loop": false },
+		{ "name": "sloop", "prefix": "Shoot loop", "fps": 12, "loop": false },
+		{ "name": "send", "prefix": "Shoot end", "fps": 12, "loop": false },
+		{ "name": "hurt", "prefix": "Hurt", "fps": 12, "loop": false },
+		{ "name": "death", "prefix": "Death.", "fps": 12, "loop": false }
+	],
+	"hp": 3,
+	"speed": 300,
+	"aggroRange": 200,
+	"stopThreshold": 170,
+	"attackRange": 460,
+	"attack": "shoot",
+	"contactDamage": 0.25,
+	"shotDamage": 0.25,
+	"shadowOffX": 33,
+	"shadowOffXFlip": 33,
+	"shadowOffY": 105,
+	"shadowScaleX": 6,
+	"hitOffX": 15,
+	"hitOffXFlip": 15,
+	"hitOffY": 35
+}
