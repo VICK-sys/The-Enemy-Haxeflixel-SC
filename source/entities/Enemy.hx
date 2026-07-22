@@ -1,4 +1,4 @@
-package;
+﻿package entities;
 
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
@@ -20,6 +20,7 @@ class Enemy extends Enemies
         this.height = 95;
         this.offset.set(-15, -19);
         this.scale.set(4, 4);
+        this.hitOffXFlip = 10;
     }
 
     override public function update(elapsed:Float):Void

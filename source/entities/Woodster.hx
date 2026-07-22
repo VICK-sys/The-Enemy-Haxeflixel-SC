@@ -1,4 +1,4 @@
-package;
+﻿package entities;
 
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
@@ -11,7 +11,7 @@ class Woodster extends Enemies
     public function new(x:Float=0, y:Float=0)
     {
         super(x, y);
-        // Load a graphic for the Enemies (change this to your AI's image)
+
 		this.loadGraphic("assets/images/enemies/woodster.png", true, 20, 23);
 		this.frames = FlxAtlasFrames.fromSparrow("assets/images/enemies/woodster.png", "assets/images/enemies/woodster.xml");
 		this.animation.addByPrefix("idle", "Idle", 12, true);
@@ -24,10 +24,14 @@ class Woodster extends Enemies
 		this.height = 105;
 		this.offset.set(-23, 9);
 		this.scale.set(4, 4);
+		this.shadowOffX = 33;
+		this.shadowOffXFlip = 33;
+		this.shadowOffY = 105;
+		this.shadowScaleX = 6;
     }
 
     override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
-	}	
+	}
 }

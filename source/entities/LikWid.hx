@@ -1,4 +1,4 @@
-package;
+﻿package entities;
 
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
@@ -20,6 +20,12 @@ class LikWid extends Enemies
         this.height = 75;
         this.offset.set(-23, 0);
         this.scale.set(4, 4);
+        this.shadowOffX = 33;
+        this.shadowOffXFlip = 33;
+        this.shadowOffY = 73;
+        this.shadowScaleX = 7;
+        this.hitOffX = 25;
+        this.hitOffXFlip = 25;
     }
 
     override public function update(elapsed:Float):Void
