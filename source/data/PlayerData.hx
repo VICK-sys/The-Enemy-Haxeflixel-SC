@@ -1,6 +1,5 @@
-package entities;
+package data;
 
-import util.DataLoader;
 import util.Paths;
 
 typedef PlayerData = {

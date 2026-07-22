@@ -1,4 +1,4 @@
-package util;
+package data;
 
 import haxe.Json;
 import openfl.utils.Assets;

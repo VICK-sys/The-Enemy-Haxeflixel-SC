@@ -1,4 +1,4 @@
-package entities;
+package entities.enemy;
 
 class ShootAttack implements AttackBehavior
 {

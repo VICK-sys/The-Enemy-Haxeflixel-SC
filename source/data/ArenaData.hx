@@ -1,6 +1,5 @@
-package systems;
+package data;
 
-import util.DataLoader;
 import util.Paths;
 
 typedef ArenaData = {

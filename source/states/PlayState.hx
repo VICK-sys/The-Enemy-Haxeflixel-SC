@@ -4,7 +4,7 @@ import flixel.FlxState;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import entities.Player;
-import entities.Enemies;
+import entities.enemy.Enemies;
 import systems.Arena;
 import systems.Fx;
 import systems.RenderLayers;

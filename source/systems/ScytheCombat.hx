@@ -5,7 +5,7 @@ import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
-import entities.Enemies;
+import entities.enemy.Enemies;
 import entities.SlashProjectile;
 import util.Paths;
 

@@ -5,7 +5,7 @@ import flixel.FlxSprite;
 import flixel.util.FlxSort;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
-import entities.Enemies;
+import entities.enemy.Enemies;
 import util.Paths;
 
 class RenderLayers

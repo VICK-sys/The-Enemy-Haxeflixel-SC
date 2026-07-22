@@ -7,7 +7,7 @@ import flixel.math.FlxPoint;
 import flixel.tile.FlxTilemap;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import util.Paths;
-import systems.ArenaData.ArenaDataRegistry;
+import data.ArenaData.ArenaDataRegistry;
 
 class Arena
 {

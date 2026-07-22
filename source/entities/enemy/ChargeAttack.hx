@@ -1,4 +1,4 @@
-package entities;
+package entities.enemy;
 
 import flixel.FlxG;
 import util.Paths;

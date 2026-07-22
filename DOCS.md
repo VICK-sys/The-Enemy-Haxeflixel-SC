@@ -18,6 +18,8 @@ source/
   states/                game states
   systems/               gameplay systems owned by PlayState
   entities/              sprites and components
+  entities/enemy/        enemy class, navigation, attack styles, projectile
+  data/                  JSON typedefs and loaders (mirrors assets/data/)
   util/                  utilities
 export/                  build output (not committed)
 ```
@@ -45,19 +47,25 @@ Each system is constructed once by PlayState and updated once per frame.
 ## Entities (source/entities/)
 
 - `Player` — WASD movement with an acceleration ramp, dash, and the walk sound loop.
-- `Enemies` — the one enemy class. Loads its definition from JSON by kind (`"enemy"`, `"woodster"`, `"likwid"`) and runs a three-state FSM: Wandering, Following, Attacking. Wave-spawned enemies start off screen in an entering mode that walks them through the border wall before collision turns on.
-- `EnemyNav` — line-of-sight and pathfinding component. It rays the tilemap toward the target a few times per second; when the line is blocked it runs A* over the map and steers along the waypoints.
-- `AttackBehavior`, `ChargeAttack`, `ShootAttack` — the attack style interface and its two implementations. A charge is a windup, a straight lunge, and a recovery. A shooter holds position, cycles its shoot animation, and requests a projectile on the loop frame.
 - `SlashProjectile` — the player's pooled slash wave. It pierces enemies (one hit per enemy per wave) and dies on walls.
-- `EnemyShot` — pooled enemy projectile. Carries its damage, speed, and range from the shooter.
 - `ThrownScythe` — the airborne scythe. Spins, stretches on release, throbs in flight, and hits each enemy once per flight leg (out and return).
 - `HealthPickup` — dropped heart. Restores health on contact, expires after a few seconds.
-- `EnemyData`, `PlayerData` — JSON typedefs and parse-once registries for their data files.
+
+Enemy behavior lives in `source/entities/enemy/`:
+
+- `Enemies` — the one enemy class. Loads its definition from JSON by kind (`"enemy"`, `"woodster"`, `"likwid"`) and runs a three-state FSM: Wandering, Following, Attacking. Wave-spawned enemies start off screen in an entering mode that walks them through the border wall before collision turns on.
+- `EnemyNav` — line-of-sight and pathfinding component. A few times per second it checks a body-width corridor toward the target (two offset rays); when blocked it runs A* over the map, simplified with a body-sized box cast, and steers along the waypoints. Wall contact while chasing forces an immediate re-path.
+- `AttackBehavior`, `ChargeAttack`, `ShootAttack` — the attack style interface and its two implementations. A charge is a windup, a straight lunge, and a recovery. A shooter holds position, cycles its shoot animation, and requests a projectile on the loop frame.
+- `EnemyShot` — pooled enemy projectile. Carries its damage, speed, and range from the shooter.
+
+## Data modules (source/data/)
+
+- `DataLoader` — reads and parses a JSON asset; throws with the path in the message if the file is missing.
+- `EnemyData`, `PlayerData`, `WaveData`, `ArenaData` — typedefs and parse-once registries for the files under `assets/data/`.
 
 ## Utilities (source/util/)
 
 - `Paths` — asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow` (returns the loaded atlas for a png/xml pair).
-- `DataLoader` — reads and parses a JSON asset; throws with the path in the message if the file is missing.
 - `SaveData` — persistent save (best wave reached).
 
 ## Data
@@ -130,10 +138,10 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `systems/ScytheCombat.hx` | swing time, arc, scale pulse, aim smoothing, slash spawn distance, facing flip margin |
 | `systems/ThrowAttack.hx` | throw distance, return speed, catch radius, wall probe, trail density and fade |
 | `entities/ThrownScythe.hx` | throw speed, spin rate, hit radius |
-| `entities/SlashProjectile.hx` | slash speed, range, fade time, hit radius |
-| `entities/Enemies.hx` | wander and idle durations, hit flash time |
-| `entities/EnemyNav.hx` | waypoint radius; the repath interval is in `tick()` |
 | `entities/HealthPickup.hx` | heal amount, lifetime |
+| `entities/SlashProjectile.hx` | slash speed, range, fade time, hit radius |
+| `entities/enemy/Enemies.hx` | wander and idle durations, hit flash time |
+| `entities/enemy/EnemyNav.hx` | waypoint radius, body radius default; the repath interval is in `tick()` |
 | `systems/EnemyDirector.hx` | off-screen entry margin, edge spawn margins, shot wall probe |
 | `systems/Fx.hx` | hitstop length, shake strengths, spark settings |
 

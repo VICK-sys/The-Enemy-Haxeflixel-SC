@@ -1,4 +1,4 @@
-package entities;
+package entities.enemy;
 
 import flixel.FlxG;
 import flixel.math.FlxPoint;
@@ -6,10 +6,11 @@ import flixel.tile.FlxTilemap;
 
 class EnemyNav
 {
-	static inline var WAYPOINT_REACHED:Float = 24;
+	static inline var WAYPOINT_REACHED:Float = 32;
 
 	public var map:FlxTilemap;
 	public var losClear:Bool = true;
+	public var bodyRadius:Float = 40;
 	public var moveX:Float = 0;
 	public var moveY:Float = 0;
 
@@ -36,17 +37,46 @@ class EnemyNav
 			losClear = true;
 			return;
 		}
-		var from = FlxPoint.get(fromX, fromY);
-		var to = FlxPoint.get(toX, toY);
-		losClear = map.ray(from, to);
+		losClear = corridorClear(fromX, fromY, toX, toY);
 		if (!losClear)
 		{
 			clear();
-			pathPoints = map.findPath(from, to);
+			var from = FlxPoint.get(fromX, fromY);
+			var to = FlxPoint.get(toX, toY);
+			pathPoints = map.findPath(from, to, RAY_BOX(bodyRadius * 2, bodyRadius * 2));
 			pathIndex = 0;
+			from.put();
+			to.put();
 		}
-		from.put();
-		to.put();
+	}
+
+	function corridorClear(fromX:Float, fromY:Float, toX:Float, toY:Float):Bool
+	{
+		var dx = toX - fromX;
+		var dy = toY - fromY;
+		var len = Math.sqrt(dx * dx + dy * dy);
+		if (len <= 0)
+			return true;
+		var px = -dy / len * bodyRadius;
+		var py = dx / len * bodyRadius;
+		return rayClear(fromX + px, fromY + py, toX + px, toY + py)
+			&& rayClear(fromX - px, fromY - py, toX - px, toY - py);
+	}
+
+	function rayClear(x1:Float, y1:Float, x2:Float, y2:Float):Bool
+	{
+		var a = FlxPoint.get(x1, y1);
+		var b = FlxPoint.get(x2, y2);
+		var clear = map.ray(a, b);
+		a.put();
+		b.put();
+		return clear;
+	}
+
+	public function notifyBlocked():Void
+	{
+		losClear = false;
+		repathTimer = 0;
 	}
 
 	public function steer(fromX:Float, fromY:Float, straightX:Float, straightY:Float):Void

@@ -1,11 +1,11 @@
-package entities;
+package entities.enemy;
 
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
 import flixel.FlxG;
 import util.Paths;
-import entities.EnemyData.EnemyDataRegistry;
+import data.EnemyData.EnemyDataRegistry;
 
 enum State {
 	Wandering;
@@ -71,6 +71,7 @@ class Enemies extends FlxSprite
 		this.width = data.width;
 		this.height = data.height;
 		this.offset.set(data.offsetX, data.offsetY);
+		pathing.bodyRadius = data.width * 0.6;
 
 		hp = data.hp;
 		speed = data.speed;
@@ -254,6 +255,8 @@ class Enemies extends FlxSprite
 						idleCountdown = 0;
 					}
 				case Following:
+					if (wasTouching != NONE)
+						pathing.notifyBlocked();
 					if (distance <= attackRange && pathing.losClear)
 					{
 						currentState = Attacking;

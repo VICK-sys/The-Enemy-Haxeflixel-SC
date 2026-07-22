@@ -5,7 +5,8 @@ import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.sound.FlxSound;
 import util.Paths;
-import entities.PlayerData.PlayerDataRegistry;
+import data.PlayerData;
+import data.PlayerData.PlayerDataRegistry;
 
 class Player extends FlxSprite
 {

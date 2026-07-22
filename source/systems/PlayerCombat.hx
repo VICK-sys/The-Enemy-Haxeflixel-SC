@@ -3,8 +3,8 @@ package systems;
 import flixel.FlxG;
 import flixel.FlxObject;
 import entities.Player;
-import entities.PlayerData;
-import entities.PlayerData.PlayerDataRegistry;
+import data.PlayerData;
+import data.PlayerData.PlayerDataRegistry;
 import util.Paths;
 
 class PlayerCombat

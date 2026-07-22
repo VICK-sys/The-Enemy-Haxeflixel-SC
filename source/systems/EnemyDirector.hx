@@ -5,9 +5,10 @@ import flixel.FlxSprite;
 import flixel.FlxObject;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
-import entities.Enemies;
-import entities.EnemyShot;
-import systems.WaveData.WaveDataRegistry;
+import entities.enemy.Enemies;
+import entities.enemy.EnemyShot;
+import data.WaveData;
+import data.WaveData.WaveDataRegistry;
 import util.Paths;
 
 class EnemyDirector

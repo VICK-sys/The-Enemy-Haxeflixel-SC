@@ -5,7 +5,7 @@ import flixel.FlxSprite;
 import flixel.sound.FlxSound;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
-import entities.Enemies;
+import entities.enemy.Enemies;
 import entities.ThrownScythe;
 import util.Paths;
 
