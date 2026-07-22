@@ -2,10 +2,10 @@ package entities;
 
 class ChargeAttack implements AttackBehavior
 {
-	static inline var WINDUP:Float = 0.35;
-	static inline var SPEED:Float = 950;
-	static inline var TIME:Float = 0.45;
-	static inline var RECOVER:Float = 0.4;
+	public var windupTime:Float = 0.35;
+	public var chargeSpeed:Float = 950;
+	public var chargeTime:Float = 0.45;
+	public var recoverTime:Float = 0.4;
 
 	private var started:Bool = false;
 	private var phase:Int = 0;
@@ -19,7 +19,7 @@ class ChargeAttack implements AttackBehavior
 		{
 			started = true;
 			phase = 0;
-			timer = WINDUP;
+			timer = windupTime;
 			e.velocity.set(0, 0);
 			if (dirX > 0) { e.flipX = false; }
 			else if (dirX < 0) { e.flipX = true; }
@@ -32,12 +32,12 @@ class ChargeAttack implements AttackBehavior
 				if (timer <= 0)
 				{
 					var len:Float = distance != 0 ? distance : 1;
-					e.velocity.set(dirX / len * SPEED, dirY / len * SPEED);
+					e.velocity.set(dirX / len * chargeSpeed, dirY / len * chargeSpeed);
 					if (dirX > 0) { e.flipX = false; }
 					else if (dirX < 0) { e.flipX = true; }
 					e.animation.play("walk");
 					phase = 1;
-					timer = TIME;
+					timer = chargeTime;
 				}
 			case 1:
 				if (timer <= 0)
@@ -45,7 +45,7 @@ class ChargeAttack implements AttackBehavior
 					e.velocity.set(0, 0);
 					e.animation.play("idle");
 					phase = 2;
-					timer = RECOVER;
+					timer = recoverTime;
 				}
 			default:
 				if (timer <= 0)

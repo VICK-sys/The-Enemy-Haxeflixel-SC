@@ -7,6 +7,7 @@ Top-down action game built with HaxeFlixel. Fight enemies with a mouse-aimed scy
 - WASD — move
 - Mouse — aim, left click to swing
 - SPACE — dash (costs 1 AP; kills refill the meter)
+- ESC — pause
 - ENTER — skip the intro
 - R — restart after death
 

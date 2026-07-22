@@ -2,10 +2,10 @@ package entities;
 
 class ShootAttack implements AttackBehavior
 {
-	static inline var WINDUP:Float = 0.5;
-	static inline var STEP:Float = 0.2;
-	static inline var GAP:Float = 1.2;
-	static inline var DISENGAGE:Float = 120;
+	public var windupTime:Float = 0.5;
+	public var stepTime:Float = 0.2;
+	public var gapTime:Float = 1.2;
+	public var disengageSlack:Float = 120;
 
 	private var animations:Array<String> = ["sstart", "sloop", "send"];
 	private var started:Bool = false;
@@ -24,7 +24,7 @@ class ShootAttack implements AttackBehavior
 		{
 			started = true;
 			animIndex = 0;
-			windup = WINDUP;
+			windup = windupTime;
 			stepTimer = 0;
 			e.animation.play("idle");
 		}
@@ -45,7 +45,7 @@ class ShootAttack implements AttackBehavior
 			if (stepTimer <= 0)
 				playNext(e);
 		}
-		if (distance > e.attackRange + DISENGAGE || !e.pathing.losClear)
+		if (distance > e.attackRange + disengageSlack || !e.pathing.losClear)
 		{
 			started = false;
 			return true;
@@ -67,6 +67,6 @@ class ShootAttack implements AttackBehavior
 		if (name == "sloop")
 			e.shootRequested = true;
 		animIndex++;
-		stepTimer = animIndex >= animations.length ? GAP : STEP;
+		stepTimer = animIndex >= animations.length ? gapTime : stepTime;
 	}
 }

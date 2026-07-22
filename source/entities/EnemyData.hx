@@ -1,7 +1,6 @@
 package entities;
 
-import haxe.Json;
-import openfl.utils.Assets;
+import util.DataLoader;
 import util.Paths;
 
 typedef EnemyAnimData = {
@@ -26,6 +25,21 @@ typedef EnemyData = {
 	attack:String,
 	contactDamage:Float,
 	?shotDamage:Float,
+	?shotSpeed:Float,
+	?shotRange:Float,
+	dropChance:Float,
+	?knockback:Float,
+	?knockbackDrag:Float,
+	?stunTime:Float,
+	?wanderSpeed:Float,
+	?chargeWindup:Float,
+	?chargeSpeed:Float,
+	?chargeTime:Float,
+	?chargeRecover:Float,
+	?shootWindup:Float,
+	?shootStep:Float,
+	?shootGap:Float,
+	?shootDisengage:Float,
 	shadowOffX:Float,
 	shadowOffXFlip:Float,
 	shadowOffY:Float,
@@ -44,11 +58,7 @@ class EnemyDataRegistry
 		var data = cache.get(kind);
 		if (data == null)
 		{
-			var path = Paths.json("enemies/" + kind);
-			var text = Assets.getText(path);
-			if (text == null)
-				throw "Missing enemy data: " + path;
-			data = Json.parse(text);
+			data = DataLoader.load(Paths.json("enemies/" + kind));
 			cache.set(kind, data);
 		}
 		return data;

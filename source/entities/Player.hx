@@ -5,19 +5,17 @@ import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.sound.FlxSound;
 import util.Paths;
+import entities.PlayerData.PlayerDataRegistry;
 
 class Player extends FlxSprite
 {
-
-	static inline var MOVEMENT_SPEED:Float = 450;
-	static inline var DASH_SPEED:Float = 1100;
-	static inline var DASH_TIME:Float = 0.15;
 
 	public var blockMovement:Bool = false;
 	public var isDead:Bool = false;
 	public var dashTimer:Float = 0;
 
-	private var initialSpeed:Float = 50;
+	private var data:PlayerData;
+	private var initialSpeed:Float = 0;
 	private var walkingSound:FlxSound;
 	private var walkSound:Bool = false;
 
@@ -36,7 +34,9 @@ class Player extends FlxSprite
 		this.offset.set(-19, -17);
 		this.scale.set(4, 4);
 
-		drag.x = drag.y = 700;
+		data = PlayerDataRegistry.get();
+		initialSpeed = data.rampStart;
+		drag.x = drag.y = data.drag;
 
 		walkingSound = FlxG.sound.load(Paths.sound("walk/wave"), 1, true);
 	}
@@ -54,11 +54,11 @@ class Player extends FlxSprite
 		var len:Float = Math.sqrt(dx * dx + dy * dy);
 		dx /= len;
 		dy /= len;
-		velocity.set(dx * DASH_SPEED, dy * DASH_SPEED);
+		velocity.set(dx * data.dashSpeed, dy * data.dashSpeed);
 		if (dx > 0) flipX = false;
 		else if (dx < 0) flipX = true;
 		this.animation.play("walk");
-		dashTimer = DASH_TIME;
+		dashTimer = data.dashTime;
 	}
 
 	override function update(elapsed:Float)
@@ -113,14 +113,14 @@ class Player extends FlxSprite
 				walkSound = true;
 			}
 
-			if(initialSpeed < MOVEMENT_SPEED)
+			if(initialSpeed < data.moveSpeed)
 			{
-				initialSpeed += 900 * elapsed;
+				initialSpeed += data.rampRate * elapsed;
 			}
 
-			if(initialSpeed >= MOVEMENT_SPEED)
+			if(initialSpeed >= data.moveSpeed)
 			{
-				initialSpeed = MOVEMENT_SPEED;
+				initialSpeed = data.moveSpeed;
 			}
 
 			this.animation.play("walk");
@@ -176,7 +176,7 @@ class Player extends FlxSprite
 				walkSound = false;
 			}
 
-			initialSpeed = 100;
+			initialSpeed = data.rampReset;
 		}
 	}
 }

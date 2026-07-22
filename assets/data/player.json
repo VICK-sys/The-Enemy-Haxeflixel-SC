@@ -1,0 +1,17 @@
+{
+	"moveSpeed": 450,
+	"rampStart": 50,
+	"rampRate": 900,
+	"rampReset": 100,
+	"drag": 700,
+	"dashSpeed": 1100,
+	"dashTime": 0.15,
+	"dashCost": 1,
+	"dashIframes": 0.25,
+	"healthMax": 2,
+	"apMax": 2,
+	"apPerKill": 0.5,
+	"iframeTime": 0.4,
+	"hurtLockTime": 0.1,
+	"knockback": 300
+}

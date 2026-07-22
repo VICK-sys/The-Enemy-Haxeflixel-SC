@@ -12,6 +12,10 @@ import systems.WaveData.WaveDataRegistry;
 class EnemyDirector
 {
 	static inline var ENTER_MARGIN:Float = 40;
+	static inline var SPAWN_OUT:Float = 40;
+	static inline var SPAWN_PAD:Float = 60;
+	static inline var SPAWN_TRIM:Float = 240;
+	static inline var SHOT_PROBE:Float = 10;
 
 	public var wave:Int = 0;
 	public var shots:FlxTypedGroup<EnemyShot>;
@@ -119,7 +123,7 @@ class EnemyDirector
 					var sdy = player.y + player.height * 0.5 - sy;
 					var sl = Math.sqrt(sdx * sdx + sdy * sdy);
 					if (sl > 0)
-						shots.recycle(EnemyShot).fire(sx, sy, sdx / sl, sdy / sl, e.shotDamage);
+						shots.recycle(EnemyShot).fire(sx, sy, sdx / sl, sdy / sl, e.shotDamage, e.shotSpeed, e.shotRange);
 				}
 			}
 			else
@@ -137,7 +141,7 @@ class EnemyDirector
 				continue;
 			var shx = shot.x + shot.width / 2;
 			var shy = shot.y + shot.height / 2;
-			if (arena.wallAt(shx + shot.dirX * 10, shy + shot.dirY * 10))
+			if (arena.wallAt(shx + shot.dirX * SHOT_PROBE, shy + shot.dirY * SHOT_PROBE))
 			{
 				shot.kill();
 				continue;
@@ -170,17 +174,17 @@ class EnemyDirector
 		switch (Std.random(4))
 		{
 			case 0:
-				e.x = -e.width - 40;
-				e.y = 60 + Math.random() * (mh - 240);
+				e.x = -e.width - SPAWN_OUT;
+				e.y = SPAWN_PAD + Math.random() * (mh - SPAWN_TRIM);
 			case 1:
-				e.x = mw + 40;
-				e.y = 60 + Math.random() * (mh - 240);
+				e.x = mw + SPAWN_OUT;
+				e.y = SPAWN_PAD + Math.random() * (mh - SPAWN_TRIM);
 			case 2:
-				e.x = 60 + Math.random() * (mw - 240);
-				e.y = -e.height - 40;
+				e.x = SPAWN_PAD + Math.random() * (mw - SPAWN_TRIM);
+				e.y = -e.height - SPAWN_OUT;
 			default:
-				e.x = 60 + Math.random() * (mw - 240);
-				e.y = mh + 40;
+				e.x = SPAWN_PAD + Math.random() * (mw - SPAWN_TRIM);
+				e.y = mh + SPAWN_OUT;
 		}
 		e.entering = true;
 		e.allowCollisions = NONE;

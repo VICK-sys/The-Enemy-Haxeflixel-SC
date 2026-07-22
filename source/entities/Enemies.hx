@@ -17,9 +17,6 @@ class Enemies extends FlxSprite
 {
 	static inline var IDLE_DURATION:Float = 3.0;
 	static inline var WANDER_DURATION:Float = 2.0;
-	static inline var KNOCKBACK_SPEED:Float = 550;
-	static inline var KNOCKBACK_DRAG:Float = 1600;
-	static inline var STUN_TIME:Float = 0.3;
 	static inline var FLASH_TIME:Float = 0.08;
 
 	public var speed:Float = 300;
@@ -28,6 +25,12 @@ class Enemies extends FlxSprite
 	public var attackRange:Float = 150;
 	public var contactDamage:Float = 0.25;
 	public var shotDamage:Float = 0.25;
+	public var shotSpeed:Float = 480;
+	public var shotRange:Float = 640;
+	public var dropChance:Float = 0;
+	public var knockbackTaken:Float = 550;
+	public var knockbackDrag:Float = 1600;
+	public var stunTime:Float = 0.3;
 
 	public var target:FlxSprite;
 	public var entering:Bool = false;
@@ -50,7 +53,7 @@ class Enemies extends FlxSprite
 
 	private var wanderCountdown:Float = 0;
 	private var idleCountdown:Float = 0;
-	private var wanderSpeed:Float = 100 + FlxG.random.float() * 20;
+	private var wanderSpeed:Float = 0;
 	private var wanderDirection:FlxPoint = new FlxPoint(FlxG.random.float() * 2 - 1, FlxG.random.float() * 2 - 1);
 	private var currentState:State = Wandering;
 
@@ -74,9 +77,34 @@ class Enemies extends FlxSprite
 		aggroRange = data.aggroRange;
 		stopThreshold = data.stopThreshold;
 		attackRange = data.attackRange;
-		attack = data.attack == "shoot" ? new ShootAttack() : new ChargeAttack();
 		contactDamage = data.contactDamage;
 		shotDamage = data.shotDamage != null ? data.shotDamage : 0.25;
+		if (data.shotSpeed != null) shotSpeed = data.shotSpeed;
+		if (data.shotRange != null) shotRange = data.shotRange;
+		dropChance = data.dropChance;
+		if (data.knockback != null) knockbackTaken = data.knockback;
+		if (data.knockbackDrag != null) knockbackDrag = data.knockbackDrag;
+		if (data.stunTime != null) stunTime = data.stunTime;
+		wanderSpeed = (data.wanderSpeed != null ? data.wanderSpeed : 100) + FlxG.random.float() * 20;
+
+		if (data.attack == "shoot")
+		{
+			var shoot = new ShootAttack();
+			if (data.shootWindup != null) shoot.windupTime = data.shootWindup;
+			if (data.shootStep != null) shoot.stepTime = data.shootStep;
+			if (data.shootGap != null) shoot.gapTime = data.shootGap;
+			if (data.shootDisengage != null) shoot.disengageSlack = data.shootDisengage;
+			attack = shoot;
+		}
+		else
+		{
+			var charge = new ChargeAttack();
+			if (data.chargeWindup != null) charge.windupTime = data.chargeWindup;
+			if (data.chargeSpeed != null) charge.chargeSpeed = data.chargeSpeed;
+			if (data.chargeTime != null) charge.chargeTime = data.chargeTime;
+			if (data.chargeRecover != null) charge.recoverTime = data.chargeRecover;
+			attack = charge;
+		}
 
 		shadowOffX = data.shadowOffX;
 		shadowOffXFlip = data.shadowOffXFlip;
@@ -112,9 +140,9 @@ class Enemies extends FlxSprite
 		else
 		{
 			this.animation.play("hurt", true);
-			velocity.set(pushX * KNOCKBACK_SPEED, pushY * KNOCKBACK_SPEED);
-			drag.set(KNOCKBACK_DRAG, KNOCKBACK_DRAG);
-			stun = STUN_TIME;
+			velocity.set(pushX * knockbackTaken, pushY * knockbackTaken);
+			drag.set(knockbackDrag, knockbackDrag);
+			stun = stunTime;
 		}
 	}
 

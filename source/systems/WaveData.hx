@@ -1,7 +1,6 @@
 package systems;
 
-import haxe.Json;
-import openfl.utils.Assets;
+import util.DataLoader;
 import util.Paths;
 
 typedef WavePool = {
@@ -24,13 +23,7 @@ class WaveDataRegistry
 	public static function get():WaveData
 	{
 		if (data == null)
-		{
-			var path = Paths.json("waves");
-			var text = Assets.getText(path);
-			if (text == null)
-				throw "Missing wave data: " + path;
-			data = Json.parse(text);
-		}
+			data = DataLoader.load(Paths.json("waves"));
 		return data;
 	}
 }

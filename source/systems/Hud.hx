@@ -36,15 +36,14 @@ class Hud
 		var playerIcon = makeSprite(barBackground.x - 120, barBackground.y, "mufu_icon");
 
 		state.add(barBackground);
-		state.add(makeBar(barBackground, "bar_main_empty", "bar_red", 'health', PlayerCombat.HEALTH_MAX));
-		state.add(makeBar(activeRed, "active_empty", "active_red", 'itemBar', PlayerCombat.AP_MAX));
+		state.add(makeBar(barBackground, "bar_main_empty", "bar_red", 'health', status.healthMax));
+		state.add(makeBar(activeRed, "active_empty", "active_red", 'itemBar', status.apMax));
 		state.add(passiveRed);
 		state.add(playerIcon);
 
 		waveText = makeText(8, 16);
 		bannerText = makeText(250, 48);
-		deadText = makeText(400, 24);
-		deadText.text = "PRESS R TO RESTART";
+		deadText = makeText(380, 24);
 		deadText.visible = false;
 
 		customCursor = makeSprite(0, 0, "mouse");
@@ -73,9 +72,15 @@ class Hud
 		bannerTimer = 2;
 	}
 
-	public function setDead(d:Bool):Void
+	public function showDeath(wave:Int, best:Int):Void
 	{
-		deadText.visible = d;
+		deadText.text = "WAVE " + wave + "  -  BEST " + best + "\nPRESS R TO RESTART";
+		deadText.visible = true;
+	}
+
+	public function hideDeath():Void
+	{
+		deadText.visible = false;
 	}
 
 	function makeSprite(x:Float, y:Float, name:String):FlxSprite

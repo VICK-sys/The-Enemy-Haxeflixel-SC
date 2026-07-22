@@ -7,6 +7,7 @@ import flixel.math.FlxPoint;
 import flixel.tile.FlxTilemap;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import util.Paths;
+import systems.ArenaData.ArenaDataRegistry;
 
 class Arena
 {
@@ -14,15 +15,21 @@ class Arena
 	static inline var TILE_HEIGHT:Int = 16;
 
 	public var map:FlxTilemap;
+	public var spawnX:Float;
+	public var spawnY:Float;
 	public var width(get, never):Float;
 	public var height(get, never):Float;
 
 	public function new(state:FlxState)
 	{
-		state.add(new FlxSprite(0, 0, Paths.image("stages/theEnemy")));
+		var data = ArenaDataRegistry.get();
+		spawnX = data.spawnX;
+		spawnY = data.spawnY;
+
+		state.add(new FlxSprite(0, 0, Paths.image(data.background)));
 
 		map = new FlxTilemap();
-		map.loadMapFromCSV(Paths.file("default_auto.txt"), Paths.file("auto_tiles.png"), TILE_WIDTH, TILE_HEIGHT, AUTO);
+		map.loadMapFromCSV(Paths.file(data.map), Paths.file(data.tiles), TILE_WIDTH, TILE_HEIGHT, AUTO);
 		map.visible = false;
 		state.add(map);
 

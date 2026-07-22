@@ -26,11 +26,12 @@ class ScytheCombat
 	private var director:EnemyDirector;
 	private var status:PlayerCombat;
 	private var fx:Fx;
+	private var pickups:Pickups;
 	private var swingTimer:Float = 0;
 	private var swingBaseAngle:Float = 0;
 	private var swingDir:Int = 1;
 
-	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx)
+	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, pickups:Pickups)
 	{
 		this.player = player;
 		this.scythe = scythe;
@@ -38,6 +39,7 @@ class ScytheCombat
 		this.director = director;
 		this.status = status;
 		this.fx = fx;
+		this.pickups = pickups;
 		slashes = new FlxTypedGroup<SlashProjectile>();
 	}
 
@@ -169,6 +171,8 @@ class ScytheCombat
 		{
 			fx.killImpact();
 			status.rewardKill();
+			if (FlxG.random.float() < e.dropChance)
+				pickups.drop(e.x + e.width / 2, e.y + e.height / 2);
 		}
 	}
 }

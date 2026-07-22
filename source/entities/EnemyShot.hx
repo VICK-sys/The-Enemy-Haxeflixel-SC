@@ -4,9 +4,6 @@ import flixel.FlxSprite;
 
 class EnemyShot extends FlxSprite
 {
-	static inline var SPEED:Float = 480;
-	static inline var RANGE:Float = 640;
-
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
 	public var damage:Float = 0.25;
@@ -20,15 +17,15 @@ class EnemyShot extends FlxSprite
 		antialiasing = false;
 	}
 
-	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, damage:Float):Void
+	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, damage:Float, speed:Float, range:Float):Void
 	{
 		revive();
 		setPosition(cx - width / 2, cy - height / 2);
 		dirX = dx;
 		dirY = dy;
 		this.damage = damage;
-		velocity.set(dx * SPEED, dy * SPEED);
-		life = RANGE / SPEED;
+		velocity.set(dx * speed, dy * speed);
+		life = range / speed;
 	}
 
 	override public function update(elapsed:Float):Void

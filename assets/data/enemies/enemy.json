@@ -17,6 +17,7 @@
 	"attackRange": 260,
 	"attack": "charge",
 	"contactDamage": 0.25,
+	"dropChance": 0.2,
 	"shadowOffX": 32,
 	"shadowOffXFlip": 22,
 	"shadowOffY": 90,

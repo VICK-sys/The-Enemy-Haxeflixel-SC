@@ -1,0 +1,7 @@
+{
+	"background": "stages/theEnemy",
+	"map": "default_auto.txt",
+	"tiles": "auto_tiles.png",
+	"spawnX": 600,
+	"spawnY": 500
+}

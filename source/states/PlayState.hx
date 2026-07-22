@@ -11,8 +11,10 @@ import systems.RenderLayers;
 import systems.PlayerCombat;
 import systems.EnemyDirector;
 import systems.ScytheCombat;
+import systems.Pickups;
 import systems.Hud;
 import util.Paths;
+import util.SaveData;
 
 class PlayState extends FlxState
 {
@@ -22,6 +24,7 @@ class PlayState extends FlxState
 	private var scythe:FlxSprite;
 	private var layers:RenderLayers;
 	private var status:PlayerCombat;
+	private var pickups:Pickups;
 	private var director:EnemyDirector;
 	private var combat:ScytheCombat;
 	private var hud:Hud;
@@ -34,7 +37,7 @@ class PlayState extends FlxState
 
 		arena = new Arena(this);
 
-		_player = new Player(600, 500);
+		_player = new Player(arena.spawnX, arena.spawnY);
 
 		FlxG.camera.follow(_player);
 		FlxG.camera.followLerp = 0.1;
@@ -50,15 +53,17 @@ class PlayState extends FlxState
 		arena.addPillars(layers.entityLayer);
 
 		status = new PlayerCombat(_player, fx);
+		pickups = new Pickups(_player, status);
+		insert(members.indexOf(layers.entityLayer), pickups.group);
 		director = new EnemyDirector(_player, arena, layers, status);
-		combat = new ScytheCombat(_player, scythe, arena, director, status, fx);
+		combat = new ScytheCombat(_player, scythe, arena, director, status, fx, pickups);
 
 		add(combat.slashes);
 		add(fx.sparks);
 		add(director.shots);
 
 		hud = new Hud(this, status);
-		director.onWave = hud.showWave;
+		director.onWave = onWaveStarted;
 
 		FlxG.sound.playMusic(Paths.music("stage/gloomDoomWoods"), 0.3, true);
 
@@ -80,16 +85,26 @@ class PlayState extends FlxState
 		{
 			layers.playerShadow.visible = false;
 			scythe.visible = false;
-			hud.setDead(true);
+			hud.showDeath(director.wave, SaveData.bestWave());
 		}
 
 		director.update(elapsed);
+		pickups.update();
 		layers.update();
 		combat.update(elapsed);
 		director.updateShots();
 		hud.update(elapsed);
 
+		if (FlxG.keys.justPressed.ESCAPE && !status.dead)
+			openSubState(new PauseSubState(hud.camUI));
+
 		debugKeys();
+	}
+
+	function onWaveStarted(n:Int):Void
+	{
+		SaveData.submitWave(n);
+		hud.showWave(n);
 	}
 
 	function debugKeys():Void
@@ -123,7 +138,7 @@ class PlayState extends FlxState
 			status.revive();
 			layers.playerShadow.visible = true;
 			scythe.visible = true;
-			hud.setDead(false);
+			hud.hideDeath();
 		}
 
 		if (FlxG.keys.justPressed.R && status.dead)
