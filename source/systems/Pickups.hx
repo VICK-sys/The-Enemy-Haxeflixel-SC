@@ -1,8 +1,10 @@
 package systems;
 
+import flixel.FlxG;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
 import entities.HealthPickup;
+import util.Paths;
 
 class Pickups
 {
@@ -35,6 +37,7 @@ class Pickups
 				|| p.y + p.height <= player.y || player.y + player.height <= p.y)
 				continue;
 			status.heal(HealthPickup.HEAL);
+			FlxG.sound.play(Paths.sound("heal"), 0.6);
 			p.kill();
 		}
 	}

@@ -59,6 +59,8 @@ class PlayState extends FlxState
 		combat = new ScytheCombat(_player, scythe, arena, director, status, fx, pickups);
 
 		add(combat.slashes);
+		add(combat.throwAttack.trail);
+		add(combat.throwAttack.thrown);
 		add(fx.sparks);
 		add(director.shots);
 
@@ -93,6 +95,7 @@ class PlayState extends FlxState
 		layers.update();
 		combat.update(elapsed);
 		director.updateShots();
+		hud.setMode(combat.throwMode);
 		hud.update(elapsed);
 
 		if (FlxG.keys.justPressed.ESCAPE && !status.dead)

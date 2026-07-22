@@ -19,6 +19,8 @@ class ScytheCombat
 	static inline var FLIP_MARGIN:Float = 12;
 
 	public var slashes:FlxTypedGroup<SlashProjectile>;
+	public var throwAttack:ThrowAttack;
+	public var throwMode:Bool = false;
 
 	private var player:Player;
 	private var scythe:FlxSprite;
@@ -41,14 +43,18 @@ class ScytheCombat
 		this.fx = fx;
 		this.pickups = pickups;
 		slashes = new FlxTypedGroup<SlashProjectile>();
+		throwAttack = new ThrowAttack(player, scythe, arena, director, status, damageEnemy);
 	}
 
 	public function update(elapsed:Float):Void
 	{
+		if (FlxG.keys.justPressed.Q)
+			throwMode = !throwMode;
 		anchorScythe();
 		updateSwing(elapsed);
 		updateAttackInput();
 		updateSlashes();
+		throwAttack.update(elapsed);
 	}
 
 	function anchorScythe():Void
@@ -104,32 +110,38 @@ class ScytheCombat
 
 	function updateAttackInput():Void
 	{
-		if (FlxG.mouse.justPressed && !status.dead)
+		if (!FlxG.mouse.justPressed || status.dead || throwAttack.airborne)
+			return;
+
+		var pmx:Float = player.x + player.width * 0.5;
+		var pmy:Float = player.y + player.height * 0.5;
+		var dx:Float = FlxG.mouse.x - pmx;
+		var dy:Float = FlxG.mouse.y - pmy;
+		var len:Float = Math.sqrt(dx * dx + dy * dy);
+		if (len < 0.001)
 		{
-			var pmx:Float = player.x + player.width * 0.5;
-			var pmy:Float = player.y + player.height * 0.5;
-			var dx:Float = FlxG.mouse.x - pmx;
-			var dy:Float = FlxG.mouse.y - pmy;
-			var len:Float = Math.sqrt(dx * dx + dy * dy);
-			if (len < 0.001)
-			{
-				dx = 1;
-				dy = 0;
-				len = 1;
-			}
-			dx /= len;
-			dy /= len;
-			var aimDeg:Float = Math.atan2(dy, dx) * 180 / Math.PI;
-
-			updateScytheFlip(aimDeg);
-			swingDir = scythe.flipX ? -1 : 1;
-			swingBaseAngle = scythe.flipX ? aimDeg - 180 : aimDeg;
-			swingTimer = SWING_TIME;
-
-			var slash = slashes.recycle(SlashProjectile);
-			slash.fire(pmx + dx * SLASH_SPAWN_DIST, pmy + dy * SLASH_SPAWN_DIST, dx, dy, aimDeg);
-			FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.7);
+			dx = 1;
+			dy = 0;
+			len = 1;
 		}
+		dx /= len;
+		dy /= len;
+		var aimDeg:Float = Math.atan2(dy, dx) * 180 / Math.PI;
+
+		if (throwMode)
+		{
+			throwAttack.launch(pmx, pmy, dx, dy);
+			return;
+		}
+
+		updateScytheFlip(aimDeg);
+		swingDir = scythe.flipX ? -1 : 1;
+		swingBaseAngle = scythe.flipX ? aimDeg - 180 : aimDeg;
+		swingTimer = SWING_TIME;
+
+		var slash = slashes.recycle(SlashProjectile);
+		slash.fire(pmx + dx * SLASH_SPAWN_DIST, pmy + dy * SLASH_SPAWN_DIST, dx, dy, aimDeg);
+		FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.7);
 	}
 
 	function updateSlashes():Void
@@ -163,8 +175,14 @@ class ScytheCombat
 			return;
 
 		slash.markHit(e);
-		e.takeHit(slash.dirX, slash.dirY);
+		damageEnemy(e, slash.dirX, slash.dirY);
+	}
 
+	function damageEnemy(e:Enemies, pushX:Float, pushY:Float):Void
+	{
+		e.takeHit(pushX, pushY);
+
+		FlxG.sound.play(Paths.sound("enemies/hit"), 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
 
 		if (e.isDead)

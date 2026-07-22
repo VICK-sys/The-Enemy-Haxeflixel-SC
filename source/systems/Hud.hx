@@ -19,6 +19,7 @@ class Hud
 	private var waveText:FlxText;
 	private var bannerText:FlxText;
 	private var deadText:FlxText;
+	private var modeText:FlxText;
 	private var bannerTimer:Float = 0;
 
 	public function new(state:FlxState, status:PlayerCombat)
@@ -45,6 +46,8 @@ class Hud
 		bannerText = makeText(250, 48);
 		deadText = makeText(380, 24);
 		deadText.visible = false;
+		modeText = makeText(645, 12);
+		modeText.text = "MODE: SWING";
 
 		customCursor = makeSprite(0, 0, "mouse");
 		state.add(customCursor);
@@ -70,6 +73,11 @@ class Hud
 		bannerText.text = "WAVE " + n;
 		bannerText.visible = true;
 		bannerTimer = 2;
+	}
+
+	public function setMode(throwMode:Bool):Void
+	{
+		modeText.text = throwMode ? "MODE: THROW" : "MODE: SWING";
 	}
 
 	public function showDeath(wave:Int, best:Int):Void

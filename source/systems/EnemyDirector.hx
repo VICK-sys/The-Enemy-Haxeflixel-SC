@@ -8,6 +8,7 @@ import entities.Player;
 import entities.Enemies;
 import entities.EnemyShot;
 import systems.WaveData.WaveDataRegistry;
+import util.Paths;
 
 class EnemyDirector
 {
@@ -123,7 +124,10 @@ class EnemyDirector
 					var sdy = player.y + player.height * 0.5 - sy;
 					var sl = Math.sqrt(sdx * sdx + sdy * sdy);
 					if (sl > 0)
+					{
 						shots.recycle(EnemyShot).fire(sx, sy, sdx / sl, sdy / sl, e.shotDamage, e.shotSpeed, e.shotRange);
+						FlxG.sound.play(Paths.sound("enemies/shoot"), 0.5);
+					}
 				}
 			}
 			else

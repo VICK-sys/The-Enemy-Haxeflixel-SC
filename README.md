@@ -5,7 +5,8 @@ Top-down action game built with HaxeFlixel. Fight enemies with a mouse-aimed scy
 ## Controls
 
 - WASD — move
-- Mouse — aim, left click to swing
+- Mouse — aim, left click to attack
+- Q — switch scythe mode (swing / throw)
 - SPACE — dash (costs 1 AP; kills refill the meter)
 - ESC — pause
 - ENTER — skip the intro

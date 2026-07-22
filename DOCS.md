@@ -26,7 +26,7 @@ export/                  build output (not committed)
 
 - `TitleSequence` — intro logo. ENTER skips. Switches to PlayState when done.
 - `PlayState` — constructs the systems in `create()`, calls them in order in `update()`, and handles the debug keys. It holds no gameplay logic of its own.
-- `PauseSubState` — opened with ESC. Freezes the game underneath, dims the screen, closes on ESC. Volume keys work while open.
+- `PauseSubState` — opened with ESC. Freezes the game and pauses all audio, dims the screen, closes on ESC. Volume keys work while open.
 
 ## Systems (source/systems/)
 
@@ -37,7 +37,8 @@ Each system is constructed once by PlayState and updated once per frame.
 - `RenderLayers` — the shadow and entity render groups. The entity layer is sorted every frame by feet position so characters and pillars overlap correctly.
 - `PlayerCombat` — player health, the AP meter, damage intake, invincibility frames and blink, dash input, death and revive. The HUD bars bind directly to its fields.
 - `EnemyDirector` — spawns waves from the wave table, owns the per-enemy rigs (enemy, shadow, contact hitbox), runs enemy collision and cleanup, and updates enemy shots.
-- `ScytheCombat` — scythe position and swing, facing flip, attack input, the slash projectile pool, and slash hit detection. Rolls health drops on kills.
+- `ScytheCombat` — scythe position and swing, facing flip, the Q mode toggle (swing or throw), attack input, the slash projectile pool, and the shared hit pipeline (hit sound, sparks, kill rewards, drops). Delegates the throw to ThrowAttack.
+- `ThrowAttack` — the boomerang throw: thrown scythe flight (out leg, wall turnaround, homing return, catch), its afterimage trail, and the spin sound loop. The player cannot attack while the scythe is airborne.
 - `Pickups` — the health pickup pool. Collected on player contact unless health is full.
 - `Hud` — the UI camera, health and AP bars, wave counter and banner, death text with the best wave, and the custom cursor.
 
@@ -49,6 +50,7 @@ Each system is constructed once by PlayState and updated once per frame.
 - `AttackBehavior`, `ChargeAttack`, `ShootAttack` — the attack style interface and its two implementations. A charge is a windup, a straight lunge, and a recovery. A shooter holds position, cycles its shoot animation, and requests a projectile on the loop frame.
 - `SlashProjectile` — the player's pooled slash wave. It pierces enemies (one hit per enemy per wave) and dies on walls.
 - `EnemyShot` — pooled enemy projectile. Carries its damage, speed, and range from the shooter.
+- `ThrownScythe` — the airborne scythe. Spins, stretches on release, throbs in flight, and hits each enemy once per flight leg (out and return).
 - `HealthPickup` — dropped heart. Restores health on contact, expires after a few seconds.
 - `EnemyData`, `PlayerData` — JSON typedefs and parse-once registries for their data files.
 
@@ -126,6 +128,8 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | File | Constants |
 |---|---|
 | `systems/ScytheCombat.hx` | swing time, arc, scale pulse, aim smoothing, slash spawn distance, facing flip margin |
+| `systems/ThrowAttack.hx` | throw distance, return speed, catch radius, wall probe, trail density and fade |
+| `entities/ThrownScythe.hx` | throw speed, spin rate, hit radius |
 | `entities/SlashProjectile.hx` | slash speed, range, fade time, hit radius |
 | `entities/Enemies.hx` | wander and idle durations, hit flash time |
 | `entities/EnemyNav.hx` | waypoint radius; the repath interval is in `tick()` |

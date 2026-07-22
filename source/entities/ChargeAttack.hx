@@ -1,5 +1,8 @@
 package entities;
 
+import flixel.FlxG;
+import util.Paths;
+
 class ChargeAttack implements AttackBehavior
 {
 	public var windupTime:Float = 0.35;
@@ -24,6 +27,7 @@ class ChargeAttack implements AttackBehavior
 			if (dirX > 0) { e.flipX = false; }
 			else if (dirX < 0) { e.flipX = true; }
 			e.animation.play("idle");
+			FlxG.sound.play(Paths.sound("enemies/charge"), 0.5);
 		}
 		timer -= elapsed;
 		switch (phase)

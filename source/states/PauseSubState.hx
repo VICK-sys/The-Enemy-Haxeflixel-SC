@@ -36,7 +36,15 @@ class PauseSubState extends FlxSubState
 		hint.cameras = [camUI];
 		add(hint);
 
+		FlxG.sound.pause();
+
 		super.create();
+	}
+
+	override public function close():Void
+	{
+		FlxG.sound.resume();
+		super.close();
 	}
 
 	override public function update(elapsed:Float):Void
