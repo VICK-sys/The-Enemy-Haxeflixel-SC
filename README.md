@@ -25,3 +25,5 @@ Requires [Haxe](https://haxe.org) with the `flixel` haxelib installed.
 haxelib run lime build windows
 haxelib run lime build html5
 ```
+
+Code and data reference: [DOCS.md](DOCS.md)
