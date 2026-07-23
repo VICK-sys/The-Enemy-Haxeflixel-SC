@@ -54,10 +54,10 @@ class PauseSubState extends FlxSubState
 		if (FlxG.keys.justPressed.ESCAPE)
 			close();
 
-		if (FlxG.keys.justPressed.ONE)
+		if (FlxG.keys.justPressed.MINUS)
 			FlxG.sound.changeVolume(-0.1);
 
-		if (FlxG.keys.justPressed.TWO)
+		if (FlxG.keys.justPressed.PLUS)
 			FlxG.sound.changeVolume(0.1);
 	}
 }

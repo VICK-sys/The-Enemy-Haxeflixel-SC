@@ -6,7 +6,7 @@
 	"drag": 700,
 	"dashSpeed": 1100,
 	"dashTime": 0.15,
-	"dashCost": 1,
+	"dashCooldown": 2,
 	"dashIframes": 0.25,
 	"healthMax": 2,
 	"apMax": 2,

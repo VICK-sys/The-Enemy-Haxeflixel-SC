@@ -1,0 +1,43 @@
+{
+	"sprite": "enemies/rofel",
+	"width": 120,
+	"height": 140,
+	"offsetX": -40,
+	"offsetY": -40,
+	"animations": [
+		{ "name": "idle", "prefix": "Idle", "fps": 8, "loop": true },
+		{ "name": "walk", "prefix": "Idle", "fps": 12, "loop": true },
+		{ "name": "hurt", "prefix": "Idle", "fps": 12, "loop": false },
+		{ "name": "death", "prefix": "Idle", "fps": 4, "loop": false }
+	],
+	"hp": 40,
+	"speed": 300,
+	"aggroRange": 100000,
+	"stopThreshold": 320,
+	"attackRange": 540,
+	"attack": "boss",
+	"boss": {
+		"moveSpeed": 330,
+		"prefMin": 360,
+		"prefMax": 660,
+		"strafeWeight": 0.85,
+		"gunDist": 64,
+		"guns": [
+			{ "image": "enemies/guns/pistol", "bullet": "enemies/rofel_bullet", "speed": 780, "count": 1, "spread": 0, "damage": 0.25, "burst": 5, "burstInterval": 0.13, "cooldown": 0.7, "range": 1000, "muzzle": 70 },
+			{ "image": "enemies/guns/shotgun", "bullet": "enemies/rofel_bullet_sq", "speed": 640, "count": 5, "spread": 12, "damage": 0.2, "burst": 1, "burstInterval": 0, "cooldown": 1.0, "range": 640, "muzzle": 80 },
+			{ "image": "enemies/guns/sniper", "bullet": "enemies/rofel_bullet_sq", "speed": 1600, "count": 1, "spread": 0, "damage": 0.5, "burst": 1, "burstInterval": 0, "cooldown": 1.25, "range": 1500, "muzzle": 130 },
+			{ "image": "enemies/guns/revolver", "bullet": "enemies/rofel_bullet", "speed": 800, "count": 1, "spread": 4, "damage": 0.3, "burst": 6, "burstInterval": 0.16, "cooldown": 0.9, "range": 1050, "muzzle": 70 }
+		]
+	},
+	"contactDamage": 0.5,
+	"dropChance": 1,
+	"knockback": 90,
+	"stunTime": 0.06,
+	"shadowOffX": 54,
+	"shadowOffXFlip": 54,
+	"shadowOffY": 124,
+	"shadowScaleX": 10,
+	"hitOffX": 40,
+	"hitOffXFlip": 40,
+	"hitOffY": 50
+}

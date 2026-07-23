@@ -14,6 +14,7 @@ class PlayerCombat
 	public var health:Float = 0;
 	public var itemBar:Float = 0;
 	public var dead:Bool = false;
+	public var invincible:Bool = false;
 	public var healthMax:Float = 0;
 	public var apMax:Float = 0;
 
@@ -21,8 +22,11 @@ class PlayerCombat
 	private var fx:Fx;
 	private var data:PlayerData;
 	private var iframeTimer:Float = 0;
+	private var blink:Bool = false;
 	private var hurtLockTimer:Float = 0;
 	private var flashTimer:Float = 0;
+	private var dashCooldownTimer:Float = 0;
+	private var dashLineTimer:Float = 0;
 	private var justDied:Bool = false;
 
 	public function new(player:Player, fx:Fx)
@@ -41,9 +45,13 @@ class PlayerCombat
 		if (iframeTimer > 0)
 		{
 			iframeTimer -= elapsed;
-			player.visible = dead || Std.int(iframeTimer * 20) % 2 == 0;
+			if (blink)
+				player.visible = dead || Std.int(iframeTimer * 20) % 2 == 0;
 			if (iframeTimer <= 0)
+			{
+				blink = false;
 				player.visible = true;
+			}
 		}
 
 		if (hurtLockTimer > 0)
@@ -60,11 +68,30 @@ class PlayerCombat
 				player.setColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
 		}
 
-		if (FlxG.keys.justPressed.SPACE && !dead && !player.blockMovement && itemBar >= data.dashCost && player.dashTimer <= 0)
+		if (dashCooldownTimer > 0)
+			dashCooldownTimer -= elapsed;
+
+		if (FlxG.keys.justPressed.SPACE && !dead && !player.blockMovement && dashCooldownTimer <= 0 && player.dashTimer <= 0)
 		{
-			itemBar -= data.dashCost;
+			dashCooldownTimer = data.dashCooldown;
 			player.dash();
 			iframeTimer = data.dashIframes;
+			blink = false;
+			player.visible = true;
+		}
+
+		if (player.dashTimer > 0)
+		{
+			dashLineTimer -= elapsed;
+			if (dashLineTimer <= 0)
+			{
+				dashLineTimer = 0.05;
+				var vx = player.velocity.x;
+				var vy = player.velocity.y;
+				var vlen = Math.sqrt(vx * vx + vy * vy);
+				if (vlen > 0)
+					fx.dashLine(player.x + player.width / 2, player.y + player.height / 2, vx / vlen, vy / vlen);
+			}
 		}
 
 		if (health <= 0 && !dead)
@@ -90,7 +117,7 @@ class PlayerCombat
 
 	public function hurtPlayer(source:FlxObject, damage:Float):Bool
 	{
-		if (dead || iframeTimer > 0)
+		if (dead || iframeTimer > 0 || invincible)
 			return false;
 		if (source.x + source.width <= player.x || player.x + player.width <= source.x
 			|| source.y + source.height <= player.y || player.y + player.height <= source.y)
@@ -108,6 +135,7 @@ class PlayerCombat
 		player.animation.play("hurt", false);
 		player.blockMovement = true;
 		iframeTimer = data.iframeTime;
+		blink = true;
 		hurtLockTimer = data.hurtLockTime;
 		return true;
 	}

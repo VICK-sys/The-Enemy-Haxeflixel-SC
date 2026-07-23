@@ -12,6 +12,8 @@ typedef WaveData = {
 	baseCount:Int,
 	countPerWave:Int,
 	maxCount:Int,
+	bossWaveMin:Int,
+	bossWaveRange:Int,
 	waves:Array<WavePool>
 }
 

@@ -12,6 +12,7 @@ class ShootAttack implements AttackBehavior
 	private var windup:Float = 0;
 	private var stepTimer:Float = 0;
 	private var animIndex:Int = 0;
+	private var pendingFire:Bool = false;
 
 	public function new() {}
 
@@ -20,6 +21,14 @@ class ShootAttack implements AttackBehavior
 		e.velocity.set(0, 0);
 		if (dirX > 0) { e.flipX = false; }
 		else if (dirX < 0) { e.flipX = true; }
+
+		if (pendingFire)
+		{
+			pendingFire = false;
+			var d = distance > 0 ? distance : 1;
+			e.requestShot(dirX / d, dirY / d, e.shotDamage, e.shotSpeed, e.shotRange, e.shotSprite,
+				e.shotSound != null ? e.shotSound : "enemies/shoot");
+		}
 		if (!started)
 		{
 			started = true;
@@ -65,7 +74,7 @@ class ShootAttack implements AttackBehavior
 		var name = animations[animIndex];
 		e.animation.play(name);
 		if (name == "sloop")
-			e.shootRequested = true;
+			pendingFire = true;
 		animIndex++;
 		stepTimer = animIndex >= animations.length ? gapTime : stepTime;
 	}

@@ -27,6 +27,8 @@ class Enemies extends FlxSprite
 	public var shotDamage:Float = 0.25;
 	public var shotSpeed:Float = 480;
 	public var shotRange:Float = 640;
+	public var shotSprite:String = null;
+	public var shotSound:String = null;
 	public var dropChance:Float = 0;
 	public var knockbackTaken:Float = 550;
 	public var knockbackDrag:Float = 1600;
@@ -35,9 +37,16 @@ class Enemies extends FlxSprite
 	public var target:FlxSprite;
 	public var entering:Bool = false;
 	public var seized:Bool = false;
+	public var throwGrace:Float = 0;
+	public var selfDriven:Bool = false;
+	public var grabbable:Bool = true;
+	public var explodes:Bool = false;
+	public var gun:FlxSprite = null;
 	public var pathing:EnemyNav = new EnemyNav();
 	public var attack:AttackBehavior = new ChargeAttack();
-	public var shootRequested:Bool = false;
+	public var pendingShots:Array<ShotSpec> = [];
+
+	private var shotPool:Array<ShotSpec> = [];
 
 	public var hp:Int = 3;
 	public var isDead:Bool = false;
@@ -84,13 +93,24 @@ class Enemies extends FlxSprite
 		shotDamage = data.shotDamage != null ? data.shotDamage : 0.25;
 		if (data.shotSpeed != null) shotSpeed = data.shotSpeed;
 		if (data.shotRange != null) shotRange = data.shotRange;
+		shotSprite = data.shotSprite;
+		shotSound = data.shotSound;
 		dropChance = data.dropChance;
 		if (data.knockback != null) knockbackTaken = data.knockback;
 		if (data.knockbackDrag != null) knockbackDrag = data.knockbackDrag;
 		if (data.stunTime != null) stunTime = data.stunTime;
 		wanderSpeed = (data.wanderSpeed != null ? data.wanderSpeed : 100) + FlxG.random.float() * 20;
 
-		if (data.attack == "shoot")
+		if (data.attack == "boss")
+		{
+			gun = new FlxSprite();
+			gun.antialiasing = false;
+			attack = new RofelBoss(gun, data.boss);
+			selfDriven = true;
+			grabbable = false;
+			explodes = true;
+		}
+		else if (data.attack == "shoot")
 		{
 			var shoot = new ShootAttack();
 			if (data.shootWindup != null) shoot.windupTime = data.shootWindup;
@@ -138,7 +158,8 @@ class Enemies extends FlxSprite
 			drag.set(0, 0);
 			pathing.clear();
 			this.animation.play("death", true);
-			FlxTween.tween(this, {alpha: 0}, 0.6, {startDelay: 1.2, onComplete: function(t:FlxTween) kill()});
+			if (!explodes)
+				FlxTween.tween(this, {alpha: 0}, 0.6, {startDelay: 1.2, onComplete: function(t:FlxTween) kill()});
 		}
 		else
 		{
@@ -152,6 +173,9 @@ class Enemies extends FlxSprite
     override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+
+		if (throwGrace > 0)
+			throwGrace -= elapsed;
 
 		if (flashTimer > 0)
 		{
@@ -191,6 +215,23 @@ class Enemies extends FlxSprite
 					velocity.set(ex / el * speed, ey / el * speed);
 				flipX = ex < 0;
 				this.animation.play("walk");
+			}
+			else
+			{
+				velocity.set(0, 0);
+			}
+			return;
+		}
+
+		if (selfDriven)
+		{
+			if (target != null)
+			{
+				var tmx:Float = target.x + target.width * 0.5;
+				var tmy:Float = target.y + target.height * 0.5;
+				var bdx = tmx - (x + width * 0.5);
+				var bdy = tmy - (y + height * 0.5);
+				attack.update(this, elapsed, bdx, bdy, Math.sqrt(bdx * bdx + bdy * bdy));
 			}
 			else
 			{
@@ -314,6 +355,32 @@ class Enemies extends FlxSprite
 
 		this.animation.play("walk");
 		wanderCountdown = WANDER_DURATION;
+	}
+
+	public function unseize(releaseStun:Float = 0):Void
+	{
+		if (seized)
+		{
+			seized = false;
+			if (releaseStun > 0)
+				stun = releaseStun;
+			drag.set(knockbackDrag, knockbackDrag);
+		}
+		throwGrace = 0.35;
+	}
+
+	public function requestShot(dirX:Float, dirY:Float, damage:Float, speed:Float, range:Float, sprite:String, sound:String):ShotSpec
+	{
+		var s = shotPool.length > 0 ? shotPool.pop() : new ShotSpec();
+		s.set(dirX, dirY, damage, speed, range, sprite, sound);
+		pendingShots.push(s);
+		return s;
+	}
+
+	public function recycleShots():Void
+	{
+		while (pendingShots.length > 0)
+			shotPool.push(pendingShots.pop());
 	}
 
 	override public function destroy():Void

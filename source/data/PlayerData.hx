@@ -10,7 +10,7 @@ typedef PlayerData = {
 	drag:Float,
 	dashSpeed:Float,
 	dashTime:Float,
-	dashCost:Float,
+	dashCooldown:Float,
 	dashIframes:Float,
 	healthMax:Float,
 	apMax:Float,

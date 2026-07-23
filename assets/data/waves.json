@@ -4,6 +4,8 @@
 	"baseCount": 2,
 	"countPerWave": 1,
 	"maxCount": 15,
+	"bossWaveMin": 4,
+	"bossWaveRange": 4,
 	"waves": [
 		{ "types": ["enemy"] },
 		{ "types": ["enemy", "woodster", "woodster"] },

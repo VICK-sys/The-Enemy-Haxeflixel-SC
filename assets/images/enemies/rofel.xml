@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="rofel.png">
+	<SubTexture name="Idle0000" x="0" y="0" width="40" height="40"/>
+	<SubTexture name="Idle0001" x="40" y="0" width="40" height="40"/>
+	<SubTexture name="Idle0002" x="80" y="0" width="40" height="40"/>
+	<SubTexture name="Idle0003" x="120" y="0" width="40" height="40"/>
+</TextureAtlas>
