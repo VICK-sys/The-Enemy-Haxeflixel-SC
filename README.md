@@ -6,7 +6,9 @@ Top-down action game built with HaxeFlixel. Fight enemies with a mouse-aimed scy
 
 - WASD — move
 - Mouse — aim, left click to attack
-- Q — switch scythe mode (swing / throw)
+- 1-4 or scroll wheel — switch weapon (scythe / hammer / bow / hook)
+- Q — switch the equipped weapon's mode (scythe: swing / air slice / throw; hammer: slam / shockwave; bow: shot / arrow rain)
+- Right click — super (scythe only, needs a full AP meter): scythes orbit you, left click launches them
 - SPACE — dash (costs 1 AP; kills refill the meter)
 - ESC — pause
 - ENTER — skip the intro
@@ -14,9 +16,9 @@ Top-down action game built with HaxeFlixel. Fight enemies with a mouse-aimed scy
 
 ## Debug keys
 
-- 1 / 2 — volume down / up
+- minus / plus — volume down / up
 - 9 / 7 / 8 — spawn Enemy / Woodster / LikWid
-- 4 — revive, 5 — die
+- F4 — revive, 5 — die
 - 6 — collision debug overlay
 
 ## Building

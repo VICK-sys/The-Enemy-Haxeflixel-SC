@@ -1,14 +1,14 @@
-﻿package entities;
+package entities;
 
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import util.Paths;
 
-class SlashProjectile extends FlxSprite
+class SliceProjectile extends FlxSprite
 {
 	public static inline var RADIUS:Float = 125;
 
-	static inline var SPEED:Float = 1100;
+	static inline var SPEED:Float = 550;
 	static inline var RANGE:Float = 420;
 	static inline var FADE_TIME:Float = 0.12;
 	static inline var HITBOX:Float = 250;

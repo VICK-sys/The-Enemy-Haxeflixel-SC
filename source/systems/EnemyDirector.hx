@@ -17,6 +17,7 @@ class EnemyDirector
 	static inline var SPAWN_OUT:Float = 40;
 	static inline var SPAWN_PAD:Float = 60;
 	static inline var SPAWN_TRIM:Float = 240;
+	static inline var SPAWN_SPREAD:Float = 700;
 	static inline var SHOT_PROBE:Float = 10;
 
 	public var wave:Int = 0;
@@ -52,7 +53,7 @@ class EnemyDirector
 
 	function separateLive(a:Enemies, b:Enemies):Bool
 	{
-		if (a.isDead || b.isDead)
+		if (a.isDead || b.isDead || a.seized || b.seized)
 			return false;
 		return FlxObject.separate(a, b);
 	}
@@ -114,7 +115,8 @@ class EnemyDirector
 			{
 				rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 				rig.hitbox.y = e.y + e.hitOffY;
-				status.hurtPlayer(rig.hitbox, e.contactDamage);
+				if (!e.seized)
+					status.hurtPlayer(rig.hitbox, e.contactDamage);
 
 				if (e.shootRequested)
 				{
@@ -180,15 +182,15 @@ class EnemyDirector
 		{
 			case 0:
 				e.x = -e.width - SPAWN_OUT;
-				e.y = SPAWN_PAD + Math.random() * (mh - SPAWN_TRIM);
+				e.y = edgeCoord(player.y, mh);
 			case 1:
 				e.x = mw + SPAWN_OUT;
-				e.y = SPAWN_PAD + Math.random() * (mh - SPAWN_TRIM);
+				e.y = edgeCoord(player.y, mh);
 			case 2:
-				e.x = SPAWN_PAD + Math.random() * (mw - SPAWN_TRIM);
+				e.x = edgeCoord(player.x, mw);
 				e.y = -e.height - SPAWN_OUT;
 			default:
-				e.x = SPAWN_PAD + Math.random() * (mw - SPAWN_TRIM);
+				e.x = edgeCoord(player.x, mw);
 				e.y = mh + SPAWN_OUT;
 		}
 		e.entering = true;
@@ -197,10 +199,20 @@ class EnemyDirector
 		register(e);
 	}
 
-	public function spawnCenter(e:Enemies):Void
+	function edgeCoord(near:Float, max:Float):Float
 	{
-		e.x = arena.width / 2 - e.width / 2 + Math.random() * 300 - 150;
-		e.y = arena.height / 2 - e.height / 2 + Math.random() * 200 - 100;
+		var v = near + (Math.random() * 2 - 1) * SPAWN_SPREAD;
+		if (v < SPAWN_PAD)
+			v = SPAWN_PAD;
+		if (v > max - SPAWN_TRIM + SPAWN_PAD)
+			v = max - SPAWN_TRIM + SPAWN_PAD;
+		return v;
+	}
+
+	public function spawnNear(e:Enemies):Void
+	{
+		e.x = player.x + player.width * 0.5 - e.width / 2 + Math.random() * 600 - 300;
+		e.y = player.y + player.height * 0.5 - e.height / 2 + Math.random() * 400 - 200;
 		register(e);
 	}
 
@@ -213,10 +225,43 @@ class EnemyDirector
 		rigs.push(new EnemyRig(e, sh, new FlxObject(0, 0, 40, 40)));
 	}
 
-	public function forEachEnemy(f:Enemies->Void):Void
+	public function firstInCircle(cx:Float, cy:Float, radius:Float, skipSeized:Bool = false):Enemies
 	{
 		for (rig in rigs)
-			f(rig.enemy);
+		{
+			var e = rig.enemy;
+			if (e.isDead || (skipSeized && e.seized))
+				continue;
+			if (circleTouches(e, cx, cy, radius))
+				return e;
+		}
+		return null;
+	}
+
+	public function eachInCircle(cx:Float, cy:Float, radius:Float, f:Enemies->Void):Void
+	{
+		for (rig in rigs)
+		{
+			var e = rig.enemy;
+			if (e.isDead)
+				continue;
+			if (circleTouches(e, cx, cy, radius))
+				f(e);
+		}
+	}
+
+	function circleTouches(e:Enemies, cx:Float, cy:Float, radius:Float):Bool
+	{
+		var nx = Math.max(e.x, Math.min(cx, e.x + e.width));
+		var ny = Math.max(e.y, Math.min(cy, e.y + e.height));
+		var dx = cx - nx;
+		var dy = cy - ny;
+		return dx * dx + dy * dy <= radius * radius;
+	}
+
+	public function enemyCount():Int
+	{
+		return rigs.length;
 	}
 
 	function waveCleared():Bool

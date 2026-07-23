@@ -5,16 +5,18 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import entities.Player;
 import entities.enemy.Enemies;
+import entities.enemy.EnemyNav;
 import systems.Arena;
 import systems.Fx;
 import systems.RenderLayers;
 import systems.PlayerCombat;
 import systems.EnemyDirector;
-import systems.ScytheCombat;
+import systems.Weapons;
 import systems.Pickups;
 import systems.Hud;
 import util.Paths;
 import util.SaveData;
+import util.PerfLog;
 
 class PlayState extends FlxState
 {
@@ -26,8 +28,9 @@ class PlayState extends FlxState
 	private var status:PlayerCombat;
 	private var pickups:Pickups;
 	private var director:EnemyDirector;
-	private var combat:ScytheCombat;
+	private var combat:Weapons;
 	private var hud:Hud;
+	private var perf:PerfLog;
 
 	override public function create()
 	{
@@ -56,16 +59,28 @@ class PlayState extends FlxState
 		pickups = new Pickups(_player, status);
 		insert(members.indexOf(layers.entityLayer), pickups.group);
 		director = new EnemyDirector(_player, arena, layers, status);
-		combat = new ScytheCombat(_player, scythe, arena, director, status, fx, pickups);
+		combat = new Weapons(_player, scythe, arena, director, status, fx, pickups);
 
-		add(combat.slashes);
+		add(combat.swing.slashes);
+		add(combat.slice.slices);
+		add(combat.bow.arrows);
+		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
+		insert(members.indexOf(layers.entityLayer), combat.hammer.shock.cracks);
+		insert(members.indexOf(layers.entityLayer), combat.hammer.shock.rings);
+		add(combat.bow.rain.arrows);
+		add(combat.hookAttack.rope);
+		add(combat.hookAttack.hook);
 		add(combat.throwAttack.trail);
 		add(combat.throwAttack.thrown);
+		insert(members.indexOf(layers.entityLayer), combat.superScythes.trail);
+		insert(members.indexOf(layers.entityLayer), combat.superScythes.backLayer);
+		add(combat.superScythes.frontLayer);
 		add(fx.sparks);
 		add(director.shots);
 
 		hud = new Hud(this, status);
 		director.onWave = onWaveStarted;
+		perf = new PerfLog();
 
 		FlxG.sound.playMusic(Paths.music("stage/gloomDoomWoods"), 0.3, true);
 
@@ -74,6 +89,8 @@ class PlayState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+		EnemyNav.resetBudget();
+
 		super.update(elapsed);
 
 		fx.update();
@@ -95,14 +112,22 @@ class PlayState extends FlxState
 		layers.update();
 		combat.update(elapsed);
 		director.updateShots();
-		hud.setMode(combat.throwMode);
+		hud.setMode(combat.modeName());
 		hud.update(elapsed);
 
 		if (FlxG.keys.justPressed.ESCAPE && !status.dead)
 			openSubState(new PauseSubState(hud.camUI));
 
 		debugKeys();
+
+		var projectiles = live(combat.slice.slices.countLiving()) + live(director.shots.countLiving())
+			+ live(combat.bow.arrows.countLiving()) + live(combat.bow.rain.arrows.countLiving())
+			+ (combat.throwAttack.airborne ? 1 : 0) + (combat.hookAttack.hook.exists ? 1 : 0);
+		perf.frame(director.enemyCount(), EnemyNav.usedBudget(), projectiles, director.wave);
 	}
+
+	function live(n:Int):Int
+		return n < 0 ? 0 : n;
 
 	function onWaveStarted(n:Int):Void
 	{
@@ -112,20 +137,20 @@ class PlayState extends FlxState
 
 	function debugKeys():Void
 	{
-		if (FlxG.keys.justPressed.ONE)
+		if (FlxG.keys.justPressed.MINUS)
 			FlxG.sound.changeVolume(-0.1);
 
-		if (FlxG.keys.justPressed.TWO)
+		if (FlxG.keys.justPressed.PLUS)
 			FlxG.sound.changeVolume(0.1);
 
 		if (FlxG.keys.justPressed.NINE)
-			director.spawnCenter(new Enemies("enemy"));
+			director.spawnNear(new Enemies("enemy"));
 
 		if (FlxG.keys.justPressed.SEVEN)
-			director.spawnCenter(new Enemies("woodster"));
+			director.spawnNear(new Enemies("woodster"));
 
 		if (FlxG.keys.justPressed.EIGHT)
-			director.spawnCenter(new Enemies("likwid"));
+			director.spawnNear(new Enemies("likwid"));
 
 		if (FlxG.keys.justPressed.FIVE)
 		{
@@ -136,7 +161,7 @@ class PlayState extends FlxState
 		if (FlxG.keys.justPressed.SIX)
 			FlxG.debugger.drawDebug = !FlxG.debugger.drawDebug;
 
-		if (FlxG.keys.justPressed.FOUR)
+		if (FlxG.keys.justPressed.F4)
 		{
 			status.revive();
 			layers.playerShadow.visible = true;

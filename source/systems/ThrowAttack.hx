@@ -6,6 +6,7 @@ import flixel.sound.FlxSound;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
 import entities.enemy.Enemies;
+import entities.enemy.EnemyNav;
 import entities.ThrownScythe;
 import util.Paths;
 
@@ -31,6 +32,7 @@ class ThrowAttack
 	private var status:PlayerCombat;
 	private var damageEnemy:(Enemies, Float, Float) -> Void;
 	private var spinSound:FlxSound;
+	private var nav:EnemyNav;
 	private var trailTimer:Float = 0;
 
 	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, damageEnemy:(Enemies, Float, Float) -> Void)
@@ -44,6 +46,10 @@ class ThrowAttack
 		thrown = new ThrownScythe();
 		trail = new FlxTypedGroup<FlxSprite>();
 		spinSound = FlxG.sound.load(Paths.sound("scythe/spin"), 0.5, true);
+		nav = new EnemyNav();
+		nav.map = arena.map;
+		nav.bodyRadius = 60;
+		nav.repathInterval = 0.15;
 	}
 
 	function get_airborne():Bool
@@ -59,11 +65,11 @@ class ThrowAttack
 
 	public function update(elapsed:Float):Void
 	{
-		updateFlight();
+		updateFlight(elapsed);
 		updateTrail(elapsed);
 	}
 
-	function updateFlight():Void
+	function updateFlight(elapsed:Float):Void
 	{
 		if (!thrown.exists)
 			return;
@@ -72,6 +78,7 @@ class ThrowAttack
 		{
 			thrown.kill();
 			spinSound.stop();
+			nav.clear();
 			return;
 		}
 
@@ -90,7 +97,10 @@ class ThrowAttack
 			var tdy = cy - thrown.startY;
 			if (tdx * tdx + tdy * tdy >= MAX_DIST * MAX_DIST
 				|| arena.wallAt(cx + vx * WALL_PROBE, cy + vy * WALL_PROBE))
+			{
 				thrown.beginReturn();
+				nav.notifyBlocked();
+			}
 		}
 
 		if (thrown.returning)
@@ -103,33 +113,26 @@ class ThrowAttack
 				thrown.kill();
 				scythe.visible = true;
 				spinSound.stop();
+				nav.clear();
 				FlxG.sound.play(Paths.sound("scythe/catch"), 0.7);
 				return;
 			}
-			thrown.velocity.set(rdx / rlen * RETURN_SPEED, rdy / rlen * RETURN_SPEED);
-			vx = rdx / rlen;
-			vy = rdy / rlen;
+			nav.tick(elapsed, cx, cy, pmx, pmy);
+			nav.steer(cx, cy, rlen > 0 ? rdx / rlen : 1, rlen > 0 ? rdy / rlen : 0);
+			thrown.velocity.set(nav.moveX * RETURN_SPEED, nav.moveY * RETURN_SPEED);
+			vx = nav.moveX;
+			vy = nav.moveY;
 		}
 
 		var pushX = vx;
 		var pushY = vy;
-		director.forEachEnemy(function(e) throwHit(e, cx, cy, pushX, pushY));
-	}
-
-	function throwHit(e:Enemies, cx:Float, cy:Float, pushX:Float, pushY:Float):Void
-	{
-		if (e.isDead || thrown.hasHit(e))
-			return;
-
-		var nx = Math.max(e.x, Math.min(cx, e.x + e.width));
-		var ny = Math.max(e.y, Math.min(cy, e.y + e.height));
-		var ddx = cx - nx;
-		var ddy = cy - ny;
-		if (ddx * ddx + ddy * ddy > ThrownScythe.RADIUS * ThrownScythe.RADIUS)
-			return;
-
-		thrown.markHit(e);
-		damageEnemy(e, pushX, pushY);
+		director.eachInCircle(cx, cy, ThrownScythe.RADIUS, function(e)
+		{
+			if (thrown.hasHit(e))
+				return;
+			thrown.markHit(e);
+			damageEnemy(e, pushX, pushY);
+		});
 	}
 
 	function updateTrail(elapsed:Float):Void

@@ -34,6 +34,7 @@ class Enemies extends FlxSprite
 
 	public var target:FlxSprite;
 	public var entering:Bool = false;
+	public var seized:Bool = false;
 	public var pathing:EnemyNav = new EnemyNav();
 	public var attack:AttackBehavior = new ChargeAttack();
 	public var shootRequested:Bool = false;
@@ -54,6 +55,7 @@ class Enemies extends FlxSprite
 	private var wanderCountdown:Float = 0;
 	private var idleCountdown:Float = 0;
 	private var wanderSpeed:Float = 0;
+	private var contactCooldown:Float = 0;
 	private var wanderDirection:FlxPoint = new FlxPoint(FlxG.random.float() * 2 - 1, FlxG.random.float() * 2 - 1);
 	private var currentState:State = Wandering;
 
@@ -116,7 +118,7 @@ class Enemies extends FlxSprite
 		hitOffY = data.hitOffY;
     }
 
-	public function takeHit(pushX:Float, pushY:Float):Void
+	public function takeHit(pushX:Float, pushY:Float, damage:Int = 1):Void
 	{
 		if (isDead)
 			return;
@@ -125,7 +127,7 @@ class Enemies extends FlxSprite
 		idleCountdown = 0;
 		attack.reset();
 
-		hp--;
+		hp -= damage;
 		flashTimer = FLASH_TIME;
 		setColorTransform(1, 1, 1, 1, 255, 255, 255, 0);
 
@@ -163,6 +165,9 @@ class Enemies extends FlxSprite
 			velocity.set(0, 0);
 			return;
 		}
+
+		if (seized)
+			return;
 
 		if (stun > 0)
 		{
@@ -255,8 +260,12 @@ class Enemies extends FlxSprite
 						idleCountdown = 0;
 					}
 				case Following:
-					if (wasTouching != NONE)
+					contactCooldown -= elapsed;
+					if (wasTouching != NONE && contactCooldown <= 0)
+					{
+						contactCooldown = 0.15;
 						pathing.notifyBlocked();
+					}
 					if (distance <= attackRange && pathing.losClear)
 					{
 						currentState = Attacking;

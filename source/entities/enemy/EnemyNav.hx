@@ -7,47 +7,87 @@ import flixel.tile.FlxTilemap;
 class EnemyNav
 {
 	static inline var WAYPOINT_REACHED:Float = 32;
+	static inline var BUDGET_PER_FRAME:Int = 2;
+	static inline var RETRY_DELAY:Float = 0.06;
+	static inline var FAR_DIST:Float = 950;
+	static inline var FAR_MULT:Float = 3;
+	static inline var MIN_PATH_AGE:Float = 0.4;
+
+	static var pathBudget:Int = BUDGET_PER_FRAME;
 
 	public var map:FlxTilemap;
 	public var losClear:Bool = true;
 	public var bodyRadius:Float = 40;
+	public var repathInterval:Float = 0.35;
 	public var moveX:Float = 0;
 	public var moveY:Float = 0;
 
 	private var pathPoints:Array<FlxPoint>;
 	private var pathIndex:Int = 0;
 	private var repathTimer:Float = 0;
+	private var pathAge:Float = 999;
 
-	public function new() {}
+	public function new()
+	{
+		repathTimer = Math.random() * 0.3;
+	}
+
+	public static function resetBudget():Void
+	{
+		pathBudget = BUDGET_PER_FRAME;
+	}
+
+	public static function usedBudget():Int
+	{
+		return BUDGET_PER_FRAME - pathBudget;
+	}
 
 	public function tick(elapsed:Float, fromX:Float, fromY:Float, toX:Float, toY:Float):Void
 	{
+		pathAge += elapsed;
 		repathTimer -= elapsed;
-		if (repathTimer <= 0)
+		if (repathTimer > 0)
+			return;
+		if (refresh(fromX, fromY, toX, toY))
 		{
-			repathTimer = 0.35 + FlxG.random.float() * 0.15;
-			refresh(fromX, fromY, toX, toY);
+			var dx = toX - fromX;
+			var dy = toY - fromY;
+			var far = dx * dx + dy * dy > FAR_DIST * FAR_DIST;
+			repathTimer = repathInterval * (1 + FlxG.random.float() * 0.4) * (far ? FAR_MULT : 1);
+		}
+		else
+		{
+			repathTimer = RETRY_DELAY;
 		}
 	}
 
-	function refresh(fromX:Float, fromY:Float, toX:Float, toY:Float):Void
+	function refresh(fromX:Float, fromY:Float, toX:Float, toY:Float):Bool
 	{
 		if (map == null)
 		{
 			losClear = true;
-			return;
+			return true;
 		}
 		losClear = corridorClear(fromX, fromY, toX, toY);
-		if (!losClear)
-		{
-			clear();
-			var from = FlxPoint.get(fromX, fromY);
-			var to = FlxPoint.get(toX, toY);
-			pathPoints = map.findPath(from, to, RAY_BOX(bodyRadius * 2, bodyRadius * 2));
-			pathIndex = 0;
-			from.put();
-			to.put();
-		}
+		if (losClear)
+			return true;
+
+		if (pathPoints != null && pathAge < MIN_PATH_AGE)
+			return true;
+
+		if (pathBudget <= 0)
+			return false;
+		pathBudget--;
+
+		clear();
+		var from = FlxPoint.get(fromX, fromY);
+		var to = FlxPoint.get(toX, toY);
+		pathPoints = map.findPath(from, to, RAY_BOX(bodyRadius * 2, bodyRadius * 2));
+		pathIndex = 0;
+		pathAge = 0;
+		from.put();
+		to.put();
+		return true;
 	}
 
 	function corridorClear(fromX:Float, fromY:Float, toX:Float, toY:Float):Bool

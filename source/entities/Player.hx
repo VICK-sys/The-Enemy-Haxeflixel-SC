@@ -13,6 +13,7 @@ class Player extends FlxSprite
 
 	public var blockMovement:Bool = false;
 	public var isDead:Bool = false;
+	public var floating:Bool = false;
 	public var dashTimer:Float = 0;
 
 	private var data:PlayerData;
@@ -58,7 +59,7 @@ class Player extends FlxSprite
 		velocity.set(dx * data.dashSpeed, dy * data.dashSpeed);
 		if (dx > 0) flipX = false;
 		else if (dx < 0) flipX = true;
-		this.animation.play("walk");
+		this.animation.play(floating ? "idle" : "walk");
 		dashTimer = data.dashTime;
 	}
 
@@ -69,13 +70,10 @@ class Player extends FlxSprite
 		else if (!blockMovement)
 			movement(elapsed);
 
-		if(isDead)
+		if((isDead || floating) && walkSound)
 		{
-			if(walkSound)
-			{
-				walkingSound.stop();
-				walkSound = false;
-			}
+			walkingSound.stop();
+			walkSound = false;
 		}
 
 		super.update(elapsed);
@@ -108,7 +106,7 @@ class Player extends FlxSprite
 		{
 			var newAngle:Float = 0;
 
-			if(!walkSound && !isDead)
+			if(!walkSound && !isDead && !floating)
 			{
 				walkingSound.play();
 				walkSound = true;
@@ -124,7 +122,7 @@ class Player extends FlxSprite
 				initialSpeed = data.moveSpeed;
 			}
 
-			this.animation.play("walk");
+			this.animation.play(floating ? "idle" : "walk");
 
 			if (up)
 			{

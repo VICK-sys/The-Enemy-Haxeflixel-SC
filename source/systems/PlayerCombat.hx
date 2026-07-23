@@ -121,6 +121,16 @@ class PlayerCombat
 			health = healthMax;
 	}
 
+	public function canSuper():Bool
+	{
+		return itemBar >= apMax;
+	}
+
+	public function spendSuper():Void
+	{
+		itemBar = 0;
+	}
+
 	public function rewardKill():Void
 	{
 		itemBar += data.apPerKill;

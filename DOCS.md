@@ -38,17 +38,33 @@ Each system is constructed once by PlayState and updated once per frame.
 - `Fx` — hitstop (time scale drops for a few frames on kills), camera shakes, and hit spark bursts.
 - `RenderLayers` — the shadow and entity render groups. The entity layer is sorted every frame by feet position so characters and pillars overlap correctly.
 - `PlayerCombat` — player health, the AP meter, damage intake, invincibility frames and blink, dash input, death and revive. The HUD bars bind directly to its fields.
-- `EnemyDirector` — spawns waves from the wave table, owns the per-enemy rigs (enemy, shadow, contact hitbox), runs enemy collision and cleanup, and updates enemy shots.
-- `ScytheCombat` — scythe position and swing, facing flip, the Q mode toggle (swing or throw), attack input, the slash projectile pool, and the shared hit pipeline (hit sound, sparks, kill rewards, drops). Delegates the throw to ThrowAttack.
-- `ThrowAttack` — the boomerang throw: thrown scythe flight (out leg, wall turnaround, homing return, catch), its afterimage trail, and the spin sound loop. The player cannot attack while the scythe is airborne.
+- `EnemyDirector` — spawns waves from the wave table, owns the per-enemy rigs (enemy, shadow, contact hitbox), runs enemy collision and cleanup, and updates enemy shots. Also the single home of enemy hit queries: `firstInCircle` and `eachInCircle` do the nearest-hitbox-point circle test every attack uses (live enemies only; `firstInCircle` can skip seized ones).
+- `Weapons` — the combat coordinator. Weapon selection (1-4 or scroll wheel: scythe, hammer, bow, hook), the Q mode cycle within the equipped weapon (each weapon remembers its last mode), attack input dispatch (super priority, the held-enemy throw intercept, aim math), and held-weapon visibility while the hook is out. Everything else is delegated to the systems below.
+- `WeaponMode` — the mode enum shared by the weapon systems.
+- `HitPipeline` — the shared hit pipeline: damage with hit sound, sparks, kill rewards, and drop rolls, plus a zero-damage stun hit with a caller-supplied duration.
+- `HeldWeapon` — the held sprite: per-weapon graphic and origin, hand anchoring, cursor tracking and facing flip, the swing sweep and bow recoil animations, the bow's held-out pose, and the arrow rain skyward pose.
+- `SwingAttack` — the scythe swing: slash visual pool and the melee strike (an arc in front of the player).
+- `SliceAttack` — the slice projectile pool: firing, wall death, and pierce hits.
+- `HammerAttack` — the hammer slam (a damage circle at the aim point, 2 damage and heavy knockback) and the shockwave trigger; owns Shockwave.
+- `BowAttack` — the bow shot (a fast arrow that dies on its first enemy hit or a wall) and the arrow rain trigger; owns ArrowRain.
+- `Shockwave` — the shockwave mode: the hammer slams the ground at the aim point, spawning a temporary cracked-ground decal and an expanding ring that stuns every enemy it passes (a staggered no-damage stagger hit plus a long stun). The wave ignores walls.
+- `ArrowRain` — the arrow rain mode: the bow is held above the player's head pointing skyward; firing launches a fanned burst of arrows up from it, then a staggered volley falls onto a scatter of points around the cursor. Each impact point shows a ground marker during the descent; a landing arrow damages enemies in a radius with outward knockback. The rain ignores walls.
+- `HookAttack` — the hook grab: the held hook itself is thrown (the hand stays empty and all attacks are blocked until it returns), trailing a rope line back to the player. It latches the first enemy hit (light damage plus a seize that suspends its AI), reels it to the player, and holds it in front of the cursor. Left click while holding whips the enemy in one quick revolution around the player, then launches it as a projectile that damages every enemy it passes through; the hook returns to the hand at the moment of release, so the enemy flies alone. Hitting a wall damages the thrown enemy, otherwise it is released with a short stun at the end of the flight. On a miss the hook retracts to the hand. Seized enemies deal no contact damage and skip crowd separation.
+- `ThrowAttack` — the boomerang throw: thrown scythe flight (out leg, wall turnaround, homing return, catch), its afterimage trail, and the spin sound loop. The return steers around walls using its own EnemyNav instance on a fast re-path interval. The player cannot attack while the scythe is airborne.
+- `SuperScythes` — the super: right click with the scythe equipped and a full AP meter drains it and wraps the player in a pseudo-3D cylinder of scythes — an elliptical carousel where blades pass in front of and behind the player, scaling with depth. The player levitates for the duration (visual offset only; the hitbox and shadow stay grounded) and the held scythe vanishes. Left click launches the blade nearest the aim; launched blades spin, pierce enemies, and die on walls. Everything leaves ghost trails. When the last blade is fired the player settles back down and the scythe returns, with the previous weapon mode intact.
 - `Pickups` — the health pickup pool. Collected on player contact unless health is full.
-- `Hud` — the UI camera, health and AP bars, wave counter and banner, death text with the best wave, and the custom cursor.
+- `Hud` — the UI camera, health and AP bars, wave counter and banner, the mode indicator (label plus icon, animated on switch), death text with the best wave, and the custom cursor.
 
 ## Entities (source/entities/)
 
 - `Player` — WASD movement with an acceleration ramp, dash, and the walk sound loop.
-- `SlashProjectile` — the player's pooled slash wave. It pierces enemies (one hit per enemy per wave) and dies on walls.
+- `SlashEffect` — the pooled swing visual. It drifts forward briefly and fades out; it carries no hitbox.
+- `SliceProjectile` — the slice mode's traveling wave. Pierces enemies (one hit per enemy per wave) and dies on walls.
 - `ThrownScythe` — the airborne scythe. Spins, stretches on release, throbs in flight, and hits each enemy once per flight leg (out and return).
+- `SuperBlade` — one orbiting super scythe. Positioned by SuperScythes while orbiting; once launched it flies straight, pierces (one hit per enemy), and fades at range.
+- `Arrow` — the bow mode's projectile. Flies straight and fast, dies on the first enemy hit or a wall, expires at range.
+- `HookShot` — the hook mode's projectile. Flies head-first; once latched it sticks to the hooked enemy until the throw resolves.
+- `RainArrow` — an arrow rain volley member. Either a fading skyward launch visual or a falling arrow that lands at its assigned impact point.
 - `HealthPickup` — dropped heart. Restores health on contact, expires after a few seconds.
 
 Enemy behavior lives in `source/entities/enemy/`:
@@ -67,6 +83,7 @@ Enemy behavior lives in `source/entities/enemy/`:
 
 - `Paths` — asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow` (returns the loaded atlas for a png/xml pair).
 - `SaveData` — persistent save (best wave reached).
+- `PerfLog` — frame-time logger for native builds. Writes `perflog.txt` next to the executable: one aggregate line per second (average, worst, fps) plus immediate lines for spike frames and long gaps, each tagged with the live enemy count, pathfinding calls, projectile count (slices, enemy shots, arrows, rain arrows, thrown scythe, hook), and wave.
 
 ## Data
 
@@ -135,11 +152,22 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 
 | File | Constants |
 |---|---|
-| `systems/ScytheCombat.hx` | swing time, arc, scale pulse, aim smoothing, slash spawn distance, facing flip margin |
+| `systems/HeldWeapon.hx` | swing times per mode, arc, scale pulse, aim smoothing, facing flip margin, bow hold distance, rain raise height |
+| `systems/SwingAttack.hx` | melee range and arc, slash spawn distance |
+| `systems/SliceAttack.hx` | slice spawn distance |
+| `systems/HammerAttack.hx` | reach, radius, damage, push, shockwave stun length |
 | `systems/ThrowAttack.hx` | throw distance, return speed, catch radius, wall probe, trail density and fade |
+| `systems/HookAttack.hx` | flight range, pull speed and timeout, grab and hold distances, spin windup time, throw speed, duration, and hit radius, release stun, retract speed |
+| `systems/ArrowRain.hx` | volley size, drop delay and stagger, spread, drop height, fall speed, hit radius, launch visual count and speed |
+| `systems/Shockwave.hx` | wave radius and expansion time, crack lifetime |
+| `systems/SuperScythes.hx` | blade count, ring radii, carousel speed, depth scaling, fire gate, trail settings |
+| `entities/SuperBlade.hx` | launch speed, range, spin, hit radius |
 | `entities/ThrownScythe.hx` | throw speed, spin rate, hit radius |
 | `entities/HealthPickup.hx` | heal amount, lifetime |
-| `entities/SlashProjectile.hx` | slash speed, range, fade time, hit radius |
+| `entities/SlashEffect.hx` | drift speed, effect lifetime |
+| `entities/SliceProjectile.hx` | slice speed, range, fade time, hit radius |
+| `entities/Arrow.hx` | arrow speed, range, hit radius |
+| `entities/HookShot.hx` | hook speed, hit radius |
 | `entities/enemy/Enemies.hx` | wander and idle durations, hit flash time |
 | `entities/enemy/EnemyNav.hx` | waypoint radius, body radius default; the repath interval is in `tick()` |
 | `systems/EnemyDirector.hx` | off-screen entry margin, edge spawn margins, shot wall probe |

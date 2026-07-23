@@ -26,11 +26,14 @@ class Arena
 		spawnX = data.spawnX;
 		spawnY = data.spawnY;
 
-		state.add(new FlxSprite(0, 0, Paths.image(data.background)));
-
 		map = new FlxTilemap();
 		map.loadMapFromCSV(Paths.file(data.map), Paths.file(data.tiles), TILE_WIDTH, TILE_HEIGHT, AUTO);
 		map.visible = false;
+
+		var bg = new FlxSprite(0, 0, Paths.image(data.background));
+		bg.setGraphicSize(Std.int(map.width), Std.int(map.height));
+		bg.updateHitbox();
+		state.add(bg);
 		state.add(map);
 
 		FlxG.worldBounds.set(0, 0, map.width, map.height);
