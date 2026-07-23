@@ -19,6 +19,7 @@ import systems.Hud;
 import util.Paths;
 import util.SaveData;
 import util.PerfLog;
+import util.DiscordPresence;
 
 class PlayState extends FlxState
 {
@@ -34,6 +35,7 @@ class PlayState extends FlxState
 	private var hud:Hud;
 	private var perf:PerfLog;
 	private var bossAlarm:FlxSound;
+	private var bossFight:Bool = false;
 
 	override public function create()
 	{
@@ -95,10 +97,13 @@ class PlayState extends FlxState
 		arena.onNormal = onArenaNormal;
 		perf = new PerfLog();
 
+		DiscordPresence.beginRun();
+
 		if (!TutorialSubState.shown)
 		{
 			TutorialSubState.shown = true;
 			openSubState(new TutorialSubState(hud.camUI));
+			DiscordPresence.tutorial();
 		}
 
 		FlxG.sound.playMusic(Paths.music("stage/gloomDoomWoods"), 0.3, true);
@@ -125,6 +130,7 @@ class PlayState extends FlxState
 			layers.playerShadow.visible = false;
 			scythe.visible = false;
 			hud.showDeath(director.wave, SaveData.bestWave());
+			DiscordPresence.died(director.wave, SaveData.bestWave());
 		}
 
 		director.update(elapsed);
@@ -135,8 +141,14 @@ class PlayState extends FlxState
 		hud.setMode(combat.modeName());
 		hud.update(elapsed);
 
+		if (subState == null && !status.dead)
+			DiscordPresence.playing(director.wave, bossFight, combat.weapon, status.kills);
+
 		if (FlxG.keys.justPressed.ESCAPE && !status.dead)
+		{
+			DiscordPresence.paused();
 			openSubState(new PauseSubState(hud.camUI));
+		}
 
 		debugKeys();
 
@@ -157,6 +169,7 @@ class PlayState extends FlxState
 
 	function onBossWave():Void
 	{
+		bossFight = true;
 		arena.beginBossTransition();
 		arena.onWhiteout = onBossWhiteout;
 		hud.showBoss();
@@ -183,6 +196,7 @@ class PlayState extends FlxState
 
 	function onBossDefeated():Void
 	{
+		bossFight = false;
 		arena.endBossTransition();
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.fadeOut(0.6, 0);

@@ -40,7 +40,7 @@ Each system is constructed once by PlayState and updated once per frame.
 - `Arena` — loads the background and collision tilemap, sets world and camera bounds, generates pillar sprites from the map data, and answers `wallAt(x, y)`. Also owns the boss-intro transition: `beginBossTransition()` shakes the camera and fades a white overlay in, then swaps the background to the warping checkerboard grid (a `WarpShader` distorts it), clears the interior pillars (removes their sprites and empties their collision tiles for an open boss arena), and fades the white back out. `update(elapsed)` drives that sequence and advances the shader; `onWhiteout` fires once at the fully-white moment (used to cut the alarm and start the boss music). `endBossTransition()` reverses it after the boss dies — a quick white flash restores the normal background, removes the shader, and rebuilds the pillars (`restoreObstacles` reloads the map CSV), firing `onNormal` to restore the normal music.
 - `Fx` — hitstop (time scale drops for a few frames on kills), camera shakes, hit spark bursts, and the dash speed-line trail.
 - `RenderLayers` — the shadow and entity render groups. The entity layer is sorted every frame by feet position so characters and pillars overlap correctly.
-- `PlayerCombat` — player health, the AP meter, damage intake, invincibility frames and blink, dash input, death and revive. The HUD bars bind directly to its fields.
+- `PlayerCombat` — player health, the AP meter, damage intake, invincibility frames and blink, dash input, death and revive, and the run's kill counter. The HUD bars bind directly to its fields.
 - `EnemyDirector` — spawns waves from the wave table, owns the per-enemy rigs (enemy, shadow, contact hitbox), runs enemy collision and cleanup, and updates enemy shots. A randomly chosen wave (4-8, rolled once at startup) is the boss wave: it fires the `onBoss` callback (which starts the intro cinematic) and, after a short intro delay, spawns a single `"rofel"` enemy instead of the normal count. When the boss dies the director runs a defeat sequence — the boss shakes in place, then plays an explosion animation with a boom sound — and fires `onBossDefeated` (which reverts the arena and music to normal) once the explosion finishes. Also the single home of enemy hit queries: `firstInCircle` and `eachInCircle` do the nearest-hitbox-point circle test every attack uses (live enemies only; `firstInCircle` can skip seized ones).
 - `Pickups` — the health pickup pool. Collected on player contact unless health is full.
 - `Hud` — the UI camera, health and AP bars, wave counter and banner, the mode indicator (label plus icon, animated on switch), death text with the best wave, the custom cursor, and the boss announcement (a pulsing red screen flash plus a red BOSS APPROACHING banner that slides slowly down from the top of the screen), and the boss health bar. `showBossBar(boss)` binds a bar to the boss's HP and plays its entrance: the bar expands out from a compressed sliver as it drops in from the top, then the name "Rofel" fades in letter by letter beneath it. The bar hides itself once the boss is gone.
@@ -100,6 +100,7 @@ Enemy behavior lives in `source/entities/enemy/`:
 - `GhostTrail` — pooled afterimage trail: fades its ghosts every tick and stamps a copy of a source sprite (position, angle, scale, color) on a fixed cadence. Used by the thrown scythe, the super scythe blades, and the Arrow Storm launch arrow.
 - `WarpShader` — a GLSL fragment shader that distorts a sprite's texture coordinates with time-driven sine waves. Applied to the boss-arena grid background; `advance(elapsed)` steps its time uniform.
 - `SaveData` — persistent save (best wave reached).
+- `DiscordPresence` — Discord Rich Presence (Windows native only, via the `hxdiscord_rpc` haxelib; every method is a no-op on HTML5). Reads the application ID from `assets/data/discord.json` and stays silent if it is empty. PlayState feeds it the raw facts each frame (`playing(wave, bossFight, weapon, kills)`) and it diffs internally: wave changes, the boss fight, weapon switches, pause, and death push immediately, kill-count changes are throttled to one update every couple of seconds. Shows the current wave or boss fight plus the equipped weapon and kill count, run elapsed time via the start timestamp, the best wave on the menu and death screens, and image keys `icon` (large) and `scythe`/`hammer`/`bow`/`hook` (small, per weapon) for art uploaded to the Discord application.
 - `PerfLog` — frame-time logger for native builds. Writes `perflog.txt` next to the executable: one aggregate line per second (average, worst, fps) plus immediate lines for spike frames and long gaps, each tagged with the live enemy count, pathfinding calls, projectile count (slices, enemy shots, arrows, rain arrows, thrown scythe, hook), and wave.
 
 ## Data
@@ -175,6 +176,12 @@ Combat balance for every weapon system, one object per system; field names match
 | `hookArms` | reach and reach speed, grab radius, reel speed, grab distance, throw force, damage, cooldown, whip time, super duration |
 
 Presentation constants (trail settings, rope geometry, rest poses, ring radii, and the like) stay in the owning source files — see Tuning.
+
+### Discord — assets/data/discord.json
+
+| Field | Meaning |
+|---|---|
+| `clientId` | Discord application ID for Rich Presence. Empty string disables presence. Create an application at discord.com/developers/applications, copy its Application ID here, and optionally upload Rich Presence art assets named `icon`, `scythe`, `hammer`, `bow`, `hook`. |
 
 ### Arena — assets/data/arena.json
 

@@ -7,6 +7,7 @@ import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.util.FlxTimer;
 import util.Paths;
+import util.DiscordPresence;
 
 class TitleSequence extends FlxState
 {
@@ -17,6 +18,7 @@ class TitleSequence extends FlxState
     override public function create()
     {
         FlxG.mouse.visible = false;
+        DiscordPresence.menu();
 
         new FlxTimer().start(3, function(timer:FlxTimer) {
             modLogoAnimated = new FlxSprite(0, 0);

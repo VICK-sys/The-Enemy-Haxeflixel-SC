@@ -15,6 +15,7 @@ class PlayerCombat
 	public var itemBar:Float = 0;
 	public var dead:Bool = false;
 	public var invincible:Bool = false;
+	public var kills:Int = 0;
 	public var healthMax:Float = 0;
 	public var apMax:Float = 0;
 
@@ -161,6 +162,7 @@ class PlayerCombat
 
 	public function rewardKill():Void
 	{
+		kills++;
 		itemBar += data.apPerKill;
 		if (itemBar > apMax)
 			itemBar = apMax;

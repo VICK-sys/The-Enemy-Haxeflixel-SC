@@ -25,11 +25,15 @@ A controls popup with animated demos appears the first time you play; flip pages
 
 ## Building
 
-Requires [Haxe](https://haxe.org) with the `flixel` haxelib installed.
+Requires [Haxe](https://haxe.org) with the `flixel` haxelib installed. The Windows target also uses `hxdiscord_rpc` for Discord Rich Presence.
 
 ```
 haxelib run lime build windows
 haxelib run lime build html5
 ```
+
+## Discord Rich Presence
+
+The Windows build can show your current wave, boss fight, equipped weapon, kill count, and run time on Discord. To enable it, create an application at [discord.com/developers/applications](https://discord.com/developers/applications), copy its Application ID into `assets/data/discord.json`, and optionally upload Rich Presence art assets named `icon`, `scythe`, `hammer`, `bow`, and `hook`. Leaving the ID empty keeps presence off.
 
 Code and data reference: [DOCS.md](DOCS.md)
