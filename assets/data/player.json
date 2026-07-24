@@ -13,5 +13,9 @@
 	"apPerKill": 0.5,
 	"iframeTime": 0.4,
 	"hurtLockTime": 0.1,
-	"knockback": 300
+	"knockback": 300,
+	"timestopSlow": 1.2,
+	"timestopHold": 10,
+	"timestopRecover": 0.8,
+	"timestopCooldown": 30
 }

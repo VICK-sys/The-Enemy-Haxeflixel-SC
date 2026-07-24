@@ -1,6 +1,7 @@
 package entities;
 
 import flixel.FlxSprite;
+import util.WorldClock;
 
 class HealthPickup extends FlxSprite
 {
@@ -27,6 +28,7 @@ class HealthPickup extends FlxSprite
 
 	override public function update(elapsed:Float):Void
 	{
+		elapsed *= WorldClock.scale;
 		super.update(elapsed);
 		life -= elapsed;
 		if (life <= 0)

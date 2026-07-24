@@ -6,10 +6,13 @@ import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import systems.MenuList;
 
 class PauseSubState extends FlxSubState
 {
 	private var camUI:FlxCamera;
+	private var list:MenuList;
+	private var leaving:Bool = false;
 
 	public function new(camUI:FlxCamera)
 	{
@@ -24,18 +27,18 @@ class PauseSubState extends FlxSubState
 		overlay.cameras = [camUI];
 		add(overlay);
 
-		var title = new FlxText(0, 280, FlxG.width, "PAUSED");
+		var title = new FlxText(0, 190, FlxG.width, "PAUSED");
 		title.setFormat(null, 48, FlxColor.WHITE, CENTER);
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		title.cameras = [camUI];
 		add(title);
 
-		var hint = new FlxText(0, 360, FlxG.width, "ESC TO RESUME");
-		hint.setFormat(null, 16, FlxColor.WHITE, CENTER);
-		hint.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
-		hint.cameras = [camUI];
-		add(hint);
+		list = new MenuList(["RESUME", "OPTIONS", "QUIT TO MENU"], 320, 70, 32);
+		list.onChoose = choose;
+		list.cameras = [camUI];
+		add(list);
 
+		FlxG.mouse.visible = true;
 		FlxG.sound.pause();
 
 		super.create();
@@ -43,6 +46,7 @@ class PauseSubState extends FlxSubState
 
 	override public function close():Void
 	{
+		FlxG.mouse.visible = false;
 		FlxG.sound.resume();
 		super.close();
 	}
@@ -59,5 +63,23 @@ class PauseSubState extends FlxSubState
 
 		if (FlxG.keys.justPressed.PLUS)
 			FlxG.sound.changeVolume(0.1);
+	}
+
+	function choose(i:Int):Void
+	{
+		if (leaving)
+			return;
+
+		switch (i)
+		{
+			case 0:
+				close();
+			case 1:
+				openSubState(new OptionsSubState(camUI));
+			default:
+				leaving = true;
+				FlxG.mouse.visible = false;
+				FlxG.switchState(new MainMenuState());
+		}
 	}
 }

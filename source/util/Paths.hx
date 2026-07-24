@@ -19,6 +19,9 @@ class Paths
 	public static inline function json(name:String):String
 		return "assets/data/" + name + ".json";
 
+	public static inline function font(name:String):String
+		return "assets/fonts/" + name + ".ttf";
+
 	public static function sparrow(name:String):FlxAtlasFrames
 		return FlxAtlasFrames.fromSparrow(image(name), "assets/images/" + name + ".xml");
 }

@@ -20,16 +20,8 @@ class Hud
 	static inline var BOSS_BANNER_FADE:Float = 0.7;
 	static inline var BOSS_BANNER_TOP:Float = -70;
 	static inline var BOSS_BANNER_REST:Float = 250;
-	static inline var BOSS_BAR_W:Int = 900;
-	static inline var BOSS_BAR_H:Int = 30;
-	static inline var BOSS_BAR_START_Y:Float = 20;
-	static inline var BOSS_BAR_REST_Y:Float = 54;
-	static inline var BOSS_EXPAND:Float = 0.55;
-	static inline var BOSS_NAME_Y:Float = 78;
-	static inline var BOSS_NAME_SPACING:Float = 4;
-	static inline var BOSS_LETTER_STAGGER:Float = 0.14;
-	static inline var BOSS_LETTER_FADE:Float = 0.3;
 	static inline var MODE_SWITCH_TIME:Float = 0.3;
+	static inline var STOP_TIMER_FADE:Float = 4;
 	static inline var ICON_X:Float = 560;
 	static inline var ICON_Y:Float = 652;
 
@@ -43,19 +35,15 @@ class Hud
 	private var deadText:FlxText;
 	private var modeText:FlxText;
 	private var modeIcon:FlxSprite;
-	private var bossFlash:FlxSprite;
-	private var bossFlashTimer:Float = 0;
+	private var bossHud:BossHud;
 	private var bannerTimer:Float = 0;
-	private var bannerY:Float = 48;
 	private var bossSlide:Bool = false;
 	private var bannerFading:Bool = false;
 	private var bannerFadeTimer:Float = 0;
-	private var boss:Enemies;
-	private var bossBar:FlxBar;
-	private var bossLetters:Array<FlxText> = [];
-	private var bossBarTimer:Float = 0;
-	private var bossBarActive:Bool = false;
 	private var currentMode:String = "";
+	private var timeText:FlxText;
+	private var stopTimerText:FlxText;
+	private var stopTimerTarget:Float = 0;
 	private var modeSwitchTimer:Float = 0;
 	private var iconBaseAngle:Float = 0;
 	private var iconScaleX:Float = 1;
@@ -81,6 +69,18 @@ class Hud
 		state.add(passiveRed);
 		state.add(playerIcon);
 
+		timeText = new FlxText(92, 616, 0, "");
+		timeText.setFormat(null, 14, FlxColor.WHITE, LEFT);
+		timeText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		timeText.cameras = [camUI];
+		state.add(timeText);
+
+		stopTimerText = makeText(120, 32);
+		stopTimerText.font = Paths.font("digital-7");
+		stopTimerText.color = 0xFFFF5A5A;
+		stopTimerText.alpha = 0;
+		stopTimerText.visible = false;
+
 		waveText = makeText(8, 16);
 		bannerText = makeText(250, 48);
 		deadText = makeText(380, 24);
@@ -92,11 +92,7 @@ class Hud
 		modeIcon.cameras = [camUI];
 		state.add(modeIcon);
 
-		bossFlash = new FlxSprite();
-		bossFlash.makeGraphic(FlxG.width, FlxG.height, 0xFFB2001E);
-		bossFlash.cameras = [camUI];
-		bossFlash.alpha = 0;
-		state.add(bossFlash);
+		bossHud = new BossHud(state, camUI);
 
 		customCursor = makeSprite(0, 0, "mouse");
 		state.add(customCursor);
@@ -104,12 +100,40 @@ class Hud
 		FlxG.mouse.visible = false;
 	}
 
+	public function setTimeStop(label:String):Void
+	{
+		if (timeText.text != label)
+			timeText.text = label;
+	}
+
+	public function setStopTimer(label:String):Void
+	{
+		if (label != "")
+		{
+			if (stopTimerText.text != label)
+				stopTimerText.text = label;
+			stopTimerTarget = 1;
+		}
+		else
+			stopTimerTarget = 0;
+	}
+
 	public function update(elapsed:Float):Void
 	{
 		customCursor.setPosition(FlxG.mouse.screenX - 5, FlxG.mouse.screenY);
 
-		if (bossBarActive)
-			updateBossBar(elapsed);
+		if (stopTimerText.alpha != stopTimerTarget)
+		{
+			var a = stopTimerText.alpha;
+			if (a < stopTimerTarget)
+				a = Math.min(stopTimerTarget, a + STOP_TIMER_FADE * elapsed);
+			else
+				a = Math.max(stopTimerTarget, a - STOP_TIMER_FADE * elapsed);
+			stopTimerText.alpha = a;
+			stopTimerText.visible = a > 0;
+		}
+
+		bossHud.update(elapsed);
 
 		if (bannerFading)
 		{
@@ -125,13 +149,6 @@ class Hud
 				bannerText.y = 48;
 				bossSlide = false;
 			}
-		}
-
-		if (bossFlashTimer > 0)
-		{
-			bossFlashTimer -= elapsed;
-			var ft = 1.6 - bossFlashTimer;
-			bossFlash.alpha = bossFlashTimer <= 0 ? 0 : 0.55 * Math.abs(Math.sin(ft * 8)) * (bossFlashTimer / 1.6);
 		}
 
 		if (modeSwitchTimer > 0)
@@ -222,7 +239,7 @@ class Hud
 		bannerText.y = BOSS_BANNER_TOP;
 		bossSlide = true;
 		bannerTimer = BOSS_BANNER_TIME;
-		bossFlashTimer = 1.6;
+		bossHud.startFlash();
 	}
 
 	function updateBossBanner():Void
@@ -238,71 +255,7 @@ class Hud
 
 	public function showBossBar(bossEnemy:Enemies):Void
 	{
-		boss = bossEnemy;
-
-		bossBar = new FlxBar(0, 0, LEFT_TO_RIGHT, BOSS_BAR_W, BOSS_BAR_H, boss, "hp", 0, boss.hp);
-		bossBar.createFilledBar(0xFF400810, 0xFFE0132D, true, 0xFF000000);
-		bossBar.antialiasing = false;
-		bossBar.origin.set(BOSS_BAR_W / 2, BOSS_BAR_H / 2);
-		bossBar.cameras = [camUI];
-		state.add(bossBar);
-
-		var word = "Rofel";
-		var total = 0.0;
-		var built = [];
-		for (i in 0...word.length)
-		{
-			var t = new FlxText(0, BOSS_NAME_Y, 0, word.charAt(i));
-			t.setFormat(null, 32, FlxColor.WHITE, LEFT);
-			t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
-			t.cameras = [camUI];
-			t.alpha = 0;
-			state.add(t);
-			built.push(t);
-			total += t.width + BOSS_NAME_SPACING;
-		}
-		total -= BOSS_NAME_SPACING;
-
-		var cx = FlxG.width / 2 - total / 2;
-		bossLetters = [];
-		for (t in built)
-		{
-			t.x = cx;
-			cx += t.width + BOSS_NAME_SPACING;
-			bossLetters.push(t);
-		}
-
-		bossBarTimer = 0;
-		bossBarActive = true;
-	}
-
-	function updateBossBar(elapsed:Float):Void
-	{
-		if (boss == null || !boss.exists)
-		{
-			if (bossBar != null)
-				bossBar.visible = false;
-			for (t in bossLetters)
-				t.visible = false;
-			bossBarActive = false;
-			return;
-		}
-
-		bossBarTimer += elapsed;
-
-		var e = bossBarTimer < BOSS_EXPAND ? bossBarTimer / BOSS_EXPAND : 1;
-		var ease = 1 - Math.pow(1 - e, 3);
-		bossBar.scale.set(0.03 + 0.97 * ease, 1);
-		var cy = BOSS_BAR_START_Y + (BOSS_BAR_REST_Y - BOSS_BAR_START_Y) * ease;
-		bossBar.x = FlxG.width / 2 - BOSS_BAR_W / 2;
-		bossBar.y = cy - BOSS_BAR_H / 2;
-
-		for (i in 0...bossLetters.length)
-		{
-			var start = BOSS_EXPAND + i * BOSS_LETTER_STAGGER;
-			var a = (bossBarTimer - start) / BOSS_LETTER_FADE;
-			bossLetters[i].alpha = a < 0 ? 0 : (a > 1 ? 1 : a);
-		}
+		bossHud.showBar(bossEnemy);
 	}
 
 	public function fadeBanner():Void

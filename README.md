@@ -2,26 +2,27 @@
 
 Top-down action game built with HaxeFlixel. Fight waves of enemies with a mouse-aimed arsenal; a boss appears after wave 3.
 
-A controls popup with animated demos appears the first time you play; flip pages with A/D and press ENTER to start.
+The main menu has PLAY, OPTIONS (master volume, fullscreen, FPS counter, reset best wave), and QUIT, navigated with W/S and ENTER or the mouse. A controls popup with animated demos appears the first time you play; flip pages with A/D and press ENTER to start.
 
 ## Controls
 
-- WASD — move
-- Mouse — aim, left click to attack
-- 1-4 or scroll wheel — switch weapon (scythe / hammer / bow / hook)
-- Right click — switch the equipped weapon's mode (scythe: swing / air slice / throw; hammer: slam / shockwave; bow: shot / arrow rain; hook: grab / spin / grapple / arms)
-- Q — super (needs a full AP meter, one per weapon): scythe orbits blades you launch with left click; hammer does Bounce Strike (somersaulting AoE slams); bow does Arrow Storm (an arena-wide downpour); hook extends two auto-grabbing arms that snatch and hurl enemies
-- SPACE — dash (2 second cooldown)
-- ESC — pause
-- ENTER — skip the intro
-- R — restart after death
+- WASD - move
+- Mouse - aim, left click to attack
+- 1-4 or scroll wheel - switch weapon (scythe / hammer / bow / hook)
+- Right click - switch the equipped weapon's mode (scythe: swing / air slice / throw; hammer: slam / shockwave; bow: shot / arrow rain; hook: grab / spin / grapple / arms)
+- Q - super (needs a full AP meter, one per weapon): scythe orbits blades you launch with left click; hammer does Bounce Strike (somersaulting AoE slams); bow does Arrow Storm (an arena-wide downpour); hook extends two auto-grabbing arms that snatch and hurl enemies
+- SPACE - dash (2 second cooldown)
+- E - time stop (30 second cooldown): the world winds down to a complete stop for 10 seconds while you keep moving and attacking at full speed
+- ESC - pause
+- ENTER - skip the intro
+- R - restart after death
 
 ## Debug keys
 
-- minus / plus — volume down / up
-- 9 / 7 / 8 — spawn Enemy / Woodster / LikWid
-- F4 — revive, 5 — die
-- 6 — collision debug overlay
+- minus / plus - volume down / up
+- 9 / 7 / 8 - spawn Enemy / Woodster / LikWid
+- F4 - revive, 5 - die
+- 6 - collision debug overlay
 
 ## Building
 

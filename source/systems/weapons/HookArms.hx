@@ -105,8 +105,14 @@ class HookArms
 			{
 				running = false;
 				retracting = true;
+				var ax = player.x + player.width * 0.5;
+				var ay = player.y + ANCHOR_DOWN;
 				for (arm in arms)
+				{
 					release(arm);
+					arm.ox = arm.cx - ax;
+					arm.oy = arm.cy - ay;
+				}
 			}
 		}
 
@@ -151,8 +157,10 @@ class HookArms
 		if (retracting)
 		{
 			var rk = Math.min(1, RETRACT_EASE * elapsed);
-			arm.cx += (anchorX - arm.cx) * rk;
-			arm.cy += (anchorY - arm.cy) * rk;
+			arm.ox -= arm.ox * rk;
+			arm.oy -= arm.oy * rk;
+			arm.cx = anchorX + arm.ox;
+			arm.cy = anchorY + arm.oy;
 			arm.target = null;
 			arm.phase = 0;
 		}
@@ -374,6 +382,8 @@ class Arm
 	public var cx:Float = 0;
 	public var cy:Float = 0;
 	public var cooldown:Float = 0;
+	public var ox:Float = 0;
+	public var oy:Float = 0;
 	public var whipTimer:Float = 0;
 	public var whipBase:Float = 0;
 	public var ctrlX:Float = 0;

@@ -110,7 +110,7 @@ class DiscordPresence
 	{
 		#if hxdiscord_rpc
 		overridden = true;
-		details = boss ? "Paused — Boss Fight" : (wave > 0 ? "Paused — Wave " + wave : "Paused");
+		details = boss ? "Paused - Boss Fight" : (wave > 0 ? "Paused - Wave " + wave : "Paused");
 		flush();
 		#end
 	}
@@ -137,7 +137,7 @@ class DiscordPresence
 		weapon = curWeapon;
 		kills = curKills;
 		overridden = false;
-		details = boss ? "Boss Fight — Rofel" : (wave > 0 ? "Fighting Wave " + wave : "Entering the Arena");
+		details = boss ? "Boss Fight - Rofel" : (wave > 0 ? "Fighting Wave " + wave : "Entering the Arena");
 		state = weaponName() + " · " + killText();
 		smallKey = weapon >= 0 ? WEAPON_KEYS[weapon] : "";
 		smallText = weaponName();

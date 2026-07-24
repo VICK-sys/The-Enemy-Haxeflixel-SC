@@ -7,6 +7,8 @@ import flixel.FlxSprite;
 import flixel.FlxG;
 import flixel.util.FlxTimer;
 import util.Paths;
+import util.SaveData;
+import util.Music;
 import util.DiscordPresence;
 
 class TitleSequence extends FlxState
@@ -18,6 +20,12 @@ class TitleSequence extends FlxState
     override public function create()
     {
         FlxG.mouse.visible = false;
+        SaveData.applySettings();
+        FlxG.sound.volumeHandler = function(v:Float)
+        {
+            if (!FlxG.sound.muted)
+                SaveData.setVolume(v);
+        };
         DiscordPresence.menu();
 
         new FlxTimer().start(3, function(timer:FlxTimer) {
@@ -29,7 +37,7 @@ class TitleSequence extends FlxState
             modLogoAnimated.screenCenter();
             add(modLogoAnimated);
 
-            FlxG.sound.playMusic(Paths.sound("teamIntro"), 0.3, false);
+            Music.play("teamIntro", 0.3, false);
 
             new FlxTimer().start(0.18, function(timer:FlxTimer) {
 
@@ -60,6 +68,6 @@ class TitleSequence extends FlxState
     }
 
     function die(tween:FlxTween):Void {
-        FlxG.switchState(new PlayState());
+        FlxG.switchState(new MainMenuState());
     }
 }

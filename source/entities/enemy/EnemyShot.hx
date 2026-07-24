@@ -2,6 +2,7 @@ package entities.enemy;
 
 import flixel.FlxSprite;
 import util.Paths;
+import util.WorldClock;
 
 class EnemyShot extends FlxSprite
 {
@@ -48,6 +49,7 @@ class EnemyShot extends FlxSprite
 
 	override public function update(elapsed:Float):Void
 	{
+		elapsed *= WorldClock.scale;
 		super.update(elapsed);
 		life -= elapsed;
 		if (life <= 0)

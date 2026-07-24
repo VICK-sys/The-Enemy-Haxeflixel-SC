@@ -5,6 +5,7 @@ import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
 import flixel.FlxG;
 import util.Paths;
+import util.WorldClock;
 import data.EnemyData.EnemyDataRegistry;
 
 enum State {
@@ -172,6 +173,17 @@ class Enemies extends FlxSprite
 
     override public function update(elapsed:Float):Void
 	{
+		if (WorldClock.scale <= 0 && !seized)
+		{
+			immovable = true;
+			velocity.set(0, 0);
+			return;
+		}
+		if (immovable)
+			immovable = false;
+		if (!seized)
+			elapsed *= WorldClock.scale;
+
 		super.update(elapsed);
 
 		if (throwGrace > 0)

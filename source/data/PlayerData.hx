@@ -17,7 +17,11 @@ typedef PlayerData = {
 	apPerKill:Float,
 	iframeTime:Float,
 	hurtLockTime:Float,
-	knockback:Float
+	knockback:Float,
+	timestopSlow:Float,
+	timestopHold:Float,
+	timestopRecover:Float,
+	timestopCooldown:Float
 }
 
 class PlayerDataRegistry

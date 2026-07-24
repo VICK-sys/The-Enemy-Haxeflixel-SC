@@ -10,6 +10,7 @@ import entities.enemy.EnemyShot;
 import data.WaveData;
 import data.WaveData.WaveDataRegistry;
 import util.Paths;
+import util.WorldClock;
 
 class EnemyDirector
 {
@@ -221,7 +222,7 @@ class EnemyDirector
 			{
 				rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 				rig.hitbox.y = e.y + e.hitOffY;
-				if (!e.seized && e.throwGrace <= 0)
+				if (!e.seized && e.throwGrace <= 0 && WorldClock.scale > 0.05)
 					status.hurtPlayer(rig.hitbox, e.contactDamage);
 
 				if (e.pendingShots.length > 0)
@@ -252,6 +253,8 @@ class EnemyDirector
 
 	public function updateShots():Void
 	{
+		if (WorldClock.scale <= 0.05)
+			return;
 		for (shot in shots.members)
 		{
 			if (shot == null || !shot.exists)

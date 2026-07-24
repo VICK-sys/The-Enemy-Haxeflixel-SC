@@ -13,12 +13,14 @@ import systems.Fx;
 import systems.RenderLayers;
 import systems.PlayerCombat;
 import systems.EnemyDirector;
+import systems.TimeStop;
 import systems.weapons.Weapons;
 import systems.Pickups;
 import systems.Hud;
 import util.Paths;
 import util.SaveData;
 import util.PerfLog;
+import util.Music;
 import util.DiscordPresence;
 
 class PlayState extends FlxState
@@ -36,6 +38,7 @@ class PlayState extends FlxState
 	private var perf:PerfLog;
 	private var bossAlarm:FlxSound;
 	private var bossFight:Bool = false;
+	private var timeStop:TimeStop;
 
 	override public function create()
 	{
@@ -62,9 +65,12 @@ class PlayState extends FlxState
 		arena.addPillars(layers.entityLayer);
 
 		status = new PlayerCombat(_player, fx);
+		timeStop = new TimeStop(_player, layers.playerShadow, status);
 		pickups = new Pickups(_player, status);
 		insert(members.indexOf(layers.entityLayer), pickups.group);
 		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
+		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
+		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
 		director = new EnemyDirector(_player, arena, layers, status);
 		combat = new Weapons(_player, scythe, arena, director, status, fx, pickups);
 
@@ -88,6 +94,7 @@ class PlayState extends FlxState
 		add(combat.superScythes.frontLayer);
 		add(fx.sparks);
 		add(director.shots);
+		add(timeStop.overlay);
 
 		hud = new Hud(this, status);
 		director.onWave = onWaveStarted;
@@ -106,7 +113,7 @@ class PlayState extends FlxState
 			DiscordPresence.tutorial();
 		}
 
-		FlxG.sound.playMusic(Paths.music("stage/gloomDoomWoods"), 0.3, true);
+		Music.play("stage/gloomDoomWoods", 0.3);
 
 		super.create();
 	}
@@ -115,10 +122,12 @@ class PlayState extends FlxState
 	{
 		EnemyNav.resetBudget();
 
+		timeStop.update(elapsed);
+
 		super.update(elapsed);
 
 		fx.update();
-		arena.update(elapsed);
+		arena.update(elapsed * timeStop.factor);
 
 		FlxG.collide(_player, arena.map);
 		director.collide();
@@ -133,12 +142,14 @@ class PlayState extends FlxState
 			DiscordPresence.died(director.wave, SaveData.bestWave());
 		}
 
-		director.update(elapsed);
+		director.update(elapsed * timeStop.factor);
 		pickups.update();
 		layers.update();
 		combat.update(elapsed);
 		director.updateShots();
 		hud.setMode(combat.modeName());
+		hud.setTimeStop(timeStop.hudLabel());
+		hud.setStopTimer(timeStop.timerLabel());
 		hud.update(elapsed);
 
 		if (subState == null && !status.dead)
@@ -190,7 +201,7 @@ class PlayState extends FlxState
 					bossAlarm = null;
 				}
 			});
-		FlxG.sound.playMusic(Paths.music("biggestBandit"), 0.5, true);
+		Music.play("biggestBandit", 0.5);
 		FlxTween.tween(FlxG.camera, {zoom: 0.8}, 1.2);
 	}
 
@@ -204,7 +215,7 @@ class PlayState extends FlxState
 
 	function onArenaNormal():Void
 	{
-		FlxG.sound.playMusic(Paths.music("stage/gloomDoomWoods"), 0.3, true);
+		Music.play("stage/gloomDoomWoods", 0.3);
 		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.8);
 	}
 
