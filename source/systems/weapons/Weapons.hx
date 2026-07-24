@@ -43,9 +43,9 @@ class Weapons
 		slice = new SliceAttack(arena, director, hits);
 		hammer = new HammerAttack(director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
-		throwAttack = new ThrowAttack(player, scythe, arena, director, status, hits.damage);
-		hookAttack = new HookAttack(player, arena, director, status, hits.damage);
-		superScythes = new SuperScythes(player, scythe, arena, director, status, fx, hits.damage);
+		throwAttack = new ThrowAttack(player, scythe, arena, director, status, hits);
+		hookAttack = new HookAttack(player, arena, director, status, hits);
+		superScythes = new SuperScythes(player, scythe, arena, director, status, fx, hits);
 		bounceStrike = new BounceStrike(player, fx, hits, held.sprite, hammer.shock);
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
 		hookArms = new HookArms(player, director, hits);

@@ -43,7 +43,7 @@ class HookAttack
 	private var arena:Arena;
 	private var director:EnemyDirector;
 	private var status:PlayerCombat;
-	private var damageEnemy:(Enemies, Float, Float) -> Void;
+	private var hits:HitPipeline;
 	private var phase:HookPhase = Idle;
 	private var victim:Enemies;
 	private var pullTimer:Float = 0;
@@ -67,13 +67,13 @@ class HookAttack
 	private var grappleHits:Array<Enemies> = [];
 	private var grappleTarget:Enemies;
 
-	public function new(player:Player, arena:Arena, director:EnemyDirector, status:PlayerCombat, damageEnemy:(Enemies, Float, Float) -> Void)
+	public function new(player:Player, arena:Arena, director:EnemyDirector, status:PlayerCombat, hits:HitPipeline)
 	{
 		this.player = player;
 		this.arena = arena;
 		this.director = director;
 		this.status = status;
-		this.damageEnemy = damageEnemy;
+		this.hits = hits;
 		hook = new HookShot();
 		hook.kill();
 		rope = new FlxTypedGroup<FlxSprite>();
@@ -229,7 +229,7 @@ class HookAttack
 			if (grappleHits.contains(e))
 				return;
 			grappleHits.push(e);
-			damageEnemy(e, ux * cfg.grappleFling, uy * cfg.grappleFling);
+			hits.damage(e, ux * cfg.grappleFling, uy * cfg.grappleFling);
 		});
 	}
 
@@ -271,7 +271,7 @@ class HookAttack
 
 		if (!hit.grabbable)
 		{
-			damageEnemy(hit, hook.dirX, hook.dirY);
+			hits.damage(hit, hook.dirX, hook.dirY);
 			beginRetract();
 			return;
 		}
@@ -283,7 +283,7 @@ class HookAttack
 		var plen = Math.sqrt(px * px + py * py);
 		if (plen <= 0)
 			plen = 1;
-		damageEnemy(hit, px / plen * 0.3, py / plen * 0.3);
+		hits.damage(hit, px / plen * 0.3, py / plen * 0.3);
 
 		if (hit.isDead || !hit.exists)
 		{
@@ -439,7 +439,7 @@ class HookAttack
 			if (e == fv || e.seized || flightHits.contains(e))
 				return;
 			flightHits.push(e);
-			damageEnemy(e, flightDirX, flightDirY);
+			hits.damage(e, flightDirX, flightDirY);
 		});
 	}
 
@@ -450,7 +450,7 @@ class HookAttack
 		flightHits = [];
 		v.unseize(cfg.releaseStun);
 		if (hitWall)
-			damageEnemy(v, -flightDirX * 0.4, -flightDirY * 0.4);
+			hits.damage(v, -flightDirX * 0.4, -flightDirY * 0.4);
 	}
 
 	function updateWhirling(elapsed:Float):Void
@@ -474,7 +474,7 @@ class HookAttack
 			if (e.seized || whirlHits.contains(e))
 				return;
 			whirlHits.push(e);
-			damageEnemy(e, Math.cos(ang), Math.sin(ang));
+			hits.damage(e, Math.cos(ang), Math.sin(ang));
 		});
 
 		if (whirlTimer <= 0)

@@ -32,19 +32,19 @@ class ThrowAttack
 	private var arena:Arena;
 	private var director:EnemyDirector;
 	private var status:PlayerCombat;
-	private var damageEnemy:(Enemies, Float, Float) -> Void;
+	private var hits:HitPipeline;
 	private var cfg = WeaponDataRegistry.get().thrown;
 	private var spinSound:FlxSound;
 	private var nav:EnemyNav;
 
-	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, damageEnemy:(Enemies, Float, Float) -> Void)
+	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, hits:HitPipeline)
 	{
 		this.player = player;
 		this.scythe = scythe;
 		this.arena = arena;
 		this.director = director;
 		this.status = status;
-		this.damageEnemy = damageEnemy;
+		this.hits = hits;
 		thrown = new ThrownScythe();
 		trail = new GhostTrail("items/mufu_scythe", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
 		spinSound = FlxG.sound.load(Paths.sound("scythe/spin"), 0.5, true);
@@ -133,7 +133,7 @@ class ThrowAttack
 			if (thrown.hasHit(e))
 				return;
 			thrown.markHit(e);
-			damageEnemy(e, pushX, pushY);
+			hits.damage(e, pushX, pushY);
 		});
 	}
 

@@ -43,7 +43,7 @@ class SuperScythes
 	private var arena:Arena;
 	private var director:EnemyDirector;
 	private var status:PlayerCombat;
-	private var damageEnemy:(Enemies, Float, Float) -> Void;
+	private var hits:HitPipeline;
 	private var spinSound:FlxSound;
 	private var cfg = WeaponDataRegistry.get().superScythes;
 	private var pool:Array<SuperBlade> = [];
@@ -71,7 +71,7 @@ class SuperScythes
 		return ascendTimer > 0;
 	}
 
-	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, damageEnemy:(Enemies, Float, Float) -> Void)
+	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, hits:HitPipeline)
 	{
 		this.player = player;
 		this.scythe = scythe;
@@ -79,7 +79,7 @@ class SuperScythes
 		this.director = director;
 		this.status = status;
 		this.fx = fx;
-		this.damageEnemy = damageEnemy;
+		this.hits = hits;
 		baseOffsetY = player.offset.y;
 		baseScaleX = player.scale.x;
 		baseScaleY = player.scale.y;
@@ -321,7 +321,7 @@ class SuperScythes
 					if (blade.hasHit(e))
 						return;
 					blade.markHit(e);
-					damageEnemy(e, blade.dirX, blade.dirY);
+					hits.damage(e, blade.dirX, blade.dirY);
 				});
 			}
 		}
