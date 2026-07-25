@@ -6,12 +6,15 @@ import util.Paths;
 class RainArrow extends FlxSprite
 {
 	static inline var ASCEND_FADE:Float = 0.35;
+	static inline var DROP_FADE_PART:Float = 0.45;
 
 	public var impactY:Float = 0;
 	public var ascending:Bool = false;
 	public var marker:FlxSprite;
 
 	private var fadeTimer:Float = 0;
+	private var fadeFromY:Float = 0;
+	private var fadeSpan:Float = 1;
 
 	public function new()
 	{
@@ -38,11 +41,13 @@ class RainArrow extends FlxSprite
 	{
 		revive();
 		ascending = false;
-		alpha = 1;
+		alpha = 0;
 		impactY = iy;
 		setPosition(ix - width / 2, iy - dropHeight - height / 2);
 		velocity.set(0, fallSpeed);
 		angle = 180;
+		fadeFromY = y;
+		fadeSpan = dropHeight * DROP_FADE_PART;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -54,6 +59,11 @@ class RainArrow extends FlxSprite
 			alpha = fadeTimer > 0 ? fadeTimer / ASCEND_FADE : 0;
 			if (fadeTimer <= 0)
 				kill();
+		}
+		else if (alpha < 1)
+		{
+			var fallen = y - fadeFromY;
+			alpha = fallen <= 0 ? 0 : (fallen >= fadeSpan ? 1 : fallen / fadeSpan);
 		}
 	}
 }

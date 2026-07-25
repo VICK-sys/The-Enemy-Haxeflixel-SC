@@ -30,6 +30,15 @@ typedef ThrownConfig = {
 	returnSpeed:Float
 }
 
+typedef BowChargeConfig = {
+	minTime:Float,
+	fullTime:Float,
+	maxDamage:Int,
+	speedBonus:Float,
+	sizeBonus:Float,
+	knockBonus:Float
+}
+
 typedef ArrowRainConfig = {
 	volley:Int,
 	delay:Float,
@@ -100,6 +109,7 @@ typedef WeaponsData = {
 	hammer:HammerConfig,
 	shockwave:ShockwaveConfig,
 	thrown:ThrownConfig,
+	bowCharge:BowChargeConfig,
 	arrowRain:ArrowRainConfig,
 	hook:HookConfig,
 	superScythes:SuperScythesConfig,

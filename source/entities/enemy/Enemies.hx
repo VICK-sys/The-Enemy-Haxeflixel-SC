@@ -6,6 +6,7 @@ import flixel.tweens.FlxTween;
 import flixel.FlxG;
 import util.Paths;
 import util.WorldClock;
+import util.SideView;
 import data.EnemyData.EnemyDataRegistry;
 
 enum State {
@@ -68,6 +69,9 @@ class Enemies extends FlxSprite
 	private var contactCooldown:Float = 0;
 	private var wanderDirection:FlxPoint = new FlxPoint(FlxG.random.float() * 2 - 1, FlxG.random.float() * 2 - 1);
 	private var currentState:State = Wandering;
+	private var prevBottom:Float = 0;
+	private var hopCooldown:Float = 0;
+	private var sideAttacking:Bool = false;
 
     public function new(kind:String, x:Float=0, y:Float=0)
     {
@@ -184,6 +188,10 @@ class Enemies extends FlxSprite
 		if (!seized)
 			elapsed *= WorldClock.scale;
 
+		if (SideView.morphing)
+			return;
+
+		prevBottom = y + height;
 		super.update(elapsed);
 
 		if (throwGrace > 0)
@@ -199,6 +207,8 @@ class Enemies extends FlxSprite
 		if (isDead)
 		{
 			velocity.set(0, 0);
+			if (SideView.active)
+				SideView.settle(this, prevBottom, elapsed);
 			return;
 		}
 
@@ -213,25 +223,34 @@ class Enemies extends FlxSprite
 				drag.set(0, 0);
 				velocity.set(0, 0);
 			}
+			if (SideView.active)
+				SideView.settle(this, prevBottom, elapsed);
 			return;
 		}
 
 		if (entering)
 		{
-			if (target != null)
-			{
-				var ex:Float = target.x + target.width * 0.5 - (x + width * 0.5);
-				var ey:Float = target.y + target.height * 0.5 - (y + height * 0.5);
-				var el:Float = Math.sqrt(ex * ex + ey * ey);
-				if (el > 0)
-					velocity.set(ex / el * speed, ey / el * speed);
-				flipX = ex < 0;
-				this.animation.play("walk");
-			}
-			else
+			if (target == null)
 			{
 				velocity.set(0, 0);
+				return;
 			}
+
+			var ex:Float = target.x + target.width * 0.5 - (x + width * 0.5);
+			flipX = ex < 0;
+			this.animation.play("walk");
+
+			if (SideView.active)
+			{
+				velocity.x = ex < 0 ? -speed : speed;
+				SideView.settle(this, prevBottom, elapsed);
+				return;
+			}
+
+			var ey:Float = target.y + target.height * 0.5 - (y + height * 0.5);
+			var el:Float = Math.sqrt(ex * ex + ey * ey);
+			if (el > 0)
+				velocity.set(ex / el * speed, ey / el * speed);
 			return;
 		}
 
@@ -249,6 +268,12 @@ class Enemies extends FlxSprite
 			{
 				velocity.set(0, 0);
 			}
+			return;
+		}
+
+		if (SideView.active)
+		{
+			sideStep(elapsed);
 			return;
 		}
 
@@ -355,6 +380,65 @@ class Enemies extends FlxSprite
 				case Attacking:
 					if (attack.update(this, elapsed, dirX, dirY, distance))
 						currentState = Following;
+		}
+	}
+
+	private function sideStep(elapsed:Float):Void
+	{
+		var grounded = SideView.settle(this, prevBottom, elapsed);
+		var bottom = y + height;
+
+		if (hopCooldown > 0)
+			hopCooldown -= elapsed;
+
+		if (target == null)
+		{
+			velocity.x = 0;
+			sideAttacking = false;
+			if (grounded)
+				this.animation.play("idle");
+		}
+		else
+		{
+			var dirX = target.x + target.width * 0.5 - (x + width * 0.5);
+			var dirY = target.y + target.height * 0.5 - (y + height * 0.5);
+			var distance = Math.sqrt(dirX * dirX + dirY * dirY);
+
+			if (sideAttacking)
+			{
+				var fallSpeed = velocity.y;
+				if (attack.update(this, elapsed, dirX, dirY, distance))
+					sideAttacking = false;
+				velocity.y = fallSpeed;
+			}
+			else if (distance <= attackRange)
+			{
+				sideAttacking = true;
+				velocity.x = 0;
+			}
+			else
+			{
+				if (Math.abs(dirX) > stopThreshold * 0.6)
+				{
+					velocity.x = dirX > 0 ? speed : -speed;
+					flipX = dirX < 0;
+					if (grounded)
+						this.animation.play("walk");
+				}
+				else
+				{
+					velocity.x = 0;
+					if (grounded)
+						this.animation.play("idle");
+				}
+
+				if (grounded && hopCooldown <= 0 && target.y + target.height < bottom - 100)
+				{
+					velocity.y = -SideView.ENEMY_JUMP;
+					grounded = false;
+					hopCooldown = 0.9 + Math.random();
+				}
+			}
 		}
 	}
 

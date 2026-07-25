@@ -7,7 +7,9 @@ typedef ArenaData = {
 	map:String,
 	tiles:String,
 	spawnX:Float,
-	spawnY:Float
+	spawnY:Float,
+	totemWaveMin:Int,
+	totemWaveRange:Int
 }
 
 class ArenaDataRegistry

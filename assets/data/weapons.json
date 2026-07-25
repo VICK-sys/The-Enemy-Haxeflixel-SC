@@ -1,9 +1,17 @@
 {
-	"swing": { "spawnDist": 110, "meleeRange": 250, "meleeArcCos": -0.5 },
+	"swing": { "spawnDist": 110, "meleeRange": 175, "meleeArcCos": -0.5 },
 	"slice": { "spawnDist": 110 },
 	"hammer": { "reach": 15, "radius": 160, "damage": 2, "push": 1.6, "stunTime": 2.0 },
 	"shockwave": { "waveRadius": 380, "waveTime": 0.45 },
 	"thrown": { "maxDist": 500, "returnSpeed": 1250 },
+	"bowCharge": {
+		"minTime": 0.15,
+		"fullTime": 1.0,
+		"maxDamage": 3,
+		"speedBonus": 0.8,
+		"sizeBonus": 0.7,
+		"knockBonus": 1.5
+	},
 	"arrowRain": { "volley": 8, "delay": 0.55, "stagger": 0.35, "spread": 130, "fallSpeed": 1600, "hitRadius": 80 },
 	"hook": {
 		"range": 500,

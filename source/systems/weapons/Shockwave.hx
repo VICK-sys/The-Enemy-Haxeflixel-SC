@@ -6,10 +6,12 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.enemy.Enemies;
 import systems.EnemyDirector;
 import data.WeaponData.WeaponDataRegistry;
+import util.SideView;
 
 class Shockwave
 {
 	static inline var RING_BASE:Float = 30;
+	static inline var SIDE_FLATTEN:Float = 0.18;
 
 	public static inline var CRACK_TIME:Float = 2.5;
 
@@ -18,25 +20,30 @@ class Shockwave
 
 	private var cfg = WeaponDataRegistry.get().shockwave;
 	private var director:EnemyDirector;
-	private var stunEnemy:(Enemies, Float, Float) -> Void;
+	private var hits:HitPipeline;
+	private var stunTime:Float;
 	private var waves:Array<Wave> = [];
 
-	public function new(director:EnemyDirector, stunEnemy:(Enemies, Float, Float) -> Void)
+	public function new(director:EnemyDirector, hits:HitPipeline, stunTime:Float)
 	{
 		this.director = director;
-		this.stunEnemy = stunEnemy;
+		this.hits = hits;
+		this.stunTime = stunTime;
 		rings = new FlxTypedGroup<FlxSprite>();
 		cracks = new FlxTypedGroup<CrackSprite>();
 	}
 
 	public function blast(cx:Float, cy:Float, stun:Bool = true):Void
 	{
+		if (SideView.active)
+			cy = SideView.surfaceBelow(cx - 1, 2, cy);
+
 		cracks.recycle(CrackSprite).show(cx, cy);
 		var ring = rings.recycle(FlxSprite);
 		if (ring.graphic == null)
 			paintRing(ring);
 		ring.setPosition(cx - ring.width / 2, cy - ring.height / 2);
-		ring.scale.set(0.2, 0.14);
+		ring.scale.set(0.2, SideView.active ? 0.04 : 0.14);
 		ring.alpha = 0.8;
 		var wave = new Wave(cx, cy, ring);
 		wave.stun = stun;
@@ -56,7 +63,7 @@ class Shockwave
 			var ease = 1 - (1 - p) * (1 - p);
 			var r = cfg.waveRadius * ease;
 			var s = r / RING_BASE;
-			w.ring.scale.set(s, s * 0.7);
+			w.ring.scale.set(s, s * (SideView.active ? SIDE_FLATTEN : 0.7));
 			w.ring.alpha = 0.8 * (1 - p);
 
 			if (w.stun)
@@ -70,7 +77,7 @@ class Shockwave
 					var elen = Math.sqrt(ex * ex + ey * ey);
 					if (elen <= 0)
 						elen = 1;
-					stunEnemy(e, ex / elen, ey / elen);
+					hits.stun(e, ex / elen, ey / elen, stunTime);
 				});
 
 			if (p >= 1)
@@ -131,8 +138,17 @@ class CrackSprite extends FlxSprite
 	public function show(cx:Float, cy:Float):Void
 	{
 		revive();
+		if (SideView.active)
+		{
+			scale.set(4, 1.4);
+			angle = 0;
+		}
+		else
+		{
+			scale.set(4, 4);
+			angle = FlxG.random.float() * 360;
+		}
 		setPosition(cx - width / 2, cy - height / 2);
-		angle = FlxG.random.float() * 360;
 		alpha = 0.85;
 		life = Shockwave.CRACK_TIME;
 	}

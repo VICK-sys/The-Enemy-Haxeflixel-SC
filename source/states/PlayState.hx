@@ -14,6 +14,7 @@ import systems.RenderLayers;
 import systems.PlayerCombat;
 import systems.EnemyDirector;
 import systems.TimeStop;
+import systems.perspective.PerspectiveShift;
 import systems.weapons.Weapons;
 import systems.Pickups;
 import systems.Hud;
@@ -21,6 +22,7 @@ import util.Paths;
 import util.SaveData;
 import util.PerfLog;
 import util.Music;
+import util.SideView;
 import util.DiscordPresence;
 
 class PlayState extends FlxState
@@ -39,9 +41,11 @@ class PlayState extends FlxState
 	private var bossAlarm:FlxSound;
 	private var bossFight:Bool = false;
 	private var timeStop:TimeStop;
+	private var shift:PerspectiveShift;
 
 	override public function create()
 	{
+		SideView.reset();
 		fx = new Fx();
 
 		FlxG.camera.bgColor = 0xFFFFFFFF;
@@ -97,6 +101,8 @@ class PlayState extends FlxState
 		add(timeStop.overlay);
 
 		hud = new Hud(this, status);
+		shift = new PerspectiveShift(arena, _player, director, combat, layers);
+		director.onProbe = shift.onProbe;
 		director.onWave = onWaveStarted;
 		director.onBoss = onBossWave;
 		director.onBossSpawn = hud.showBossBar;
@@ -122,14 +128,19 @@ class PlayState extends FlxState
 	{
 		EnemyNav.resetBudget();
 
-		timeStop.update(elapsed);
+		var frozen = SideView.morphing;
+
+		if (!frozen)
+			timeStop.update(elapsed);
 
 		super.update(elapsed);
 
 		fx.update();
 		arena.update(elapsed * timeStop.factor);
+		shift.update(elapsed);
 
-		FlxG.collide(_player, arena.map);
+		if (!SideView.active && !frozen)
+			FlxG.collide(_player, arena.map);
 		director.collide();
 
 		status.update(elapsed);
@@ -142,10 +153,11 @@ class PlayState extends FlxState
 			DiscordPresence.died(director.wave, SaveData.bestWave());
 		}
 
-		director.update(elapsed * timeStop.factor);
+		director.update(frozen ? 0 : elapsed * timeStop.factor);
 		pickups.update();
 		layers.update();
-		combat.update(elapsed);
+		if (!frozen)
+			combat.update(elapsed);
 		director.updateShots();
 		hud.setMode(combat.modeName());
 		hud.setTimeStop(timeStop.hudLabel());
@@ -176,11 +188,15 @@ class PlayState extends FlxState
 	{
 		SaveData.submitWave(n);
 		hud.showWave(n);
+		shift.onWave(n);
 	}
 
 	function onBossWave():Void
 	{
 		bossFight = true;
+		shift.locked = true;
+		shift.forceRevert();
+		shift.cancelArrival();
 		arena.beginBossTransition();
 		arena.onWhiteout = onBossWhiteout;
 		hud.showBoss();
@@ -191,6 +207,7 @@ class PlayState extends FlxState
 
 	function onBossWhiteout():Void
 	{
+		shift.clearTotem();
 		hud.fadeBanner();
 		if (bossAlarm != null)
 			bossAlarm.fadeOut(0.8, 0, function(_)
@@ -215,6 +232,8 @@ class PlayState extends FlxState
 
 	function onArenaNormal():Void
 	{
+		shift.locked = false;
+		shift.restoreTotem();
 		Music.play("stage/gloomDoomWoods", 0.3);
 		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.8);
 	}

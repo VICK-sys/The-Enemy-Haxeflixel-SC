@@ -7,6 +7,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
 import entities.enemy.Enemies;
 import util.Paths;
+import util.SideView;
 
 class RenderLayers
 {
@@ -52,8 +53,8 @@ class RenderLayers
 
 	public function update():Void
 	{
-		playerShadow.x = player.x + 30;
-		playerShadow.y = player.y + 90;
+		playerShadow.x = player.shadowCenterX - playerShadow.width / 2;
+		SideView.placeShadow(playerShadow, player.x, player.width, player.y + player.height, player.y + 90, player.shadowScaleX, 4);
 		entityLayer.sort(sortByFeet, FlxSort.ASCENDING);
 	}
 

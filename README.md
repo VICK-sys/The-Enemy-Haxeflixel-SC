@@ -1,17 +1,18 @@
 # THE ENEMY
 
-Top-down action game built with HaxeFlixel. Fight waves of enemies with a mouse-aimed arsenal; a boss appears after wave 3.
+Top-down action game built with HaxeFlixel. Fight waves of enemies with a mouse-aimed arsenal; a boss appears after wave 3. Partway through a run a totem crashes down from the sky; hitting it morphs the landscape into a side-view platformer and back.
 
 The main menu has PLAY, OPTIONS (master volume, fullscreen, FPS counter, reset best wave), and QUIT, navigated with W/S and ENTER or the mouse. A controls popup with animated demos appears the first time you play; flip pages with A/D and press ENTER to start.
 
 ## Controls
 
 - WASD - move
-- Mouse - aim, left click to attack
+- Mouse - aim, left click to attack (with the bow, hold to charge the shot and release to fire)
 - 1-4 or scroll wheel - switch weapon (scythe / hammer / bow / hook)
 - Right click - switch the equipped weapon's mode (scythe: swing / air slice / throw; hammer: slam / shockwave; bow: shot / arrow rain; hook: grab / spin / grapple / arms)
 - Q - super (needs a full AP meter, one per weapon): scythe orbits blades you launch with left click; hammer does Bounce Strike (somersaulting AoE slams); bow does Arrow Storm (an arena-wide downpour); hook extends two auto-grabbing arms that snatch and hurl enemies
 - SPACE - dash (2 second cooldown)
+- W - jump in side view (press again in the air for a double jump)
 - E - time stop (30 second cooldown): the world winds down to a complete stop for 10 seconds while you keep moving and attacking at full speed
 - ESC - pause
 - ENTER - skip the intro

@@ -3,5 +3,7 @@
 	"map": "default_auto.txt",
 	"tiles": "auto_tiles.png",
 	"spawnX": 1200,
-	"spawnY": 800
+	"spawnY": 800,
+	"totemWaveMin": 2,
+	"totemWaveRange": 3
 }

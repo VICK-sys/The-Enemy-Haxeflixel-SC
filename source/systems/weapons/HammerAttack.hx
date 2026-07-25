@@ -21,7 +21,7 @@ class HammerAttack
 		this.director = director;
 		this.fx = fx;
 		this.hits = hits;
-		shock = new Shockwave(director, function(e, pushX, pushY) hits.stun(e, pushX, pushY, cfg.stunTime));
+		shock = new Shockwave(director, hits, cfg.stunTime);
 	}
 
 	public function slam(pmx:Float, pmy:Float, dx:Float, dy:Float):Void

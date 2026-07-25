@@ -3,6 +3,7 @@ package systems.weapons;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
+import flixel.util.FlxColor;
 import entities.Player;
 import util.Paths;
 
@@ -22,9 +23,13 @@ class HeldWeapon
 	static inline var RAIN_TIME:Float = 0.6;
 	static inline var RAIN_RAISE:Float = 35;
 	static inline var HOOK_TIME:Float = 0.4;
+	static inline var CHARGE_SCALE:Float = 1.6;
+	static inline var CHARGE_DRAW:Float = 0.35;
+	static inline var CHARGE_TINT:Int = 0xFF9BE9FF;
 
 	public var sprite:FlxSprite;
 	public var mode:WeaponMode = Swing;
+	public var charge:Float = 0;
 	public var swinging(get, never):Bool;
 
 	private var player:Player;
@@ -101,7 +106,7 @@ class HeldWeapon
 			sprite.origin.set(sprite.width * 0.5, sprite.height);
 	}
 
-	function anchor():Void
+	public function anchor():Void
 	{
 		sprite.x = player.x - sprite.origin.x + 30;
 		sprite.y = player.y - sprite.origin.y + 65;
@@ -114,8 +119,9 @@ class HeldWeapon
 			var len:Float = Math.sqrt(dx * dx + dy * dy);
 			if (len > 0.001)
 			{
-				sprite.x += dx / len * BOW_DIST;
-				sprite.y += dy / len * BOW_DIST;
+				var reach = BOW_DIST * (1 - charge * CHARGE_DRAW);
+				sprite.x += dx / len * reach;
+				sprite.y += dy / len * reach;
 			}
 		}
 		else if (mode == Rain)
@@ -147,9 +153,12 @@ class HeldWeapon
 		}
 		else
 		{
-			sprite.scale.set(BASE_SCALE, BASE_SCALE);
+			var s:Float = BASE_SCALE + charge * CHARGE_SCALE;
+			sprite.scale.set(s, s);
 			trackCursor(FlxG.mouse.x, FlxG.mouse.y, elapsed);
 		}
+
+		sprite.color = charge > 0 ? FlxColor.interpolate(FlxColor.WHITE, CHARGE_TINT, charge) : FlxColor.WHITE;
 	}
 
 	function trackCursor(mouseX:Float, mouseY:Float, elapsed:Float):Void

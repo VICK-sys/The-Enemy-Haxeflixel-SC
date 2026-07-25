@@ -11,6 +11,7 @@ import data.WaveData;
 import data.WaveData.WaveDataRegistry;
 import util.Paths;
 import util.WorldClock;
+import util.SideView;
 
 class EnemyDirector
 {
@@ -24,6 +25,12 @@ class EnemyDirector
 	static inline var BOSS_SHAKE_DUR:Float = 1.0;
 	static inline var BOSS_SHAKE_AMP:Float = 12;
 	static inline var EXPLO_SCALE:Float = 9;
+	static inline var STUCK_TIME:Float = 5;
+	static inline var STUCK_EPS:Float = 6;
+	static inline var STUCK_FAR:Float = 700;
+	static inline var WAVE_TIMEOUT:Float = 75;
+	static inline var RESCUE_MIN:Float = 380;
+	static inline var RESCUE_MAX:Float = 620;
 
 	public var wave:Int = 0;
 	public var shots:FlxTypedGroup<EnemyShot>;
@@ -31,6 +38,7 @@ class EnemyDirector
 	public var onBoss:Void->Void;
 	public var onBossSpawn:Enemies->Void;
 	public var onBossDefeated:Void->Void;
+	public var onProbe:(Float, Float, Float) -> Void;
 
 	private var bossWave:Int;
 	private var bossPending:Bool = false;
@@ -51,6 +59,7 @@ class EnemyDirector
 	private var rigs:Array<EnemyRig> = [];
 	private var waveData:WaveData;
 	private var betweenWaves:Float = 0;
+	private var waveClock:Float = 0;
 
 	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat)
 	{
@@ -67,8 +76,10 @@ class EnemyDirector
 
 	public function collide():Void
 	{
-		FlxG.collide(bodies, arena.map);
-		FlxG.overlap(bodies, bodies, null, separateLive);
+		if (!SideView.active && !SideView.morphing)
+			FlxG.collide(bodies, arena.map);
+		if (!SideView.morphing)
+			FlxG.overlap(bodies, bodies, null, separateLive);
 	}
 
 	function separateLive(a:Enemies, b:Enemies):Bool
@@ -98,6 +109,7 @@ class EnemyDirector
 			if (betweenWaves > 0)
 			{
 				betweenWaves -= elapsed;
+				waveClock = 0;
 				if (betweenWaves <= 0)
 					startWave();
 			}
@@ -105,9 +117,20 @@ class EnemyDirector
 			{
 				betweenWaves = waveData.breather;
 			}
+			else
+			{
+				waveClock += elapsed;
+				if (waveClock > WAVE_TIMEOUT)
+				{
+					waveClock = 0;
+					for (rig in rigs)
+						if (rig.enemy.exists && !rig.enemy.isDead && !rig.enemy.seized && !rig.enemy.selfDriven)
+							rescue(rig);
+				}
+			}
 		}
 
-		updateRigs();
+		updateRigs(elapsed);
 
 		if (bossRef != null)
 		{
@@ -176,7 +199,72 @@ class EnemyDirector
 		layers.entityLayer.add(bossExplosion);
 	}
 
-	function updateRigs():Void
+	function clearOfWalls(x:Float, y:Float, w:Float, h:Float):Bool
+	{
+		return !arena.wallAt(x, y) && !arena.wallAt(x + w, y) && !arena.wallAt(x, y + h)
+			&& !arena.wallAt(x + w, y + h) && !arena.wallAt(x + w * 0.5, y + h * 0.5);
+	}
+
+	function rescue(rig:EnemyRig):Void
+	{
+		var e = rig.enemy;
+		var pcx = player.x + player.width * 0.5;
+		var pcy = player.y + player.height * 0.5;
+		var destX = pcx - e.width * 0.5;
+		var destY = pcy - e.height * 0.5;
+
+		for (i in 0...20)
+		{
+			var ang = Math.random() * Math.PI * 2;
+			var dist = RESCUE_MIN + Math.random() * (RESCUE_MAX - RESCUE_MIN);
+			var nx = pcx + Math.cos(ang) * dist - e.width * 0.5;
+			var ny = pcy + Math.sin(ang) * dist - e.height * 0.5;
+			if (nx < SPAWN_PAD || ny < SPAWN_PAD
+				|| nx + e.width > arena.width - SPAWN_PAD || ny + e.height > arena.height - SPAWN_PAD)
+				continue;
+			if (clearOfWalls(nx, ny, e.width, e.height))
+			{
+				destX = nx;
+				destY = ny;
+				break;
+			}
+		}
+
+		e.setPosition(destX, destY);
+		e.velocity.set(0, 0);
+		e.stun = 0;
+		e.pathing.clear();
+		e.entering = false;
+		e.allowCollisions = ANY;
+		rig.lastX = destX;
+		rig.lastY = destY;
+		rig.stuckTimer = 0;
+	}
+
+	function checkStuck(rig:EnemyRig, elapsed:Float):Void
+	{
+		var e = rig.enemy;
+		var dx = e.x - rig.lastX;
+		var dy = e.y - rig.lastY;
+		var pcx = player.x + player.width * 0.5;
+		var pcy = player.y + player.height * 0.5;
+		var ex = e.x + e.width * 0.5 - pcx;
+		var ey = e.y + e.height * 0.5 - pcy;
+
+		if (dx * dx + dy * dy > STUCK_EPS * STUCK_EPS || ex * ex + ey * ey < STUCK_FAR * STUCK_FAR)
+		{
+			rig.lastX = e.x;
+			rig.lastY = e.y;
+			rig.stuckTimer = 0;
+			return;
+		}
+
+		rig.stuckTimer += elapsed;
+		if (rig.stuckTimer > STUCK_TIME)
+			rescue(rig);
+	}
+
+	function updateRigs(elapsed:Float):Void
 	{
 		var i = rigs.length;
 		while (i-- > 0)
@@ -208,7 +296,8 @@ class EnemyDirector
 				e.gun.visible = alive;
 
 			if (e.entering && e.x > ENTER_MARGIN && e.y > ENTER_MARGIN
-				&& e.x + e.width < arena.width - ENTER_MARGIN && e.y + e.height < arena.height - ENTER_MARGIN)
+				&& e.x + e.width < arena.width - ENTER_MARGIN && e.y + e.height < arena.height - ENTER_MARGIN
+				&& clearOfWalls(e.x, e.y, e.width, e.height))
 			{
 				e.entering = false;
 				e.allowCollisions = ANY;
@@ -216,13 +305,16 @@ class EnemyDirector
 
 			rig.shadow.visible = alive;
 			rig.shadow.x = e.x + (e.flipX ? e.shadowOffXFlip : e.shadowOffX);
-			rig.shadow.y = e.y + e.shadowOffY;
+			SideView.placeShadow(rig.shadow, e.x, e.width, e.y + e.height, e.y + e.shadowOffY, e.shadowScaleX, 4);
 
 			if (alive)
 			{
+				if (!e.seized && !e.selfDriven && !status.dead)
+					checkStuck(rig, elapsed);
+
 				rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 				rig.hitbox.y = e.y + e.hitOffY;
-				if (!e.seized && e.throwGrace <= 0 && WorldClock.scale > 0.05)
+				if (!e.seized && e.throwGrace <= 0 && WorldClock.scale > 0.05 && !SideView.morphing)
 					status.hurtPlayer(rig.hitbox, e.contactDamage);
 
 				if (e.pendingShots.length > 0)
@@ -299,20 +391,28 @@ class EnemyDirector
 	{
 		var mw = arena.width;
 		var mh = arena.height;
-		switch (Std.random(4))
+		if (SideView.active)
 		{
-			case 0:
-				e.x = -e.width - SPAWN_OUT;
-				e.y = edgeCoord(player.y, mh);
-			case 1:
-				e.x = mw + SPAWN_OUT;
-				e.y = edgeCoord(player.y, mh);
-			case 2:
-				e.x = edgeCoord(player.x, mw);
-				e.y = -e.height - SPAWN_OUT;
-			default:
-				e.x = edgeCoord(player.x, mw);
-				e.y = mh + SPAWN_OUT;
+			e.x = Std.random(2) == 0 ? -e.width - SPAWN_OUT : mw + SPAWN_OUT;
+			e.y = SideView.groundY - e.height;
+		}
+		else
+		{
+			switch (Std.random(4))
+			{
+				case 0:
+					e.x = -e.width - SPAWN_OUT;
+					e.y = edgeCoord(player.y, mh);
+				case 1:
+					e.x = mw + SPAWN_OUT;
+					e.y = edgeCoord(player.y, mh);
+				case 2:
+					e.x = edgeCoord(player.x, mw);
+					e.y = -e.height - SPAWN_OUT;
+				default:
+					e.x = edgeCoord(player.x, mw);
+					e.y = mh + SPAWN_OUT;
+			}
 		}
 		e.entering = true;
 		e.allowCollisions = NONE;
@@ -350,6 +450,8 @@ class EnemyDirector
 
 	public function firstInCircle(cx:Float, cy:Float, radius:Float, skipSeized:Bool = false):Enemies
 	{
+		if (onProbe != null)
+			onProbe(cx, cy, radius);
 		for (rig in rigs)
 		{
 			var e = rig.enemy;
@@ -363,6 +465,8 @@ class EnemyDirector
 
 	public function eachInCircle(cx:Float, cy:Float, radius:Float, f:Enemies->Void):Void
 	{
+		if (onProbe != null)
+			onProbe(cx, cy, radius);
 		for (rig in rigs)
 		{
 			var e = rig.enemy;
@@ -387,6 +491,13 @@ class EnemyDirector
 		return rigs.length;
 	}
 
+	public function eachEnemy(f:Enemies->Void):Void
+	{
+		for (rig in rigs)
+			if (rig.enemy.exists)
+				f(rig.enemy);
+	}
+
 	function waveCleared():Bool
 	{
 		for (rig in rigs)
@@ -401,11 +512,16 @@ class EnemyRig
 	public var enemy:Enemies;
 	public var shadow:FlxSprite;
 	public var hitbox:FlxObject;
+	public var lastX:Float;
+	public var lastY:Float;
+	public var stuckTimer:Float = 0;
 
 	public function new(enemy:Enemies, shadow:FlxSprite, hitbox:FlxObject)
 	{
 		this.enemy = enemy;
 		this.shadow = shadow;
 		this.hitbox = hitbox;
+		lastX = enemy.x;
+		lastY = enemy.y;
 	}
 }

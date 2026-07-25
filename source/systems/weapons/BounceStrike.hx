@@ -25,7 +25,6 @@ class BounceStrike
 	private var running:Bool = false;
 	private var hopTimer:Float = 0;
 	private var strikesLeft:Int = 0;
-	private var baseOffsetY:Float = 0;
 	private var spinDir:Int = 1;
 	private var slamPop:Float = 0;
 
@@ -44,7 +43,6 @@ class BounceStrike
 	public function activate():Void
 	{
 		running = true;
-		baseOffsetY = player.offset.y;
 		strikesLeft = cfg.strikes;
 		spinDir = FlxG.mouse.x >= player.x + player.width * 0.5 ? 1 : -1;
 		player.blockMovement = true;
@@ -52,6 +50,17 @@ class BounceStrike
 		player.animation.play("idle");
 		slam();
 		hopTimer = cfg.hopTime;
+	}
+
+	public function cancel():Void
+	{
+		if (!running)
+			return;
+		running = false;
+		player.offset.y = player.baseOffsetY;
+		player.angle = 0;
+		player.floating = false;
+		player.velocity.set(0, 0);
 	}
 
 	public function update(elapsed:Float):Void
@@ -64,7 +73,7 @@ class BounceStrike
 		if (t > 1)
 			t = 1;
 		var h = APEX * Math.sin(Math.PI * t);
-		player.offset.y = baseOffsetY + h;
+		player.offset.y = player.baseOffsetY + h;
 		player.angle = spinDir * SPIN * t;
 		if (slamPop > 0)
 			slamPop -= elapsed * 8;
@@ -73,7 +82,7 @@ class BounceStrike
 
 		if (hopTimer <= 0)
 		{
-			player.offset.y = baseOffsetY;
+			player.offset.y = player.baseOffsetY;
 			player.angle = 0;
 			strikesLeft--;
 			if (strikesLeft > 0)

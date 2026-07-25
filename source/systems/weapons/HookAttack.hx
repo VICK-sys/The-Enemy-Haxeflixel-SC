@@ -236,7 +236,8 @@ class HookAttack
 	function endGrapple():Void
 	{
 		player.velocity.set(0, 0);
-		player.blockMovement = false;
+		if (!status.dead)
+			player.blockMovement = false;
 		status.invincible = false;
 		grappleTarget = null;
 		grappleHits = [];
@@ -514,7 +515,7 @@ class HookAttack
 		phase = Retracting;
 	}
 
-	function drop():Void
+	public function drop():Void
 	{
 		detachVictim();
 		if (flightVictim != null)
@@ -527,7 +528,8 @@ class HookAttack
 		grappleHits = [];
 		grappleTarget = null;
 		status.invincible = false;
-		player.blockMovement = false;
+		if (!status.dead)
+			player.blockMovement = false;
 		hook.kill();
 		Rope.clear(rope);
 		phase = Idle;

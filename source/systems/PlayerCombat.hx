@@ -9,8 +9,6 @@ import util.Paths;
 
 class PlayerCombat
 {
-	static inline var FLASH_TIME:Float = 0.12;
-
 	public var health:Float = 0;
 	public var itemBar:Float = 0;
 	public var dead:Bool = false;
@@ -25,7 +23,6 @@ class PlayerCombat
 	private var iframeTimer:Float = 0;
 	private var blink:Bool = false;
 	private var hurtLockTimer:Float = 0;
-	private var flashTimer:Float = 0;
 	private var dashCooldownTimer:Float = 0;
 	private var dashLineTimer:Float = 0;
 	private var justDied:Bool = false;
@@ -62,13 +59,6 @@ class PlayerCombat
 				player.blockMovement = false;
 		}
 
-		if (flashTimer > 0)
-		{
-			flashTimer -= elapsed;
-			if (flashTimer <= 0)
-				player.setColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
-		}
-
 		if (dashCooldownTimer > 0)
 			dashCooldownTimer -= elapsed;
 
@@ -100,8 +90,14 @@ class PlayerCombat
 			player.animation.play("death", false);
 			dead = true;
 			player.isDead = true;
-			player.blockMovement = true;
 			justDied = true;
+		}
+
+		if (dead)
+		{
+			player.blockMovement = true;
+			if (player.animation.name != "death")
+				player.animation.play("death", false);
 		}
 
 		if (health <= 0)
@@ -126,8 +122,6 @@ class PlayerCombat
 
 		FlxG.sound.play(Paths.sound("damaged/hit"));
 		fx.hurtShake();
-		player.setColorTransform(1, 1, 1, 1, 255, 0, 0, 0);
-		flashTimer = FLASH_TIME;
 
 		player.velocity.x = data.knockback * (player.x > source.x ? 1 : -1);
 		player.velocity.y = data.knockback * (player.y > source.y ? 1 : -1);

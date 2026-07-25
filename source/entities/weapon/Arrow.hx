@@ -12,6 +12,8 @@ class Arrow extends FlxSprite
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
+	public var damage:Int = 1;
+	public var knock:Float = 1;
 
 	private var life:Float = 0;
 
@@ -23,13 +25,18 @@ class Arrow extends FlxSprite
 		scale.set(4, 4);
 	}
 
-	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float):Void
+	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, damage:Int = 1, speedMult:Float = 1,
+			sizeMult:Float = 1, knock:Float = 1):Void
 	{
 		revive();
+		this.damage = damage;
+		this.knock = knock;
+		scale.set(4 * sizeMult, 4 * sizeMult);
 		setPosition(cx - width / 2, cy - height / 2);
 		dirX = dx;
 		dirY = dy;
-		velocity.set(dx * SPEED, dy * SPEED);
+		var speed = SPEED * speedMult;
+		velocity.set(dx * speed, dy * speed);
 		angle = angleDeg + 90;
 		life = RANGE / SPEED;
 	}

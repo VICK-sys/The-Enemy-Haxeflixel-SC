@@ -265,7 +265,7 @@ class Hud
 		bannerFadeTimer = BOSS_BANNER_FADE;
 	}
 
-	function showBanner(text:String):Void
+	public function showBanner(text:String):Void
 	{
 		bossSlide = false;
 		bannerText.y = 48;

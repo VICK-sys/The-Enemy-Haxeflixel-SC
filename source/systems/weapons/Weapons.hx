@@ -56,9 +56,27 @@ class Weapons
 	function get_superBusy():Bool
 		return superScythes.activating || bounceStrike.active || arrowStorm.active || hookArms.active;
 
+	public var playerBusy(get, never):Bool;
+
+	function get_playerBusy():Bool
+		return superBusy || superScythes.active();
+
+	public function anchorHeld():Void
+	{
+		if (!superBusy)
+			held.anchor();
+	}
+
+	public function releaseHook():Void
+	{
+		if (hookAttack.busy)
+			hookAttack.drop();
+	}
+
 	public function update(elapsed:Float):Void
 	{
 		updateWeaponInput();
+		held.charge = bow.charging ? bow.charge : 0;
 		if (!superBusy)
 			held.update(elapsed);
 		updateAttackInput();
@@ -72,6 +90,8 @@ class Weapons
 		arrowStorm.update(elapsed);
 		if (status.dead && hookArms.active)
 			hookArms.deactivate();
+		if (status.dead && bounceStrike.active)
+			bounceStrike.cancel();
 		hookArms.update(elapsed);
 		updateHeldHook();
 		updateHeldArms();
@@ -134,6 +154,7 @@ class Weapons
 			if (list.length > 1)
 			{
 				modeIndexes[weapon] = (modeIndexes[weapon] + 1) % list.length;
+				bow.cancelCharge();
 				held.setMode(list[modeIndexes[weapon]]);
 			}
 		}
@@ -144,13 +165,54 @@ class Weapons
 		if (i == weapon)
 			return;
 		weapon = i;
+		bow.cancelCharge();
 		held.setMode(WEAPON_MODES[i][modeIndexes[i]]);
+	}
+
+	function aimFromPlayer():{dx:Float, dy:Float, deg:Float}
+	{
+		var pmx:Float = player.x + player.width * 0.5;
+		var pmy:Float = player.y + player.height * 0.5;
+		var dx:Float = FlxG.mouse.x - pmx;
+		var dy:Float = FlxG.mouse.y - pmy;
+		var len:Float = Math.sqrt(dx * dx + dy * dy);
+		if (len < 0.001)
+		{
+			dx = 1;
+			dy = 0;
+			len = 1;
+		}
+		dx /= len;
+		dy /= len;
+		return {dx: dx, dy: dy, deg: Math.atan2(dy, dx) * 180 / Math.PI};
+	}
+
+	function updateBowCharge():Void
+	{
+		if (hookAttack.busy || throwAttack.airborne)
+		{
+			bow.cancelCharge();
+			return;
+		}
+
+		if (FlxG.mouse.justPressed)
+			bow.beginCharge();
+
+		if (bow.charging && !FlxG.mouse.pressed)
+		{
+			var aim = aimFromPlayer();
+			held.beginSwing(aim.deg);
+			bow.release(held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+		}
 	}
 
 	function updateAttackInput():Void
 	{
 		if (status.dead || superBusy)
+		{
+			bow.cancelCharge();
 			return;
+		}
 
 		if (FlxG.keys.justPressed.Q && status.canSuper() && !superScythes.active() && !throwAttack.airborne && !hookAttack.busy)
 		{
@@ -165,23 +227,21 @@ class Weapons
 			return;
 		}
 
+		if (held.mode == Bow)
+		{
+			updateBowCharge();
+			return;
+		}
+
 		if (!FlxG.mouse.justPressed || throwAttack.airborne)
 			return;
 
 		var pmx:Float = player.x + player.width * 0.5;
 		var pmy:Float = player.y + player.height * 0.5;
-		var dx:Float = FlxG.mouse.x - pmx;
-		var dy:Float = FlxG.mouse.y - pmy;
-		var len:Float = Math.sqrt(dx * dx + dy * dy);
-		if (len < 0.001)
-		{
-			dx = 1;
-			dy = 0;
-			len = 1;
-		}
-		dx /= len;
-		dy /= len;
-		var aimDeg:Float = Math.atan2(dy, dx) * 180 / Math.PI;
+		var aim = aimFromPlayer();
+		var dx:Float = aim.dx;
+		var dy:Float = aim.dy;
+		var aimDeg:Float = aim.deg;
 
 		if (superScythes.active())
 		{
@@ -214,8 +274,6 @@ class Weapons
 				hammer.slam(pmx, pmy, dx, dy);
 			case Quake:
 				hammer.quake(pmx, pmy, dx, dy);
-			case Bow:
-				bow.shoot(held.handX(), held.handY(), dx, dy, aimDeg);
 			case Rain:
 				bow.rainFire(FlxG.mouse.x, FlxG.mouse.y, held.handX(), held.handY());
 			case Hook:

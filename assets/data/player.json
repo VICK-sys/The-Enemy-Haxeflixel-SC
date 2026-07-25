@@ -17,5 +17,25 @@
 	"timestopSlow": 1.2,
 	"timestopHold": 10,
 	"timestopRecover": 0.8,
-	"timestopCooldown": 30
+	"timestopCooldown": 30,
+	"sideSkin": {
+		"sheet": "characters/mufu2d",
+		"frameW": 32,
+		"frameH": 32,
+		"offsetX": -24,
+		"offsetY": -16,
+		"shadowScaleX": 6.5,
+		"idle": [0, 1, 2, 3],
+		"walk": [10, 11, 12, 13],
+		"jump": [14],
+		"fall": [15],
+		"hurt": [5, 6],
+		"death": [4, 7, 8, 9],
+		"idleFps": 8,
+		"walkFps": 12,
+		"jumpFps": 12,
+		"fallFps": 12,
+		"hurtFps": 12,
+		"deathFps": 8
+	}
 }

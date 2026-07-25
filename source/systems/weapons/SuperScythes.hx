@@ -50,7 +50,6 @@ class SuperScythes
 	private var ringAngle:Float = 0;
 	private var fireGate:Float = 0;
 	private var fx:Fx;
-	private var baseOffsetY:Float = 0;
 	private var baseScaleX:Float = 1;
 	private var baseScaleY:Float = 1;
 	private var hover:Float = 0;
@@ -80,7 +79,6 @@ class SuperScythes
 		this.status = status;
 		this.fx = fx;
 		this.hits = hits;
-		baseOffsetY = player.offset.y;
 		baseScaleX = player.scale.x;
 		baseScaleY = player.scale.y;
 		backLayer = new FlxTypedGroup<SuperBlade>();
@@ -262,7 +260,7 @@ class SuperScythes
 
 		var bob = isActive ? Math.sin(hoverTime * HOVER_BOB_SPEED) * HOVER_BOB * (hover / HOVER_HEIGHT) : 0;
 		var lift = hover + bob;
-		player.offset.y = baseOffsetY + lift;
+		player.offset.y = player.baseOffsetY + lift;
 		player.floating = hover > 2;
 
 		if (squashTimer > 0)
