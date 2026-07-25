@@ -1,0 +1,22 @@
+{
+	"props": [
+		{
+			"name": "TOTEM",
+			"sheet": "stage/totem_top",
+			"rect": [],
+			"scale": 3
+		},
+		{
+			"name": "TOTEM SIDE",
+			"sheet": "stage/totem_side",
+			"rect": [],
+			"scale": 3
+		},
+		{
+			"name": "SCYTHE",
+			"sheet": "items/mufu_scythe",
+			"rect": [],
+			"scale": 2
+		}
+	]
+}

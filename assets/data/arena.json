@@ -1,9 +1,15 @@
 {
+	"cols": 160,
+	"rows": 90,
+	"tileSize": 16,
+
 	"background": "stages/theEnemy",
 	"map": "default_auto.txt",
 	"tiles": "auto_tiles.png",
+
 	"spawnX": 1200,
 	"spawnY": 800,
+
 	"totemWaveMin": 2,
 	"totemWaveRange": 3
 }

@@ -1,0 +1,24 @@
+{
+	"view": {
+		"startZoom": 0.5,
+		"minZoom": 0.35,
+		"maxZoom": 4,
+		"zoomStep": 1.15,
+		"panSpeed": 900
+	},
+
+	"palette": {
+		"width": 520,
+		"height": 400,
+		"padding": 10,
+		"propCell": 104,
+		"maxZoom": 8
+	},
+
+	"brush": {
+		"maxSize": 3,
+		"undoDepth": 30
+	},
+
+	"flashTime": 1.2
+}

@@ -47,6 +47,7 @@ class MainMenuState extends FlxState
 		FlxG.camera.bgColor = 0xFF000000;
 		FlxG.mouse.visible = true;
 		DiscordPresence.menu();
+		util.CustomArena.clear();
 
 		addBands();
 
@@ -61,6 +62,7 @@ class MainMenuState extends FlxState
 		#if desktop
 		labels.push("ONLINE");
 		#end
+		labels.push("EDITOR");
 		labels.push("OPTIONS");
 		#if !html5
 		labels.push("QUIT");
@@ -155,6 +157,9 @@ class MainMenuState extends FlxState
 			case "ONLINE":
 				leaving = true;
 				wipe.close(function() FlxG.switchState(new OnlineState()));
+			case "EDITOR":
+				leaving = true;
+				wipe.close(function() FlxG.switchState(new EditorState()));
 			case "OPTIONS":
 				FlxG.inputs.reset();
 				openSubState(new OptionsSubState());

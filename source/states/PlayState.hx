@@ -50,6 +50,16 @@ class PlayState extends FlxState
 	private var wipe:IrisWipe;
 	private var restarting:Bool = false;
 	private var netSync:NetSync;
+	private var decor:Array<flixel.FlxSprite> = [];
+	private var floor:flixel.tile.FlxTilemap;
+
+	function showDecor(on:Bool):Void
+	{
+		for (s in decor)
+			s.visible = on;
+		if (floor != null)
+			floor.visible = on;
+	}
 
 	function beginRestart():Void
 	{
@@ -83,8 +93,13 @@ class PlayState extends FlxState
 		scythe.x = _player.x - scythe.origin.x + 30;
 		scythe.y = _player.y - scythe.origin.y + 65;
 
+		floor = systems.DecorTiles.build(util.CustomArena.tiles, util.CustomArena.tileset);
+		if (floor != null)
+			add(floor);
+
 		layers = new RenderLayers(this, _player, scythe);
 		arena.addPillars(layers.entityLayer);
+		decor = systems.Decor.build(util.CustomArena.props, layers.entityLayer);
 
 		status = new PlayerCombat(_player, fx);
 		timeStop = new TimeStop(_player, layers.playerShadow, status);
@@ -247,6 +262,7 @@ class PlayState extends FlxState
 
 	function onBossWhiteout():Void
 	{
+		showDecor(false);
 		shift.clearTotem();
 		hud.fadeBanner();
 		if (bossAlarm != null)
@@ -289,6 +305,7 @@ class PlayState extends FlxState
 
 	function onArenaNormal():Void
 	{
+		showDecor(true);
 		if (!Net.active)
 			shift.locked = false;
 		shift.restoreTotem();

@@ -36,7 +36,9 @@ export/                  build output (not committed)
 - `MainMenuState` - the main menu: PLAY, OPTIONS, and QUIT (QUIT is desktop-only) on a black background framed by two pairs of scrolling `JaggedBand` teeth (a dark, slow, coarse pair behind a bright accent pair, drifting opposite ways for depth), with the title, a yellow splash line angled across the title's lower-right corner that throbs in and out, the best wave in the corner, and menu music. Navigated with W/S or the arrows plus ENTER, or by mouse hover and click. PLAY fades to black and switches to PlayState; OPTIONS opens `OptionsSubState`. QUIT collapses the OS window like a CRT switching off, as a chain of three `FlxTween.num` tweens that drive the window's size and opacity: the frame is dropped so the window can shrink freely, its height squeezes to a horizontal sliver while the width holds, then the width pinches to a dot and the window fades out, and the last tween's completion shuts down Discord presence and exits. Windows will not shrink a window past about 36 px, which is why the last of the vanish is done with opacity rather than size. The collapse is desktop-only; other targets keep the plain fade-to-black exit.
 - `OptionsSubState` - the options panel over the menu: master volume (adjust with A/D or the arrows, or click to step), fullscreen toggle, FPS counter toggle, and a reset-best-wave action that asks for a second press within a few seconds to confirm. All settings apply immediately and persist in the save file. ESC or BACK closes it.
 - `PlayState` - constructs the systems in `create()`, calls them in order in `update()`, and handles the debug keys. It holds no gameplay logic of its own.
-- `PauseSubState` - opened with ESC. Freezes the game and pauses all audio, dims the screen, closes on ESC. Volume keys work while open.
+- `PauseSubState` - opened with ESC. Freezes the game and pauses all audio, dims the screen, closes on ESC. Volume keys work while open. QUIT TO MENU returns to the editor instead when the run came from a playtest.
+- `editor/EditorMap` - the map being edited: collision, painted floor, props, spawn, theme and tileset, plus its own CSV serialisation and slot load/save. Owns the rules that go with that data - the outer ring staying solid, undo history, and clearing the floor when the tileset's cell size changes - so the state above it is only a UI. `setWall` reports whether a cell actually changed, which is what lets the editor skip redrawing cells a stroke passed over twice.
+- `EditorState` - the tile editor, opened from the main menu. It opens at half camera zoom with the whole arena in view, so nothing has to be found before work can start; the wheel then zooms about the cursor (the tile under the pointer stays under it), holding space and dragging grabs the view - the usual gesture, and it leaves the left button free to paint - with a middle-drag or the arrows doing the same, and 0 returns to the opening view. Painting is suppressed while space is held, so grabbing the view never leaves a stray tile behind. The HUD sits on its own camera so it does not shrink with the world. Mouse position is read fresh from the camera rather than through the per-frame cached value, which would otherwise lag a frame behind every zoom and put paint in the wrong cell. Left button paints walls, right erases, holding SHIFT drags a filled box, B cycles the brush through 1x1/2x2/3x3, X drops the player spawn at the cursor, Z undoes, C clears the interior, L copies the stock stage in as a starting point. P cycles three modes: walls, tiles, props. In tile mode a palette sits on the right, framed on the sheet's used area with grid lines drawn over it; drag across the palette to pick a rectangular patch - a plain click is just a 1x1 patch - `[` `]` step one cell at a time, the wheel zooms the panel, and a right- or middle-drag inside it slides the sheet around. Painting stamps the whole patch with its top-left on the cursor, keeping the cells in the arrangement they had on the sheet, so a floor pattern several tiles across goes down in one stroke instead of one cell at a time. Erasing clears the same footprint, and the cursor ghost is the patch itself, cut out of the sheet. `V` toggles whether laying tiles also makes the ground under them solid, which is how wall tiles are drawn and made collidable in one pass. Left click paints and right click erases, with a ghost of the picked tile snapped to the grid; F switches sheets. The panel shows a window cut out of the sheet at the current zoom and pan rather than a scaled copy of the whole thing, which keeps what is drawn exactly the panel's size and the click maths a plain division. Prop mode gets the same panel, but composed differently: props come from different sheets at different sizes, so rather than a window into one image it is a contact sheet - every prop scaled to fit one cell of a grid, built once and then scrolled with the wheel. Click a thumbnail to select, or step with `[` `]`, which scrolls the highlight back into view when it leaves the panel. In prop mode a ghost of the selected prop follows the cursor, the wheel or `[` `]` picks one, F flips it, left click stamps it with its feet on the cursor, right click deletes the topmost prop under the cursor, and Z takes back the last one placed - each mode undoes its own kind of edit. T cycles the map's theme, previewed live. Five slots on the number keys; switching autosaves. ENTER saves and plays the map; ESC saves and returns to the menu. The painted grid is the source of truth - the tilemap is only its picture, patched per cell while a stroke is live and rebuilt cleanly when it ends so the autotile edges stay exact. Fast drags are line-walked so strokes have no gaps, and the outer ring is locked solid so the arena is always closed.
 - `OnlineHelpSubState` - the co-op explainer, styled like the controls popup and shown the first time the online lobby opens each session; H reopens it. Three pages flipped with A/D: what co-op is, how to host or join (including the `IP:PORT` form when the host has fallen back to another port), and what behaves differently online. Because the lobby keeps updating while a substate is open - the socket has to stay serviced so a friend can still connect while you are reading - the lobby explicitly hands input ownership to the popup and skips its own key handling, which also stops one ENTER or ESC from being consumed twice.
 - `TutorialSubState` - the controls popup shown the first time PlayState opens each session. Seven pages (move, attack, weapons, modes, super, abilities, health) flipped with A/D or the arrow keys, each with a looping animated demo built from game sprites. The abilities page demos time stop: four enemies close in around the player until the stop triggers, then they freeze mid-stride while the player keeps running laps around them with the blue afterimage trail, steering clear of every frozen body, and everything ramps back up on release. The popup fades in on open; ENTER or ESC freezes the demo and fades it back out before starting the game. The wave timer is frozen while it is open. Each page's demo is its own class under `states/tutorial/` (MoveDemo, AttackDemo, WeaponsDemo, ModesDemo, SuperDemo, AbilitiesDemo, HealthDemo), all extending `TutorialDemo` - a group base with the shared sprite/text/player factories, the demo clock, and a per-frame `step()` hook. The substate itself only owns the panel, the page texts, and page flipping; flipping destroys the old demo instance and constructs the next.
 
@@ -45,8 +47,10 @@ export/                  build output (not committed)
 Each system is constructed once by PlayState and updated once per frame (except `MenuList`, which the menu states construct).
 
 - `Arena` - loads the background and collision tilemap, sets world and camera bounds, generates pillar sprites from the map data, and answers `wallAt(x, y)` (always false while side view is active). Also owns the side-view landscape: `buildSideAssets()` creates the sky gradient and ground slab, `applySideMorph(t)` interpolates the whole landscape between perspectives (the floor art sinks and dims, the sky curtain descends, the ground slab fades in, and every pillar stretches into its floating platform), and `sidePlatforms()` exposes the platform rectangles. Platform targets are computed alongside the pillars: same x, width at least 150 px, and a height mapped from how far north the pillar stands - north becomes high. Also owns the boss-intro transition: `beginBossTransition()` shakes the camera and fades a white overlay in, then swaps the background to the warping checkerboard grid (a `WarpShader` distorts it), clears the interior pillars (removes their sprites and empties their collision tiles for an open boss arena), and fades the white back out. `update(elapsed)` drives that sequence and advances the shader; `onWhiteout` fires once at the fully-white moment (used to cut the alarm and start the boss music). `endBossTransition()` reverses it after the boss dies - a quick white flash restores the normal background, removes the shader, and rebuilds the pillars (`restoreObstacles` reloads the map CSV), firing `onNormal` to restore the normal music.
-- `Fx` - hitstop (time scale drops for a few frames on kills), camera shakes, hit spark bursts, and the dash speed-line trail.
-- `RenderLayers` - the shadow and entity render groups. The entity layer is sorted every frame by feet position so characters and pillars overlap correctly.
+- `DecorTiles` - the painted floor layer: grid maths, CSV round-tripping, and building the tilemap from a map's tiles. Shared by the editor and the game. Purely decorative - it is never collided against.
+- `Decor` - builds a map's decoration sprites from its placements, shared by the editor and the game so a map looks the same in both. Cuts each prop out of its sheet once and keeps it in flixel's cache under its own persistent key, since the cache is cleared between states and a plain BitmapData handed to `loadGraphic` would be disposed with it. Also owns the feet-anchored placement both sides use.
+- `Fx` - hitstop (time scale drops for a few frames on kills), camera shakes, hit spark bursts, the dash speed-line trail, and `bossBlast`, the boss death explosion built in one place so the host's real death and a client's mirrored one cannot drift apart.
+- `RenderLayers` - the shadow, entity, and tag render groups. The entity layer is sorted every frame by feet position so characters, pillars, and decorations overlap correctly; the tag layer sits above that sort so a name is never hidden by whoever stands behind it.
 - `PlayerCombat` - player health, the AP meter, damage intake, invincibility frames and blink, dash input, death and revive, and the run's kill counter. The HUD bars bind directly to its fields. Death is re-asserted every frame rather than only on the transition: several weapon systems clear `blockMovement` when they finish, and one that finishes after you die would otherwise hand control back, so while dead the block is reapplied and the death animation restored if anything overrode it. `Player` independently refuses to run its movement routine while `isDead`, which is what actually keeps a corpse from walking and playing an idle.
 - `EnemyDirector` - spawns waves from the wave table, owns the per-enemy rigs (enemy, shadow, contact hitbox), runs enemy collision and cleanup, and updates enemy shots. A randomly chosen wave (4-8, rolled once at startup) is the boss wave: it fires the `onBoss` callback (which starts the intro cinematic) and, after a short intro delay, spawns a single `"rofel"` enemy instead of the normal count. When the boss dies the director runs a defeat sequence - the boss shakes in place, then plays an explosion animation with a boom sound - and fires `onBossDefeated` (which reverts the arena and music to normal) once the explosion finishes. Also the single home of enemy hit queries: `firstInCircle` and `eachInCircle` do the nearest-hitbox-point circle test every attack uses (live enemies only; `firstInCircle` can skip seized ones).
 
@@ -145,7 +149,9 @@ Enemy behavior lives in `source/entities/enemy/`:
 - `GhostTrail` - pooled afterimage trail: fades its ghosts every tick and stamps a copy of a source sprite (position, angle, scale, color) on a fixed cadence. `stampFrame` instead copies an animated sprite's current frame with a forced tint (the time-stop player trail). Used by the thrown scythe, the super scythe blades, the Arrow Storm launch arrow, and the time-stop trail.
 - `WorldClock` - a single static `scale` (1 normal, 0 frozen) written by TimeStop and read by world entities that update through the display list.
 - `WarpShader` - a GLSL fragment shader that distorts a sprite's texture coordinates with time-driven sine waves. Applied to the boss-arena grid background; `advance(elapsed)` steps its time uniform.
-- `SaveData` - persistent save: best wave reached plus the settings (master volume, fullscreen, FPS counter visibility). `applySettings()` pushes the saved settings into the engine and is called at boot and whenever an option changes.
+- `SaveData` - persistent save: best wave reached, the settings (master volume, fullscreen, FPS counter visibility), the last joined IP, and the online player name. `applySettings()` pushes the saved settings into the engine and is called at boot and whenever an option changes.
+- `CustomArena` - the map the editor asked the next run to use, as raw CSV plus a spawn point; null means the stock arena. Cleared at the main menu.
+- `MapStore` - the editor's five map slots; JSON files next to the executable on desktop, browser save on html5.
 - `MenuSlash` - the menu's confirm animation. The scythe selector winds up to the left of the chosen row, sweeps through it, and on contact the row is hidden and replaced by one sprite per letter that tumbles away under gravity and fades - so the option is cut apart and falls into the void before the choice is carried out. Letter widths are measured individually and then scaled to span the row's real width, which keeps the swap seamless at the moment the shards appear. Every menu choice routes through it, and returning from Options restores the shattered row.
 - `JaggedBand` - a sawtooth strip that scrolls sideways forever, used to frame the main menu. The tooth shape is the one from Will Boyd's "Hello Houdini: Jagged Edge with Mask" pen: walk across the width alternating between a peak and a valley, then close the polygon along the bottom and fill it. Rather than redraw that path every frame, the strip is drawn once at two teeth wider than the screen and simply slid left, wrapping every tooth width - so the motion costs nothing and never seams. `top` flips it vertically for the upper edge, and a negative speed scrolls the other way, which is how the menu gets its two mirrored pairs.
 - `IrisWipe` - the state transition: a black overlay with the game icon punched out of it as a transparent hole, which grows to reveal a state on arrival and shrinks to swallow it on the way out. The mask is built once and cached as a persistent `FlxGraphic` - the icon is drawn into a square bitmap and its alpha inverted, so the icon silhouette becomes the hole. It must be persistent: Flixel clears its bitmap cache between states, so a plain cached BitmapData is disposed after the first transition and every later wipe renders as a bare square. Four oversized black bars track the mask's edges so the screen stays covered no matter how small the hole gets. It draws on its own camera added on top, so it covers the HUD as well as the world, and `open` hides itself when finished so the icon's concave notches never linger over gameplay. Scale is driven by `FlxTween.num`; the fully open scale is set so the hole comfortably clears the screen, since anything smaller would pop black into the corners the moment a close began. Used by the title sequence, the menu, the pause menu's quit, and the death restart.
@@ -241,12 +247,92 @@ Presentation constants (trail settings, rope geometry, rest poses, ring radii, a
 
 | Field | Meaning |
 |---|---|
+| `cols`, `rows`, `tileSize` | arena size in cells and the cell size; the single source everything derives from - Arena's tilemap, the editor's grid, and the painted floor layer's dimensions all read it rather than repeating 160/90/16 |
 | `background` | stage image name under `assets/images/` |
 | `map`, `tiles` | collision CSV and tileset file names under `assets/` |
 | `spawnX`, `spawnY` | player start position |
 | `totemWaveMin`, `totemWaveRange` | the totem crashes down on a wave rolled once at startup from `totemWaveMin` to `totemWaveMin + totemWaveRange` |
 
-The map CSV holds `0` (open) and `1` (solid) tiles, 16 px each, loaded with flixel auto-tiling. The outer ring is the arena wall. Solid interior tiles become pillars: they block movement and projectiles, break line of sight, and Arena draws block sprites over them. Arena geometry is edited in the CSV only.
+The map CSV holds `0` (open) and `1` (solid) tiles, 16 px each, loaded with flixel auto-tiling. The outer ring is the arena wall. Solid interior tiles become pillars: they block movement and projectiles, break line of sight, and Arena draws block sprites over them. The stock arena is edited in this CSV; player maps come from the in-game editor instead.
+
+Editor maps ride the same format. `MapStore` keeps five slots - on desktop as plain JSON files (`sx`, `sy`, `csv`) in a `maps/` folder next to the executable, anchored to the executable's own path rather than the working directory so shortcuts cannot scatter them, and shareable by copying the file; on html5 they live in the browser save. Playing one sets `CustomArena`, a static the Arena constructor checks: when set, the raw CSV and spawn replace the stock ones, which the tilemap loader accepts directly, and everything downstream - pillars, pathfinding, boss obstacle clearing, the side-view morph - works unchanged because it all reads the tilemap generically. The main menu clears `CustomArena` on entry, so a normal PLAY is always the stock arena, and since online can only be reached through the menu, custom maps cannot desync a co-op session.
+
+### Paintable tilesets - assets/data/tilesets.json
+
+An array of `tilesets`, the sheets the editor can paint floor art from. This is the layer to reach for when you want to *place* tiles from an art pack.
+
+| Field | Meaning |
+|---|---|
+| `name` | shown in the editor, and what maps store |
+| `image` | sheet under `assets/images/` |
+| `tileW`, `tileH` | cell size the sheet is cut into |
+
+Unlike the collision tileset, which must be flixel's 16-tile auto-tiling strip, this is any image cut into a uniform grid - so most art packs work by naming their cell size and nothing else. Adding one is a JSON entry plus the image:
+
+```json
+{ "name": "CAVE", "image": "tilesets/cave", "tileW": 32, "tileH": 32 }
+```
+
+Note what the image's own dimensions can and cannot tell you: nothing useful about cell size, since a 768 px sheet divides evenly by 16, 24, 32, 48 and 64 alike. Only the art knows where its cells fall, so `tileW`/`tileH` stay hand-written - but the editor draws grid lines over the palette so a wrong guess is visible immediately, and you can zoom in to check the lines land on the seams.
+
+What the sheet *can* be read for is its used area. Art packs routinely park a small strip of tiles in the corner of a big empty canvas, so the palette scans the image for its non-transparent bounds, snaps them outward to whole cells, and frames that region instead of the whole file. Tile indices still count across the full sheet, so the crop only changes what you look at.
+
+The painted grid is stored per map as its own CSV, sized from the sheet's cell size rather than the 16 px collision grid, so a 32 px sheet paints on 32 px cells. `0` is empty and `1..N` are the sheet's cells in reading order; the layer loads with `startingIndex` 1 because flixel resolves a tile's frame as `index - startingIndex`, which is what keeps `0` free to mean nothing. Switching a map to a different sheet clears the painted layer, since the cell size - and therefore the grid - changes.
+
+The floor layer is added before the render layers so it draws under everything that moves, and it hides with the rest of the decoration during the boss fight.
+
+Painted tiles are also what walls are made of. A wall block is filled in three passes, each only where the last left nothing: the theme's flat colour, then its repeating texture, then any tiles painted over that spot - so the painted layer wins. That is what lets one map carry brick walls in one corner and cobble in another, which a single theme texture cannot express. The two grids need not share a cell size (a 24 px sheet over 16 px collision is normal), so each overlapping tile is clipped to the block rather than assumed aligned. Walls stay merged block sprites in the entity layer, so they still depth-sort.
+
+Collision itself remains separate and lives only in the arena's hidden tilemap, which is what pathfinding and projectiles read. Painting a tile does not make it solid - unless the editor's `V` toggle is on, which marks every collision cell a tile covers as it is laid, so a wall can be drawn and made solid in one stroke.
+
+### Props - assets/data/props.json
+
+An array of `props`, the decorations the editor can stamp into a map.
+
+| Field | Meaning |
+|---|---|
+| `name` | shown in the editor, and what maps store - so reordering this file cannot break saved maps |
+| `sheet` | image under `assets/images/` |
+| `rect` | optional `[x, y, w, h]` cutting one prop out of a shared sheet; empty means the whole image is the prop |
+| `scale` | draw scale, since the art is pixel-sized |
+
+`rect` is what lets an art pack be used as-is: list each prop as a region of the same sheet rather than slicing it into files.
+
+Placements are stored per map as `{n, x, y, f}` - prop name, the point its **feet** stand on, and whether it is flipped. Anchoring by the feet is deliberate: that same point is the depth-sort key, so a prop placed further down the screen correctly draws in front. Props go into the entity layer, which sorts by feet, so you walk behind a house and in front of one below you. They are hidden for the boss fight, which strips the arena to a bare void, and restored afterwards.
+
+Decorations are **purely visual** - they never collide. Paint walls under or around a prop when you want it solid, which keeps collision entirely in the tilemap where the pathfinding and projectiles already read it.
+
+### Editor tuning - assets/data/editor.json
+
+Grouped as `view` (start/min/max zoom, zoom step, pan speed), `palette` (panel width and height, padding, prop cell size, max zoom), `brush` (max size, undo depth), and `flashTime`. The editor reads these into named accessors, so call sites still read as constants while the numbers stay data.
+
+### Themes - assets/data/themes.json
+
+An array of `themes`, each one a look a custom map can wear. Worth knowing before adding art: **the collision tileset is never drawn**. `Arena` hides the tilemap and renders walls as merged block sprites, so swapping `tiles` in arena.json changes collision shapes, not appearance. What changes how a map looks is a theme.
+
+| Field | Meaning |
+|---|---|
+| `name` | shown in the editor |
+| `background` | stage image under `assets/images/` |
+| `wall` | optional image tiled across the wall blocks; empty means a flat colour |
+| `wallRect` | optional `[x, y, w, h]` region of that image to tile; empty means the whole file |
+| `wallColor` | wall colour as `RRGGBB`, also the fill behind a wall texture |
+
+`wallColor` is RGB only on purpose: a full ARGB literal like `0xFF1C1010` is larger than a signed 32-bit int, so parsing it clamps to `0x7FFFFFFF` and every wall comes out translucent white. The alpha is OR'd on in code.
+
+`wallRect` is what makes an art-pack sheet usable directly - point it at the one patch you want repeated rather than slicing the sheet into a new file. Adding a theme is a JSON entry plus the images; no code changes:
+
+```json
+{
+  "name": "SANDSTONE",
+  "background": "stages/desert",
+  "wall": "tilesets/desert_sheet",
+  "wallRect": [0, 96, 48, 48],
+  "wallColor": "C86432"
+}
+```
+
+Themes apply to editor maps only; the stock arena keeps its arena.json look.
 
 ### Side view - assets/data/sideview.json
 

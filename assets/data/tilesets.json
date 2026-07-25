@@ -1,0 +1,10 @@
+{
+	"tilesets": [
+		{
+			"name": "Orange Ground Set",
+			"image": "tilesets/OK_ME_MATO",
+			"tileW": 24,
+			"tileH": 24
+		}
+	]
+}

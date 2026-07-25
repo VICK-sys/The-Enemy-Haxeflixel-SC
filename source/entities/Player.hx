@@ -11,7 +11,6 @@ import data.PlayerData.PlayerDataRegistry;
 
 class Player extends FlxSprite
 {
-
 	public var blockMovement:Bool = false;
 	public var isDead:Bool = false;
 	public var floating:Bool = false;
@@ -252,7 +251,6 @@ class Player extends FlxSprite
 
 	private function movement(elapsed:Float)
 	{
-
 		var up:Bool = false;
 		var down:Bool = false;
 		var left:Bool = false;
@@ -337,7 +335,6 @@ class Player extends FlxSprite
 		}
 		else
 		{
-
 			this.animation.play("idle");
 
 			if(walkSound)

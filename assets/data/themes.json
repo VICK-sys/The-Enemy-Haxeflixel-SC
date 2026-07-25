@@ -1,0 +1,18 @@
+{
+	"themes": [
+		{
+			"name": "THE ENEMY",
+			"background": "stages/theEnemy",
+			"wall": "",
+			"wallRect": [],
+			"wallColor": "1C1010"
+		},
+		{
+			"name": "VOID GRID",
+			"background": "stage/grid",
+			"wall": "",
+			"wallRect": [],
+			"wallColor": "241536"
+		}
+	]
+}

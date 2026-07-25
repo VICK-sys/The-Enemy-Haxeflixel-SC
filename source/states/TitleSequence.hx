@@ -42,7 +42,6 @@ class TitleSequence extends FlxState
             Music.play("teamIntro", 0.3, false);
 
             new FlxTimer().start(0.18, function(timer:FlxTimer) {
-
                 modLogoAnimated.visible = true;
                 modLogoAnimated.animation.play("idle", false);
                 canSkip = true;
