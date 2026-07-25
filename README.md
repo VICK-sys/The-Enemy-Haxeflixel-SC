@@ -4,6 +4,10 @@ Top-down action game built with HaxeFlixel. Fight waves of enemies with a mouse-
 
 The main menu has PLAY, OPTIONS (master volume, fullscreen, FPS counter, reset best wave), and QUIT, navigated with W/S and ENTER or the mouse. A controls popup with animated demos appears the first time you play; flip pages with A/D and press ENTER to start.
 
+## Online co-op (desktop)
+
+Two players. From the main menu choose ONLINE. One player picks HOST GAME (this listens on TCP port 7777 - forward that port on your router and share your public IP), the other picks JOIN GAME and types the host's IP. If port 7777 is busy the host falls back to the next free port and shows it; in that case the friend joins with `IP:port`. The host presses ENTER once the friend is connected. Time stop and the perspective totem are disabled online, and death respawns you after a few seconds instead of ending the run.
+
 ## Controls
 
 - WASD - move

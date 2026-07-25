@@ -25,7 +25,7 @@ class HeldWeapon
 	static inline var HOOK_TIME:Float = 0.4;
 	static inline var CHARGE_SCALE:Float = 1.6;
 	static inline var CHARGE_DRAW:Float = 0.35;
-	static inline var CHARGE_TINT:Int = 0xFF9BE9FF;
+	public static inline var CHARGE_TINT:Int = 0xFF9BE9FF;
 
 	public var sprite:FlxSprite;
 	public var mode:WeaponMode = Swing;

@@ -9,6 +9,7 @@ import flixel.util.FlxTimer;
 import util.Paths;
 import util.SaveData;
 import util.Music;
+import util.IrisWipe;
 import util.DiscordPresence;
 
 class TitleSequence extends FlxState
@@ -16,6 +17,7 @@ class TitleSequence extends FlxState
     private var modLogoAnimated:FlxSprite;
     private var canSkip:Bool = false;
     private var skipped:Bool = false;
+    private var wipe:IrisWipe;
 
     override public function create()
     {
@@ -68,6 +70,8 @@ class TitleSequence extends FlxState
     }
 
     function die(tween:FlxTween):Void {
-        FlxG.switchState(new MainMenuState());
+        if (wipe == null)
+            wipe = new IrisWipe(this);
+        wipe.close(function() FlxG.switchState(new MainMenuState()));
     }
 }

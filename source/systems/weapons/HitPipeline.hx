@@ -10,6 +10,10 @@ import util.Paths;
 
 class HitPipeline
 {
+	public var remote:Bool = false;
+	public var onClaim:(Enemies, Float, Float, Int, Float) -> Void;
+	public var onImpact:(Float, Float) -> Void;
+
 	private var status:PlayerCombat;
 	private var fx:Fx;
 	private var pickups:Pickups;
@@ -30,23 +34,51 @@ class HitPipeline
 
 	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Int):Void
 	{
+		if (remote)
+		{
+			claim(e, pushX, pushY, damage, 0);
+			return;
+		}
+		applyHit(e, pushX, pushY, damage, true);
+	}
+
+	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Int, rewardable:Bool):Void
+	{
 		e.takeHit(pushX, pushY, damage);
 
 		FlxG.sound.play(Paths.sound("enemies/hit"), 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
+		if (rewardable && onImpact != null)
+			onImpact(e.x + e.width / 2, e.y + e.height / 2);
 
 		if (e.isDead)
 		{
 			fx.killImpact();
-			status.rewardKill();
+			if (rewardable)
+				status.rewardKill();
 			if (FlxG.random.float() < e.dropChance)
 				pickups.drop(e.x + e.width / 2, e.y + e.height / 2);
 		}
 	}
 
+	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Int, stunTime:Float):Void
+	{
+		FlxG.sound.play(Paths.sound("enemies/hit"), 0.6);
+		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
+		e.flashTimer = 0.08;
+		e.setColorTransform(1, 1, 1, 1, 255, 255, 255, 0);
+		if (onClaim != null)
+			onClaim(e, pushX, pushY, damage, stunTime);
+	}
+
 	public function stun(e:Enemies, pushX:Float, pushY:Float, duration:Float):Void
 	{
-		damageN(e, pushX * 0.2, pushY * 0.2, 0);
+		if (remote)
+		{
+			claim(e, pushX * 0.2, pushY * 0.2, 0, duration);
+			return;
+		}
+		applyHit(e, pushX * 0.2, pushY * 0.2, 0, true);
 		e.stun = duration;
 	}
 

@@ -38,7 +38,10 @@ class SuperScythes
 	public var frontLayer:FlxTypedGroup<SuperBlade>;
 	public var trail:GhostTrail;
 
-	private var player:Player;
+	public var cosmetic:Bool = false;
+
+	private var player:FlxSprite;
+	private var owner:Player;
 	private var scythe:FlxSprite;
 	private var arena:Arena;
 	private var director:EnemyDirector;
@@ -70,9 +73,17 @@ class SuperScythes
 		return ascendTimer > 0;
 	}
 
-	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, hits:HitPipeline)
+	public static function decoration(body:FlxSprite, fx:Fx):SuperScythes
+	{
+		var s = new SuperScythes(body, null, null, null, null, fx, null);
+		s.cosmetic = true;
+		return s;
+	}
+
+	public function new(player:FlxSprite, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, hits:HitPipeline)
 	{
 		this.player = player;
+		this.owner = Std.isOfType(player, Player) ? cast player : null;
 		this.scythe = scythe;
 		this.arena = arena;
 		this.director = director;
@@ -101,12 +112,24 @@ class SuperScythes
 		return orbiterCount() > 0;
 	}
 
+	public function clear():Void
+	{
+		for (b in pool)
+			if (b.exists && !b.launched)
+				b.kill();
+		spinSound.stop();
+		ascendTimer = 0;
+	}
+
 	public function activate():Void
 	{
 		ascendTimer = ASCEND_TIME;
-		scytheStartX = scythe.x;
-		scytheStartY = scythe.y;
-		scytheStartAngle = scythe.angle;
+		if (scythe != null)
+		{
+			scytheStartX = scythe.x;
+			scytheStartY = scythe.y;
+			scytheStartAngle = scythe.angle;
+		}
 		FlxG.sound.play(Paths.sound("scythe/ascend"), 0.7);
 	}
 
@@ -123,7 +146,8 @@ class SuperScythes
 		}
 		ringAngle = 0;
 		deployTimer = DEPLOY_TIME;
-		scythe.visible = false;
+		if (scythe != null)
+			scythe.visible = false;
 		FlxG.sound.play(Paths.sound("scythe/split"), 0.7);
 		spinSound.play(true);
 	}
@@ -202,27 +226,31 @@ class SuperScythes
 
 		if (ascendTimer > 0)
 		{
-			if (status.dead)
+			if (!cosmetic && status.dead)
 			{
 				ascendTimer = 0;
 			}
 			else
 			{
 				ascendTimer -= elapsed;
-				var p = 1 - Math.max(0, ascendTimer) / ASCEND_TIME;
-				var ease = 1 - (1 - p) * (1 - p) * (1 - p);
-				var apexX = player.x + player.width * 0.5 - scythe.width / 2;
-				var apexY = player.y + player.height * 0.5 - APEX_HEIGHT - scythe.height / 2;
-				scythe.x = scytheStartX + (apexX - scytheStartX) * ease;
-				scythe.y = scytheStartY + (apexY - scytheStartY) * ease;
-				var delta = ((0 - scytheStartAngle) % 360 + 540) % 360 - 180;
-				scythe.angle = scytheStartAngle + delta * ease;
+
+				if (scythe != null)
+				{
+					var p = 1 - Math.max(0, ascendTimer) / ASCEND_TIME;
+					var ease = 1 - (1 - p) * (1 - p) * (1 - p);
+					var apexX = player.x + player.width * 0.5 - scythe.width / 2;
+					var apexY = player.y + player.height * 0.5 - APEX_HEIGHT - scythe.height / 2;
+					scythe.x = scytheStartX + (apexX - scytheStartX) * ease;
+					scythe.y = scytheStartY + (apexY - scytheStartY) * ease;
+					var delta = ((0 - scytheStartAngle) % 360 + 540) % 360 - 180;
+					scythe.angle = scytheStartAngle + delta * ease;
+				}
 				if (ascendTimer <= 0)
 					deployBlades();
 			}
 		}
 
-		if (status.dead && active())
+		if (!cosmetic && status.dead && active())
 		{
 			for (b in pool)
 				if (b.exists && !b.launched)
@@ -231,7 +259,7 @@ class SuperScythes
 		}
 
 		var isActive = active();
-		if (wasActive && !isActive && !status.dead)
+		if (!cosmetic && wasActive && !isActive && !status.dead)
 			scythe.visible = true;
 		wasActive = isActive;
 
@@ -249,7 +277,7 @@ class SuperScythes
 			{
 				hover = 0;
 				fallSpeed = 0;
-				if (!status.dead)
+				if (cosmetic || !status.dead)
 				{
 					squashTimer = SQUASH_TIME;
 					FlxG.sound.play(Paths.sound("scythe/catch"), 0.45);
@@ -260,14 +288,19 @@ class SuperScythes
 
 		var bob = isActive ? Math.sin(hoverTime * HOVER_BOB_SPEED) * HOVER_BOB * (hover / HOVER_HEIGHT) : 0;
 		var lift = hover + bob;
-		player.offset.y = player.baseOffsetY + lift;
-		player.floating = hover > 2;
+
+		if (owner != null)
+		{
+			owner.offset.y = owner.baseOffsetY + lift;
+			owner.floating = hover > 2;
+		}
 
 		if (squashTimer > 0)
 		{
 			squashTimer -= elapsed;
 			var q = squashTimer > 0 ? squashTimer / SQUASH_TIME : 0;
-			player.scale.set(baseScaleX * (1 + 0.15 * q), baseScaleY * (1 - 0.25 * q));
+			if (owner != null)
+				owner.scale.set(baseScaleX * (1 + 0.15 * q), baseScaleY * (1 - 0.25 * q));
 		}
 
 		ringAngle += ROT_SPEED * elapsed;
@@ -303,7 +336,7 @@ class SuperScythes
 				b.alpha = 0.85 + 0.15 * depth;
 				setLayer(b, depth > 0);
 			}
-			else if (b.inFlight() && !b.fading)
+			else if (!cosmetic && b.inFlight() && !b.fading)
 			{
 				var cx = b.x + b.width / 2;
 				var cy = b.y + b.height / 2;

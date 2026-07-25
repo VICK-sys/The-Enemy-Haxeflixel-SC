@@ -24,7 +24,6 @@ class EnemyDirector
 	static inline var BOSS_INTRO_TIME:Float = 4.8;
 	static inline var BOSS_SHAKE_DUR:Float = 1.0;
 	static inline var BOSS_SHAKE_AMP:Float = 12;
-	static inline var EXPLO_SCALE:Float = 9;
 	static inline var STUCK_TIME:Float = 5;
 	static inline var STUCK_EPS:Float = 6;
 	static inline var STUCK_FAR:Float = 700;
@@ -39,6 +38,7 @@ class EnemyDirector
 	public var onBossSpawn:Enemies->Void;
 	public var onBossDefeated:Void->Void;
 	public var onProbe:(Float, Float, Float) -> Void;
+	public var onShot:(Float, Float, Float, Float, Float, Float, Float, String) -> Void;
 
 	private var bossWave:Int;
 	private var bossPending:Bool = false;
@@ -50,6 +50,8 @@ class EnemyDirector
 	private var bossBaseX:Float = 0;
 	private var bossBaseY:Float = 0;
 	private var bossExplosion:FlxSprite;
+
+	public var coopBodies(default, null):Array<FlxSprite> = [];
 
 	private var player:Player;
 	private var arena:Arena;
@@ -166,9 +168,8 @@ class EnemyDirector
 				bossRef.x = bossBaseX;
 				bossRef.y = bossBaseY;
 				bossRef.visible = false;
-				spawnExplosion(bossRef.x + bossRef.width / 2, bossRef.y + bossRef.height / 2);
-				FlxG.sound.play(Paths.sound("rofel_explode"), 0.9);
-				FlxG.camera.shake(0.02, 0.5);
+				bossExplosion = Fx.bossBlast(bossRef.x + bossRef.width / 2, bossRef.y + bossRef.height / 2);
+				layers.entityLayer.add(bossExplosion);
 				bossDeathPhase = 1;
 			}
 		}
@@ -185,31 +186,51 @@ class EnemyDirector
 		}
 	}
 
-	function spawnExplosion(cx:Float, cy:Float):Void
-	{
-		bossExplosion = new FlxSprite();
-		bossExplosion.loadGraphic(Paths.image("effects/rofel_explosion"), true, 80, 48);
-		bossExplosion.animation.add("boom", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 14, false);
-		bossExplosion.antialiasing = false;
-		bossExplosion.scale.set(EXPLO_SCALE, EXPLO_SCALE);
-		bossExplosion.updateHitbox();
-		bossExplosion.x = cx - bossExplosion.width / 2;
-		bossExplosion.y = cy - bossExplosion.height / 2;
-		bossExplosion.animation.play("boom");
-		layers.entityLayer.add(bossExplosion);
-	}
-
 	function clearOfWalls(x:Float, y:Float, w:Float, h:Float):Bool
 	{
 		return !arena.wallAt(x, y) && !arena.wallAt(x + w, y) && !arena.wallAt(x, y + h)
 			&& !arena.wallAt(x + w, y + h) && !arena.wallAt(x + w * 0.5, y + h * 0.5);
 	}
 
+	function pickTarget(e:Enemies):FlxSprite
+	{
+		var ex = e.x + e.width * 0.5;
+		var ey = e.y + e.height * 0.5;
+		var best:FlxSprite = status.dead ? null : player;
+		var bestD:Float = best != null ? sqTo(ex, ey, best) : -1;
+
+		for (b in coopBodies)
+		{
+			var d = sqTo(ex, ey, b);
+			if (best == null || d < bestD)
+			{
+				best = b;
+				bestD = d;
+			}
+		}
+		return best;
+	}
+
+	static function sqTo(x:Float, y:Float, s:FlxSprite):Float
+	{
+		var dx = s.x + s.width * 0.5 - x;
+		var dy = s.y + s.height * 0.5 - y;
+		return dx * dx + dy * dy;
+	}
+
+	function anchorBody():FlxSprite
+	{
+		if (status.dead && coopBodies.length > 0)
+			return coopBodies[0];
+		return player;
+	}
+
 	function rescue(rig:EnemyRig):Void
 	{
 		var e = rig.enemy;
-		var pcx = player.x + player.width * 0.5;
-		var pcy = player.y + player.height * 0.5;
+		var anchor = anchorBody();
+		var pcx = anchor.x + anchor.width * 0.5;
+		var pcy = anchor.y + anchor.height * 0.5;
 		var destX = pcx - e.width * 0.5;
 		var destY = pcy - e.height * 0.5;
 
@@ -246,8 +267,9 @@ class EnemyDirector
 		var e = rig.enemy;
 		var dx = e.x - rig.lastX;
 		var dy = e.y - rig.lastY;
-		var pcx = player.x + player.width * 0.5;
-		var pcy = player.y + player.height * 0.5;
+		var anchor = anchorBody();
+		var pcx = anchor.x + anchor.width * 0.5;
+		var pcy = anchor.y + anchor.height * 0.5;
 		var ex = e.x + e.width * 0.5 - pcx;
 		var ey = e.y + e.height * 0.5 - pcy;
 
@@ -288,7 +310,7 @@ class EnemyDirector
 				continue;
 			}
 
-			e.target = status.dead ? null : player;
+			e.target = pickTarget(e);
 
 			var alive = !e.isDead;
 
@@ -309,7 +331,7 @@ class EnemyDirector
 
 			if (alive)
 			{
-				if (!e.seized && !e.selfDriven && !status.dead)
+				if (!e.seized && !e.selfDriven && !e.puppet && !status.dead)
 					checkStuck(rig, elapsed);
 
 				rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
@@ -327,6 +349,8 @@ class EnemyDirector
 						var sx = spec.useOrigin ? spec.originX : cx;
 						var sy = spec.useOrigin ? spec.originY : cy;
 						shots.recycle(EnemyShot).fire(sx, sy, spec.dirX, spec.dirY, spec.damage, spec.speed, spec.range, spec.sprite);
+						if (onShot != null)
+							onShot(sx, sy, spec.dirX, spec.dirY, spec.damage, spec.speed, spec.range, spec.sprite);
 						if (spec.sound != null && spec.sound != lastSound)
 						{
 							FlxG.sound.play(Paths.sound(spec.sound), 0.5);
@@ -398,19 +422,20 @@ class EnemyDirector
 		}
 		else
 		{
+			var anchor = anchorBody();
 			switch (Std.random(4))
 			{
 				case 0:
 					e.x = -e.width - SPAWN_OUT;
-					e.y = edgeCoord(player.y, mh);
+					e.y = edgeCoord(anchor.y, mh);
 				case 1:
 					e.x = mw + SPAWN_OUT;
-					e.y = edgeCoord(player.y, mh);
+					e.y = edgeCoord(anchor.y, mh);
 				case 2:
-					e.x = edgeCoord(player.x, mw);
+					e.x = edgeCoord(anchor.x, mw);
 					e.y = -e.height - SPAWN_OUT;
 				default:
-					e.x = edgeCoord(player.x, mw);
+					e.x = edgeCoord(anchor.x, mw);
 					e.y = mh + SPAWN_OUT;
 			}
 		}
@@ -432,14 +457,15 @@ class EnemyDirector
 
 	public function spawnNear(e:Enemies):Void
 	{
-		e.x = player.x + player.width * 0.5 - e.width / 2 + Math.random() * 600 - 300;
-		e.y = player.y + player.height * 0.5 - e.height / 2 + Math.random() * 400 - 200;
+		var anchor = anchorBody();
+		e.x = anchor.x + anchor.width * 0.5 - e.width / 2 + Math.random() * 600 - 300;
+		e.y = anchor.y + anchor.height * 0.5 - e.height / 2 + Math.random() * 400 - 200;
 		register(e);
 	}
 
 	function register(e:Enemies):Void
 	{
-		e.target = player;
+		e.target = anchorBody();
 		e.pathing.map = arena.map;
 		var sh = layers.addEnemy(e);
 		if (e.gun != null)

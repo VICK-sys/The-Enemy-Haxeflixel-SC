@@ -26,6 +26,9 @@ class Weapons
 	public var arrowStorm:ArrowStorm;
 	public var hookArms:HookArms;
 	public var weapon:Int = 0;
+	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float) -> Void;
+	public var onSuper:Int -> Void;
+	public var onSuperLaunch:(Float, Float) -> Void;
 
 	private var player:Player;
 	private var status:PlayerCombat;
@@ -201,8 +204,10 @@ class Weapons
 		if (bow.charging && !FlxG.mouse.pressed)
 		{
 			var aim = aimFromPlayer();
+			var power = bow.charge;
 			held.beginSwing(aim.deg);
 			bow.release(held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+			emitAttack(Bow, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg, power);
 		}
 	}
 
@@ -224,6 +229,8 @@ class Weapons
 				case 2: arrowStorm.activate();
 				default: hookArms.activate();
 			}
+			if (onSuper != null)
+				onSuper(weapon);
 			return;
 		}
 
@@ -246,6 +253,8 @@ class Weapons
 		if (superScythes.active())
 		{
 			superScythes.tryLaunch(FlxG.mouse.x, FlxG.mouse.y);
+			if (onSuperLaunch != null)
+				onSuperLaunch(FlxG.mouse.x, FlxG.mouse.y);
 			return;
 		}
 
@@ -261,10 +270,16 @@ class Weapons
 		if (held.mode == Throw)
 		{
 			throwAttack.launch(pmx, pmy, dx, dy);
+			emitAttack(Throw, pmx, pmy, dx, dy, aimDeg);
 			return;
 		}
 
 		held.beginSwing(aimDeg);
+
+		if (held.mode == Rain)
+			emitAttack(Rain, held.handX(), held.handY(), dx, dy, aimDeg);
+		else
+			emitAttack(held.mode, pmx, pmy, dx, dy, aimDeg);
 
 		switch (held.mode)
 		{
@@ -285,6 +300,12 @@ class Weapons
 			default:
 				swing.fire(pmx, pmy, dx, dy, aimDeg);
 		}
+	}
+
+	function emitAttack(mode:WeaponMode, pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0):Void
+	{
+		if (onAttack != null)
+			onAttack(mode, pmx, pmy, dx, dy, aimDeg, FlxG.mouse.x, FlxG.mouse.y, power);
 	}
 
 	function updateHeldHook():Void

@@ -14,7 +14,7 @@ class HookArms
 {
 	static inline var REST_UP:Float = 78;
 	static inline var REST_DX:Float = 20;
-	static inline var ANCHOR_DOWN:Float = 46;
+	public static inline var ANCHOR_DOWN:Float = 46;
 	static inline var REST_TILT_DEG:Float = 42;
 	static inline var CURVE_FRAC:Float = 0.75;
 	static inline var REST_EASE:Float = 9;
@@ -32,7 +32,7 @@ class HookArms
 	private var player:Player;
 	private var director:EnemyDirector;
 	private var hits:HitPipeline;
-	private var arms:Array<Arm> = [];
+	public var arms(default, null):Array<Arm> = [];
 	private var running:Bool = false;
 	private var retracting:Bool = false;
 	private var superTimer:Float = 0;
@@ -302,9 +302,9 @@ class HookArms
 		var tangent = Math.atan2(arm.cy - arm.ctrlY, arm.cx - arm.ctrlX) * 180 / Math.PI;
 		arm.claw.angle = tangent + 90;
 		var tr = tangent * Math.PI / 180;
-		var handleX = arm.cx - Math.cos(tr) * HANDLE_LEN;
-		var handleY = arm.cy - Math.sin(tr) * HANDLE_LEN;
-		Rope.curve(arm.rope, anchorX, anchorY, handleX, handleY, arm.ctrlX, arm.ctrlY);
+		arm.handleX = arm.cx - Math.cos(tr) * HANDLE_LEN;
+		arm.handleY = arm.cy - Math.sin(tr) * HANDLE_LEN;
+		Rope.curve(arm.rope, anchorX, anchorY, arm.handleX, arm.handleY, arm.ctrlX, arm.ctrlY);
 	}
 
 	function stepToward(arm:Arm, tx:Float, ty:Float, maxStep:Float):Bool
@@ -389,6 +389,8 @@ class Arm
 	public var ctrlX:Float = 0;
 	public var ctrlY:Float = 0;
 	public var ctrlInit:Bool = false;
+	public var handleX:Float = 0;
+	public var handleY:Float = 0;
 
 	public function new(claw:HookShot, rope:FlxTypedGroup<FlxSprite>, restDX:Float)
 	{

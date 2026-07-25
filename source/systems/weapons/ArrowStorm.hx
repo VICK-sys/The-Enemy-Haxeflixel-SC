@@ -24,7 +24,7 @@ class ArrowStorm
 	public var trail:GhostTrail;
 
 	private var cfg = WeaponDataRegistry.get().arrowStorm;
-	private var player:Player;
+	private var player:FlxSprite;
 	private var bow:FlxSprite;
 	private var rain:ArrowRain;
 	private var phase:Int = 0;
@@ -32,7 +32,7 @@ class ArrowStorm
 	private var spawnTimer:Float = 0;
 	private var launchTimer:Float = 0;
 
-	public function new(player:Player, bow:FlxSprite, rain:ArrowRain)
+	public function new(player:FlxSprite, bow:FlxSprite, rain:ArrowRain)
 	{
 		this.player = player;
 		this.bow = bow;

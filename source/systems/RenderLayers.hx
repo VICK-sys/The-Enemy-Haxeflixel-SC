@@ -13,6 +13,7 @@ class RenderLayers
 {
 	public var shadowLayer:FlxTypedGroup<FlxSprite>;
 	public var entityLayer:FlxTypedGroup<FlxSprite>;
+	public var tagLayer:FlxTypedGroup<FlxSprite>;
 	public var playerShadow:FlxSprite;
 
 	private var player:Player;
@@ -34,6 +35,9 @@ class RenderLayers
 		state.add(entityLayer);
 		entityLayer.add(player);
 		entityLayer.add(scythe);
+
+		tagLayer = new FlxTypedGroup<FlxSprite>();
+		state.add(tagLayer);
 	}
 
 	public function addEnemy(e:Enemies):FlxSprite

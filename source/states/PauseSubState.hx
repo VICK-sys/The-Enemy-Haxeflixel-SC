@@ -7,6 +7,7 @@ import flixel.FlxCamera;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import systems.MenuList;
+import util.IrisWipe;
 
 class PauseSubState extends FlxSubState
 {
@@ -78,8 +79,10 @@ class PauseSubState extends FlxSubState
 				openSubState(new OptionsSubState(camUI));
 			default:
 				leaving = true;
+				list.enabled = false;
 				FlxG.mouse.visible = false;
-				FlxG.switchState(new MainMenuState());
+				net.Net.stop();
+				new IrisWipe(this).close(function() FlxG.switchState(new MainMenuState()));
 		}
 	}
 }

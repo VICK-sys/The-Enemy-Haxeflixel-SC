@@ -13,6 +13,7 @@ import util.Paths;
 class MenuList extends FlxGroup
 {
 	static inline var SELECTOR_GAP:Float = 26;
+	static inline var REST_ANGLE:Float = -35;
 	static inline var EASE:Float = 16;
 	static inline var BOB:Float = 4;
 	static inline var BOB_SPEED:Float = 5;
@@ -46,7 +47,7 @@ class MenuList extends FlxGroup
 		selector.antialiasing = false;
 		selector.scale.set(3, 3);
 		selector.updateHitbox();
-		selector.angle = -35;
+		selector.angle = REST_ANGLE;
 		add(selector);
 
 		lastMouseX = FlxG.mouse.x;
@@ -58,6 +59,20 @@ class MenuList extends FlxGroup
 	{
 		rows[i].text = text;
 		rows[i].screenCenter(X);
+	}
+
+	public function rowAt(i:Int):FlxText
+		return rows[i];
+
+	public var scythe(get, never):FlxSprite;
+
+	function get_scythe():FlxSprite
+		return selector;
+
+	public function restoreRows():Void
+	{
+		for (r in rows)
+			r.visible = true;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -158,12 +173,14 @@ class MenuList extends FlxGroup
 		var k = Math.min(1, EASE * elapsed);
 		selector.x += (targetX() - selector.x) * k;
 		selector.y += (targetY() - selector.y) * k;
+		selector.angle += (REST_ANGLE - selector.angle) * k;
 	}
 
 	function snapSelector():Void
 	{
 		selector.x = targetX();
 		selector.y = targetY();
+		selector.angle = REST_ANGLE;
 	}
 
 	function targetX():Float

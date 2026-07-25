@@ -10,6 +10,8 @@ class HealthPickup extends FlxSprite
 
 	static inline var LIFETIME:Float = 8;
 
+	public var netId:Int = -1;
+
 	private var life:Float = 0;
 	private var prevBottom:Float = 0;
 

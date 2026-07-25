@@ -23,7 +23,12 @@ import util.SaveData;
 import util.PerfLog;
 import util.Music;
 import util.SideView;
+import util.IrisWipe;
+import util.WorldClock;
 import util.DiscordPresence;
+import net.Net;
+import net.NetSync;
+import net.PuppetDirector;
 
 class PlayState extends FlxState
 {
@@ -42,10 +47,23 @@ class PlayState extends FlxState
 	private var bossFight:Bool = false;
 	private var timeStop:TimeStop;
 	private var shift:PerspectiveShift;
+	private var wipe:IrisWipe;
+	private var restarting:Bool = false;
+	private var netSync:NetSync;
+
+	function beginRestart():Void
+	{
+		if (restarting)
+			return;
+		restarting = true;
+		wipe.close(function() FlxG.resetState());
+	}
 
 	override public function create()
 	{
 		SideView.reset();
+		WorldClock.scale = 1;
+		persistentUpdate = Net.active;
 		fx = new Fx();
 
 		FlxG.camera.bgColor = 0xFFFFFFFF;
@@ -75,7 +93,7 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
-		director = new EnemyDirector(_player, arena, layers, status);
+		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status) : new EnemyDirector(_player, arena, layers, status);
 		combat = new Weapons(_player, scythe, arena, director, status, fx, pickups);
 
 		add(combat.swing.slashes);
@@ -110,9 +128,22 @@ class PlayState extends FlxState
 		arena.onNormal = onArenaNormal;
 		perf = new PerfLog();
 
+		if (Net.active)
+		{
+			shift.locked = true;
+			Net.inGame = true;
+			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, hud, scythe);
+			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
+			netSync.onWaveEvt = onWaveStarted;
+			netSync.onBossEvt = onBossWave;
+			netSync.onBossDefeatedEvt = onBossDefeated;
+			netSync.onDropped = onNetDropped;
+		netSync.onRestart = beginRestart;
+		}
+
 		DiscordPresence.beginRun();
 
-		if (!TutorialSubState.shown)
+		if (!TutorialSubState.shown && !Net.active)
 		{
 			TutorialSubState.shown = true;
 			openSubState(new TutorialSubState(hud.camUI));
@@ -120,6 +151,9 @@ class PlayState extends FlxState
 		}
 
 		Music.play("stage/gloomDoomWoods", 0.3);
+
+		wipe = new IrisWipe(this);
+		wipe.open();
 
 		super.create();
 	}
@@ -129,8 +163,9 @@ class PlayState extends FlxState
 		EnemyNav.resetBudget();
 
 		var frozen = SideView.morphing;
+		var inputLocked = Net.active && subState != null;
 
-		if (!frozen)
+		if (!frozen && !Net.active)
 			timeStop.update(elapsed);
 
 		super.update(elapsed);
@@ -149,25 +184,30 @@ class PlayState extends FlxState
 		{
 			layers.playerShadow.visible = false;
 			scythe.visible = false;
-			hud.showDeath(director.wave, SaveData.bestWave());
-			DiscordPresence.died(director.wave, SaveData.bestWave());
+			if (!Net.active)
+			{
+				hud.showDeath(director.wave, SaveData.bestWave());
+				DiscordPresence.died(director.wave, SaveData.bestWave());
+			}
 		}
 
 		director.update(frozen ? 0 : elapsed * timeStop.factor);
 		pickups.update();
 		layers.update();
-		if (!frozen)
+		if (!frozen && !inputLocked)
 			combat.update(elapsed);
 		director.updateShots();
+		if (netSync != null)
+			netSync.update(elapsed);
 		hud.setMode(combat.modeName());
-		hud.setTimeStop(timeStop.hudLabel());
-		hud.setStopTimer(timeStop.timerLabel());
+		hud.setTimeStop(Net.active ? "OFF" : timeStop.hudLabel());
+		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
 
 		if (subState == null && !status.dead)
 			DiscordPresence.playing(director.wave, bossFight, combat.weapon, status.kills);
 
-		if (FlxG.keys.justPressed.ESCAPE && !status.dead)
+		if (FlxG.keys.justPressed.ESCAPE && !status.dead && subState == null)
 		{
 			DiscordPresence.paused();
 			openSubState(new PauseSubState(hud.camUI));
@@ -230,9 +270,27 @@ class PlayState extends FlxState
 			FlxG.sound.music.fadeOut(0.6, 0);
 	}
 
+	function onNetDropped():Void
+	{
+		hud.showBanner("CONNECTION LOST");
+		if (Net.isClient)
+		{
+			new flixel.util.FlxTimer().start(1.4, function(_)
+			{
+				Net.stop();
+				wipe.close(function()
+				{
+					FlxG.mouse.visible = true;
+					FlxG.switchState(new MainMenuState());
+				});
+			});
+		}
+	}
+
 	function onArenaNormal():Void
 	{
-		shift.locked = false;
+		if (!Net.active)
+			shift.locked = false;
 		shift.restoreTotem();
 		Music.play("stage/gloomDoomWoods", 0.3);
 		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.8);
@@ -263,7 +321,11 @@ class PlayState extends FlxState
 			hud.hideDeath();
 		}
 
-		if (FlxG.keys.justPressed.R && status.dead)
-			FlxG.resetState();
+		if (FlxG.keys.justPressed.R && status.dead && !restarting && (!Net.active || (netSync != null && netSync.runFailed)))
+		{
+			if (netSync != null)
+				netSync.requestRestart();
+			beginRestart();
+		}
 	}
 }

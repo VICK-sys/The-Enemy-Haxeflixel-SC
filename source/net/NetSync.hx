@@ -1,0 +1,405 @@
+package net;
+
+import flixel.FlxSprite;
+import flixel.util.FlxTimer;
+import entities.Player;
+import entities.enemy.Enemies;
+import entities.enemy.EnemyShot;
+import systems.Arena;
+import systems.EnemyDirector;
+import systems.Hud;
+import systems.Pickups;
+import systems.PlayerCombat;
+import systems.RenderLayers;
+import systems.weapons.Weapons;
+import util.SaveData;
+
+class NetSync
+{
+	static inline var SNAP_FRAMES:Int = 4;
+	static inline var RESPAWN_TIME:Float = 5;
+
+	public var onWaveEvt:Int->Void;
+	public var onBossEvt:Void->Void;
+	public var onBossDefeatedEvt:Void->Void;
+	public var onDropped:Void->Void;
+	public var onRestart:Void->Void;
+	public var runFailed(default, null):Bool = false;
+	public var makeFx:RemoteAvatar->RemoteFx;
+
+	private var player:Player;
+	private var status:PlayerCombat;
+	private var arena:Arena;
+	private var layers:RenderLayers;
+	private var director:EnemyDirector;
+	private var combat:Weapons;
+	private var pickups:Pickups;
+	private var hud:Hud;
+	private var scythe:FlxSprite;
+
+	private var roster:PeerRoster;
+	private var mirror:PuppetMirror;
+	private var frame:Int = 0;
+	private var nextEnemyId:Int = 1;
+	private var respawnTimer:Float = -1;
+	private var droppedHandled:Bool = false;
+
+	public function new(player:Player, status:PlayerCombat, arena:Arena, layers:RenderLayers, director:EnemyDirector,
+			combat:Weapons, pickups:Pickups, hud:Hud, scythe:FlxSprite)
+	{
+		this.player = player;
+		this.status = status;
+		this.arena = arena;
+		this.layers = layers;
+		this.director = director;
+		this.combat = combat;
+		this.pickups = pickups;
+		this.hud = hud;
+		this.scythe = scythe;
+
+		roster = new PeerRoster(function()
+		{
+			var av = new RemoteAvatar(layers);
+			return new Peer(av, makeFx != null ? makeFx(av) : null);
+		});
+		if (Net.isClient)
+			mirror = new PuppetMirror(director, pickups, status, hud, layers);
+
+		combat.onAttack = function(mode, pmx, pmy, dx, dy, aimDeg, tx, ty, power)
+			Net.send({
+				t: "atk",
+				m: Type.enumIndex(mode),
+				x: r1(pmx),
+				y: r1(pmy),
+				dx: r2(dx),
+				dy: r2(dy),
+				a: r1(aimDeg),
+				tx: r1(tx),
+				ty: r1(ty),
+				p: r2(power)
+			});
+
+		combat.onSuper = function(kind) Net.send({t: "sup", k: kind});
+		combat.onSuperLaunch = function(tx, ty) Net.send({t: "sla", x: r1(tx), y: r1(ty)});
+		combat.bounceStrike.onSlam = function(x, y) Net.send({t: "slm", x: r1(x), y: r1(y)});
+
+		if (Net.isHost)
+			wireHost();
+		else
+			wireClient();
+
+		announceName();
+	}
+
+	function myName():String
+	{
+		var n = SaveData.playerName();
+		return n.length > 0 ? n : "PLAYER " + (Net.selfId + 1);
+	}
+
+	function announceName():Void
+		Net.send({t: "nm", n: myName()});
+
+	public function requestRestart():Void
+		Net.send({t: "rst"});
+
+	public function peerCount():Int
+		return roster.count();
+
+	function wireHost():Void
+	{
+		var oldWave = director.onWave;
+		director.onWave = function(n)
+		{
+			Net.send({t: "wave", n: n});
+			if (oldWave != null)
+				oldWave(n);
+		};
+
+		var oldBoss = director.onBoss;
+		director.onBoss = function()
+		{
+			Net.send({t: "boss"});
+			if (oldBoss != null)
+				oldBoss();
+		};
+
+		var oldSpawn = director.onBossSpawn;
+		director.onBossSpawn = function(b)
+		{
+			if (b.netId < 0)
+				b.netId = nextEnemyId++;
+			Net.send({t: "bossSpawn", id: b.netId});
+			if (oldSpawn != null)
+				oldSpawn(b);
+		};
+
+		var oldDead = director.onBossDefeated;
+		director.onBossDefeated = function()
+		{
+			Net.send({t: "bossDead"});
+			if (oldDead != null)
+				oldDead();
+		};
+
+		director.onShot = function(x, y, dx, dy, dmg, spd, rng, sprite)
+			Net.send({t: "shot", x: r1(x), y: r1(y), dx: dx, dy: dy, dm: dmg, sp: spd, rg: rng, im: sprite});
+
+		combat.hits.onImpact = function(x, y) Net.send({t: "imp", x: r1(x), y: r1(y)});
+	}
+
+	function wireClient():Void
+	{
+		combat.hits.remote = true;
+		combat.hits.onClaim = function(e, px, py, d, s)
+		{
+			if (e.netId < 0)
+				return;
+			mirror.noteClaim(e.netId);
+			Net.send({t: "hit", id: e.netId, px: r2(px), py: r2(py), d: d, s: s});
+		};
+
+		pickups.onCollect = function(p)
+		{
+			if (p.netId >= 0)
+				Net.send({t: "took", id: p.netId});
+		};
+	}
+
+	static inline function r1(v:Float):Float
+		return Math.round(v * 10) / 10;
+
+	static inline function r2(v:Float):Float
+		return Math.round(v * 100) / 100;
+
+	public function update(elapsed:Float):Void
+	{
+		frame++;
+
+		for (msg in Net.poll())
+			handle(msg);
+
+		if (Net.dropped && !droppedHandled)
+		{
+			droppedHandled = true;
+			roster.dropAll();
+			if (onDropped != null)
+				onDropped();
+		}
+
+		if (Net.connected && frame % SNAP_FRAMES == 0)
+		{
+			if (Net.isHost)
+				sendSnapshot();
+			sendAvatar();
+		}
+
+		if (mirror != null)
+			mirror.update(elapsed);
+
+		roster.update(elapsed);
+		roster.fillBodies(director.coopBodies);
+		updateRespawn(elapsed);
+	}
+
+	function handle(msg:Dynamic):Void
+	{
+		switch ((msg.t : String))
+		{
+			case "av":
+				var p = roster.get(msg.f);
+				if (p != null)
+					p.applyAvatar(msg);
+
+			case "atk":
+				var p = roster.get(msg.f);
+				if (p != null && p.fx != null)
+					p.fx.attack(msg.m, msg.x, msg.y, msg.dx, msg.dy, msg.a, msg.tx, msg.ty, msg.p);
+
+			case "sup":
+				var p = roster.get(msg.f);
+				if (p != null && p.fx != null)
+					p.fx.superActivate(msg.k);
+
+			case "sla":
+				var p = roster.get(msg.f);
+				if (p != null && p.fx != null)
+					p.fx.superLaunch(msg.x, msg.y);
+
+			case "slm":
+				var p = roster.get(msg.f);
+				if (p != null && p.fx != null)
+					p.fx.slam(msg.x, msg.y);
+
+			case "nm":
+				var p = roster.get(msg.f);
+				if (p != null)
+					p.avatar.setName(msg.n);
+
+			case "join":
+				announceName();
+
+			case "bye":
+				roster.drop(msg.id);
+
+			case "rst":
+				if (onRestart != null)
+					onRestart();
+
+			case "imp" if (Net.isClient):
+				var p = roster.get(msg.f);
+				if (p != null && p.fx != null)
+					p.fx.spark(msg.x, msg.y);
+
+			case "hit" if (Net.isHost):
+				var e = findEnemy(msg.id);
+				if (e != null && !e.isDead)
+				{
+					combat.hits.applyHit(e, msg.px, msg.py, msg.d, false);
+					if (msg.s > 0)
+						e.stun = msg.s;
+				}
+
+			case "took" if (Net.isHost):
+				var p = pickups.findById(msg.id);
+				if (p != null)
+					p.kill();
+
+			case "snap" if (Net.isClient):
+				mirror.apply(msg);
+
+			case "shot" if (Net.isClient):
+				director.shots.recycle(EnemyShot).fire(msg.x, msg.y, msg.dx, msg.dy, msg.dm, msg.sp, msg.rg, msg.im);
+
+			case "wave" if (Net.isClient):
+				if (onWaveEvt != null)
+					onWaveEvt(msg.n);
+
+			case "boss" if (Net.isClient):
+				if (onBossEvt != null)
+					onBossEvt();
+
+			case "bossSpawn" if (Net.isClient):
+				mirror.expectBoss(msg.id);
+
+			case "bossDead" if (Net.isClient):
+				mirror.blastLastBoss();
+				new FlxTimer().start(0.9, function(_)
+				{
+					if (onBossDefeatedEvt != null)
+						onBossDefeatedEvt();
+				});
+
+			default:
+		}
+	}
+
+	function findEnemy(id:Int):Enemies
+	{
+		var found:Enemies = null;
+		director.eachEnemy(function(e)
+		{
+			if (e.netId == id)
+				found = e;
+		});
+		return found;
+	}
+
+	function sendSnapshot():Void
+	{
+		var en:Array<Array<Dynamic>> = [];
+		director.eachEnemy(function(e)
+		{
+			if (e.netId < 0)
+				e.netId = nextEnemyId++;
+			en.push([
+				e.netId, e.kind, r1(e.x), r1(e.y), e.flipX ? 1 : 0,
+				e.animation.name, e.hp, e.isDead ? 1 : 0
+			]);
+		});
+
+		var pk:Array<Array<Dynamic>> = [];
+		for (p in pickups.group.members)
+			if (p != null && p.exists && p.netId >= 0)
+				pk.push([p.netId, r1(p.x), r1(p.y)]);
+
+		Net.send({t: "snap", w: director.wave, en: en, pk: pk});
+	}
+
+	function armWire():Array<Dynamic>
+	{
+		if (!combat.hookArms.active)
+			return null;
+		var out:Array<Dynamic> = [];
+		for (a in combat.hookArms.arms)
+			out.push(a.claw.exists ? [
+				r1(a.cx), r1(a.cy), r1(a.claw.angle),
+				r1(a.handleX), r1(a.handleY), r1(a.ctrlX), r1(a.ctrlY)
+			] : null);
+		return out;
+	}
+
+	function sendAvatar():Void
+	{
+		var held = combat.held.sprite;
+		var hookShot = combat.hookAttack.hook;
+		var fly = combat.throwAttack.thrown;
+
+		Net.send({
+			t: "av",
+			x: r1(player.x),
+			y: r1(player.y),
+			fx: player.flipX,
+			an: player.animation.name,
+			wi: combat.weapon,
+			hv: held.visible && scythe.visible,
+			ha: r1(held.angle),
+			hf: held.flipX,
+			ho: [r1(held.x - player.x), r1(held.y - player.y), r2(held.scale.x), r2(combat.held.charge)],
+			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
+			sb: combat.superScythes.active(),
+			dd: status.dead,
+			ar: armWire(),
+			hk: hookShot.exists ? [r1(hookShot.x), r1(hookShot.y), r1(hookShot.angle), r1(combat.held.handX()), r1(combat.held.handY())] : null,
+			th: fly.exists ? [r1(fly.x), r1(fly.y), r1(fly.velocity.x), r1(fly.velocity.y)] : null
+		});
+	}
+
+	function updateRespawn(elapsed:Float):Void
+	{
+		if (!status.dead)
+		{
+			respawnTimer = -1;
+			runFailed = false;
+			return;
+		}
+
+		if (roster.everyoneDown())
+		{
+			if (!runFailed)
+			{
+				runFailed = true;
+				respawnTimer = -1;
+				hud.showDeath(director.wave, SaveData.bestWave());
+			}
+			return;
+		}
+
+		if (respawnTimer < 0)
+		{
+			respawnTimer = RESPAWN_TIME;
+			hud.showRespawn();
+		}
+		respawnTimer -= elapsed;
+		if (respawnTimer <= 0)
+		{
+			respawnTimer = -1;
+			status.revive();
+			status.health = status.healthMax * 0.5;
+			player.setPosition(arena.spawnX, arena.spawnY);
+			layers.playerShadow.visible = true;
+			scythe.visible = true;
+			hud.hideDeath();
+		}
+	}
+}

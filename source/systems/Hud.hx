@@ -355,6 +355,12 @@ class Hud
 		deadText.visible = true;
 	}
 
+	public function showRespawn():Void
+	{
+		deadText.text = "RESPAWNING...";
+		deadText.visible = true;
+	}
+
 	public function hideDeath():Void
 	{
 		deadText.visible = false;

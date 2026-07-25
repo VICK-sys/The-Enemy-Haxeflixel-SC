@@ -17,6 +17,7 @@ class ArrowRain
 
 	public var arrows:FlxTypedGroup<RainArrow>;
 	public var markers:FlxTypedGroup<FlxSprite>;
+	public var cosmetic:Bool = false;
 
 	private var cfg = WeaponDataRegistry.get().arrowRain;
 	private var fx:Fx;
@@ -105,7 +106,8 @@ class ArrowRain
 			FlxG.sound.play(Paths.sound("scythe/slice"), 0.25);
 			soundTimer = 0.05;
 		}
-		hits.blastRadial(ix, iy, cfg.hitRadius, 1, 1);
+		if (!cosmetic)
+			hits.blastRadial(ix, iy, cfg.hitRadius, 1, 1);
 	}
 }
 

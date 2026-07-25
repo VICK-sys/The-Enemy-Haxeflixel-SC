@@ -9,9 +9,11 @@ import util.Paths;
 class Pickups
 {
 	public var group:FlxTypedGroup<HealthPickup>;
+	public var onCollect:HealthPickup->Void;
 
 	private var player:Player;
 	private var status:PlayerCombat;
+	private var nextId:Int = 1;
 
 	public function new(player:Player, status:PlayerCombat)
 	{
@@ -20,9 +22,20 @@ class Pickups
 		group = new FlxTypedGroup<HealthPickup>();
 	}
 
-	public function drop(cx:Float, cy:Float):Void
+	public function drop(cx:Float, cy:Float):HealthPickup
 	{
-		group.recycle(HealthPickup).drop(cx, cy);
+		var p = group.recycle(HealthPickup);
+		p.drop(cx, cy);
+		p.netId = nextId++;
+		return p;
+	}
+
+	public function findById(id:Int):HealthPickup
+	{
+		for (p in group.members)
+			if (p != null && p.exists && p.netId == id)
+				return p;
+		return null;
 	}
 
 	public function update():Void
@@ -39,6 +52,8 @@ class Pickups
 			status.heal(HealthPickup.HEAL);
 			FlxG.sound.play(Paths.sound("heal"), 0.6);
 			p.kill();
+			if (onCollect != null)
+				onCollect(p);
 		}
 	}
 }

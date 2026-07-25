@@ -15,6 +15,7 @@ class BounceStrike
 	static inline var HAND_Y:Float = 65;
 
 	public var active(get, never):Bool;
+	public var onSlam:(Float, Float) -> Void;
 
 	private var cfg = WeaponDataRegistry.get().bounceStrike;
 	private var player:Player;
@@ -114,6 +115,9 @@ class BounceStrike
 		launch(cx, cy);
 
 		hits.blastRadial(cx, cy, cfg.radius, cfg.force, cfg.damage);
+
+		if (onSlam != null)
+			onSlam(cx, cy);
 	}
 
 	function launch(cx:Float, cy:Float):Void

@@ -82,6 +82,32 @@ class SaveData
 		save.flush();
 	}
 
+	public static function playerName():String
+	{
+		ensure();
+		return save.data.playerName != null ? save.data.playerName : "";
+	}
+
+	public static function setPlayerName(n:String):Void
+	{
+		ensure();
+		save.data.playerName = n;
+		save.flush();
+	}
+
+	public static function lastIp():String
+	{
+		ensure();
+		return save.data.lastIp != null ? save.data.lastIp : "";
+	}
+
+	public static function setLastIp(ip:String):Void
+	{
+		ensure();
+		save.data.lastIp = ip;
+		save.flush();
+	}
+
 	public static function applySettings():Void
 	{
 		FlxG.sound.volume = volume();

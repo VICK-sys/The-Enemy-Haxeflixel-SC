@@ -37,6 +37,9 @@ class Enemies extends FlxSprite
 	public var stunTime:Float = 0.3;
 
 	public var target:FlxSprite;
+	public var kind(default, null):String;
+	public var puppet:Bool = false;
+	public var netId:Int = -1;
 	public var entering:Bool = false;
 	public var seized:Bool = false;
 	public var throwGrace:Float = 0;
@@ -76,6 +79,7 @@ class Enemies extends FlxSprite
     public function new(kind:String, x:Float=0, y:Float=0)
     {
         super(x, y);
+		this.kind = kind;
 
 		this.antialiasing = false;
 		this.scale.set(4, 4);
@@ -177,6 +181,19 @@ class Enemies extends FlxSprite
 
     override public function update(elapsed:Float):Void
 	{
+		if (puppet)
+		{
+			prevBottom = y + height;
+			super.update(elapsed);
+			if (flashTimer > 0)
+			{
+				flashTimer -= elapsed;
+				if (flashTimer <= 0)
+					setColorTransform(1, 1, 1, alpha, 0, 0, 0, 0);
+			}
+			return;
+		}
+
 		if (WorldClock.scale <= 0 && !seized)
 		{
 			immovable = true;

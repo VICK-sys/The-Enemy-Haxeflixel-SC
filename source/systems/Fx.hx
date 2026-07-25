@@ -5,6 +5,7 @@ import flixel.FlxSprite;
 import flixel.effects.particles.FlxEmitter;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxColor;
+import util.Paths;
 
 class Fx
 {
@@ -83,5 +84,21 @@ class Fx
 	public function slamShake():Void
 	{
 		FlxG.camera.shake(0.009, 0.15);
+	}
+
+	public static function bossBlast(cx:Float, cy:Float):FlxSprite
+	{
+		var boom = new FlxSprite();
+		boom.loadGraphic(Paths.image("effects/rofel_explosion"), true, 80, 48);
+		boom.animation.add("boom", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 14, false);
+		boom.antialiasing = false;
+		boom.scale.set(9, 9);
+		boom.updateHitbox();
+		boom.x = cx - boom.width / 2;
+		boom.y = cy - boom.height / 2;
+		boom.animation.play("boom");
+		FlxG.sound.play(Paths.sound("rofel_explode"), 0.9);
+		FlxG.camera.shake(0.02, 0.5);
+		return boom;
 	}
 }
