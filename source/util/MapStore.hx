@@ -13,7 +13,6 @@ typedef StoredMap =
 	sx:Float,
 	sy:Float,
 	csv:String,
-	?theme:Int,
 	?props:Array<data.PropData.PropPlace>,
 	?tileset:String,
 	?tiles:String

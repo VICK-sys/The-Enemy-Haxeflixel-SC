@@ -340,7 +340,8 @@ class SuperScythes
 			{
 				var cx = b.x + b.width / 2;
 				var cy = b.y + b.height / 2;
-				if (arena.wallAt(cx + b.dirX * SuperBlade.RADIUS, cy + b.dirY * SuperBlade.RADIUS))
+				if (arena.wallAt(cx + b.dirX * SuperBlade.RADIUS, cy + b.dirY * SuperBlade.RADIUS)
+					|| systems.PropBlock.at(cx + b.dirX * SuperBlade.RADIUS, cy + b.dirY * SuperBlade.RADIUS))
 				{
 					b.velocity.set(0, 0);
 					b.fading = true;

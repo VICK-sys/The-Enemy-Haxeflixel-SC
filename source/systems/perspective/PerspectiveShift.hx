@@ -18,6 +18,7 @@ class PerspectiveShift
 	static inline var HIT_COOLDOWN:Float = 0.9;
 
 	public var locked:Bool = false;
+	public var disabled:Bool = false;
 	public var morphing(get, never):Bool;
 
 	private var sv:SideViewData;
@@ -71,12 +72,12 @@ class PerspectiveShift
 
 	public function onWave(n:Int):Void
 	{
-		arrival.tryBegin(n, locked);
+		arrival.tryBegin(n, locked || disabled);
 	}
 
 	public function onProbe(cx:Float, cy:Float, radius:Float):Void
 	{
-		if (!arrival.arrived || hitCd > 0 || morphing || locked || WorldClock.scale < 1 || combat.playerBusy)
+		if (disabled || !arrival.arrived || hitCd > 0 || morphing || locked || WorldClock.scale < 1 || combat.playerBusy)
 			return;
 		if (!totem.hitTest(cx, cy, radius))
 			return;
@@ -104,6 +105,8 @@ class PerspectiveShift
 
 	public function restoreTotem():Void
 	{
+		if (disabled)
+			return;
 		if (arrival.arrived)
 			totem.show();
 	}

@@ -135,7 +135,7 @@ class RemoteAvatar
 		held.y = sprite.y + heldOY;
 
 		shadow.x = sprite.x + 30;
-		SideView.placeShadow(shadow, sprite.x, sprite.width, sprite.y + sprite.height, sprite.y + 90, 4, 4);
+		SideView.placeShadow(shadow, sprite.x, sprite.width, sprite.y + sprite.height, sprite.y + entities.Player.FEET, 4, 4);
 
 		tag.visible = sprite.visible;
 		tag.x = sprite.x + sprite.width * 0.5 - TAG_WIDTH * 0.5;

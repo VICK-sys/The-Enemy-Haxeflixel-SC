@@ -38,6 +38,8 @@ class MainMenuState extends FlxState
 	private var shutY:Int = 0;
 	private var shutW:Int = 0;
 	private var shutH:Int = 0;
+	private var maps:Array<Int> = [0];
+	private var mapPick:Int = 0;
 	private var shutCurW:Int = 0;
 	private var shutCurH:Int = 0;
 
@@ -58,17 +60,19 @@ class MainMenuState extends FlxState
 
 		addSplash(title);
 
-		var labels = ["PLAY"];
+		findMaps();
+
+		var labels = [playLabel()];
 		#if desktop
 		labels.push("ONLINE");
 		#end
-		labels.push("EDITOR");
 		labels.push("OPTIONS");
 		#if !html5
 		labels.push("QUIT");
 		#end
 		list = new MenuList(labels, 360, 72, 44);
 		list.onChoose = choose;
+		list.onAdjust = adjustMap;
 		add(list);
 
 		best = new FlxText(16, FlxG.height - 30, 0, "");
@@ -126,6 +130,14 @@ class MainMenuState extends FlxState
 		if (leaving)
 			return;
 
+		if (FlxG.keys.justPressed.F7 && !busy && subState == null)
+		{
+			leaving = true;
+			list.enabled = false;
+			wipe.close(function() FlxG.switchState(new EditorState()));
+			return;
+		}
+
 		splashTime += elapsed;
 		var s = 1 - SPLASH_THROB * Math.abs(Math.sin(splashTime * SPLASH_SPEED));
 		splash.scale.set(s, s);
@@ -150,16 +162,18 @@ class MainMenuState extends FlxState
 
 	function commit(i:Int):Void
 	{
-		switch (list.rowAt(i).text)
+		var label = list.rowAt(i).text;
+		if (StringTools.startsWith(label, "PLAY"))
 		{
-			case "PLAY":
-				startGame();
+			startGame();
+			return;
+		}
+
+		switch (label)
+		{
 			case "ONLINE":
 				leaving = true;
 				wipe.close(function() FlxG.switchState(new OnlineState()));
-			case "EDITOR":
-				leaving = true;
-				wipe.close(function() FlxG.switchState(new EditorState()));
 			case "OPTIONS":
 				FlxG.inputs.reset();
 				openSubState(new OptionsSubState());
@@ -168,10 +182,46 @@ class MainMenuState extends FlxState
 		}
 	}
 
+	function findMaps():Void
+	{
+		maps = [0];
+		for (s in 1...util.MapStore.SLOTS + 1)
+			if (util.MapStore.load(s) != null)
+				maps.push(s);
+
+		mapPick = 0;
+		for (i in 0...maps.length)
+			if (maps[i] == EditorState.lastSlot)
+				mapPick = i;
+	}
+
+	function playLabel():String
+		return maps[mapPick] == 0 ? "PLAY" : "PLAY: SLOT " + maps[mapPick];
+
+	function adjustMap(i:Int, dir:Int):Void
+	{
+		if (i != 0 || maps.length <= 1)
+			return;
+		mapPick = (mapPick + dir + maps.length) % maps.length;
+		list.setLabel(0, playLabel());
+	}
+
+	function loadPick():Void
+	{
+		util.CustomArena.clear();
+		if (maps[mapPick] == 0)
+			return;
+
+		var m = util.MapStore.load(maps[mapPick]);
+		if (m != null)
+			util.CustomArena.fromStored(m);
+	}
+
 	function startGame():Void
 	{
 		leaving = true;
 		list.enabled = false;
+		loadPick();
 		wipe.close(function()
 		{
 			FlxG.mouse.visible = false;

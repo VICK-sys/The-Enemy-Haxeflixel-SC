@@ -112,12 +112,15 @@ class PlayerCombat
 		return true;
 	}
 
-	public function hurtPlayer(source:FlxObject, damage:Float):Bool
+	public function hurtPlayer(source:FlxObject, damage:Float, ?fromY:Null<Float>):Bool
 	{
 		if (dead || iframeTimer > 0 || invincible)
 			return false;
 		if (source.x + source.width <= player.x || player.x + player.width <= source.x
 			|| source.y + source.height <= player.y || player.y + player.height <= source.y)
+			return false;
+		if (PropBlock.between(source.x + source.width / 2, fromY == null ? source.y + source.height : fromY,
+			player.x + player.width / 2, player.feetY))
 			return false;
 
 		FlxG.sound.play(Paths.sound("damaged/hit"));

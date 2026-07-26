@@ -11,6 +11,13 @@ import data.PlayerData.PlayerDataRegistry;
 
 class Player extends FlxSprite
 {
+	public static inline var FEET:Float = 90;
+
+	public var feetY(get, never):Float;
+
+	function get_feetY():Float
+		return y + FEET;
+
 	public var blockMovement:Bool = false;
 	public var isDead:Bool = false;
 	public var floating:Bool = false;

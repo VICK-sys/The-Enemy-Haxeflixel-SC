@@ -20,6 +20,12 @@ typedef EditorPaletteData =
 	maxZoom:Float
 }
 
+typedef EditorUiData =
+{
+	sidebar:Int,
+	topbar:Int
+}
+
 typedef EditorBrushData =
 {
 	maxSize:Int,
@@ -30,6 +36,7 @@ typedef EditorData =
 {
 	view:EditorViewData,
 	palette:EditorPaletteData,
+	ui:EditorUiData,
 	brush:EditorBrushData,
 	flashTime:Float
 }

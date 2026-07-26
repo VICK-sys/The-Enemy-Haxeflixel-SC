@@ -11,6 +11,7 @@ import util.Paths;
 class HitPipeline
 {
 	public var remote:Bool = false;
+	public var owner:entities.Player;
 	public var onClaim:(Enemies, Float, Float, Int, Float) -> Void;
 	public var onImpact:(Float, Float) -> Void;
 
@@ -34,6 +35,8 @@ class HitPipeline
 
 	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Int):Void
 	{
+		if (owner != null && PropBlock.between(owner.x + owner.width / 2, owner.feetY, e.x + e.width / 2, e.feetY))
+			return;
 		if (remote)
 		{
 			claim(e, pushX, pushY, damage, 0);

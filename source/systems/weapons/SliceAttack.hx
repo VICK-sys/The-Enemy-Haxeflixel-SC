@@ -40,7 +40,8 @@ class SliceAttack
 				continue;
 			var scx = slice.x + slice.width / 2;
 			var scy = slice.y + slice.height / 2;
-			if (arena.wallAt(scx + slice.dirX * SliceProjectile.RADIUS, scy + slice.dirY * SliceProjectile.RADIUS))
+			if (arena.wallAt(scx + slice.dirX * SliceProjectile.RADIUS, scy + slice.dirY * SliceProjectile.RADIUS)
+				|| systems.PropBlock.at(scx + slice.dirX * SliceProjectile.RADIUS, scy + slice.dirY * SliceProjectile.RADIUS))
 			{
 				slice.velocity.set(0, 0);
 				slice.fading = true;

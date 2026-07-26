@@ -41,6 +41,7 @@ class Weapons
 		this.player = player;
 		this.status = status;
 		hits = new HitPipeline(status, fx, pickups, director);
+		hits.owner = player;
 		held = new HeldWeapon(player, scythe);
 		swing = new SwingAttack(director, hits);
 		slice = new SliceAttack(arena, director, hits);
@@ -136,21 +137,6 @@ class Weapons
 
 	function updateWeaponInput():Void
 	{
-		if (FlxG.keys.justPressed.ONE)
-			selectWeapon(0);
-		if (FlxG.keys.justPressed.TWO)
-			selectWeapon(1);
-		if (FlxG.keys.justPressed.THREE)
-			selectWeapon(2);
-		if (FlxG.keys.justPressed.FOUR)
-			selectWeapon(3);
-
-		var wheel = FlxG.mouse.wheel;
-		if (wheel < 0)
-			selectWeapon((weapon + 1) % WEAPON_MODES.length);
-		else if (wheel > 0)
-			selectWeapon((weapon + WEAPON_MODES.length - 1) % WEAPON_MODES.length);
-
 		if (FlxG.mouse.justPressedRight)
 		{
 			var list = WEAPON_MODES[weapon];
@@ -163,13 +149,11 @@ class Weapons
 		}
 	}
 
-	function selectWeapon(i:Int):Void
+	public function equip(i:Int):Void
 	{
-		if (i == weapon)
-			return;
-		weapon = i;
+		weapon = i < 0 || i >= WEAPON_MODES.length ? 0 : i;
 		bow.cancelCharge();
-		held.setMode(WEAPON_MODES[i][modeIndexes[i]]);
+		held.setMode(WEAPON_MODES[weapon][modeIndexes[weapon]]);
 	}
 
 	function aimFromPlayer():{dx:Float, dy:Float, deg:Float}

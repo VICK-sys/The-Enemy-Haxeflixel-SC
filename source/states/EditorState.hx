@@ -9,9 +9,11 @@ import flixel.util.FlxColor;
 import data.ArenaData.ArenaDataRegistry;
 import data.EditorData.EditorDataRegistry;
 import data.ThemeData.ThemeDataRegistry;
+import states.editor.EditorChrome;
 import states.editor.EditorHud;
 import states.editor.EditorMap;
 import states.editor.EditorView;
+import states.editor.LibraryPanel;
 import states.editor.PropPalette;
 import states.editor.PropTool;
 import states.editor.TilePalette;
@@ -33,6 +35,8 @@ class EditorState extends FlxState
 	private var doc:EditorMap;
 	private var view:EditorView;
 	private var hud:EditorHud;
+	private var chrome:EditorChrome;
+	private var library:LibraryPanel;
 	private var wallTool:WallTool;
 	private var tileTool:TileTool;
 	private var propTool:PropTool;
@@ -47,6 +51,8 @@ class EditorState extends FlxState
 	private var slot:Int;
 	private var mode:Int = MODE_WALLS;
 	private var leaving:Bool = false;
+	private var eyes:Array<Bool> = [true, true, true];
+	private var lastHeld:Bool = true;
 
 	private var isProps(get, never):Bool;
 
@@ -56,7 +62,7 @@ class EditorState extends FlxState
 	override public function create():Void
 	{
 		FlxG.mouse.visible = true;
-		FlxG.camera.bgColor = 0xFF120C14;
+		FlxG.camera.bgColor = 0xFF0A0A0A;
 
 		doc = new EditorMap(cfg.brush.undoDepth);
 		slot = lastSlot;
@@ -66,40 +72,107 @@ class EditorState extends FlxState
 		uiCam.bgColor = FlxColor.TRANSPARENT;
 		FlxG.cameras.add(uiCam, false);
 
-		tilePal = new TilePalette(this, uiCam, cfg.palette.width, cfg.palette.height, cfg.palette.padding, cfg.palette.maxZoom);
-		propPal = new PropPalette(this, uiCam, cfg.palette.width, cfg.palette.height, cfg.palette.padding, cfg.palette.propCell);
-		hud = new EditorHud(this, uiCam, cfg.flashTime);
+		var palX = (cfg.ui.sidebar - cfg.palette.width) / 2;
+		var palY = cfg.ui.topbar + 16;
+
+		chrome = new EditorChrome(this, uiCam, cfg.ui.sidebar, cfg.ui.topbar, palX, palY, cfg.palette.width, cfg.palette.height,
+			cfg.palette.padding);
+		tilePal = new TilePalette(this, uiCam, palX, palY, cfg.palette.width, cfg.palette.height, cfg.palette.padding, cfg.palette.maxZoom);
+		propPal = new PropPalette(this, uiCam, palX, palY, cfg.palette.width, cfg.palette.height, cfg.palette.padding, cfg.palette.propCell);
+		hud = new EditorHud(this, uiCam, cfg.flashTime, cfg.ui.sidebar, cfg.ui.topbar);
+		library = new LibraryPanel(this, uiCam, hud.flash, cfg.ui.sidebar, cfg.ui.topbar, EditorHud.BAR);
 
 		wallTool = new WallTool(doc, Paths.file(ArenaDataRegistry.get().tiles));
 		tileTool = new TileTool(doc, wallTool, tilePal, hud.flash);
 		propTool = new PropTool(doc, propPal, hud.flash);
 
 		bg = new FlxSprite(0, 0);
-		add(bg);
-		add(wallTool.map);
-		add(tileTool.layer);
-		add(propTool.group);
-		add(tileTool.ghost);
-		add(wallTool.hover);
-		add(wallTool.rectPreview);
-		add(propTool.ghost);
+		insert(0, bg);
+		insert(1, wallTool.map);
+		insert(2, tileTool.layer);
+		insert(3, propTool.group);
+		insert(4, propTool.boxes);
+		insert(5, propTool.outline);
+		insert(6, tileTool.ghost);
+		insert(7, wallTool.hover);
+		insert(8, wallTool.rectPreview);
+		insert(9, propTool.ghost);
+		insert(10, tileTool.marquee);
 
 		spawnMark = new FlxSprite();
 		spawnMark.makeGraphic(22, 22, 0xFF7CFC00);
 		spawnMark.angle = 45;
-		add(spawnMark);
+		insert(11, spawnMark);
 
 		spawnLabel = new FlxText(0, 0, 120, "SPAWN");
 		spawnLabel.setFormat(null, 20, 0xFF7CFC00, CENTER);
 		spawnLabel.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
-		add(spawnLabel);
+		insert(12, spawnLabel);
 
+		wireChrome();
 		refreshAll();
 		showPalettes();
-		view = new EditorView(cfg.view, doc);
-		hud.setHelp(helpLine());
-		refreshStatus();
+		view = new EditorView(cfg.view, doc, cfg.ui.sidebar, cfg.ui.topbar, EditorHud.BAR);
+		hud.setHint(hintLine());
+		chrome.setMode(mode);
 		super.create();
+	}
+
+	function wireChrome():Void
+	{
+		chrome.onSlot = function() switchSlot(slot % 5 + 1);
+		chrome.onModeChip = modeChipAction;
+		chrome.onSheet = function() if (mode == MODE_TILES) tileTool.cycleSheet();
+		chrome.onMode = setMode;
+		chrome.onEye = toggleEye;
+		chrome.onUndo = undo;
+		chrome.onClear = function() if (!isProps) clearMap();
+		chrome.onSave = saveSlot;
+		chrome.onPlay = playTest;
+		chrome.onControls = hud.toggleSheet;
+		chrome.onLibrary = library.toggle;
+		library.onAdded = onLibraryChanged;
+	}
+
+	function onLibraryChanged(kind:String):Void
+	{
+		switch (kind)
+		{
+			case "tilesets":
+				tilePal.build(doc.tileset());
+				tileTool.refreshGhost();
+			case "props", "hitbox":
+				propPal.build();
+				propTool.rebuild();
+				propTool.refreshGhost();
+			case "walls":
+				applyTheme();
+			default:
+				tilePal.build(doc.tileset());
+				propPal.build();
+		}
+	}
+
+	function modeChipAction():Void
+	{
+		switch (mode)
+		{
+			case MODE_TILES: tileTool.toggleSolid();
+			case MODE_PROPS: propTool.setHeld(!propTool.held);
+			default: hud.flash(wallTool.cycleBrush(cfg.brush.maxSize));
+		}
+	}
+
+	function toggleEye(i:Int):Void
+	{
+		eyes[i] = !eyes[i];
+		chrome.setEye(i, eyes[i]);
+		switch (i)
+		{
+			case 0: wallTool.map.visible = eyes[i];
+			case 1: tileTool.layer.visible = eyes[i];
+			default: propTool.group.visible = eyes[i];
+		}
 	}
 
 	function refreshAll():Void
@@ -115,7 +188,7 @@ class EditorState extends FlxState
 
 	function applyTheme():Void
 	{
-		var t = ThemeDataRegistry.get(doc.theme);
+		var t = ThemeDataRegistry.get(0);
 		bg.loadGraphic(Paths.image(t.background));
 		bg.setGraphicSize(doc.cols * doc.cell, doc.rows * doc.cell);
 		bg.updateHitbox();
@@ -135,48 +208,30 @@ class EditorState extends FlxState
 	{
 		tilePal.show(mode == MODE_TILES);
 		propPal.show(mode == MODE_PROPS);
+		propTool.showOverlays(mode == MODE_PROPS);
+		chrome.setPaletteHint(mode == MODE_WALLS ? "WALL MODE PAINTS WITH THE BRUSH" : "");
 	}
 
-	function overPanel():Bool
-		return tilePal.contains() || propPal.contains();
-
-	function hideCursors():Void
-	{
-		wallTool.hideCursor();
-		tileTool.hideCursor();
-		propTool.hideCursor();
-	}
-
-	function helpLine():String
+	function hintLine():String
 	{
 		return switch (mode)
 		{
 			case MODE_TILES:
-				"TILES - LEFT PAINT   RIGHT ERASE   [ ] STEP   F SHEET   V SOLID   PALETTE: DRAG A PATCH, WHEEL ZOOM, RIGHT-DRAG PAN";
+				"LEFT PAINT   RIGHT ERASE   [ ] STEP   F SHEET   V SOLID   CTRL-DRAG SELECT   CTRL+C COPY   CTRL+V PASTE";
 			case MODE_PROPS:
-				"PROPS - LEFT PLACE   RIGHT DELETE   F FLIP      PALETTE - CLICK A PROP, WHEEL SCROLLS, [ ] STEPS";
+				propTool.held ? "LEFT PLACE   RIGHT DELETE   F FLIP   [ ] STEP   Q PUT DOWN TO EDIT PLACED PROPS   H HITBOX" : "LEFT PICK A PLACED PROP   DRAG TO MOVE   F FLIP   DEL REMOVE   Q PICK BACK UP   H HITBOX";
 			default:
-				"WALLS - LEFT PAINT   RIGHT ERASE   SHIFT BOX   B BRUSH   C CLEAR   L COPY STAGE";
+				"LEFT PAINT   RIGHT ERASE   SHIFT BOX   B BRUSH   C CLEAR   L COPY STOCK STAGE";
 		};
 	}
 
-	function refreshStatus():Void
+	function setMode(m:Int):Void
 	{
-		var left = "SLOT " + slot + (doc.dirty ? "  *UNSAVED*" : "  (SAVED)") + "   THEME: "
-			+ ThemeDataRegistry.get(doc.theme).name;
-		var right = switch (mode)
-		{
-			case MODE_TILES: tileTool.statusText();
-			case MODE_PROPS: propTool.statusText();
-			default: "WALLS   BRUSH " + wallTool.brush;
-		};
-		hud.setStatus(left, right);
-	}
-
-	function cycleMode():Void
-	{
-		mode = (mode + 1) % 3;
+		if (m == mode)
+			return;
+		mode = m;
 		hideCursors();
+		tileTool.clearSelection();
 		showPalettes();
 		if (mode == MODE_TILES)
 		{
@@ -188,16 +243,19 @@ class EditorState extends FlxState
 			propPal.build();
 			propTool.refreshGhost();
 		}
-		hud.setHelp(helpLine());
+		chrome.setMode(mode);
+		hud.setHint(hintLine());
 		hud.flash(MODE_NAMES[mode]);
 	}
 
-	function cycleTheme():Void
+	function cycleMode():Void
+		setMode((mode + 1) % 3);
+
+	function hideCursors():Void
 	{
-		doc.theme = (doc.theme + 1) % ThemeDataRegistry.count();
-		applyTheme();
-		doc.dirty = true;
-		hud.flash("THEME: " + ThemeDataRegistry.get(doc.theme).name);
+		wallTool.hideCursor();
+		tileTool.hideCursor();
+		propTool.hideCursor();
 	}
 
 	function saveSlot():Void
@@ -238,10 +296,12 @@ class EditorState extends FlxState
 
 	function undo():Void
 	{
-		if (isProps)
-			propTool.undoLast();
-		else if (doc.undo())
-			wallTool.rebuild();
+		if (!doc.undo())
+			return;
+		wallTool.rebuild();
+		tileTool.rebuild();
+		propTool.rebuild();
+		hud.flash("UNDONE");
 	}
 
 	function dropSpawn():Void
@@ -263,9 +323,10 @@ class EditorState extends FlxState
 			return;
 		leaving = true;
 		saveSlot();
-		CustomArena.set(doc.wallCsv(), doc.spawnX, doc.spawnY, doc.theme, doc.props);
+		CustomArena.set(doc.wallCsv(), doc.spawnX, doc.spawnY, doc.props);
 		var t = doc.tileset();
 		CustomArena.setTiles(t == null ? null : t.name, doc.tileCsv());
+		CustomArena.fromEditor = true;
 		FlxG.mouse.visible = false;
 		FlxG.switchState(new PlayState());
 	}
@@ -280,6 +341,26 @@ class EditorState extends FlxState
 		FlxG.switchState(new MainMenuState());
 	}
 
+	function syncChrome():Void
+	{
+		if (lastHeld != propTool.held)
+		{
+			lastHeld = propTool.held;
+			if (isProps)
+				hud.setHint(hintLine());
+		}
+
+		chrome.setSlot(slot, doc.dirty);
+		chrome.setModeChip(switch (mode)
+		{
+			case MODE_TILES: "SOLID: " + (tileTool.solid ? "ON" : "OFF");
+			case MODE_PROPS: propTool.held ? "HOLDING: " + propTool.heldName() : "HANDS EMPTY";
+			default: "BRUSH " + wallTool.brush + "X" + wallTool.brush;
+		});
+		var t = doc.tileset();
+		chrome.setSheet("SHEET: " + (t == null ? "NONE" : t.name), mode == MODE_TILES);
+	}
+
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
@@ -288,7 +369,12 @@ class EditorState extends FlxState
 			return;
 
 		hud.update(elapsed);
-		view.update(elapsed, overPanel());
+		library.update();
+		if (!library.isOpen())
+			chrome.update();
+
+		var overUI = chrome.contains() || hud.modal() || library.isOpen();
+		view.update(elapsed, overUI);
 
 		if (FlxG.keys.pressed.SPACE)
 			hideCursors();
@@ -297,28 +383,51 @@ class EditorState extends FlxState
 			var cell = view.cellAt();
 			switch (mode)
 			{
-				case MODE_TILES: tileTool.update();
-				case MODE_PROPS: propTool.update();
-				default: wallTool.update(cell.c, cell.r);
+				case MODE_TILES: tileTool.update(overUI);
+				case MODE_PROPS: propTool.update(overUI);
+				default: wallTool.update(cell.c, cell.r, overUI);
 			}
 		}
 
-		updateKeys();
-		refreshStatus();
+		updateKeys(overUI);
+		syncChrome();
 	}
 
-	function updateKeys():Void
+	function updateKeys(overUI:Bool):Void
 	{
+		if (library.isOpen())
+		{
+			if (FlxG.keys.justPressed.ESCAPE)
+				library.close();
+			return;
+		}
+
+		var ctrl = FlxG.keys.pressed.CONTROL;
+		var onCanvas = mode == MODE_TILES && !overUI;
+
 		if (FlxG.keys.justPressed.P)
 			cycleMode();
 		if (FlxG.keys.justPressed.B && mode == MODE_WALLS)
 			hud.flash(wallTool.cycleBrush(cfg.brush.maxSize));
 		if (FlxG.keys.justPressed.Z)
 			undo();
-		if (FlxG.keys.justPressed.C && !isProps)
-			clearMap();
-		if (FlxG.keys.justPressed.T)
-			cycleTheme();
+
+		if (FlxG.keys.justPressed.C)
+		{
+			if (ctrl)
+			{
+				if (onCanvas && tileTool.copySelection())
+					hud.flash("COPIED " + tileTool.clipLabel());
+			}
+			else if (!isProps)
+				clearMap();
+		}
+		if (ctrl && FlxG.keys.justPressed.V && onCanvas && tileTool.paste())
+			hud.flash("PASTED");
+
+		if (FlxG.keys.justPressed.H && isProps)
+			library.openHitbox(propTool.selectedName());
+
 		if (FlxG.keys.justPressed.L && !isProps)
 			copyStock();
 		if (FlxG.keys.justPressed.S)
@@ -340,6 +449,13 @@ class EditorState extends FlxState
 		if (FlxG.keys.justPressed.ENTER)
 			playTest();
 		if (FlxG.keys.justPressed.ESCAPE)
-			back();
+		{
+			if (library.isOpen())
+				library.close();
+			else if (hud.modal())
+				hud.toggleSheet();
+			else
+				back();
+		}
 	}
 }

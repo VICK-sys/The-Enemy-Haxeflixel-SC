@@ -48,12 +48,14 @@ class Decor
 		if (g == null)
 			return null;
 
-		var s = new FlxSprite();
+		var s = new PropSprite();
 		s.loadGraphic(g);
 		s.antialiasing = false;
 		var sc = p.scale <= 0 ? 1 : p.scale;
 		s.scale.set(sc, sc);
 		s.updateHitbox();
+		s.layerMode = p.layer == null ? PropSprite.SORTED : p.layer;
+		s.baseOffset = p.hitbox != null && p.hitbox.length == 4 ? p.hitbox[1] + p.hitbox[3] : g.height;
 		return s;
 	}
 
@@ -61,6 +63,56 @@ class Decor
 	{
 		s.x = x - s.width / 2;
 		s.y = y - s.height;
+		if (Std.isOfType(s, PropSprite))
+		{
+			var p = cast(s, PropSprite);
+			p.sortY = s.y + p.baseOffset * s.scale.y;
+		}
+	}
+
+	public static function sortValue(s:FlxSprite):Float
+	{
+		if (!Std.isOfType(s, PropSprite))
+			return s.y + s.height;
+		var p = cast(s, PropSprite);
+		if (p.layerMode == PropSprite.GROUND)
+			return -999999;
+		if (p.layerMode == PropSprite.OVERHEAD)
+			return 999999;
+		return p.sortY;
+	}
+
+	public static function solids(list:Array<PropPlace>, ?tint:Int):flixel.group.FlxGroup.FlxTypedGroup<FlxSprite>
+	{
+		var group = new flixel.group.FlxGroup.FlxTypedGroup<FlxSprite>();
+		if (list == null)
+			return group;
+
+		for (pl in list)
+		{
+			var p = PropDataRegistry.byName(pl.n);
+			if (p == null || p.hitbox == null || p.hitbox.length != 4)
+				continue;
+			var g = graphicFor(p);
+			if (g == null)
+				continue;
+
+			var sc = p.scale <= 0 ? 1 : p.scale;
+			var bx = pl.f == true ? g.width - p.hitbox[0] - p.hitbox[2] : p.hitbox[0];
+			var w = Math.max(1, p.hitbox[2] * sc);
+			var h = Math.max(1, p.hitbox[3] * sc);
+
+			var s = new FlxSprite(pl.x - g.width * sc / 2 + bx * sc, pl.y - g.height * sc + p.hitbox[1] * sc);
+			s.makeGraphic(1, 1, tint == null ? 0x00000000 : tint);
+			s.setGraphicSize(Std.int(w), Std.int(h));
+			s.updateHitbox();
+			s.immovable = true;
+			s.moves = false;
+			s.visible = tint != null;
+			s.alpha = 0.3;
+			group.add(s);
+		}
+		return group;
 	}
 
 	public static function build(list:Array<PropPlace>, into:flixel.group.FlxGroup.FlxTypedGroup<FlxSprite>):Array<FlxSprite>

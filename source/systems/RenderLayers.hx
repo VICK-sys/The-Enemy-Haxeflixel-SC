@@ -27,7 +27,7 @@ class RenderLayers
 		shadowLayer = new FlxTypedGroup<FlxSprite>();
 		state.add(shadowLayer);
 
-		playerShadow = new FlxSprite(player.x + 30, player.y + 90, Paths.image("effects/shadow"));
+		playerShadow = new FlxSprite(player.x + 30, player.feetY, Paths.image("effects/shadow"));
 		playerShadow.scale.set(4, 4);
 		shadowLayer.add(playerShadow);
 
@@ -58,7 +58,7 @@ class RenderLayers
 	public function update():Void
 	{
 		playerShadow.x = player.shadowCenterX - playerShadow.width / 2;
-		SideView.placeShadow(playerShadow, player.x, player.width, player.y + player.height, player.y + 90, player.shadowScaleX, 4);
+		SideView.placeShadow(playerShadow, player.x, player.width, player.y + player.height, player.feetY, player.shadowScaleX, 4);
 		entityLayer.sort(sortByFeet, FlxSort.ASCENDING);
 	}
 
@@ -67,14 +67,17 @@ class RenderLayers
 		return FlxSort.byValues(order, sortKey(a), sortKey(b));
 	}
 
+	public function keyOf(s:FlxSprite):Float
+		return sortKey(s);
+
 	function sortKey(s:FlxSprite):Float
 	{
 		if (s == scythe)
-			return player.y + 91;
+			return player.feetY + 1;
 		if (s == player)
-			return s.y + 90;
+			return player.feetY;
 		if (Std.isOfType(s, Enemies))
-			return s.y + cast(s, Enemies).shadowOffY;
-		return s.y + s.height;
+			return cast(s, Enemies).feetY;
+		return Decor.sortValue(s);
 	}
 }

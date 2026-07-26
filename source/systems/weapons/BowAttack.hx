@@ -121,7 +121,8 @@ class BowAttack
 				continue;
 			var acx = arrow.x + arrow.width / 2;
 			var acy = arrow.y + arrow.height / 2;
-			if (arena.wallAt(acx + arrow.dirX * Arrow.RADIUS, acy + arrow.dirY * Arrow.RADIUS))
+			if (arena.wallAt(acx + arrow.dirX * Arrow.RADIUS, acy + arrow.dirY * Arrow.RADIUS)
+				|| systems.PropBlock.at(acx + arrow.dirX * Arrow.RADIUS, acy + arrow.dirY * Arrow.RADIUS))
 			{
 				arrow.kill();
 				continue;

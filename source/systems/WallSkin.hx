@@ -27,7 +27,7 @@ class WallSkin
 		if (!CustomArena.active)
 			return;
 
-		var t = ThemeDataRegistry.get(CustomArena.theme);
+		var t = ThemeDataRegistry.get(0);
 		background = t.background;
 		color = ThemeDataRegistry.colorOf(t);
 

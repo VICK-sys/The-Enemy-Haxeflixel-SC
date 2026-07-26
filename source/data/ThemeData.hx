@@ -1,5 +1,6 @@
 package data;
 
+import util.Library;
 import util.Paths;
 
 typedef ThemeData =
@@ -19,11 +20,30 @@ typedef ThemeSet =
 class ThemeDataRegistry
 {
 	static var data:ThemeSet;
+	static var baseWall:String;
+	static var baseRect:Array<Int>;
+	static var appliedAt:Int = -1;
 
 	public static function all():Array<ThemeData>
 	{
 		if (data == null)
+		{
 			data = DataLoader.load(Paths.json("themes"));
+			if (data.themes.length > 0)
+			{
+				baseWall = data.themes[0].wall;
+				baseRect = data.themes[0].wallRect;
+			}
+		}
+
+		Library.ensure();
+		if (appliedAt != Library.version && data.themes.length > 0)
+		{
+			var w = Library.wallImage;
+			data.themes[0].wall = w == null ? baseWall : w;
+			data.themes[0].wallRect = w == null ? baseRect : [];
+			appliedAt = Library.version;
+		}
 		return data.themes;
 	}
 

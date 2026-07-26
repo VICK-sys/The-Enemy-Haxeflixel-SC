@@ -10,14 +10,18 @@ class EditorView
 
 	private var cfg:EditorViewData;
 	private var doc:EditorMap;
+	private var insetL:Float;
+	private var insetT:Float;
+	private var insetB:Float;
 
-	public function new(cfg:EditorViewData, doc:EditorMap)
+	public function new(cfg:EditorViewData, doc:EditorMap, insetL:Float, insetT:Float, insetB:Float)
 	{
 		this.cfg = cfg;
 		this.doc = doc;
-		zoom = cfg.startZoom;
-		FlxG.camera.zoom = zoom;
-		center();
+		this.insetL = insetL;
+		this.insetT = insetT;
+		this.insetB = insetB;
+		reset();
 	}
 
 	public static function mouseWorld():FlxPoint
@@ -54,7 +58,7 @@ class EditorView
 		}
 
 		if (FlxG.keys.justPressed.ZERO)
-			setZoom(cfg.startZoom, false);
+			reset();
 
 		if (!overPanel && FlxG.mouse.wheel != 0)
 			setZoom(zoom * (FlxG.mouse.wheel > 0 ? cfg.zoomStep : 1 / cfg.zoomStep), true);
@@ -63,7 +67,7 @@ class EditorView
 	public function setZoom(z:Float, atCursor:Bool):Void
 	{
 		var before = mouseWorld();
-		zoom = z < cfg.minZoom ? cfg.minZoom : (z > cfg.maxZoom ? cfg.maxZoom : z);
+		zoom = clampZoom(z);
 		FlxG.camera.zoom = zoom;
 		if (atCursor)
 		{
@@ -75,6 +79,21 @@ class EditorView
 			center();
 	}
 
+	public function reset():Void
+	{
+		var fit = Math.min((FlxG.width - insetL) / (doc.cols * doc.cell), (FlxG.height - insetT - insetB) / (doc.rows * doc.cell));
+		zoom = clampZoom(fit);
+		FlxG.camera.zoom = zoom;
+		center();
+	}
+
+	function clampZoom(z:Float):Float
+		return z < cfg.minZoom ? cfg.minZoom : (z > cfg.maxZoom ? cfg.maxZoom : z);
+
 	function center():Void
+	{
 		FlxG.camera.focusOn(FlxPoint.weak(doc.cols * doc.cell / 2, doc.rows * doc.cell / 2));
+		FlxG.camera.scroll.x -= (insetL / 2) / zoom;
+		FlxG.camera.scroll.y -= ((insetT - insetB) / 2) / zoom;
+	}
 }

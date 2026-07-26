@@ -8,6 +8,13 @@ import systems.DecorTiles;
 import util.MapStore;
 import util.Paths;
 
+typedef EditorSnapshot =
+{
+	walls:Array<Bool>,
+	tiles:Array<Int>,
+	props:Array<PropPlace>
+}
+
 class EditorMap
 {
 	public var cols(default, null):Int;
@@ -19,11 +26,10 @@ class EditorMap
 	public var props:Array<PropPlace> = [];
 	public var spawnX:Float;
 	public var spawnY:Float;
-	public var theme:Int = 0;
 	public var tilesetIndex:Int = 0;
 	public var dirty:Bool = false;
 
-	private var undoStack:Array<Array<Bool>> = [];
+	private var undoStack:Array<EditorSnapshot> = [];
 	private var undoDepth:Int;
 
 	public function new(undoDepth:Int)
@@ -46,7 +52,6 @@ class EditorMap
 		spawnX = cols * cell / 2;
 		spawnY = rows * cell / 2;
 		props = [];
-		theme = 0;
 		tilesetIndex = 0;
 		tiles = DecorTiles.parse(null, tileset());
 		undoStack = [];
@@ -91,7 +96,7 @@ class EditorMap
 
 	public function pushUndo():Void
 	{
-		undoStack.push(walls.copy());
+		undoStack.push({walls: walls.copy(), tiles: tiles.copy(), props: props.copy()});
 		if (undoStack.length > undoDepth)
 			undoStack.shift();
 	}
@@ -101,7 +106,9 @@ class EditorMap
 		var prev = undoStack.pop();
 		if (prev == null)
 			return false;
-		walls = prev;
+		walls = prev.walls;
+		tiles = prev.tiles;
+		props = prev.props;
 		dirty = true;
 		return true;
 	}
@@ -162,7 +169,6 @@ class EditorMap
 		readWallCsv(stored.csv);
 		spawnX = stored.sx;
 		spawnY = stored.sy;
-		theme = stored.theme == null ? 0 : stored.theme;
 		props = stored.props == null ? [] : stored.props;
 		tilesetIndex = TilesetDataRegistry.indexOf(stored.tileset);
 		tiles = DecorTiles.parse(stored.tiles, tileset());
@@ -177,7 +183,6 @@ class EditorMap
 			sx: spawnX,
 			sy: spawnY,
 			csv: wallCsv(),
-			theme: theme,
 			props: props,
 			tileset: t == null ? null : t.name,
 			tiles: tileCsv()

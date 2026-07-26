@@ -1,18 +1,23 @@
 {
 	"view": {
 		"startZoom": 0.5,
-		"minZoom": 0.35,
+		"minZoom": 0.3,
 		"maxZoom": 4,
 		"zoomStep": 1.15,
 		"panSpeed": 900
 	},
 
 	"palette": {
-		"width": 520,
-		"height": 400,
-		"padding": 10,
-		"propCell": 104,
+		"width": 280,
+		"height": 250,
+		"padding": 12,
+		"propCell": 88,
 		"maxZoom": 8
+	},
+
+	"ui": {
+		"sidebar": 312,
+		"topbar": 44
 	},
 
 	"brush": {

@@ -8,26 +8,28 @@ import openfl.display.BitmapData;
 
 class PalettePanel
 {
-	static inline var TOP:Float = 96;
-
 	public var bg(default, null):FlxSprite;
 	public var sheet(default, null):FlxSprite;
 	public var sel(default, null):FlxSprite;
 
 	private var cam:FlxCamera;
+	private var px:Float;
+	private var py:Float;
 	private var w:Float;
 	private var h:Float;
 	private var pad:Float;
 
-	public function new(state:FlxState, cam:FlxCamera, w:Float, h:Float, pad:Float)
+	public function new(state:FlxState, cam:FlxCamera, px:Float, py:Float, w:Float, h:Float, pad:Float)
 	{
 		this.cam = cam;
+		this.px = px;
+		this.py = py;
 		this.w = w;
 		this.h = h;
 		this.pad = pad;
 
 		bg = new FlxSprite();
-		bg.makeGraphic(1, 1, 0xDD16121C);
+		bg.makeGraphic(1, 1, 0xFF0E0E0E);
 		bg.cameras = [cam];
 		state.add(bg);
 
@@ -45,12 +47,12 @@ class PalettePanel
 	public var x(get, never):Float;
 
 	function get_x():Float
-		return FlxG.width - w - pad * 2;
+		return px;
 
 	public var y(get, never):Float;
 
 	function get_y():Float
-		return TOP;
+		return py;
 
 	public var width(get, never):Float;
 

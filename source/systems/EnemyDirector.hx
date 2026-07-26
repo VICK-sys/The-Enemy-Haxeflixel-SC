@@ -52,6 +52,7 @@ class EnemyDirector
 	private var bossExplosion:FlxSprite;
 
 	public var coopBodies(default, null):Array<FlxSprite> = [];
+	public var solids:FlxTypedGroup<FlxSprite>;
 
 	private var player:Player;
 	private var arena:Arena;
@@ -79,7 +80,11 @@ class EnemyDirector
 	public function collide():Void
 	{
 		if (!SideView.active && !SideView.morphing)
+		{
 			FlxG.collide(bodies, arena.map);
+			if (solids != null)
+				bodies.forEachAlive(function(e:Enemies) FootCollide.against(e, e.feetY, solids));
+		}
 		if (!SideView.morphing)
 			FlxG.overlap(bodies, bodies, null, separateLive);
 	}
@@ -189,7 +194,8 @@ class EnemyDirector
 	function clearOfWalls(x:Float, y:Float, w:Float, h:Float):Bool
 	{
 		return !arena.wallAt(x, y) && !arena.wallAt(x + w, y) && !arena.wallAt(x, y + h)
-			&& !arena.wallAt(x + w, y + h) && !arena.wallAt(x + w * 0.5, y + h * 0.5);
+			&& !arena.wallAt(x + w, y + h) && !arena.wallAt(x + w * 0.5, y + h * 0.5)
+			&& !PropBlock.at(x + w * 0.5, y + h * 0.5) && !PropBlock.at(x + w * 0.5, y + h);
 	}
 
 	function pickTarget(e:Enemies):FlxSprite
@@ -327,7 +333,7 @@ class EnemyDirector
 
 			rig.shadow.visible = alive;
 			rig.shadow.x = e.x + (e.flipX ? e.shadowOffXFlip : e.shadowOffX);
-			SideView.placeShadow(rig.shadow, e.x, e.width, e.y + e.height, e.y + e.shadowOffY, e.shadowScaleX, 4);
+			SideView.placeShadow(rig.shadow, e.x, e.width, e.y + e.height, e.feetY, e.shadowScaleX, 4);
 
 			if (alive)
 			{
@@ -337,7 +343,7 @@ class EnemyDirector
 				rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 				rig.hitbox.y = e.y + e.hitOffY;
 				if (!e.seized && e.throwGrace <= 0 && WorldClock.scale > 0.05 && !SideView.morphing)
-					status.hurtPlayer(rig.hitbox, e.contactDamage);
+					status.hurtPlayer(rig.hitbox, e.contactDamage, e.feetY);
 
 				if (e.pendingShots.length > 0)
 				{
@@ -377,7 +383,8 @@ class EnemyDirector
 				continue;
 			var shx = shot.x + shot.width / 2;
 			var shy = shot.y + shot.height / 2;
-			if (arena.wallAt(shx + shot.dirX * SHOT_PROBE, shy + shot.dirY * SHOT_PROBE))
+			if (arena.wallAt(shx + shot.dirX * SHOT_PROBE, shy + shot.dirY * SHOT_PROBE)
+				|| PropBlock.at(shx + shot.dirX * SHOT_PROBE, shy + shot.dirY * SHOT_PROBE))
 			{
 				shot.kill();
 				continue;

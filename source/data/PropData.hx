@@ -1,5 +1,6 @@
 package data;
 
+import util.Library;
 import util.Paths;
 
 typedef PropData =
@@ -7,7 +8,9 @@ typedef PropData =
 	name:String,
 	sheet:String,
 	rect:Array<Int>,
-	scale:Float
+	scale:Float,
+	?hitbox:Array<Int>,
+	?layer:Int
 }
 
 typedef PropPlace =
@@ -26,12 +29,25 @@ typedef PropSet =
 class PropDataRegistry
 {
 	static var data:PropSet;
+	static var merged:Array<PropData>;
+	static var mergedAt:Int = -1;
 
 	public static function all():Array<PropData>
 	{
 		if (data == null)
 			data = DataLoader.load(Paths.json("props"));
-		return data.props;
+		Library.ensure();
+		if (merged == null || mergedAt != Library.version)
+		{
+			merged = data.props.concat(Library.props);
+			for (p in merged)
+			{
+				p.hitbox = Library.hitboxOf(p.name);
+				p.layer = Library.layerOf(p.name);
+			}
+			mergedAt = Library.version;
+		}
+		return merged;
 	}
 
 	public static function get(i:Int):PropData

@@ -1,20 +1,20 @@
 {
 	"props": [
 		{
-			"name": "TOTEM",
-			"sheet": "stage/totem_top",
+			"name": "shop",
+			"sheet": "props/shop",
 			"rect": [],
-			"scale": 3
+			"scale": 2
 		},
 		{
-			"name": "TOTEM SIDE",
-			"sheet": "stage/totem_side",
+			"name": "building",
+			"sheet": "props/building",
 			"rect": [],
-			"scale": 3
+			"scale": 2
 		},
 		{
-			"name": "SCYTHE",
-			"sheet": "items/mufu_scythe",
+			"name": "rofelfanHouse",
+			"sheet": "props/rofelfanHouse",
 			"rect": [],
 			"scale": 2
 		}

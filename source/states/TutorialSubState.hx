@@ -29,7 +29,7 @@ class TutorialSubState extends FlxSubState
 	static var DESCS:Array<String> = [
 		"WASD - move        SPACE - dash (2s cooldown)",
 		"Aim with the mouse        LEFT CLICK - attack",
-		"1-4 or SCROLL WHEEL - switch weapon",
+		"One weapon per run - you pick it when the run starts",
 		"RIGHT CLICK - cycle the equipped weapon's mode",
 		"Q - super at full AP (scythe only)\nLEFT CLICK - launch the blades",
 		"E - TIME STOP: the arena freezes for 10s (30s cooldown)\nYou keep moving and attacking - press E again to end it early",

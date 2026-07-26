@@ -1,5 +1,6 @@
 package data;
 
+import util.Library;
 import util.Paths;
 
 typedef TilesetData =
@@ -18,12 +19,20 @@ typedef TilesetSet =
 class TilesetDataRegistry
 {
 	static var data:TilesetSet;
+	static var merged:Array<TilesetData>;
+	static var mergedAt:Int = -1;
 
 	public static function all():Array<TilesetData>
 	{
 		if (data == null)
 			data = DataLoader.load(Paths.json("tilesets"));
-		return data.tilesets;
+		Library.ensure();
+		if (merged == null || mergedAt != Library.version)
+		{
+			merged = data.tilesets.concat(Library.tilesets);
+			mergedAt = Library.version;
+		}
+		return merged;
 	}
 
 	public static function get(i:Int):TilesetData

@@ -82,7 +82,7 @@ class PauseSubState extends FlxSubState
 				list.enabled = false;
 				FlxG.mouse.visible = false;
 				net.Net.stop();
-				if (util.CustomArena.active)
+				if (util.CustomArena.fromEditor)
 					new IrisWipe(this).close(function() FlxG.switchState(new EditorState()));
 				else
 					new IrisWipe(this).close(function() FlxG.switchState(new MainMenuState()));

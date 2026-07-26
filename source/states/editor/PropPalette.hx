@@ -13,15 +13,16 @@ import systems.Decor;
 class PropPalette extends PalettePanel
 {
 	public var index(default, null):Int = 0;
+	public var highlight(default, null):Bool = true;
 
 	private var contact:BitmapData;
 	private var cell:Int;
 	private var cols:Int = 1;
 	private var scrollY:Float = 0;
 
-	public function new(state:FlxState, cam:FlxCamera, w:Float, h:Float, pad:Float, cell:Int)
+	public function new(state:FlxState, cam:FlxCamera, px:Float, py:Float, w:Float, h:Float, pad:Float, cell:Int)
 	{
-		super(state, cam, w, h, pad);
+		super(state, cam, px, py, w, h, pad);
 		this.cell = cell;
 	}
 
@@ -75,7 +76,20 @@ class PropPalette extends PalettePanel
 		sel.updateHitbox();
 		sel.x = x + (index % cols) * cell;
 		sel.y = y + Math.floor(index / cols) * cell - scrollY;
-		sel.visible = bg.visible && sel.y >= y - 1 && sel.y + cell <= y + height + 1;
+		sel.visible = highlight && bg.visible && sel.y >= y - 1 && sel.y + cell <= y + height + 1;
+	}
+
+	public function setHighlight(on:Bool):Void
+	{
+		highlight = on;
+		redraw();
+	}
+
+	override public function show(on:Bool):Void
+	{
+		super.show(on);
+		if (on)
+			redraw();
 	}
 
 	public function pick():Bool

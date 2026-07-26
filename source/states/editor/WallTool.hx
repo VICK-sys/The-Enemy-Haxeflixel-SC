@@ -72,8 +72,13 @@ class WallTool
 		return "BRUSH " + brush + "X" + brush;
 	}
 
-	public function update(c:Int, r:Int):Void
+	public function update(c:Int, r:Int, blocked:Bool):Void
 	{
+		if (blocked)
+		{
+			hideCursor();
+			return;
+		}
 		updateHover(c, r);
 		updateStroke(c, r);
 	}

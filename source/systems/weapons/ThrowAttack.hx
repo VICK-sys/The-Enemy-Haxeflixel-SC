@@ -98,7 +98,8 @@ class ThrowAttack
 			var tdx = cx - thrown.startX;
 			var tdy = cy - thrown.startY;
 			if (tdx * tdx + tdy * tdy >= cfg.maxDist * cfg.maxDist
-				|| arena.wallAt(cx + vx * WALL_PROBE, cy + vy * WALL_PROBE))
+				|| arena.wallAt(cx + vx * WALL_PROBE, cy + vy * WALL_PROBE)
+				|| systems.PropBlock.at(cx + vx * WALL_PROBE, cy + vy * WALL_PROBE))
 			{
 				thrown.beginReturn();
 				nav.notifyBlocked();

@@ -191,7 +191,8 @@ class HookAttack
 		var fdx = hcx - fireX;
 		var fdy = hcy - fireY;
 		if (fdx * fdx + fdy * fdy >= cfg.grappleRange * cfg.grappleRange
-			|| arena.wallAt(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS))
+			|| arena.wallAt(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS)
+			|| systems.PropBlock.at(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS))
 		{
 			endGrapple();
 		}
@@ -260,7 +261,8 @@ class HookAttack
 		var fdx = hcx - fireX;
 		var fdy = hcy - fireY;
 		if (fdx * fdx + fdy * fdy >= cfg.range * cfg.range
-			|| arena.wallAt(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS))
+			|| arena.wallAt(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS)
+			|| systems.PropBlock.at(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS))
 		{
 			beginRetract();
 			return;
@@ -421,7 +423,8 @@ class HookAttack
 		var vcx = flightVictim.x + flightVictim.width / 2;
 		var vcy = flightVictim.y + flightVictim.height / 2;
 
-		if (arena.wallAt(vcx + flightDirX * WALL_PROBE, vcy + flightDirY * WALL_PROBE))
+		if (arena.wallAt(vcx + flightDirX * WALL_PROBE, vcy + flightDirY * WALL_PROBE)
+			|| systems.PropBlock.at(vcx + flightDirX * WALL_PROBE, vcy + flightDirY * WALL_PROBE))
 		{
 			endFlight(true);
 			return;

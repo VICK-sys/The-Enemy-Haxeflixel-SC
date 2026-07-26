@@ -50,13 +50,12 @@ class PlayState extends FlxState
 	private var wipe:IrisWipe;
 	private var restarting:Bool = false;
 	private var netSync:NetSync;
-	private var decor:Array<flixel.FlxSprite> = [];
+	private var props:systems.PropWorld;
 	private var floor:flixel.tile.FlxTilemap;
 
 	function showDecor(on:Bool):Void
 	{
-		for (s in decor)
-			s.visible = on;
+		props.setDecorVisible(on);
 		if (floor != null)
 			floor.visible = on;
 	}
@@ -99,7 +98,8 @@ class PlayState extends FlxState
 
 		layers = new RenderLayers(this, _player, scythe);
 		arena.addPillars(layers.entityLayer);
-		decor = systems.Decor.build(util.CustomArena.props, layers.entityLayer);
+		props = new systems.PropWorld(_player, layers);
+		add(props.solids);
 
 		status = new PlayerCombat(_player, fx);
 		timeStop = new TimeStop(_player, layers.playerShadow, status);
@@ -109,6 +109,7 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
 		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status) : new EnemyDirector(_player, arena, layers, status);
+		director.solids = props.solids;
 		combat = new Weapons(_player, scythe, arena, director, status, fx, pickups);
 
 		add(combat.swing.slashes);
@@ -131,10 +132,14 @@ class PlayState extends FlxState
 		add(combat.superScythes.frontLayer);
 		add(fx.sparks);
 		add(director.shots);
+
+		add(props.overlay);
+
 		add(timeStop.overlay);
 
 		hud = new Hud(this, status);
 		shift = new PerspectiveShift(arena, _player, director, combat, layers);
+		shift.disabled = util.CustomArena.active;
 		director.onProbe = shift.onProbe;
 		director.onWave = onWaveStarted;
 		director.onBoss = onBossWave;
@@ -158,12 +163,11 @@ class PlayState extends FlxState
 
 		DiscordPresence.beginRun();
 
-		if (!TutorialSubState.shown && !Net.active)
-		{
-			TutorialSubState.shown = true;
-			openSubState(new TutorialSubState(hud.camUI));
-			DiscordPresence.tutorial();
-		}
+		combat.equip(WeaponPickSubState.lastPick);
+		if (Net.active)
+			openTutorialIfNew();
+		else
+			openWeaponPick();
 
 		Music.play("stage/gloomDoomWoods", 0.3);
 
@@ -171,6 +175,23 @@ class PlayState extends FlxState
 		wipe.open();
 
 		super.create();
+	}
+
+	function openWeaponPick():Void
+	{
+		var picker = new WeaponPickSubState(hud.camUI);
+		picker.onPicked = function(i) combat.equip(i);
+		picker.closeCallback = openTutorialIfNew;
+		openSubState(picker);
+	}
+
+	function openTutorialIfNew():Void
+	{
+		if (TutorialSubState.shown || Net.active)
+			return;
+		TutorialSubState.shown = true;
+		openSubState(new TutorialSubState(hud.camUI));
+		DiscordPresence.tutorial();
 	}
 
 	override public function update(elapsed:Float):Void
@@ -190,7 +211,10 @@ class PlayState extends FlxState
 		shift.update(elapsed);
 
 		if (!SideView.active && !frozen)
+		{
 			FlxG.collide(_player, arena.map);
+			props.collidePlayer();
+		}
 		director.collide();
 
 		status.update(elapsed);
@@ -209,6 +233,10 @@ class PlayState extends FlxState
 		director.update(frozen ? 0 : elapsed * timeStop.factor);
 		pickups.update();
 		layers.update();
+		props.update();
+		scythe.alpha = props.buried ? 0 : 1;
+		combat.swing.slashes.visible = !props.buried;
+		combat.slice.slices.visible = !props.buried;
 		if (!frozen && !inputLocked)
 			combat.update(elapsed);
 		director.updateShots();

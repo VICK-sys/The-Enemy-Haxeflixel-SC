@@ -26,9 +26,9 @@ class TilePalette extends PalettePanel
 	private var dragCol:Int = 0;
 	private var dragRow:Int = 0;
 
-	public function new(state:FlxState, cam:FlxCamera, w:Float, h:Float, pad:Float, maxZoom:Float)
+	public function new(state:FlxState, cam:FlxCamera, px:Float, py:Float, w:Float, h:Float, pad:Float, maxZoom:Float)
 	{
-		super(state, cam, w, h, pad);
+		super(state, cam, px, py, w, h, pad);
 		this.maxZoom = maxZoom;
 	}
 
@@ -193,6 +193,27 @@ class TilePalette extends PalettePanel
 		viewX = cx - (width / scale) * 0.5;
 		viewY = cy - (height / scale) * 0.5;
 		redraw();
+	}
+
+	public function renderIndices(idx:Array<Int>, w:Int, h:Int):BitmapData
+	{
+		var b = bitmap();
+		if (b == null || set == null || w <= 0 || h <= 0)
+			return null;
+		var per = perRow();
+		var out = new BitmapData(w * set.tileW, h * set.tileH, true, 0);
+		for (r in 0...h)
+			for (c in 0...w)
+			{
+				var v = idx[r * w + c];
+				if (v <= 0)
+					continue;
+				var sc = (v - 1) % per;
+				var sr = Std.int((v - 1) / per);
+				out.copyPixels(b, new Rectangle(sc * set.tileW, sr * set.tileH, set.tileW, set.tileH),
+					new Point(c * set.tileW, r * set.tileH));
+			}
+		return out;
 	}
 
 	public function patchBitmap():BitmapData
