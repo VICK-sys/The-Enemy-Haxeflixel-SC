@@ -17,22 +17,28 @@ class HeldWeapon
 	static inline var AIM_LERP:Float = 0.25;
 	static inline var FLIP_MARGIN:Float = 12;
 	static inline var HAMMER_SWING_TIME:Float = 0.45;
-	static inline var QUAKE_TIME:Float = 0.8;
 	static inline var BOW_TIME:Float = 0.3;
 	static inline var BOW_DIST:Float = 55;
 	static inline var RAIN_TIME:Float = 0.6;
 	static inline var RAIN_RAISE:Float = 35;
 	static inline var HOOK_TIME:Float = 0.4;
+	static inline var JAB_TIME:Float = 0.13;
 	static inline var CHARGE_SCALE:Float = 1.6;
 	static inline var CHARGE_DRAW:Float = 0.35;
 	public static inline var CHARGE_TINT:Int = 0xFF9BE9FF;
 
+	public static inline var SCYTHE:Int = 0;
+	public static inline var HAMMER:Int = 1;
+	public static inline var BOW:Int = 2;
+	public static inline var HOOK:Int = 3;
+
 	public var sprite:FlxSprite;
-	public var mode:WeaponMode = Swing;
+	public var kind:Int = SCYTHE;
 	public var charge:Float = 0;
 	public var swinging(get, never):Bool;
 
 	private var player:Player;
+	private var attack:WeaponMode = Swing;
 	private var swingTimer:Float = 0;
 	private var swingBaseAngle:Float = 0;
 	private var swingDir:Int = 1;
@@ -48,9 +54,11 @@ class HeldWeapon
 	function get_swinging():Bool
 		return swingTimer > 0;
 
-	public function setMode(m:WeaponMode):Void
+	public function setKind(i:Int):Void
 	{
-		mode = m;
+		kind = i;
+		attack = Swing;
+		swingTimer = 0;
 		applyGraphic();
 	}
 
@@ -66,8 +74,9 @@ class HeldWeapon
 		updateSwing(elapsed);
 	}
 
-	public function beginSwing(aimDeg:Float):Void
+	public function beginSwing(aimDeg:Float, mode:WeaponMode):Void
 	{
+		attack = mode;
 		if (!bowLike())
 		{
 			updateFlip(aimDeg);
@@ -78,25 +87,28 @@ class HeldWeapon
 		activeSwingTime = switch (mode)
 		{
 			case Hammer: HAMMER_SWING_TIME;
-			case Quake: QUAKE_TIME;
 			case Bow: BOW_TIME;
 			case Rain: RAIN_TIME;
 			case Hook: HOOK_TIME;
+			case Jab: JAB_TIME;
 			default: SWING_TIME;
 		};
 		swingTimer = activeSwingTime;
 	}
 
 	function bowLike():Bool
-		return mode == Bow || mode == Rain;
+		return kind == BOW;
+
+	function raining():Bool
+		return attack == Rain && swingTimer > 0;
 
 	function applyGraphic():Void
 	{
-		var img = switch (mode)
+		var img = switch (kind)
 		{
-			case Hammer, Quake: "items/mufu_hammer";
-			case Bow, Rain: "items/mufu_bow";
-			case Hook, Whirl, Grapple: "items/mufu_hook";
+			case 1: "items/mufu_hammer";
+			case 2: "items/mufu_bow";
+			case 3: "items/mufu_hook";
 			default: "items/mufu_scythe";
 		};
 		sprite.loadGraphic(Paths.image(img));
@@ -110,7 +122,11 @@ class HeldWeapon
 	{
 		sprite.x = player.x - sprite.origin.x + 30;
 		sprite.y = player.y - sprite.origin.y + 65;
-		if (mode == Bow)
+		if (raining())
+		{
+			sprite.y = player.y - sprite.origin.y - RAIN_RAISE;
+		}
+		else if (kind == BOW)
 		{
 			var pmx:Float = player.x + player.width * 0.5;
 			var pmy:Float = player.y + player.height * 0.5;
@@ -123,10 +139,6 @@ class HeldWeapon
 				sprite.x += dx / len * reach;
 				sprite.y += dy / len * reach;
 			}
-		}
-		else if (mode == Rain)
-		{
-			sprite.y = player.y - sprite.origin.y - RAIN_RAISE;
 		}
 	}
 
@@ -167,12 +179,12 @@ class HeldWeapon
 		var pmy:Float = player.y + player.height * 0.5;
 		var theta:Float = Math.atan2(mouseY - pmy, mouseX - pmx) * 180 / Math.PI;
 		var target:Float;
-		if (mode == Rain)
+		if (raining())
 		{
 			sprite.flipX = false;
 			target = -90;
 		}
-		else if (mode == Bow)
+		else if (kind == BOW)
 		{
 			sprite.flipX = false;
 			target = theta;

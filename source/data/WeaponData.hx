@@ -5,11 +5,8 @@ import util.Paths;
 typedef SwingConfig = {
 	spawnDist:Float,
 	meleeRange:Float,
-	meleeArcCos:Float
-}
-
-typedef SliceConfig = {
-	spawnDist:Float
+	meleeArcCos:Float,
+	damage:Int
 }
 
 typedef HammerConfig = {
@@ -36,7 +33,8 @@ typedef BowChargeConfig = {
 	maxDamage:Int,
 	speedBonus:Float,
 	sizeBonus:Float,
-	knockBonus:Float
+	knockBonus:Float,
+	shotCooldown:Float
 }
 
 typedef ArrowRainConfig = {
@@ -45,7 +43,8 @@ typedef ArrowRainConfig = {
 	stagger:Float,
 	spread:Float,
 	fallSpeed:Float,
-	hitRadius:Float
+	hitRadius:Float,
+	rechargeTime:Float
 }
 
 typedef HookConfig = {
@@ -59,15 +58,7 @@ typedef HookConfig = {
 	throwTime:Float,
 	throwHitRadius:Float,
 	releaseStun:Float,
-	whirlTime:Float,
-	whirlRadius:Float,
-	whirlHitRadius:Float,
-	grappleRange:Float,
-	grapplePullSpeed:Float,
-	grappleRadius:Float,
-	grappleFling:Float,
-	grappleCatch:Float,
-	grappleTimeout:Float
+	snagDamage:Int
 }
 
 typedef SuperScythesConfig = {
@@ -105,7 +96,7 @@ typedef HookArmsConfig = {
 
 typedef WeaponsData = {
 	swing:SwingConfig,
-	slice:SliceConfig,
+	jab:SwingConfig,
 	hammer:HammerConfig,
 	shockwave:ShockwaveConfig,
 	thrown:ThrownConfig,

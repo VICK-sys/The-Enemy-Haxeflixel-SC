@@ -80,6 +80,17 @@ class EnemyDirector
 		return f;
 	}
 
+	public var onFriendlyShot(get, set):EnemyShot->Bool;
+
+	function get_onFriendlyShot()
+		return gunfire.onFriendly;
+
+	function set_onFriendlyShot(f:EnemyShot->Bool)
+	{
+		gunfire.onFriendly = f;
+		return f;
+	}
+
 	public var onBossDefeated(get, set):Void->Void;
 
 	function get_onBossDefeated()

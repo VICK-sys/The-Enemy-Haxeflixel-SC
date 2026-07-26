@@ -33,7 +33,6 @@ Each system is constructed once by PlayState and updated once per frame (except 
 Weapon projectiles and visuals live in `source/entities/weapon/`:
 
 - `SlashEffect` - the pooled swing visual. It drifts forward briefly and fades out; it carries no hitbox.
-- `SliceProjectile` - the slice mode's traveling wave. Pierces enemies (one hit per enemy per wave) and dies on walls.
 - `ThrownScythe` - the airborne scythe. Spins, stretches on release, throbs in flight, and hits each enemy once per flight leg (out and return).
 - `SuperBlade` - one orbiting super scythe. Positioned by SuperScythes while orbiting; once launched it flies straight, pierces (one hit per enemy), and fades at range.
 - `Arrow` - the bow mode's projectile. Flies straight and fast, dies on the first enemy hit or a wall, expires at range.
@@ -69,7 +68,7 @@ Enemy behavior lives in `source/entities/enemy/`:
 - `Music` - the single owner of music playback. `play(name, volume, loop)` switches tracks only when the requested track differs from the current one; asking for the playing track just applies the volume, restores pitch, and resumes it if paused - which is what keeps the stage theme seamless across the menu, the game, pause-quit, and restarts.
 - `SideView` - global side-view state, following the WorldClock pattern: `active`, `morphing`, `groundY`, the platform rectangles, and the shared helpers used by the player, enemies, and pickups: gravity, one-way platform landing, `settle` (the snap-or-fall resolve every side-mode body runs each frame), and `placeShadow`. Physics values load from sideview.json in `reset()`. Shadows are anchored to each entity's existing feet offset, so a grounded character looks identical to top-down; in side view an airborne one drops its shadow onto the surface below (ground or platform), shrinking and fading with height. Reset by PlayState on every run.
 - `DiscordPresence` - Discord Rich Presence (Windows native only, via the `hxdiscord_rpc` haxelib; every method is a no-op on HTML5). Reads the application ID from `assets/data/discord.json` and stays silent if it is empty. PlayState feeds it the raw facts each frame (`playing(wave, bossFight, weapon, kills)`) and it diffs internally: wave changes, the boss fight, weapon switches, pause, and death push immediately, kill-count changes are throttled to one update every couple of seconds. Shows the current wave or boss fight plus the equipped weapon and kill count, run elapsed time via the start timestamp, the best wave on the menu and death screens, and image keys `icon` (large) and `scythe`/`hammer`/`bow`/`hook` (small, per weapon) for art uploaded to the Discord application.
-- `PerfLog` - frame-time logger for native builds. Writes `perflog.txt` next to the executable: one aggregate line per second (average, worst, fps) plus immediate lines for spike frames and long gaps, each tagged with the live enemy count, pathfinding calls, projectile count (slices, enemy shots, arrows, rain arrows, thrown scythe, hook), and wave.
+- `PerfLog` - frame-time logger for native builds. Writes `perflog.txt` next to the executable: one aggregate line per second (average, worst, fps) plus immediate lines for spike frames and long gaps, each tagged with the live enemy count, pathfinding calls, projectile count (enemy shots, arrows, rain arrows, thrown scythe, hook), and wave.
 
 ---
 

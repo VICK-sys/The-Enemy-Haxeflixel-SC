@@ -4,29 +4,49 @@ import flixel.FlxG;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.weapon.SlashEffect;
 import systems.enemy.EnemyDirector;
-import data.WeaponData.WeaponDataRegistry;
+import data.WeaponData.SwingConfig;
 import util.Paths;
 
 class SwingAttack
 {
+	static inline var GUARD_TIME:Float = 0.2;
+
 	public var slashes:FlxTypedGroup<SlashEffect>;
 
-	private var cfg = WeaponDataRegistry.get().swing;
+	private var cfg:SwingConfig;
 	private var director:EnemyDirector;
 	private var hits:HitPipeline;
+	private var effectScale:Float;
+	private var guardTimer:Float = 0;
+	private var guardX:Float = 1;
+	private var guardY:Float = 0;
 
-	public function new(director:EnemyDirector, hits:HitPipeline)
+	public function new(director:EnemyDirector, hits:HitPipeline, cfg:SwingConfig, effectScale:Float = 1)
 	{
 		this.director = director;
 		this.hits = hits;
+		this.cfg = cfg;
+		this.effectScale = effectScale;
 		slashes = new FlxTypedGroup<SlashEffect>();
 	}
 
 	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
-		slashes.recycle(SlashEffect).fire(pmx + dx * cfg.spawnDist, pmy + dy * cfg.spawnDist, dx, dy, aimDeg);
+		slashes.recycle(SlashEffect).fire(pmx + dx * cfg.spawnDist, pmy + dy * cfg.spawnDist, dx, dy, aimDeg, effectScale);
 		strike(pmx, pmy, dx, dy);
+		guardTimer = GUARD_TIME;
+		guardX = dx;
+		guardY = dy;
+		deflect(pmx, pmy, dx, dy);
 		FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.7);
+	}
+
+	public function update(elapsed:Float, pmx:Float, pmy:Float):Void
+	{
+		if (guardTimer <= 0)
+			return;
+		guardTimer -= elapsed;
+		deflect(pmx, pmy, guardX, guardY);
 	}
 
 	function strike(pmx:Float, pmy:Float, aimX:Float, aimY:Float):Void
@@ -40,7 +60,27 @@ class SwingAttack
 				return;
 
 			var push = elen > 0 ? elen : 1;
-			hits.damage(e, ex / push, ey / push);
+			hits.damageN(e, ex / push, ey / push, cfg.damage);
 		});
+	}
+
+	function deflect(pmx:Float, pmy:Float, aimX:Float, aimY:Float):Void
+	{
+		for (shot in director.shots.members)
+		{
+			if (shot == null || !shot.exists || shot.friendly)
+				continue;
+
+			var sx = shot.x + shot.width / 2 - pmx;
+			var sy = shot.y + shot.height / 2 - pmy;
+			var slen = Math.sqrt(sx * sx + sy * sy);
+			if (slen > cfg.meleeRange)
+				continue;
+			if (slen > 0 && (sx * aimX + sy * aimY) / slen < cfg.meleeArcCos)
+				continue;
+
+			shot.deflect();
+			FlxG.sound.play(Paths.sound("scythe/catch"), 0.5);
+		}
 	}
 }

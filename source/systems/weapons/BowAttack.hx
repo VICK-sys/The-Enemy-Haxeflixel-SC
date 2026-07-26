@@ -19,14 +19,17 @@ class BowAttack
 	public var rain:ArrowRain;
 	public var charging:Bool = false;
 	public var charge(get, never):Float;
+	public var rainCharge:Float = 1;
 
 	private var cfg = WeaponDataRegistry.get().bowCharge;
+	private var rainCfg = WeaponDataRegistry.get().arrowRain;
 	private var arena:Arena;
 	private var director:EnemyDirector;
 	private var fx:Fx;
 	private var hits:HitPipeline;
 	private var chargeTime:Float = 0;
 	private var fullNoted:Bool = false;
+	private var cooldown:Float = 0;
 	private var drawSound:FlxSound;
 
 	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline)
@@ -48,8 +51,20 @@ class BowAttack
 		return t < 0 ? 0 : (t > 1 ? 1 : t);
 	}
 
+	public var ready(get, never):Bool;
+
+	function get_ready():Bool
+		return cooldown <= 0;
+
+	public var rainReady(get, never):Bool;
+
+	function get_rainReady():Bool
+		return rainCharge >= 1;
+
 	public function beginCharge():Void
 	{
+		if (cooldown > 0)
+			return;
 		charging = true;
 		chargeTime = 0;
 		fullNoted = false;
@@ -97,11 +112,14 @@ class BowAttack
 	public function shoot(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0):Void
 	{
 		var damage = 1 + Math.floor(power * (cfg.maxDamage - 1));
-		arrows.recycle(Arrow).fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,
+		var arrow = arrows.recycle(Arrow);
+		arrow.fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,
 			1 + power * cfg.sizeBonus, 1 + power * cfg.knockBonus);
+		cooldown = cfg.shotCooldown;
 		FlxG.sound.play(Paths.sound("bow"), 0.7 + power * 0.3);
 		if (power >= 1)
 		{
+			arrow.piercing = true;
 			fx.sparksAt(bx + dx * 30, by + dy * 30);
 			FlxG.camera.shake(0.004, 0.18);
 		}
@@ -109,6 +127,7 @@ class BowAttack
 
 	public function rainFire(tx:Float, ty:Float, bx:Float, by:Float):Void
 	{
+		rainCharge = 0;
 		rain.fire(tx, ty, bx, by);
 		FlxG.sound.play(Paths.sound("bow"), 0.7);
 	}
@@ -127,12 +146,33 @@ class BowAttack
 				arrow.kill();
 				continue;
 			}
+			if (arrow.piercing)
+			{
+				director.eachInCircle(acx, acy, Arrow.RADIUS, function(e)
+				{
+					if (arrow.hasHit(e))
+						return;
+					arrow.markHit(e);
+					hits.damageN(e, arrow.dirX * arrow.knock, arrow.dirY * arrow.knock, arrow.damage);
+				});
+				continue;
+			}
+
 			var hit = director.firstInCircle(acx, acy, Arrow.RADIUS);
 			if (hit != null)
 			{
 				hits.damageN(hit, arrow.dirX * arrow.knock, arrow.dirY * arrow.knock, arrow.damage);
 				arrow.kill();
 			}
+		}
+
+		if (cooldown > 0)
+			cooldown -= elapsed;
+		if (rainCharge < 1)
+		{
+			rainCharge += elapsed / rainCfg.rechargeTime;
+			if (rainCharge > 1)
+				rainCharge = 1;
 		}
 
 		tickCharge(elapsed);

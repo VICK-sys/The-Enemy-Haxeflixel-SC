@@ -15,6 +15,7 @@ class EnemyShots
 
 	public var group(default, null):FlxTypedGroup<EnemyShot>;
 	public var onShot:(Float, Float, Float, Float, Float, Float, Float, String) -> Void;
+	public var onFriendly:EnemyShot->Bool;
 
 	private var arena:Arena;
 	private var status:PlayerCombat;
@@ -66,6 +67,13 @@ class EnemyShots
 			if (arena.wallAt(px, py) || PropBlock.at(px, py))
 			{
 				shot.kill();
+				continue;
+			}
+
+			if (shot.friendly)
+			{
+				if (onFriendly != null && onFriendly(shot))
+					shot.kill();
 				continue;
 			}
 

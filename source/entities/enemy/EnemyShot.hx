@@ -6,12 +6,16 @@ import util.WorldClock;
 
 class EnemyShot extends FlxSprite
 {
+	static inline var DEFLECT_BOOST:Float = 1.35;
+
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
 	public var damage:Float = 0.25;
+	public var friendly:Bool = false;
 
 	private var life:Float = 0;
 	private var spriteKey:String = null;
+	private var fullLife:Float = 0;
 
 	public function new()
 	{
@@ -42,9 +46,24 @@ class EnemyShot extends FlxSprite
 		dirX = dx;
 		dirY = dy;
 		this.damage = damage;
+		friendly = false;
+		setColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
 		angle = sprite == null ? 0 : Math.atan2(dy, dx) * 180 / Math.PI;
 		velocity.set(dx * speed, dy * speed);
-		life = range / speed;
+		fullLife = range / speed;
+		life = fullLife;
+	}
+
+	public function deflect():Void
+	{
+		dirX = -dirX;
+		dirY = -dirY;
+		velocity.set(-velocity.x * DEFLECT_BOOST, -velocity.y * DEFLECT_BOOST);
+		if (spriteKey != null)
+			angle = Math.atan2(dirY, dirX) * 180 / Math.PI;
+		life = fullLife;
+		friendly = true;
+		setColorTransform(1, 1, 1, 1, 0, 90, 150, 0);
 	}
 
 	override public function update(elapsed:Float):Void

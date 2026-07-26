@@ -55,10 +55,10 @@ class WeaponPickSubState extends FlxSubState
 	static var NAMES:Array<String> = ["SCYTHE", "HAMMER", "BOW", "HOOK"];
 	static var ART:Array<String> = ["items/mufu_scythe", "items/mufu_hammer", "items/mufu_bow", "items/mufu_hook"];
 	static var BLURBS:Array<String> = [
-		"SWING  SLICE  THROW",
-		"SWING  QUAKE",
-		"SHOT  RAIN",
-		"SHOT  WHIRL  GRAPPLE"
+		"SLASH  /  THROW",
+		"SLAM",
+		"CHARGE SHOT  /  ARROW RAIN",
+		"JAB  /  GRAB"
 	];
 
 	public var onPicked:Int->Void;

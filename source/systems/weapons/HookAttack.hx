@@ -20,9 +20,7 @@ enum HookPhase
 	Pulling;
 	Holding;
 	Spinning;
-	Whirling;
 	Retracting;
-	Grappling;
 }
 
 class HookAttack
@@ -44,8 +42,6 @@ class HookAttack
 	private var status:PlayerCombat;
 	private var hits:HitPipeline;
 
-	private var grappleMode:HookGrapple;
-	private var whirlMode:HookWhirl;
 	private var flight:HookFlight;
 
 	private var phase:HookPhase = Idle;
@@ -70,8 +66,6 @@ class HookAttack
 		hook.kill();
 		rope = new FlxTypedGroup<FlxSprite>();
 
-		grappleMode = new HookGrapple(player, arena, director, status, hits, hook);
-		whirlMode = new HookWhirl(player, director, hits, hook);
 		flight = new HookFlight(arena, director, hits);
 	}
 
@@ -90,22 +84,6 @@ class HookAttack
 		hook.fire(fireX, fireY, dx, dy, aimDeg);
 		phase = Flying;
 		FlxG.sound.play(Paths.sound("scythe/throw"), 0.6);
-	}
-
-	public function whirl(aimDeg:Float):Void
-	{
-		if (phase != Idle)
-			return;
-		whirlMode.begin(aimDeg);
-		phase = Whirling;
-	}
-
-	public function grapple(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
-	{
-		if (phase != Idle)
-			return;
-		grappleMode.begin(pmx + dx * SPAWN_DIST, pmy + dy * SPAWN_DIST, dx, dy, aimDeg);
-		phase = Grappling;
 	}
 
 	public function throwHeld(dx:Float, dy:Float):Void
@@ -138,21 +116,10 @@ class HookAttack
 			case Holding: updateHolding();
 			case Spinning: updateSpinning(elapsed);
 			case Retracting: updateRetract();
-			case Whirling: if (!whirlMode.update(elapsed)) endMode();
-			case Grappling: if (!grappleMode.update(elapsed)) endMode();
 		}
 
 		flight.update(elapsed);
 		updateRope();
-	}
-
-	function endMode():Void
-	{
-		grappleMode.stop();
-		whirlMode.stop();
-		hook.kill();
-		Rope.clear(rope);
-		phase = Idle;
 	}
 
 	function updateFlying():Void
@@ -182,7 +149,7 @@ class HookAttack
 
 		if (!hit.grabbable)
 		{
-			hits.damage(hit, hook.dirX, hook.dirY);
+			hits.damageN(hit, hook.dirX, hook.dirY, cfg.snagDamage);
 			beginRetract();
 			return;
 		}
@@ -339,11 +306,6 @@ class HookAttack
 	{
 		detachVictim();
 		flight.stop();
-		grappleMode.stop();
-		whirlMode.stop();
-		status.invincible = false;
-		if (!status.dead)
-			player.blockMovement = false;
 		hook.kill();
 		Rope.clear(rope);
 		phase = Idle;

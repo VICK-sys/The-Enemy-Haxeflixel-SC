@@ -19,9 +19,10 @@ class SlashEffect extends FlxSprite
 		scale.set(4, 4);
 	}
 
-	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float):Void
+	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, size:Float = 1):Void
 	{
 		revive();
+		scale.set(4 * size, 4 * size);
 		setPosition(cx - width / 2, cy - height / 2);
 		velocity.set(dx * DRIFT, dy * DRIFT);
 		angle = angleDeg;

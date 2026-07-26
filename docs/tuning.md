@@ -4,7 +4,8 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 
 | File | Constants |
 |---|---|
-| `systems/weapons/HeldWeapon.hx` | swing times per mode, arc, scale pulse, aim smoothing, facing flip margin, bow hold distance, rain raise height, charge grow/draw-back/tint |
+| `systems/weapons/HeldWeapon.hx` | swing time per attack, arc, scale pulse, aim smoothing, facing flip margin, bow hold distance, rain raise height, charge grow/draw-back/tint |
+| `systems/weapons/SwingAttack.hx` | melee guard window (how long a swing keeps deflecting shots) |
 | `systems/weapons/BowAttack.hx` | draw-loop pitch floor and rise |
 | `systems/weapons/ThrowAttack.hx` | spawn distance, catch radius, wall probe, trail density and fade |
 | `systems/weapons/HookAttack.hx` | spawn distance, wall probe, retract speed, catch radius, rope handle length |
@@ -18,8 +19,9 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `entities/weapon/ThrownScythe.hx` | throw speed, spin rate, hit radius |
 | `entities/HealthPickup.hx` | heal amount, lifetime |
 | `entities/weapon/SlashEffect.hx` | drift speed, effect lifetime |
-| `entities/weapon/SliceProjectile.hx` | slice speed, range, fade time, hit radius |
 | `entities/weapon/Arrow.hx` | arrow speed, range, hit radius |
+| `entities/enemy/EnemyShot.hx` | deflected shot speed boost |
+| `states/PlayState.hx` | deflected shot hit radius, damage, knockback |
 | `entities/weapon/HookShot.hx` | hook speed, hit radius |
 | `entities/enemy/Enemies.hx` | wander and idle durations, hit flash time |
 | `entities/enemy/RofelBoss.hx` | gun sprite scale, shot sound (the movement and gun stats live in `rofel.json`) |

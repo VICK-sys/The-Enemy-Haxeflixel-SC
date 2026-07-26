@@ -11,7 +11,6 @@ import states.tutorial.TutorialDemo;
 import states.tutorial.MoveDemo;
 import states.tutorial.AttackDemo;
 import states.tutorial.WeaponsDemo;
-import states.tutorial.ModesDemo;
 import states.tutorial.SuperDemo;
 import states.tutorial.AbilitiesDemo;
 import states.tutorial.HealthDemo;
@@ -21,11 +20,11 @@ class TutorialSubState extends FlxSubState
 {
 	public static var shown:Bool = false;
 
-	static inline var PAGES:Int = 7;
+	static inline var PAGES:Int = 6;
 	static inline var FADE_TIME:Float = 0.35;
 	static inline var OPEN_TIME:Float = 0.2;
 
-	static var TITLES:Array<String> = ["MOVE", "ATTACK", "WEAPONS", "MODES", "SUPER", "ABILITIES", "HEALTH"];
+	static var TITLES:Array<String> = ["MOVE", "ATTACK", "WEAPONS", "SUPER", "ABILITIES", "HEALTH"];
 	static var DESCS:Array<String> = [
 		"WASD - move        SPACE - dash (2s cooldown)",
 		"Aim with the mouse        LEFT CLICK - attack",
@@ -108,9 +107,8 @@ class TutorialSubState extends FlxSubState
 			case 0: new MoveDemo(camUI);
 			case 1: new AttackDemo(camUI);
 			case 2: new WeaponsDemo(camUI);
-			case 3: new ModesDemo(camUI);
-			case 4: new SuperDemo(camUI);
-			case 5: new AbilitiesDemo(camUI);
+			case 3: new SuperDemo(camUI);
+			case 4: new AbilitiesDemo(camUI);
 			default: new HealthDemo(camUI);
 		}
 		add(demo);

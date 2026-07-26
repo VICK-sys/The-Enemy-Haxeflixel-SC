@@ -61,13 +61,13 @@ Combat balance for every weapon system, one object per system; field names match
 | Section | Covers |
 |---|---|
 | `swing` | melee range and arc, slash spawn distance |
-| `slice` | slice spawn distance |
+| `jab` | hook jab spawn distance, reach, arc, damage |
 | `hammer` | reach, radius, damage, push, shockwave stun length |
 | `shockwave` | wave radius and expansion time |
 | `thrown` | throw distance, return speed |
 | `bowCharge` | charged shot: `minTime` below which a press is a plain tap shot, `fullTime` to reach full charge, `maxDamage` at full, and the `speedBonus`/`sizeBonus`/`knockBonus` multipliers applied across the charge range |
 | `arrowRain` | volley size, drop delay and stagger, spread, fall speed, hit radius |
-| `hook` | flight range, pull speed and timeout, grab and hold distances, spin windup, throw speed/duration/hit radius, release stun, whirl time/radius/hit radius, and the grapple set (range, pull speed, sweep radius, fling force, catch distance, timeout) |
+| `hook` | flight range, pull speed and timeout, grab and hold distances, spin windup, throw speed/duration/hit radius, release stun, and the damage dealt to enemies that cannot be grabbed |
 | `superScythes` | blade count, fire gate |
 | `bounceStrike` | strike count, hop time, radius, damage, force, catapult speed |
 | `arrowStorm` | storm duration, spawn cadence, drops per tick |

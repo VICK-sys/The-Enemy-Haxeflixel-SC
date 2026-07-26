@@ -31,6 +31,10 @@ import net.PuppetDirector;
 
 class PlayState extends FlxState
 {
+	static inline var DEFLECT_RADIUS:Float = 45;
+	static inline var DEFLECT_DAMAGE:Int = 1;
+	static inline var DEFLECT_PUSH:Float = 1.2;
+
 	private var fx:Fx;
 	private var arena:Arena;
 	private var _player:Player;
@@ -112,7 +116,7 @@ class PlayState extends FlxState
 		combat = new Weapons(_player, scythe, arena, director, status, fx, pickups);
 
 		add(combat.swing.slashes);
-		add(combat.slice.slices);
+		add(combat.jab.slashes);
 		add(combat.bow.arrows);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
 		insert(members.indexOf(layers.entityLayer), combat.hammer.shock.cracks);
@@ -144,6 +148,7 @@ class PlayState extends FlxState
 		director.onBoss = onBossWave;
 		director.onBossSpawn = hud.showBossBar;
 		director.onBossDefeated = onBossDefeated;
+		director.onFriendlyShot = onDeflectedShot;
 		arena.onNormal = onArenaNormal;
 		perf = new PerfLog();
 
@@ -235,13 +240,14 @@ class PlayState extends FlxState
 		props.update();
 		scythe.alpha = props.buried ? 0 : 1;
 		combat.swing.slashes.visible = !props.buried;
-		combat.slice.slices.visible = !props.buried;
+		combat.jab.slashes.visible = !props.buried;
 		if (!frozen && !inputLocked)
 			combat.update(elapsed);
 		director.updateShots();
 		if (netSync != null)
 			netSync.update(elapsed);
 		hud.setMode(combat.modeName());
+		hud.setRain(combat.bow.rainCharge, combat.weapon == 2);
 		hud.setTimeStop(Net.active ? "OFF" : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
@@ -257,7 +263,7 @@ class PlayState extends FlxState
 
 		debugKeys();
 
-		var projectiles = live(combat.slice.slices.countLiving()) + live(director.shots.countLiving())
+		var projectiles = live(director.shots.countLiving())
 			+ live(combat.bow.arrows.countLiving()) + live(combat.bow.rain.arrows.countLiving())
 			+ (combat.throwAttack.airborne ? 1 : 0) + (combat.hookAttack.hook.exists ? 1 : 0);
 		perf.frame(director.enemyCount(), EnemyNav.usedBudget(), projectiles, director.wave);
@@ -265,6 +271,16 @@ class PlayState extends FlxState
 
 	function live(n:Int):Int
 		return n < 0 ? 0 : n;
+
+
+	function onDeflectedShot(shot:entities.enemy.EnemyShot):Bool
+	{
+		var hit = director.firstInCircle(shot.x + shot.width / 2, shot.y + shot.height / 2, DEFLECT_RADIUS);
+		if (hit == null)
+			return false;
+		combat.hits.damageN(hit, shot.dirX * DEFLECT_PUSH, shot.dirY * DEFLECT_PUSH, DEFLECT_DAMAGE);
+		return true;
+	}
 
 	function onWaveStarted(n:Int):Void
 	{

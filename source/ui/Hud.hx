@@ -46,6 +46,7 @@ class Hud
 	private var stopTimerText:FlxText;
 	private var stopTimerTarget:Float = 0;
 	private var modeSwitchTimer:Float = 0;
+	private var rainBar:FlxBar;
 	private var iconBaseAngle:Float = 0;
 	private var iconScaleX:Float = 1;
 	private var iconScaleY:Float = 1;
@@ -69,6 +70,15 @@ class Hud
 		state.add(makeBar(activeRed, "active_empty", "active_red", 'itemBar', status.apMax));
 		state.add(passiveRed);
 		state.add(playerIcon);
+
+		var rainAnchor = makeSprite(1060, 578, "active_blue");
+		rainBar = new FlxBar(rainAnchor.x, rainAnchor.y, LEFT_TO_RIGHT, Std.int(rainAnchor.width), Std.int(rainAnchor.height), null, "", 0, 1);
+		rainBar.createImageBar(Paths.image("ui/active_empty"), Paths.image("ui/active_blue"), FlxColor.TRANSPARENT, FlxColor.TRANSPARENT);
+		rainBar.antialiasing = false;
+		rainBar.scale.set(4, 4);
+		rainBar.cameras = [camUI];
+		rainBar.visible = false;
+		state.add(rainBar);
 
 		timeText = new FlxText(92, 616, 0, "");
 		timeText.setFormat(null, 14, FlxColor.WHITE, LEFT);
@@ -283,9 +293,16 @@ class Hud
 		if (name == currentMode)
 			return;
 		currentMode = name;
-		modeText.text = "MODE: " + name;
+		modeText.text = "WEAPON: " + name;
 		applyModeIcon(name);
 		modeSwitchTimer = MODE_SWITCH_TIME;
+	}
+
+	public function setRain(charge:Float, shown:Bool):Void
+	{
+		rainBar.visible = shown;
+		if (shown)
+			rainBar.percent = charge * 100;
 	}
 
 	function applyModeIcon(name:String):Void
@@ -310,22 +327,17 @@ class Hud
 			modeIcon.loadGraphic(Paths.image("items/mufu_bow"));
 			iconBaseAngle = 0;
 		}
-		else if (name == "ARROW RAIN" || name == "ARROW STORM")
+		else if (name == "ARROW STORM")
 		{
 			modeIcon.loadGraphic(Paths.image("items/mufu_bow"));
 			iconBaseAngle = -45;
 		}
-		else if (name == "HOOK" || name == "GRAPPLE" || name == "ARMS")
+		else if (name == "HOOK" || name == "ARMS")
 		{
 			modeIcon.loadGraphic(Paths.image("items/mufu_hook"));
 			iconBaseAngle = 30;
 		}
-		else if (name == "SPIN")
-		{
-			modeIcon.loadGraphic(Paths.image("items/mufu_hook"));
-			iconBaseAngle = -30;
-		}
-		else if (name == "THROW" || name.indexOf("SUPER") == 0)
+		else if (name == "SCYTHE" || name.indexOf("SUPER") == 0)
 		{
 			modeIcon.loadGraphic(Paths.image("items/mufu_scythe"));
 			iconBaseAngle = 30;
@@ -335,11 +347,9 @@ class Hud
 			modeIcon.frames = Paths.sparrow("effects/attacks_gfx");
 			if (modeIcon.animation.getByName("slash") == null)
 				modeIcon.animation.addByPrefix("slash", "Sword", 0, false);
-			var slashAnim = modeIcon.animation.getByName("slash");
-			var frame = name == "AIR SLICE" && slashAnim.numFrames > 3 ? slashAnim.numFrames - 3 : 0;
-			modeIcon.animation.play("slash", true, false, frame);
+			modeIcon.animation.play("slash", true, false, 0);
 			modeIcon.animation.pause();
-			iconBaseAngle = name == "AIR SLICE" ? -35 : 0;
+			iconBaseAngle = 0;
 		}
 		modeIcon.setGraphicSize(34, 0);
 		modeIcon.updateHitbox();

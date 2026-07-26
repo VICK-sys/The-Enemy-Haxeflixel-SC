@@ -1,6 +1,6 @@
 {
-	"swing": { "spawnDist": 110, "meleeRange": 175, "meleeArcCos": -0.5 },
-	"slice": { "spawnDist": 110 },
+	"swing": { "spawnDist": 110, "meleeRange": 175, "meleeArcCos": -0.5, "damage": 2 },
+	"jab": { "spawnDist": 85, "meleeRange": 130, "meleeArcCos": -0.2, "damage": 1 },
 	"hammer": { "reach": 15, "radius": 160, "damage": 2, "push": 1.6, "stunTime": 2.0 },
 	"shockwave": { "waveRadius": 380, "waveTime": 0.45 },
 	"thrown": { "maxDist": 500, "returnSpeed": 1250 },
@@ -10,11 +10,20 @@
 		"maxDamage": 3,
 		"speedBonus": 0.8,
 		"sizeBonus": 0.7,
-		"knockBonus": 1.5
+		"knockBonus": 1.5,
+		"shotCooldown": 0.35
 	},
-	"arrowRain": { "volley": 8, "delay": 0.55, "stagger": 0.35, "spread": 130, "fallSpeed": 1600, "hitRadius": 80 },
+	"arrowRain": {
+		"volley": 8,
+		"delay": 0.55,
+		"stagger": 0.35,
+		"spread": 130,
+		"fallSpeed": 1600,
+		"hitRadius": 80,
+		"rechargeTime": 9.0
+	},
 	"hook": {
-		"range": 500,
+		"range": 700,
 		"pullSpeed": 1500,
 		"pullTimeout": 0.8,
 		"grabDist": 110,
@@ -24,15 +33,7 @@
 		"throwTime": 0.5,
 		"throwHitRadius": 60,
 		"releaseStun": 0.35,
-		"whirlTime": 0.45,
-		"whirlRadius": 160,
-		"whirlHitRadius": 50,
-		"grappleRange": 620,
-		"grapplePullSpeed": 1900,
-		"grappleRadius": 95,
-		"grappleFling": 2.6,
-		"grappleCatch": 75,
-		"grappleTimeout": 0.7
+		"snagDamage": 3
 	},
 	"superScythes": { "count": 10, "fireGate": 0.08 },
 	"bounceStrike": { "strikes": 5, "hopTime": 0.55, "radius": 300, "damage": 2, "force": 4, "catapultSpeed": 720 },

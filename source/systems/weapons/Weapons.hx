@@ -11,12 +11,12 @@ import systems.Pickups;
 
 class Weapons
 {
-	static var WEAPON_MODES:Array<Array<WeaponMode>> = [[Swing, Slice, Throw], [Hammer, Quake], [Bow, Rain], [Hook, Whirl, Grapple]];
+	static var WEAPON_NAMES:Array<String> = ["SCYTHE", "HAMMER", "BOW", "HOOK"];
 
 	public var held:HeldWeapon;
 	public var hits:HitPipeline;
 	public var swing:SwingAttack;
-	public var slice:SliceAttack;
+	public var jab:SwingAttack;
 	public var hammer:HammerAttack;
 	public var bow:BowAttack;
 	public var throwAttack:ThrowAttack;
@@ -32,7 +32,6 @@ class Weapons
 
 	private var player:Player;
 	private var status:PlayerCombat;
-	private var modeIndexes:Array<Int> = [0, 0, 0, 0];
 	private var wasHookBusy:Bool = false;
 	private var wasArms:Bool = false;
 
@@ -43,8 +42,9 @@ class Weapons
 		hits = new HitPipeline(status, fx, pickups, director);
 		hits.owner = player;
 		held = new HeldWeapon(player, scythe);
-		swing = new SwingAttack(director, hits);
-		slice = new SliceAttack(arena, director, hits);
+		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
+		swing = new SwingAttack(director, hits, weaponCfg.swing);
+		jab = new SwingAttack(director, hits, weaponCfg.jab, 0.6);
 		hammer = new HammerAttack(director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, scythe, arena, director, status, hits);
@@ -79,12 +79,12 @@ class Weapons
 
 	public function update(elapsed:Float):Void
 	{
-		updateWeaponInput();
 		held.charge = bow.charging ? bow.charge : 0;
 		if (!superBusy)
 			held.update(elapsed);
 		updateAttackInput();
-		slice.update();
+		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
+		jab.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		bow.update(elapsed);
 		hammer.update(elapsed);
 		hookAttack.update(elapsed);
@@ -120,40 +120,14 @@ class Weapons
 			return "ARMS";
 		if (superScythes.active())
 			return "SUPER " + superScythes.orbiterCount();
-		return switch (held.mode)
-		{
-			case Swing: "SWING";
-			case Slice: "AIR SLICE";
-			case Throw: "THROW";
-			case Hammer: "HAMMER";
-			case Quake: "SHOCKWAVE";
-			case Bow: "BOW";
-			case Rain: "ARROW RAIN";
-			case Hook: "HOOK";
-			case Whirl: "SPIN";
-			case Grapple: "GRAPPLE";
-		};
-	}
-
-	function updateWeaponInput():Void
-	{
-		if (FlxG.mouse.justPressedRight)
-		{
-			var list = WEAPON_MODES[weapon];
-			if (list.length > 1)
-			{
-				modeIndexes[weapon] = (modeIndexes[weapon] + 1) % list.length;
-				bow.cancelCharge();
-				held.setMode(list[modeIndexes[weapon]]);
-			}
-		}
+		return WEAPON_NAMES[weapon];
 	}
 
 	public function equip(i:Int):Void
 	{
-		weapon = i < 0 || i >= WEAPON_MODES.length ? 0 : i;
+		weapon = i < 0 || i >= WEAPON_NAMES.length ? 0 : i;
 		bow.cancelCharge();
-		held.setMode(WEAPON_MODES[weapon][modeIndexes[weapon]]);
+		held.setKind(weapon);
 	}
 
 	function aimFromPlayer():{dx:Float, dy:Float, deg:Float}
@@ -174,11 +148,21 @@ class Weapons
 		return {dx: dx, dy: dy, deg: Math.atan2(dy, dx) * 180 / Math.PI};
 	}
 
-	function updateBowCharge():Void
+	function updateBowInput():Void
 	{
-		if (hookAttack.busy || throwAttack.airborne)
+		if (throwAttack.airborne)
 		{
 			bow.cancelCharge();
+			return;
+		}
+
+		if (FlxG.mouse.justPressedRight && bow.rainReady && !held.swinging)
+		{
+			var aim = aimFromPlayer();
+			bow.cancelCharge();
+			held.beginSwing(aim.deg, Rain);
+			emitAttack(Rain, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+			bow.rainFire(FlxG.mouse.x, FlxG.mouse.y, held.handX(), held.handY());
 			return;
 		}
 
@@ -189,7 +173,7 @@ class Weapons
 		{
 			var aim = aimFromPlayer();
 			var power = bow.charge;
-			held.beginSwing(aim.deg);
+			held.beginSwing(aim.deg, Bow);
 			bow.release(held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
 			emitAttack(Bow, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg, power);
 		}
@@ -218,13 +202,15 @@ class Weapons
 			return;
 		}
 
-		if (held.mode == Bow)
+		if (weapon == 2)
 		{
-			updateBowCharge();
+			updateBowInput();
 			return;
 		}
 
-		if (!FlxG.mouse.justPressed || throwAttack.airborne)
+		var leftClick = FlxG.mouse.justPressed;
+		var rightClick = FlxG.mouse.justPressedRight;
+		if ((!leftClick && !rightClick) || throwAttack.airborne)
 			return;
 
 		var pmx:Float = player.x + player.width * 0.5;
@@ -236,6 +222,8 @@ class Weapons
 
 		if (superScythes.active())
 		{
+			if (!leftClick)
+				return;
 			superScythes.tryLaunch(FlxG.mouse.x, FlxG.mouse.y);
 			if (onSuperLaunch != null)
 				onSuperLaunch(FlxG.mouse.x, FlxG.mouse.y);
@@ -244,45 +232,51 @@ class Weapons
 
 		if (hookAttack.holding)
 		{
-			hookAttack.throwHeld(dx, dy);
+			if (leftClick)
+				hookAttack.throwHeld(dx, dy);
 			return;
 		}
 
 		if (hookAttack.busy || held.swinging)
 			return;
 
-		if (held.mode == Throw)
-		{
-			throwAttack.launch(pmx, pmy, dx, dy);
-			emitAttack(Throw, pmx, pmy, dx, dy, aimDeg);
-			return;
-		}
-
-		held.beginSwing(aimDeg);
-
-		if (held.mode == Rain)
-			emitAttack(Rain, held.handX(), held.handY(), dx, dy, aimDeg);
+		if (leftClick)
+			primary(pmx, pmy, dx, dy, aimDeg);
 		else
-			emitAttack(held.mode, pmx, pmy, dx, dy, aimDeg);
+			secondary(pmx, pmy, dx, dy, aimDeg);
+	}
 
-		switch (held.mode)
+	function primary(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
+	{
+		switch (weapon)
 		{
-			case Slice:
-				slice.fire(pmx, pmy, dx, dy, aimDeg);
-			case Hammer:
+			case 1:
+				held.beginSwing(aimDeg, Hammer);
+				emitAttack(Hammer, pmx, pmy, dx, dy, aimDeg);
 				hammer.slam(pmx, pmy, dx, dy);
-			case Quake:
-				hammer.quake(pmx, pmy, dx, dy);
-			case Rain:
-				bow.rainFire(FlxG.mouse.x, FlxG.mouse.y, held.handX(), held.handY());
-			case Hook:
-				hookAttack.fire(pmx, pmy, dx, dy, aimDeg);
-			case Whirl:
-				hookAttack.whirl(aimDeg);
-			case Grapple:
-				hookAttack.grapple(pmx, pmy, dx, dy, aimDeg);
+			case 3:
+				held.beginSwing(aimDeg, Jab);
+				emitAttack(Jab, pmx, pmy, dx, dy, aimDeg);
+				jab.fire(pmx, pmy, dx, dy, aimDeg);
 			default:
+				held.beginSwing(aimDeg, Swing);
+				emitAttack(Swing, pmx, pmy, dx, dy, aimDeg);
 				swing.fire(pmx, pmy, dx, dy, aimDeg);
+		}
+	}
+
+	function secondary(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
+	{
+		switch (weapon)
+		{
+			case 0:
+				throwAttack.launch(pmx, pmy, dx, dy);
+				emitAttack(Throw, pmx, pmy, dx, dy, aimDeg);
+			case 3:
+				held.beginSwing(aimDeg, Hook);
+				emitAttack(Hook, pmx, pmy, dx, dy, aimDeg);
+				hookAttack.fire(pmx, pmy, dx, dy, aimDeg);
+			default:
 		}
 	}
 

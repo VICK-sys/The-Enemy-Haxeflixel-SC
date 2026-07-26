@@ -1,5 +1,6 @@
 package entities.weapon;
 
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import util.Paths;
 
@@ -14,8 +15,10 @@ class Arrow extends FlxSprite
 	public var dirY:Float = 0;
 	public var damage:Int = 1;
 	public var knock:Float = 1;
+	public var piercing:Bool = false;
 
 	private var life:Float = 0;
+	private var hitList:Array<FlxObject> = [];
 
 	public function new()
 	{
@@ -31,6 +34,8 @@ class Arrow extends FlxSprite
 		revive();
 		this.damage = damage;
 		this.knock = knock;
+		piercing = false;
+		hitList.resize(0);
 		scale.set(4 * sizeMult, 4 * sizeMult);
 		setPosition(cx - width / 2, cy - height / 2);
 		dirX = dx;
@@ -39,6 +44,16 @@ class Arrow extends FlxSprite
 		velocity.set(dx * speed, dy * speed);
 		angle = angleDeg + 90;
 		life = RANGE / SPEED;
+	}
+
+	public function hasHit(e:FlxObject):Bool
+	{
+		return hitList.indexOf(e) >= 0;
+	}
+
+	public function markHit(e:FlxObject):Void
+	{
+		hitList.push(e);
 	}
 
 	override public function update(elapsed:Float):Void

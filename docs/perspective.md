@@ -34,7 +34,7 @@ The totem wears one of two faces, `stage/totem_top` in top-down and `stage/totem
 
 The morph freezes combat - enemy updates pause, shots clear, contact damage off, inputs held - plays its direction's swap sound (`platswap_side` going to 2D, `platswap_top` coming back), drives the landscape through `applySideMorph`, and glides the player, enemies, and totem to their remapped positions over about a second and a half. Entities farther north end up higher, then fall.
 
-Because combat is frozen mid-morph, the shift keeps the held weapon anchored to the player itself (`Weapons.anchorHeld()`, position only) so it travels with them, and retracts a deployed hook before the move so no rope is left stretched across the arena. Retracting first also clears the grapple's movement block, which would otherwise be restored when the morph ends.
+Because combat is frozen mid-morph, the shift keeps the held weapon anchored to the player itself (`Weapons.anchorHeld()`, position only) so it travels with them, and retracts a deployed hook before the move so no rope is left stretched across the arena.
 
 ## Side view
 

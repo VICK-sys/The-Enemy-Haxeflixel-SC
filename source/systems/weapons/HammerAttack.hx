@@ -35,17 +35,6 @@ class HammerAttack
 		FlxG.sound.play(Paths.sound("hammer"), 0.8);
 	}
 
-	public function quake(pmx:Float, pmy:Float, dx:Float, dy:Float):Void
-	{
-		var qx = pmx + dx * cfg.reach;
-		var qy = pmy + dy * cfg.reach;
-		shock.blast(qx, qy);
-		fx.sparksAt(qx, qy);
-		fx.slamShake();
-		FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.7);
-		FlxG.sound.play(Paths.sound("hammer"), 1);
-	}
-
 	public function update(elapsed:Float):Void
 	{
 		shock.update(elapsed);

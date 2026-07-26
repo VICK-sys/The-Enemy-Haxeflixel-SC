@@ -7,7 +7,6 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.weapon.Arrow;
 import entities.weapon.HookShot;
 import entities.weapon.SlashEffect;
-import entities.weapon.SliceProjectile;
 import entities.weapon.ThrownScythe;
 import systems.enemy.EnemyDirector;
 import systems.Fx;
@@ -29,7 +28,6 @@ class RemoteFx
 	private var fx:Fx;
 
 	private var slashes:FlxTypedGroup<SlashEffect>;
-	private var slices:FlxTypedGroup<SliceProjectile>;
 	private var arrows:FlxTypedGroup<Arrow>;
 	private var rope:FlxTypedGroup<FlxSprite>;
 	private var hook:HookShot;
@@ -65,7 +63,6 @@ class RemoteFx
 		rain.cosmetic = true;
 
 		slashes = new FlxTypedGroup<SlashEffect>();
-		slices = new FlxTypedGroup<SliceProjectile>();
 		arrows = new FlxTypedGroup<Arrow>();
 		rope = new FlxTypedGroup<FlxSprite>();
 
@@ -91,7 +88,6 @@ class RemoteFx
 			state.insert(below, r);
 		for (c in arms.claws)
 			state.insert(below, c);
-		state.add(slices);
 		state.add(arrows);
 		state.add(rain.arrows);
 		state.add(slashes);
@@ -145,19 +141,12 @@ class RemoteFx
 				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.swing.spawnDist, pmy + dy * cfg.swing.spawnDist, dx, dy, aimDeg);
 				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
-			case Slice:
-				slices.recycle(SliceProjectile).fire(pmx + dx * cfg.slice.spawnDist, pmy + dy * cfg.slice.spawnDist, dx, dy, aimDeg);
-				FlxG.sound.play(Paths.sound("scythe/slice"), 0.5);
+			case Jab:
+				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.jab.spawnDist, pmy + dy * cfg.jab.spawnDist, dx, dy, aimDeg, 0.6);
+				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
 			case Hammer:
 				fx.sparksAt(pmx + dx * cfg.hammer.reach, pmy + dy * cfg.hammer.reach);
-				FlxG.sound.play(Paths.sound("hammer"), 0.5);
-
-			case Quake:
-				var qx = pmx + dx * cfg.hammer.reach;
-				var qy = pmy + dy * cfg.hammer.reach;
-				shock.blast(qx, qy, false);
-				fx.sparksAt(qx, qy);
 				FlxG.sound.play(Paths.sound("hammer"), 0.5);
 
 			case Bow:
@@ -175,11 +164,8 @@ class RemoteFx
 			case Throw:
 				FlxG.sound.play(Paths.sound("scythe/throw"), 0.5);
 
-			case Hook, Grapple:
+			case Hook:
 				FlxG.sound.play(Paths.sound("scythe/throw"), 0.5);
-
-			case Whirl:
-				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 		}
 	}
 
