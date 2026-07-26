@@ -81,6 +81,7 @@ class EditorState extends FlxState
 		propPal = new PropPalette(this, uiCam, palX, palY, cfg.palette.width, cfg.palette.height, cfg.palette.padding, cfg.palette.propCell);
 		hud = new EditorHud(this, uiCam, cfg.flashTime, cfg.ui.sidebar, cfg.ui.topbar);
 		library = new LibraryPanel(this, uiCam, hud.flash, cfg.ui.sidebar, cfg.ui.topbar, EditorHud.BAR);
+		hud.raiseFlash();
 
 		wallTool = new WallTool(doc, Paths.file(ArenaDataRegistry.get().tiles));
 		tileTool = new TileTool(doc, wallTool, tilePal, hud.flash);

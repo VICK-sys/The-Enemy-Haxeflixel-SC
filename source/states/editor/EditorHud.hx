@@ -32,10 +32,12 @@ class EditorHud
 	private var flashText:FlxText;
 	private var flashTimer:Float = 0;
 	private var flashTime:Float;
+	private var state:FlxState;
 
 	public function new(state:FlxState, cam:FlxCamera, flashTime:Float, leftInset:Float, topInset:Float)
 	{
 		this.flashTime = flashTime;
+		this.state = state;
 
 		var canvasW = FlxG.width - leftInset;
 
@@ -86,6 +88,12 @@ class EditorHud
 		state.add(sheetActions);
 
 		showSheet(false);
+	}
+
+	public function raiseFlash():Void
+	{
+		state.remove(flashText);
+		state.add(flashText);
 	}
 
 	public function toggleSheet():Void
