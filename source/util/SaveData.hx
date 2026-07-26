@@ -108,6 +108,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function runValue():Int
+	{
+		ensure();
+		return save.data.runValue != null ? save.data.runValue : 0;
+	}
+
+	public static function setRunValue(v:Int):Void
+	{
+		ensure();
+		save.data.runValue = v;
+		save.flush();
+	}
+
 	public static function applySettings():Void
 	{
 		FlxG.sound.volume = volume();

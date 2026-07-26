@@ -144,6 +144,24 @@ Decorations are **purely visual** - they never collide. Paint walls under or aro
 
 Grouped as `view` (start/min/max zoom, zoom step, pan speed), `palette` (panel width and height, padding, prop cell size, max zoom), `brush` (max size, undo depth), and `flashTime`. The editor reads these into named accessors, so call sites still read as constants while the numbers stay data.
 
+## RUN - assets/data/run.json
+
+A hidden number rolled per run, in the manner of the one Undertale keeps, for gating rare content that should not appear on demand. Nothing reads it yet - this is the framework only.
+
+```json
+{
+	"min": 1,
+	"max": 100,
+	"events": []
+}
+```
+
+`min` and `max` bound the roll. `events` names the windows that rare content sits in, each `{ "name", "min", "max" }` with an optional `"note"` for what it is meant to trigger, so the whole table of secrets is readable in one place rather than scattered as magic numbers through the code.
+
+`util.Run` is the runtime. `Run.value` reads the current roll, taking it from the save and rolling one the first time if there is none. `Run.reroll()` takes a fresh number and stores it - call it wherever a run should get its own. `Run.allows("name")` is the question gameplay asks, true only when the current value falls inside that event's window; an undefined name answers false, so a typo hides content rather than exposing it. `Run.inRange(lo, hi)` checks a window inline for something not worth naming, `Run.force(v)` pins a value for testing, and `Run.report()` prints the roll with every event and whether it is live.
+
+The value persists in the save alongside the best wave and the settings, so it survives a restart until something rerolls it.
+
 ## Themes - assets/data/themes.json
 
 An array of `themes`. The first entry is the look every map wears - there is no in-editor switcher, so the rest are inert unless something selects them in code. Worth knowing before adding art: **the collision tileset is never drawn**. `Arena` hides the tilemap and renders walls as merged block sprites, so swapping `tiles` in arena.json changes collision shapes, not appearance. What changes how a map looks is a theme.
