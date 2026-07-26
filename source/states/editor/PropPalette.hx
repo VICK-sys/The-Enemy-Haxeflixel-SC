@@ -1,14 +1,13 @@
 package states.editor;
 
 import flixel.FlxCamera;
-import flixel.FlxG;
 import flixel.FlxState;
 import openfl.display.BitmapData;
 import openfl.geom.Matrix;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 import data.PropData.PropDataRegistry;
-import systems.Decor;
+import systems.world.Decor;
 
 class PropPalette extends PalettePanel
 {

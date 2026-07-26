@@ -2,8 +2,8 @@ package net;
 
 import entities.Player;
 import entities.enemy.Enemies;
-import systems.Arena;
-import systems.EnemyDirector;
+import systems.world.Arena;
+import systems.enemy.EnemyDirector;
 import systems.PlayerCombat;
 import systems.RenderLayers;
 

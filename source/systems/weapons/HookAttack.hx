@@ -6,14 +6,15 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
 import entities.enemy.Enemies;
 import entities.weapon.HookShot;
-import systems.Arena;
-import systems.EnemyDirector;
+import systems.world.Arena;
+import systems.enemy.EnemyDirector;
 import systems.PlayerCombat;
-import flixel.util.FlxDirectionFlags;
 import data.WeaponData.WeaponDataRegistry;
 import util.Paths;
+import systems.world.PropBlock;
 
-enum HookPhase {
+enum HookPhase
+{
 	Idle;
 	Flying;
 	Pulling;
@@ -21,14 +22,12 @@ enum HookPhase {
 	Spinning;
 	Whirling;
 	Retracting;
-	GrappleFly;
-	GrapplePull;
+	Grappling;
 }
 
 class HookAttack
 {
 	static inline var SPAWN_DIST:Float = 40;
-	static inline var WALL_PROBE:Float = 50;
 	static inline var RETRACT_SPEED:Float = 2200;
 	static inline var CATCH_DIST:Float = 60;
 	static inline var HANDLE_LEN:Float = 62;
@@ -44,6 +43,11 @@ class HookAttack
 	private var director:EnemyDirector;
 	private var status:PlayerCombat;
 	private var hits:HitPipeline;
+
+	private var grappleMode:HookGrapple;
+	private var whirlMode:HookWhirl;
+	private var flight:HookFlight;
+
 	private var phase:HookPhase = Idle;
 	private var victim:Enemies;
 	private var pullTimer:Float = 0;
@@ -53,19 +57,6 @@ class HookAttack
 	private var throwDirY:Float = 0;
 	private var fireX:Float = 0;
 	private var fireY:Float = 0;
-	private var flightVictim:Enemies;
-	private var flightTimer:Float = 0;
-	private var flightDirX:Float = 1;
-	private var flightDirY:Float = 0;
-	private var flightHits:Array<Enemies> = [];
-	private var whirlTimer:Float = 0;
-	private var whirlBase:Float = 0;
-	private var whirlHits:Array<Enemies> = [];
-	private var anchorX:Float = 0;
-	private var anchorY:Float = 0;
-	private var grappleTimer:Float = 0;
-	private var grappleHits:Array<Enemies> = [];
-	private var grappleTarget:Enemies;
 
 	public function new(player:Player, arena:Arena, director:EnemyDirector, status:PlayerCombat, hits:HitPipeline)
 	{
@@ -74,9 +65,14 @@ class HookAttack
 		this.director = director;
 		this.status = status;
 		this.hits = hits;
+
 		hook = new HookShot();
 		hook.kill();
 		rope = new FlxTypedGroup<FlxSprite>();
+
+		grappleMode = new HookGrapple(player, arena, director, status, hits, hook);
+		whirlMode = new HookWhirl(player, director, hits, hook);
+		flight = new HookFlight(arena, director, hits);
 	}
 
 	function get_busy():Bool
@@ -100,26 +96,16 @@ class HookAttack
 	{
 		if (phase != Idle)
 			return;
-		whirlBase = aimDeg;
-		whirlTimer = cfg.whirlTime;
-		whirlHits = [];
-		hook.revive();
-		hook.velocity.set(0, 0);
+		whirlMode.begin(aimDeg);
 		phase = Whirling;
-		FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.7);
 	}
 
 	public function grapple(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
 		if (phase != Idle)
 			return;
-		fireX = pmx + dx * SPAWN_DIST;
-		fireY = pmy + dy * SPAWN_DIST;
-		hook.fire(fireX, fireY, dx, dy, aimDeg);
-		grappleHits = [];
-		player.blockMovement = true;
-		phase = GrappleFly;
-		FlxG.sound.play(Paths.sound("scythe/throw"), 0.6);
+		grappleMode.begin(pmx + dx * SPAWN_DIST, pmy + dy * SPAWN_DIST, dx, dy, aimDeg);
+		phase = Grappling;
 	}
 
 	public function throwHeld(dx:Float, dy:Float):Void
@@ -139,7 +125,7 @@ class HookAttack
 	{
 		if (status.dead)
 		{
-			if (phase != Idle || flightVictim != null)
+			if (phase != Idle || flight.active)
 				drop();
 			return;
 		}
@@ -151,97 +137,19 @@ class HookAttack
 			case Pulling: updatePulling(elapsed);
 			case Holding: updateHolding();
 			case Spinning: updateSpinning(elapsed);
-			case Whirling: updateWhirling(elapsed);
 			case Retracting: updateRetract();
-			case GrappleFly: updateGrappleFly();
-			case GrapplePull: updateGrapplePull(elapsed);
+			case Whirling: if (!whirlMode.update(elapsed)) endMode();
+			case Grappling: if (!grappleMode.update(elapsed)) endMode();
 		}
 
-		updateFlight(elapsed);
+		flight.update(elapsed);
 		updateRope();
 	}
 
-	function updateGrappleFly():Void
+	function endMode():Void
 	{
-		if (!hook.exists)
-		{
-			endGrapple();
-			return;
-		}
-
-		player.velocity.set(0, 0);
-
-		var hcx = hook.x + hook.width / 2;
-		var hcy = hook.y + hook.height / 2;
-
-		var hit = director.firstInCircle(hcx, hcy, HookShot.RADIUS, true);
-		if (hit != null)
-		{
-			grappleTarget = hit;
-			anchorX = hit.x + hit.width * 0.5;
-			anchorY = hit.y + hit.height * 0.5;
-			hook.velocity.set(0, 0);
-			grappleTimer = cfg.grappleTimeout;
-			grappleHits = [];
-			status.invincible = true;
-			phase = GrapplePull;
-			return;
-		}
-
-		var fdx = hcx - fireX;
-		var fdy = hcy - fireY;
-		if (fdx * fdx + fdy * fdy >= cfg.grappleRange * cfg.grappleRange
-			|| arena.wallAt(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS)
-			|| systems.PropBlock.at(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS))
-		{
-			endGrapple();
-		}
-	}
-
-	function updateGrapplePull(elapsed:Float):Void
-	{
-		if (grappleTarget != null && grappleTarget.exists && !grappleTarget.isDead)
-		{
-			anchorX = grappleTarget.x + grappleTarget.width * 0.5;
-			anchorY = grappleTarget.y + grappleTarget.height * 0.5;
-		}
-
-		var pmx = player.x + player.width * 0.5;
-		var pmy = player.y + player.height * 0.5;
-		var dx = anchorX - pmx;
-		var dy = anchorY - pmy;
-		var dist = Math.sqrt(dx * dx + dy * dy);
-
-		grappleTimer -= elapsed;
-		if (dist < cfg.grappleCatch || grappleTimer <= 0 || player.wasTouching != FlxDirectionFlags.NONE)
-		{
-			endGrapple();
-			return;
-		}
-
-		var ux = dx / dist;
-		var uy = dy / dist;
-		player.velocity.set(ux * cfg.grapplePullSpeed, uy * cfg.grapplePullSpeed);
-		player.flipX = ux < 0;
-		hook.setPosition(anchorX - hook.width / 2, anchorY - hook.height / 2);
-
-		director.eachInCircle(pmx, pmy, cfg.grappleRadius, function(e)
-		{
-			if (grappleHits.contains(e))
-				return;
-			grappleHits.push(e);
-			hits.damage(e, ux * cfg.grappleFling, uy * cfg.grappleFling);
-		});
-	}
-
-	function endGrapple():Void
-	{
-		player.velocity.set(0, 0);
-		if (!status.dead)
-			player.blockMovement = false;
-		status.invincible = false;
-		grappleTarget = null;
-		grappleHits = [];
+		grappleMode.stop();
+		whirlMode.stop();
 		hook.kill();
 		Rope.clear(rope);
 		phase = Idle;
@@ -260,9 +168,9 @@ class HookAttack
 
 		var fdx = hcx - fireX;
 		var fdy = hcy - fireY;
-		if (fdx * fdx + fdy * fdy >= cfg.range * cfg.range
-			|| arena.wallAt(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS)
-			|| systems.PropBlock.at(hcx + hook.dirX * HookShot.RADIUS, hcy + hook.dirY * HookShot.RADIUS))
+		var px = hcx + hook.dirX * HookShot.RADIUS;
+		var py = hcy + hook.dirY * HookShot.RADIUS;
+		if (fdx * fdx + fdy * fdy >= cfg.range * cfg.range || arena.wallAt(px, py) || PropBlock.at(px, py))
 		{
 			beginRetract();
 			return;
@@ -281,12 +189,12 @@ class HookAttack
 
 		var pmx = player.x + player.width * 0.5;
 		var pmy = player.y + player.height * 0.5;
-		var px = pmx - (hit.x + hit.width / 2);
-		var py = pmy - (hit.y + hit.height / 2);
-		var plen = Math.sqrt(px * px + py * py);
+		var ptx = pmx - (hit.x + hit.width / 2);
+		var pty = pmy - (hit.y + hit.height / 2);
+		var plen = Math.sqrt(ptx * ptx + pty * pty);
 		if (plen <= 0)
 			plen = 1;
-		hits.damage(hit, px / plen * 0.3, py / plen * 0.3);
+		hits.damage(hit, ptx / plen * 0.3, pty / plen * 0.3);
 
 		if (hit.isDead || !hit.exists)
 		{
@@ -393,100 +301,11 @@ class HookAttack
 
 	function releaseThrow():Void
 	{
-		flightVictim = victim;
+		flight.launch(victim, throwDirX, throwDirY);
 		victim = null;
-		flightDirX = throwDirX;
-		flightDirY = throwDirY;
-		flightHits = [];
-		flightTimer = cfg.throwTime;
-		flightVictim.velocity.set(flightDirX * cfg.throwSpeed, flightDirY * cfg.throwSpeed);
-		flightVictim.drag.set(0, 0);
 		hook.kill();
 		phase = Idle;
 		FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.7);
-	}
-
-	function updateFlight(elapsed:Float):Void
-	{
-		if (flightVictim == null)
-			return;
-
-		if (!flightVictim.exists || flightVictim.isDead)
-		{
-			flightVictim = null;
-			flightHits = [];
-			return;
-		}
-
-		flightVictim.velocity.set(flightDirX * cfg.throwSpeed, flightDirY * cfg.throwSpeed);
-
-		var vcx = flightVictim.x + flightVictim.width / 2;
-		var vcy = flightVictim.y + flightVictim.height / 2;
-
-		if (arena.wallAt(vcx + flightDirX * WALL_PROBE, vcy + flightDirY * WALL_PROBE)
-			|| systems.PropBlock.at(vcx + flightDirX * WALL_PROBE, vcy + flightDirY * WALL_PROBE))
-		{
-			endFlight(true);
-			return;
-		}
-
-		flightTimer -= elapsed;
-		if (flightTimer <= 0)
-		{
-			endFlight(false);
-			return;
-		}
-
-		var fv = flightVictim;
-		director.eachInCircle(vcx, vcy, cfg.throwHitRadius, function(e)
-		{
-			if (e == fv || e.seized || flightHits.contains(e))
-				return;
-			flightHits.push(e);
-			hits.damage(e, flightDirX, flightDirY);
-		});
-	}
-
-	function endFlight(hitWall:Bool):Void
-	{
-		var v = flightVictim;
-		flightVictim = null;
-		flightHits = [];
-		v.unseize(cfg.releaseStun);
-		if (hitWall)
-			hits.damage(v, -flightDirX * 0.4, -flightDirY * 0.4);
-	}
-
-	function updateWhirling(elapsed:Float):Void
-	{
-		whirlTimer -= elapsed;
-		var p = 1 - whirlTimer / cfg.whirlTime;
-		if (p > 1)
-			p = 1;
-
-		var pmx = player.x + player.width * 0.5;
-		var pmy = player.y + player.height * 0.5;
-		var ang = (whirlBase + 360 * p) * Math.PI / 180;
-		var hx = pmx + Math.cos(ang) * cfg.whirlRadius;
-		var hy = pmy + Math.sin(ang) * cfg.whirlRadius;
-		hook.velocity.set(0, 0);
-		hook.setPosition(hx - hook.width / 2, hy - hook.height / 2);
-		hook.angle = ang * 180 / Math.PI + 90;
-
-		director.eachInCircle(hx, hy, cfg.whirlHitRadius, function(e)
-		{
-			if (e.seized || whirlHits.contains(e))
-				return;
-			whirlHits.push(e);
-			hits.damage(e, Math.cos(ang), Math.sin(ang));
-		});
-
-		if (whirlTimer <= 0)
-		{
-			whirlHits = [];
-			hook.kill();
-			phase = Idle;
-		}
 	}
 
 	function updateRetract():Void
@@ -514,22 +333,14 @@ class HookAttack
 	}
 
 	function beginRetract():Void
-	{
 		phase = Retracting;
-	}
 
 	public function drop():Void
 	{
 		detachVictim();
-		if (flightVictim != null)
-		{
-			flightVictim.unseize(cfg.releaseStun);
-			flightVictim = null;
-			flightHits = [];
-		}
-		whirlHits = [];
-		grappleHits = [];
-		grappleTarget = null;
+		flight.stop();
+		grappleMode.stop();
+		whirlMode.stop();
 		status.invincible = false;
 		if (!status.dead)
 			player.blockMovement = false;

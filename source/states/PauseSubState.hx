@@ -6,7 +6,7 @@ import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import systems.MenuList;
+import ui.MenuList;
 import util.IrisWipe;
 
 class PauseSubState extends FlxSubState

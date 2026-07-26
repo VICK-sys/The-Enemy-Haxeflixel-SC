@@ -32,9 +32,12 @@ source/
   net/                   online co-op: transport, sync, puppets
   states/                game states
   states/tutorial/       the tutorial's animated demo pages
-  systems/               core systems owned by PlayState
+  systems/               per-run systems owned by PlayState
+  systems/enemy/         the director, its spawner, shots and boss death
+  systems/world/         the arena, its props and how they collide
   systems/perspective/   the totem, its meteor arrival, and the view morph
   systems/weapons/       the weapon systems, coordinated by Weapons
+  ui/                    the HUD and the menu list widget
   entities/              player and pickup sprites
   entities/enemy/        enemy class, navigation, attack styles, projectile
   entities/weapon/       weapon projectiles and visuals

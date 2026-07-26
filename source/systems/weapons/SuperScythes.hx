@@ -5,10 +5,9 @@ import flixel.FlxSprite;
 import flixel.sound.FlxSound;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
-import entities.enemy.Enemies;
 import entities.weapon.SuperBlade;
-import systems.Arena;
-import systems.EnemyDirector;
+import systems.world.Arena;
+import systems.enemy.EnemyDirector;
 import systems.PlayerCombat;
 import systems.Fx;
 import data.WeaponData.WeaponDataRegistry;
@@ -341,7 +340,7 @@ class SuperScythes
 				var cx = b.x + b.width / 2;
 				var cy = b.y + b.height / 2;
 				if (arena.wallAt(cx + b.dirX * SuperBlade.RADIUS, cy + b.dirY * SuperBlade.RADIUS)
-					|| systems.PropBlock.at(cx + b.dirX * SuperBlade.RADIUS, cy + b.dirY * SuperBlade.RADIUS))
+					|| systems.world.PropBlock.at(cx + b.dirX * SuperBlade.RADIUS, cy + b.dirY * SuperBlade.RADIUS))
 				{
 					b.velocity.set(0, 0);
 					b.fading = true;

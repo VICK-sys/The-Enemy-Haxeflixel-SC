@@ -1,7 +1,6 @@
 package entities.enemy;
 
 import flixel.FlxSprite;
-import flixel.math.FlxPoint;
 import flixel.tweens.FlxTween;
 import flixel.FlxG;
 import util.Paths;
@@ -9,16 +8,8 @@ import util.WorldClock;
 import util.SideView;
 import data.EnemyData.EnemyDataRegistry;
 
-enum State {
-	Wandering;
-	Following;
-	Attacking;
-}
-
 class Enemies extends FlxSprite
 {
-	static inline var IDLE_DURATION:Float = 3.0;
-	static inline var WANDER_DURATION:Float = 2.0;
 	static inline var FLASH_TIME:Float = 0.08;
 
 	public var speed:Float = 300;
@@ -72,15 +63,10 @@ class Enemies extends FlxSprite
 	public var hitOffXFlip:Float = 15;
 	public var hitOffY:Float = 35;
 
-	private var wanderCountdown:Float = 0;
-	private var idleCountdown:Float = 0;
-	private var wanderSpeed:Float = 0;
-	private var contactCooldown:Float = 0;
-	private var wanderDirection:FlxPoint = new FlxPoint(FlxG.random.float() * 2 - 1, FlxG.random.float() * 2 - 1);
-	private var currentState:State = Wandering;
+	private var brain:EnemyBrain = new EnemyBrain();
+
+	private var sideStepper:EnemySideStep = new EnemySideStep();
 	private var prevBottom:Float = 0;
-	private var hopCooldown:Float = 0;
-	private var sideAttacking:Bool = false;
 
     public function new(kind:String, x:Float=0, y:Float=0)
     {
@@ -114,7 +100,7 @@ class Enemies extends FlxSprite
 		if (data.knockback != null) knockbackTaken = data.knockback;
 		if (data.knockbackDrag != null) knockbackDrag = data.knockbackDrag;
 		if (data.stunTime != null) stunTime = data.stunTime;
-		wanderSpeed = (data.wanderSpeed != null ? data.wanderSpeed : 100) + FlxG.random.float() * 20;
+		brain.wanderSpeed = (data.wanderSpeed != null ? data.wanderSpeed : 100) + FlxG.random.float() * 20;
 
 		if (data.attack == "boss")
 		{
@@ -158,8 +144,7 @@ class Enemies extends FlxSprite
 		if (isDead)
 			return;
 
-		wanderCountdown = 0;
-		idleCountdown = 0;
+		brain.interrupt();
 		attack.reset();
 
 		hp -= damage;
@@ -296,184 +281,11 @@ class Enemies extends FlxSprite
 
 		if (SideView.active)
 		{
-			sideStep(elapsed);
+			sideStepper.update(this, elapsed, prevBottom);
 			return;
 		}
 
-		if (target == null && currentState != Wandering)
-		{
-			currentState = Wandering;
-			wanderCountdown = 0;
-			idleCountdown = 0;
-			attack.reset();
-		}
-
-		var dirX:Float = 0;
-		var dirY:Float = 0;
-		var distance:Float = 0;
-		if (target != null)
-		{
-			var tmx:Float = target.x + target.width * 0.5;
-			var tmy:Float = target.y + target.height * 0.5;
-			dirX = tmx - (x + width * 0.5);
-			dirY = tmy - (y + height * 0.5);
-			distance = Math.sqrt(dirX * dirX + dirY * dirY);
-
-			pathing.tick(elapsed, x + width * 0.5, y + height * 0.5, tmx, tmy);
-		}
-
-		switch (currentState)
-		{
-				case Wandering:
-					if (wanderCountdown > 0)
-					{
-						wanderCountdown -= elapsed;
-						if (wanderCountdown <= 0)
-						{
-							velocity.set(0, 0);
-							this.animation.play("idle");
-							idleCountdown = IDLE_DURATION;
-						}
-					}
-					else if (idleCountdown > 0)
-					{
-						idleCountdown -= elapsed;
-						if (idleCountdown <= 0)
-						{
-							wanderDirection.set(FlxG.random.float() * 2 - 1, FlxG.random.float() * 2 - 1);
-							var length:Float = Math.sqrt(wanderDirection.x * wanderDirection.x + wanderDirection.y * wanderDirection.y);
-							if (length != 0)
-							{
-								wanderDirection.x /= length;
-								wanderDirection.y /= length;
-							}
-							beginWander();
-						}
-					}
-					else
-					{
-						beginWander();
-					}
-					if (target != null && distance <= aggroRange)
-					{
-						currentState = Following;
-						wanderCountdown = 0;
-						idleCountdown = 0;
-					}
-				case Following:
-					contactCooldown -= elapsed;
-					if (wasTouching != NONE && contactCooldown <= 0)
-					{
-						contactCooldown = 0.15;
-						pathing.notifyBlocked();
-					}
-					if (distance <= attackRange && pathing.losClear)
-					{
-						currentState = Attacking;
-					}
-					else if (distance > aggroRange)
-					{
-						currentState = Wandering;
-					}
-					else
-					{
-						var mvX:Float = dirX;
-						var mvY:Float = dirY;
-						if (distance != 0)
-						{
-							mvX /= distance;
-							mvY /= distance;
-						}
-						pathing.steer(x + width * 0.5, y + height * 0.5, mvX, mvY);
-
-						if (pathing.moveX > 0) { this.flipX = false; }
-						else if (pathing.moveX < 0) { this.flipX = true; }
-
-						if (distance <= stopThreshold && pathing.losClear)
-						{
-							velocity.set(0, 0);
-							this.animation.play("idle");
-						}
-						else
-						{
-							velocity.set(pathing.moveX * speed, pathing.moveY * speed);
-							this.animation.play("walk");
-						}
-					}
-				case Attacking:
-					if (attack.update(this, elapsed, dirX, dirY, distance))
-						currentState = Following;
-		}
-	}
-
-	private function sideStep(elapsed:Float):Void
-	{
-		var grounded = SideView.settle(this, prevBottom, elapsed);
-		var bottom = y + height;
-
-		if (hopCooldown > 0)
-			hopCooldown -= elapsed;
-
-		if (target == null)
-		{
-			velocity.x = 0;
-			sideAttacking = false;
-			if (grounded)
-				this.animation.play("idle");
-		}
-		else
-		{
-			var dirX = target.x + target.width * 0.5 - (x + width * 0.5);
-			var dirY = target.y + target.height * 0.5 - (y + height * 0.5);
-			var distance = Math.sqrt(dirX * dirX + dirY * dirY);
-
-			if (sideAttacking)
-			{
-				var fallSpeed = velocity.y;
-				if (attack.update(this, elapsed, dirX, dirY, distance))
-					sideAttacking = false;
-				velocity.y = fallSpeed;
-			}
-			else if (distance <= attackRange)
-			{
-				sideAttacking = true;
-				velocity.x = 0;
-			}
-			else
-			{
-				if (Math.abs(dirX) > stopThreshold * 0.6)
-				{
-					velocity.x = dirX > 0 ? speed : -speed;
-					flipX = dirX < 0;
-					if (grounded)
-						this.animation.play("walk");
-				}
-				else
-				{
-					velocity.x = 0;
-					if (grounded)
-						this.animation.play("idle");
-				}
-
-				if (grounded && hopCooldown <= 0 && target.y + target.height < bottom - 100)
-				{
-					velocity.y = -SideView.ENEMY_JUMP;
-					grounded = false;
-					hopCooldown = 0.9 + Math.random();
-				}
-			}
-		}
-	}
-
-	private function beginWander():Void
-	{
-		velocity.set(wanderDirection.x * wanderSpeed, wanderDirection.y * wanderSpeed);
-
-		if (wanderDirection.x > 0) { this.flipX = false; }
-		else if (wanderDirection.x < 0) { this.flipX = true; }
-
-		this.animation.play("walk");
-		wanderCountdown = WANDER_DURATION;
+		brain.update(this, elapsed);
 	}
 
 	public function unseize(releaseStun:Float = 0):Void

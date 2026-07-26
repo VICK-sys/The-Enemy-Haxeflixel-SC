@@ -4,7 +4,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
-import systems.Arena;
+import systems.world.Arena;
 import systems.RenderLayers;
 import util.Paths;
 import data.SideViewData.SideViewData;

@@ -6,18 +6,17 @@ import flixel.FlxSprite;
 import flixel.sound.FlxSound;
 import flixel.tweens.FlxTween;
 import entities.Player;
-import entities.enemy.Enemies;
 import entities.enemy.EnemyNav;
-import systems.Arena;
+import systems.world.Arena;
 import systems.Fx;
 import systems.RenderLayers;
 import systems.PlayerCombat;
-import systems.EnemyDirector;
+import systems.enemy.EnemyDirector;
 import systems.TimeStop;
 import systems.perspective.PerspectiveShift;
 import systems.weapons.Weapons;
 import systems.Pickups;
-import systems.Hud;
+import ui.Hud;
 import util.Paths;
 import util.SaveData;
 import util.PerfLog;
@@ -50,7 +49,7 @@ class PlayState extends FlxState
 	private var wipe:IrisWipe;
 	private var restarting:Bool = false;
 	private var netSync:NetSync;
-	private var props:systems.PropWorld;
+	private var props:systems.world.PropWorld;
 	private var floor:flixel.tile.FlxTilemap;
 
 	function showDecor(on:Bool):Void
@@ -92,13 +91,13 @@ class PlayState extends FlxState
 		scythe.x = _player.x - scythe.origin.x + 30;
 		scythe.y = _player.y - scythe.origin.y + 65;
 
-		floor = systems.DecorTiles.build(util.CustomArena.tiles, util.CustomArena.tileset);
+		floor = systems.world.DecorTiles.build(util.CustomArena.tiles, util.CustomArena.tileset);
 		if (floor != null)
 			add(floor);
 
 		layers = new RenderLayers(this, _player, scythe);
 		arena.addPillars(layers.entityLayer);
-		props = new systems.PropWorld(_player, layers);
+		props = new systems.world.PropWorld(_player, layers);
 		add(props.solids);
 
 		status = new PlayerCombat(_player, fx);

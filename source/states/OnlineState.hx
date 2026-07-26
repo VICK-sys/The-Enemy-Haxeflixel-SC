@@ -6,10 +6,9 @@ import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import net.Net;
-import systems.MenuList;
+import ui.MenuList;
 import util.IrisWipe;
 import util.MenuSlash;
-import util.Music;
 import util.SaveData;
 
 class OnlineState extends FlxState

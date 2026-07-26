@@ -1,4 +1,4 @@
-package systems;
+package ui;
 
 import flixel.FlxG;
 import flixel.FlxState;
@@ -9,6 +9,7 @@ import flixel.ui.FlxBar;
 import flixel.util.FlxColor;
 import entities.enemy.Enemies;
 import util.Paths;
+import systems.PlayerCombat;
 
 class Hud
 {

@@ -1,4 +1,4 @@
-package systems;
+package systems.world;
 
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;

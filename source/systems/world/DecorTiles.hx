@@ -1,4 +1,4 @@
-package systems;
+package systems.world;
 
 import flixel.tile.FlxTilemap;
 import data.ArenaData.ArenaDataRegistry;

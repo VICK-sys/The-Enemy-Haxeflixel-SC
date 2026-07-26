@@ -4,7 +4,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.enemy.Enemies;
-import systems.EnemyDirector;
+import systems.enemy.EnemyDirector;
 import data.WeaponData.WeaponDataRegistry;
 import util.SideView;
 

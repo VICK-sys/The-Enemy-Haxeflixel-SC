@@ -7,7 +7,7 @@ import openfl.display.BitmapData;
 import openfl.geom.Point;
 import openfl.geom.Rectangle;
 import data.TilesetData.TilesetData;
-import systems.DecorTiles;
+import systems.world.DecorTiles;
 import util.Paths;
 
 class TilePalette extends PalettePanel

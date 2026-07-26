@@ -4,7 +4,7 @@ import data.ArenaData.ArenaDataRegistry;
 import data.PropData.PropPlace;
 import data.TilesetData.TilesetData;
 import data.TilesetData.TilesetDataRegistry;
-import systems.DecorTiles;
+import systems.world.DecorTiles;
 import util.MapStore;
 import util.Paths;
 

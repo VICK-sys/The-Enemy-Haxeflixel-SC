@@ -2,11 +2,12 @@ package systems.weapons;
 
 import flixel.FlxG;
 import entities.enemy.Enemies;
-import systems.EnemyDirector;
+import systems.enemy.EnemyDirector;
 import systems.PlayerCombat;
 import systems.Fx;
 import systems.Pickups;
 import util.Paths;
+import systems.world.PropBlock;
 
 class HitPipeline
 {

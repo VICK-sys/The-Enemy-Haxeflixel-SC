@@ -6,6 +6,7 @@ import entities.Player;
 import data.PlayerData;
 import data.PlayerData.PlayerDataRegistry;
 import util.Paths;
+import systems.world.PropBlock;
 
 class PlayerCombat
 {

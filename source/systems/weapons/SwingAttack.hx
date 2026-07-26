@@ -3,7 +3,7 @@ package systems.weapons;
 import flixel.FlxG;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.weapon.SlashEffect;
-import systems.EnemyDirector;
+import systems.enemy.EnemyDirector;
 import data.WeaponData.WeaponDataRegistry;
 import util.Paths;
 

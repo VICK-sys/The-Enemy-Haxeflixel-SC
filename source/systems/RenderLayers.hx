@@ -8,6 +8,7 @@ import entities.Player;
 import entities.enemy.Enemies;
 import util.Paths;
 import util.SideView;
+import systems.world.Decor;
 
 class RenderLayers
 {

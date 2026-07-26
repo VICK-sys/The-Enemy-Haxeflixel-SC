@@ -5,7 +5,7 @@ import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.math.FlxPoint;
 import data.PropData.PropDataRegistry;
-import systems.Decor;
+import systems.world.Decor;
 
 class PropTool
 {

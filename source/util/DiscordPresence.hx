@@ -6,6 +6,7 @@ import data.DataLoader;
 import hxdiscord_rpc.Discord;
 import hxdiscord_rpc.Types;
 import lime.app.Application;
+import systems.world.Arena;
 #end
 
 class DiscordPresence

@@ -5,7 +5,7 @@ import flixel.FlxSprite;
 import flixel.tile.FlxTilemap;
 import data.TilesetData.TilesetData;
 import data.TilesetData.TilesetDataRegistry;
-import systems.DecorTiles;
+import systems.world.DecorTiles;
 import util.Paths;
 
 class TileTool

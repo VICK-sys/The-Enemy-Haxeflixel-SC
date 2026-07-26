@@ -4,11 +4,10 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.sound.FlxSound;
 import entities.Player;
-import entities.enemy.Enemies;
 import entities.enemy.EnemyNav;
 import entities.weapon.ThrownScythe;
-import systems.Arena;
-import systems.EnemyDirector;
+import systems.world.Arena;
+import systems.enemy.EnemyDirector;
 import systems.PlayerCombat;
 import data.WeaponData.WeaponDataRegistry;
 import util.GhostTrail;
@@ -99,7 +98,7 @@ class ThrowAttack
 			var tdy = cy - thrown.startY;
 			if (tdx * tdx + tdy * tdy >= cfg.maxDist * cfg.maxDist
 				|| arena.wallAt(cx + vx * WALL_PROBE, cy + vy * WALL_PROBE)
-				|| systems.PropBlock.at(cx + vx * WALL_PROBE, cy + vy * WALL_PROBE))
+				|| systems.world.PropBlock.at(cx + vx * WALL_PROBE, cy + vy * WALL_PROBE))
 			{
 				thrown.beginReturn();
 				nav.notifyBlocked();

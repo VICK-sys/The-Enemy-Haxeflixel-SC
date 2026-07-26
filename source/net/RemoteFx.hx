@@ -9,7 +9,7 @@ import entities.weapon.HookShot;
 import entities.weapon.SlashEffect;
 import entities.weapon.SliceProjectile;
 import entities.weapon.ThrownScythe;
-import systems.EnemyDirector;
+import systems.enemy.EnemyDirector;
 import systems.Fx;
 import systems.RenderLayers;
 import systems.weapons.ArrowRain;

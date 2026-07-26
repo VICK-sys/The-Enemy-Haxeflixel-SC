@@ -2,7 +2,6 @@ package util;
 
 import haxe.Json;
 import data.PropData.PropData;
-import data.ThemeData.ThemeData;
 import data.TilesetData.TilesetData;
 #if sys
 import flixel.FlxG;

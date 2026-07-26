@@ -6,7 +6,7 @@ import flixel.FlxSprite;
 import flixel.FlxSubState;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
-import systems.MenuList;
+import ui.MenuList;
 import util.SaveData;
 
 class OptionsSubState extends FlxSubState

@@ -2,7 +2,6 @@ package systems.weapons;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
-import entities.Player;
 import data.WeaponData.WeaponDataRegistry;
 import util.GhostTrail;
 import util.Paths;

@@ -4,8 +4,8 @@ import flixel.FlxG;
 import flixel.sound.FlxSound;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.weapon.Arrow;
-import systems.Arena;
-import systems.EnemyDirector;
+import systems.world.Arena;
+import systems.enemy.EnemyDirector;
 import systems.Fx;
 import util.Paths;
 import data.WeaponData.WeaponDataRegistry;
@@ -122,7 +122,7 @@ class BowAttack
 			var acx = arrow.x + arrow.width / 2;
 			var acy = arrow.y + arrow.height / 2;
 			if (arena.wallAt(acx + arrow.dirX * Arrow.RADIUS, acy + arrow.dirY * Arrow.RADIUS)
-				|| systems.PropBlock.at(acx + arrow.dirX * Arrow.RADIUS, acy + arrow.dirY * Arrow.RADIUS))
+				|| systems.world.PropBlock.at(acx + arrow.dirX * Arrow.RADIUS, acy + arrow.dirY * Arrow.RADIUS))
 			{
 				arrow.kill();
 				continue;

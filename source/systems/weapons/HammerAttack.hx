@@ -1,7 +1,7 @@
 package systems.weapons;
 
 import flixel.FlxG;
-import systems.EnemyDirector;
+import systems.enemy.EnemyDirector;
 import systems.Fx;
 import data.WeaponData.WeaponDataRegistry;
 import util.Paths;

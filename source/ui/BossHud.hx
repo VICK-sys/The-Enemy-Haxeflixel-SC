@@ -1,4 +1,4 @@
-package systems;
+package ui;
 
 import flixel.FlxG;
 import flixel.FlxState;
