@@ -3,10 +3,9 @@
 	"jab": { "spawnDist": 85, "meleeRange": 130, "meleeArcCos": -0.2, "damage": 1, "effectScale": 0.6 },
 	"hammer": { "reach": 15, "radius": 160, "damage": 2, "push": 1.6, "stunTime": 2.0 },
 	"revolver": {
-		"cylinder": 6,
+		"cylinder": 8,
 		"damage": 2,
 		"fanDamage": 1,
-		"shotCooldown": 0.16,
 		"reloadTime": 1.1,
 		"spread": 16,
 		"speed": 2200,

@@ -282,6 +282,7 @@ class PlayState extends FlxState
 
 
 
+
 	function gaugeFill():Float
 		return combat.weapon == 1 ? combat.revolver.gauge : combat.bow.rainCharge;
 

@@ -201,7 +201,7 @@ class Weapons
 			return;
 		}
 
-		if (FlxG.mouse.pressed && revolver.canFire())
+		if (FlxG.mouse.justPressed && revolver.canFire())
 		{
 			held.beginSwing(aim.deg, Shoot);
 			emitAttack(Shoot, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);

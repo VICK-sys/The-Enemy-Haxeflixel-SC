@@ -22,7 +22,6 @@ typedef RevolverConfig = {
 	cylinder:Int,
 	damage:Int,
 	fanDamage:Int,
-	shotCooldown:Float,
 	reloadTime:Float,
 	spread:Float,
 	speed:Float,

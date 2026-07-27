@@ -23,7 +23,6 @@ class RevolverAttack
 	private var director:EnemyDirector;
 	private var fx:Fx;
 	private var hits:HitPipeline;
-	private var cooldown:Float = 0;
 	private var reloading:Float = 0;
 
 	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline)
@@ -44,7 +43,7 @@ class RevolverAttack
 	}
 
 	public function canFire():Bool
-		return cooldown <= 0 && reloading <= 0 && rounds > 0;
+		return reloading <= 0 && rounds > 0;
 
 	public function canFan():Bool
 		return reloading <= 0 && rounds > 0;
@@ -56,7 +55,6 @@ class RevolverAttack
 
 		spawn(bx, by, dx, dy, aimDeg, cfg.damage);
 		rounds--;
-		cooldown = cfg.shotCooldown;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.65);
 		if (rounds <= 0)
@@ -92,7 +90,6 @@ class RevolverAttack
 	{
 		rounds = cfg.cylinder;
 		reloading = 0;
-		cooldown = 0;
 	}
 
 	public function update(elapsed:Float):Void
@@ -119,9 +116,6 @@ class RevolverAttack
 				b.kill();
 			}
 		}
-
-		if (cooldown > 0)
-			cooldown -= elapsed;
 
 		if (reloading > 0)
 		{
