@@ -50,7 +50,7 @@
 		"sepiaAlpha": 0.42,
 		"fadeTime": 0.7,
 		"markRadius": 70,
-		"shotInterval": 0.14,
+		"shotInterval": 0.045,
 		"damage": 15
 	},
 	"superOrbit": { "count": 10, "fireGate": 0.08 },
