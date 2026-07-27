@@ -31,7 +31,7 @@ import net.PuppetDirector;
 
 class PlayState extends FlxState
 {
-	static inline var CURSOR_LEAN:Float = 0.5;
+	static inline var CURSOR_LEAN:Float = 1.0;
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
 	static inline var DEFLECT_PUSH:Float = 1.2;
