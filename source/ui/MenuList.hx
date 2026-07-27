@@ -9,6 +9,7 @@ import flixel.util.FlxColor;
 import openfl.display.BitmapData;
 import openfl.geom.Point;
 import util.Paths;
+import util.Lang;
 
 class MenuList extends FlxGroup
 {
@@ -35,7 +36,7 @@ class MenuList extends FlxGroup
 		for (i in 0...labels.length)
 		{
 			var t = new FlxText(0, startY + i * spacing, 0, labels[i]);
-			t.setFormat(null, size, FlxColor.WHITE, CENTER);
+			t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
 			t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 			t.screenCenter(X);
 			rows.push(t);

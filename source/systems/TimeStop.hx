@@ -7,6 +7,7 @@ import data.PlayerData.PlayerDataRegistry;
 import util.GhostTrail;
 import util.Paths;
 import util.WorldClock;
+import util.Lang;
 
 enum TimePhase {
 	Running;
@@ -162,10 +163,10 @@ class TimeStop
 	public function hudLabel():String
 	{
 		if (phase != Running)
-			return "TIME STOPPED";
+			return Lang.t("timestop.stopped");
 		if (cooldown > 0)
-			return "TIME " + Math.ceil(cooldown);
-		return "TIME READY";
+			return Lang.t("timestop.cooldown", [Math.ceil(cooldown)]);
+		return Lang.t("timestop.ready");
 	}
 
 	function begin():Void

@@ -8,6 +8,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import ui.MenuList;
 import util.IrisWipe;
+import util.Lang;
 
 class PauseSubState extends FlxSubState
 {
@@ -28,19 +29,21 @@ class PauseSubState extends FlxSubState
 		overlay.cameras = [camUI];
 		add(overlay);
 
-		var title = new FlxText(0, 190, FlxG.width, "PAUSED");
-		title.setFormat(null, 48, FlxColor.WHITE, CENTER);
+		var title = new FlxText(0, 190, FlxG.width, Lang.t("pause.title"));
+		title.setFormat(Lang.font(), 48, FlxColor.WHITE, CENTER);
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		title.cameras = [camUI];
 		add(title);
 
-		list = new MenuList(["RESUME", "OPTIONS", "QUIT TO MENU"], 320, 70, 32);
+		list = new MenuList([Lang.t("pause.resume"), Lang.t("pause.options"), Lang.t("pause.quit")], 320, 70, 32);
 		list.onChoose = choose;
 		list.cameras = [camUI];
 		add(list);
 
 		FlxG.mouse.visible = true;
 		FlxG.sound.pause();
+
+		subStateClosed.add(function(_) relabel(title));
 
 		super.create();
 	}
@@ -50,6 +53,19 @@ class PauseSubState extends FlxSubState
 		FlxG.mouse.visible = false;
 		FlxG.sound.resume();
 		super.close();
+	}
+
+	function relabel(title:FlxText):Void
+	{
+		title.text = Lang.t("pause.title");
+		title.font = Lang.font();
+
+		var keys = ["pause.resume", "pause.options", "pause.quit"];
+		for (i in 0...keys.length)
+		{
+			list.rowAt(i).font = Lang.font();
+			list.setLabel(i, Lang.t(keys[i]));
+		}
 	}
 
 	override public function update(elapsed:Float):Void

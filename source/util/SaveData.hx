@@ -82,6 +82,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function language():String
+	{
+		ensure();
+		return save.data.language != null ? save.data.language : "en";
+	}
+
+	public static function setLanguage(c:String):Void
+	{
+		ensure();
+		save.data.language = c;
+		save.flush();
+	}
+
 	public static function playerName():String
 	{
 		ensure();

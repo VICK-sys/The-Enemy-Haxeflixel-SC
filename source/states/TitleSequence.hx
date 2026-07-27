@@ -22,6 +22,7 @@ class TitleSequence extends FlxState
     override public function create()
     {
         FlxG.mouse.visible = false;
+        util.Lang.init();
         SaveData.applySettings();
         FlxG.sound.volumeHandler = function(v:Float)
         {

@@ -10,6 +10,7 @@ import ui.MenuList;
 import util.IrisWipe;
 import util.MenuSlash;
 import util.SaveData;
+import util.Lang;
 
 class OnlineState extends FlxState
 {
@@ -38,37 +39,37 @@ class OnlineState extends FlxState
 		FlxG.camera.bgColor = 0xFF000000;
 		FlxG.mouse.visible = true;
 
-		var title = new FlxText(0, 90, FlxG.width, "ONLINE");
-		title.setFormat(null, 72, FlxColor.WHITE, CENTER);
+		var title = new FlxText(0, 90, FlxG.width, Lang.t("online.title"));
+		title.setFormat(Lang.font(), 72, FlxColor.WHITE, CENTER);
 		title.setBorderStyle(OUTLINE, ACCENT, 4);
 		add(title);
 
-		list = new MenuList(["HOST GAME", "JOIN GAME", "WEAPON", "SET NAME", "BACK"], 236, 58, 32);
+		list = new MenuList([Lang.t("online.host"), Lang.t("online.join"), Lang.t("online.weapon"), Lang.t("online.setName"), Lang.t("common.back")], 236, 58, 32);
 		list.onChoose = choose;
 		add(list);
 
 		weaponText = new FlxText(0, 514, FlxG.width, "");
-		weaponText.setFormat(null, 22, FlxColor.WHITE, CENTER);
+		weaponText.setFormat(Lang.font(), 22, FlxColor.WHITE, CENTER);
 		weaponText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(weaponText);
 
 		nameText = new FlxText(0, 546, FlxG.width, "");
-		nameText.setFormat(null, 22, FlxColor.WHITE, CENTER);
+		nameText.setFormat(Lang.font(), 22, FlxColor.WHITE, CENTER);
 		nameText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(nameText);
 
 		ipText = new FlxText(0, 578, FlxG.width, "");
-		ipText.setFormat(null, 24, FlxColor.WHITE, CENTER);
+		ipText.setFormat(Lang.font(), 24, FlxColor.WHITE, CENTER);
 		ipText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(ipText);
 
 		status = new FlxText(0, 620, FlxG.width, "");
-		status.setFormat(null, 20, FlxColor.YELLOW, CENTER);
+		status.setFormat(Lang.font(), 20, FlxColor.YELLOW, CENTER);
 		status.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(status);
 
-		var hint = new FlxText(0, FlxG.height - 32, FlxG.width, "H - HOW TO PLAY ONLINE        TAB - CHANGE WEAPON");
-		hint.setFormat(null, 16, FlxColor.WHITE, CENTER);
+		var hint = new FlxText(0, FlxG.height - 32, FlxG.width, Lang.t("online.hint"));
+		hint.setFormat(Lang.font(), 16, FlxColor.WHITE, CENTER);
 		hint.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		hint.alpha = 0.7;
 		add(hint);
@@ -149,15 +150,14 @@ class OnlineState extends FlxState
 			list.enabled = false;
 			status.color = FlxColor.YELLOW;
 			status.text = Net.hostPort == Net.PORT
-				? "HOSTING ON PORT " + Net.PORT + " - WAITING FOR FRIENDS...\n(they join with your IP; forward TCP " + Net.PORT + " on your router)"
-				: "PORT " + Net.PORT + " WAS BUSY - HOSTING ON " + Net.hostPort
-					+ "\n(they must join with YOUR-IP:" + Net.hostPort + "; forward TCP " + Net.hostPort + ")";
+				? Lang.t("online.hosting", [Net.PORT])
+				: Lang.t("online.hostingBusy", [Net.PORT, Net.hostPort]);
 		}
 		else
 		{
 			releaseMenu();
 			status.color = ACCENT;
-			status.text = "NO FREE PORT IN " + Net.PORT + "-" + (Net.PORT + Net.PORT_TRIES - 1);
+			status.text = Lang.t("online.noPort", [Net.PORT, Net.PORT + Net.PORT_TRIES - 1]);
 		}
 	}
 
@@ -167,7 +167,7 @@ class OnlineState extends FlxState
 		nameMode = false;
 		list.enabled = false;
 		status.color = FlxColor.YELLOW;
-		status.text = "TYPE THE HOST'S IP, THEN ENTER\nESC - cancel";
+		status.text = Lang.t("online.typeIp");
 		refreshIp();
 	}
 
@@ -187,7 +187,7 @@ class OnlineState extends FlxState
 	}
 
 	function refreshWeapon():Void
-		weaponText.text = "WEAPON: " + WeaponPickSubState.nameOf(WeaponPickSubState.lastPick);
+		weaponText.text = Lang.t("online.weaponLabel", [WeaponPickSubState.nameOf(WeaponPickSubState.lastPick)]);
 
 	function beginNaming():Void
 	{
@@ -195,19 +195,19 @@ class OnlineState extends FlxState
 		nameMode = true;
 		list.enabled = false;
 		status.color = FlxColor.YELLOW;
-		status.text = "TYPE YOUR NAME, THEN ENTER\nESC - cancel";
+		status.text = Lang.t("online.typeName");
 		refreshName();
 	}
 
 	function refreshIp():Void
 	{
-		ipText.text = (typing && !nameMode) || ip.length > 0 ? "IP: " + ip + (typing && !nameMode ? "_" : "") : "";
+		ipText.text = (typing && !nameMode) || ip.length > 0 ? Lang.t("online.ipLabel", [ip + (typing && !nameMode ? "_" : "")]) : "";
 	}
 
 	function refreshName():Void
 	{
-		var shown = playerName.length > 0 ? playerName : "PLAYER";
-		nameText.text = "NAME: " + (nameMode ? playerName + "_" : shown);
+		var shown = playerName.length > 0 ? playerName : Lang.t("online.defaultName");
+		nameText.text = Lang.t("online.nameLabel", [nameMode ? playerName + "_" : shown]);
 	}
 
 	function saveName():Void
@@ -226,18 +226,18 @@ class OnlineState extends FlxState
 		typing = false;
 		refreshIp();
 		status.color = FlxColor.YELLOW;
-		status.text = "CONNECTING...";
+		status.text = Lang.t("online.connecting");
 		if (Net.join(ip))
 		{
 			SaveData.setLastIp(ip);
 			waiting = true;
-			status.text = "CONNECTED - WAITING FOR HOST TO START";
+			status.text = Lang.t("online.connected");
 		}
 		else
 		{
 			releaseMenu();
 			status.color = ACCENT;
-			status.text = "COULD NOT CONNECT TO " + ip;
+			status.text = Lang.t("online.failed", [ip]);
 		}
 	}
 
@@ -285,7 +285,7 @@ class OnlineState extends FlxState
 			Net.stop();
 			releaseMenu();
 			status.color = ACCENT;
-			status.text = "CONNECTION LOST";
+			status.text = Lang.t("hud.connectionLost");
 		}
 
 		if (helpOpen)

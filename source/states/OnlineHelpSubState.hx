@@ -8,6 +8,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import net.Net;
 import util.Paths;
+import util.Lang;
 
 class OnlineHelpSubState extends FlxSubState
 {
@@ -17,7 +18,7 @@ class OnlineHelpSubState extends FlxSubState
 	static inline var FADE_TIME:Float = 0.3;
 	static inline var OPEN_TIME:Float = 0.2;
 
-	static var TITLES:Array<String> = ["ONLINE CO-OP", "SETTING IT UP", "WHAT CHANGES"];
+	static var KEYS:Array<String> = ["p1", "p2", "p3"];
 
 	private var titleText:FlxText;
 	private var bodyText:FlxText;
@@ -56,7 +57,7 @@ class OnlineHelpSubState extends FlxSubState
 	function uiText(y:Float, size:Int):FlxText
 	{
 		var t = new FlxText(260, y, 760, "");
-		t.setFormat(null, size, FlxColor.WHITE, CENTER);
+		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(t);
 		return t;
@@ -67,43 +68,19 @@ class OnlineHelpSubState extends FlxSubState
 		return switch (i)
 		{
 			case 0:
-				"Fight the waves together - up to " + (Net.MAX_GUESTS + 1) + " of you.\n\n"
-					+ "One of you HOSTS and runs the game.\n"
-					+ "Everyone else JOINS and fights alongside.\n\n"
-					+ "You share the wave counter and the boss,\n"
-					+ "but you each keep your own health and AP.\n\n"
-					+ "Friends can drop in after the run has begun.";
-
+				Lang.t("onlineHelp.p1.body", [Net.MAX_GUESTS + 1]);
 			case 1:
-				"HOST - pick HOST GAME, then send your friends\n"
-					+ "your IP address. Over the internet you must\n"
-					+ "forward TCP port " + Net.PORT + " on your router first.\n\n"
-					+ "JOIN - pick JOIN GAME, type the host's IP,\n"
-					+ "then press ENTER.\n\n"
-					+ "If the host reports a different port because\n"
-					+ Net.PORT + " was busy, join with   IP:PORT\n\n"
-					+ "On the same house network, use the host's\n"
-					+ "local IP and skip the port forwarding.";
-
+				Lang.t("onlineHelp.p2.body", [Net.PORT]);
 			default:
-				"Dying does not end the run. You drop out for\n"
-					+ "a few seconds, then respawn with half health.\n"
-					+ "The enemies turn on whoever is still standing,\n"
-					+ "so the run only ends if EVERYONE is down.\n\n"
-					+ "TIME STOP and the TOTEM are switched off\n"
-					+ "online - both rewrite the whole world, which\n"
-					+ "only works when one player owns it.\n\n"
-					+ "You will see everything your friend throws\n"
-					+ "out - bullets, arrows, slashes, the hook,\n"
-					+ "the thrown hammer and every SUPER.";
+				Lang.t("onlineHelp.p3.body");
 		}
 	}
 
 	function buildPage():Void
 	{
-		titleText.text = TITLES[page];
+		titleText.text = Lang.t("onlineHelp." + KEYS[page] + ".title");
 		bodyText.text = body(page);
-		pageText.text = "A/<- <   " + (page + 1) + " / " + PAGES + "   > D/->        ENTER - CLOSE";
+		pageText.text = Lang.t("onlineHelp.nav", [page + 1, PAGES]);
 	}
 
 	override public function update(elapsed:Float):Void

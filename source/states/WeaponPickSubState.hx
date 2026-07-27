@@ -7,6 +7,7 @@ import flixel.FlxSubState;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import util.Paths;
+import util.Lang;
 
 private class Card
 {
@@ -52,21 +53,18 @@ class WeaponPickSubState extends FlxSubState
 		[-1, -1], [1, -1], [-1, 1], [1, 1]
 	];
 
-	static var NAMES:Array<String> = ["HAMMER", "REVOLVER", "CROSSBOW", "HOOK"];
+	static var KEYS:Array<String> = ["hammer", "revolver", "crossbow", "hook"];
 
 	public static function nameOf(i:Int):String
-		return i >= 0 && i < NAMES.length ? NAMES[i] : NAMES[0];
+		return Lang.t("weapon." + KEYS[i >= 0 && i < KEYS.length ? i : 0]);
+
+	static function blurbOf(i:Int):String
+		return Lang.t("weapon." + KEYS[i] + ".blurb");
 
 	public static function artOf(i:Int):String
 		return i >= 0 && i < ART.length ? ART[i] : ART[0];
 
 	static var ART:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/hook"];
-	static var BLURBS:Array<String> = [
-		"SWING  /  THROW",
-		"SHOOT  /  FAN THE HAMMER",
-		"CHARGE SHOT  /  ARROW RAIN",
-		"JAB  /  GRAB"
-	];
 
 	public var onPicked:Int->Void;
 	public var pickedX(default, null):Float = 0;
@@ -96,15 +94,15 @@ class WeaponPickSubState extends FlxSubState
 		overlay.cameras = [camUI];
 		add(overlay);
 
-		uiText(96, 40, "CHOOSE YOUR WEAPON");
-		uiText(150, 16, "ONE FOR THE WHOLE RUN - THERE IS NO SWAPPING LATER");
+		uiText(96, 40, Lang.t("weaponPick.title"));
+		uiText(150, 16, Lang.t("weaponPick.sub"));
 
-		var total = NAMES.length * CARD_W + (NAMES.length - 1) * CARD_GAP;
+		var total = KEYS.length * CARD_W + (KEYS.length - 1) * CARD_GAP;
 		var x0 = (FlxG.width - total) / 2;
-		for (i in 0...NAMES.length)
+		for (i in 0...KEYS.length)
 			cards.push(buildCard(i, x0 + i * (CARD_W + CARD_GAP)));
 
-		uiText(560, 16, "1-4 OR A/D OR THE ARROWS TO CHOOSE        ENTER OR CLICK TO LOCK IT IN");
+		uiText(560, 16, Lang.t("weaponPick.hint"));
 
 		refresh();
 		FlxG.mouse.visible = true;
@@ -144,17 +142,17 @@ class WeaponPickSubState extends FlxSubState
 		ui(c.icon);
 		c.baseY = c.icon.y;
 
-		c.label = new FlxText(x, CARD_TOP + LABEL_TOP, CARD_W, NAMES[i]);
-		c.label.setFormat(null, 26, FlxColor.WHITE, CENTER);
+		c.label = new FlxText(x, CARD_TOP + LABEL_TOP, CARD_W, nameOf(i));
+		c.label.setFormat(Lang.font(), 26, FlxColor.WHITE, CENTER);
 		c.label.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		ui(c.label);
 
-		var blurb = new FlxText(x + 8, CARD_TOP + BLURB_TOP, CARD_W - 16, BLURBS[i]);
-		blurb.setFormat(null, 13, TEXT_DIM, CENTER);
+		var blurb = new FlxText(x + 8, CARD_TOP + BLURB_TOP, CARD_W - 16, blurbOf(i));
+		blurb.setFormat(Lang.font(), 13, TEXT_DIM, CENTER);
 		ui(blurb);
 
 		var num = new FlxText(x, CARD_TOP + 8, CARD_W - 12, "" + (i + 1));
-		num.setFormat(null, 16, TEXT_DIM, RIGHT);
+		num.setFormat(Lang.font(), 16, TEXT_DIM, RIGHT);
 		ui(num);
 
 		return c;
@@ -179,7 +177,7 @@ class WeaponPickSubState extends FlxSubState
 	function uiText(y:Float, size:Int, s:String):FlxText
 	{
 		var t = new FlxText(0, y, FlxG.width, s);
-		t.setFormat(null, size, FlxColor.WHITE, CENTER);
+		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		return ui(t);
 	}
@@ -200,7 +198,7 @@ class WeaponPickSubState extends FlxSubState
 	}
 
 	function move(d:Int):Void
-		set((pick + d + NAMES.length) % NAMES.length);
+		set((pick + d + KEYS.length) % KEYS.length);
 
 	function set(i:Int):Void
 	{

@@ -8,6 +8,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import ui.MenuList;
 import util.SaveData;
+import util.Lang;
 
 class OptionsSubState extends FlxSubState
 {
@@ -15,6 +16,7 @@ class OptionsSubState extends FlxSubState
 
 	private var cam:FlxCamera;
 	private var list:MenuList;
+	private var title:FlxText;
 	private var resetArmed:Bool = false;
 	private var resetTimer:Float = 0;
 	private var shownVolume:Float = -1;
@@ -31,12 +33,12 @@ class OptionsSubState extends FlxSubState
 		shade.makeGraphic(FlxG.width, FlxG.height, 0xC8000000);
 		add(shade);
 
-		var title = new FlxText(0, 120, FlxG.width, "OPTIONS");
-		title.setFormat(null, 56, FlxColor.WHITE, CENTER);
+		title = new FlxText(0, 120, FlxG.width, Lang.t("options.title"));
+		title.setFormat(Lang.font(), 56, FlxColor.WHITE, CENTER);
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
 		add(title);
 
-		list = new MenuList(["", "", "", "", "BACK"], 280, 66, 32);
+		list = new MenuList(["", "", "", "", "", ""], 260, 60, 30);
 		list.onChoose = choose;
 		list.onAdjust = adjust;
 		add(list);
@@ -77,10 +79,25 @@ class OptionsSubState extends FlxSubState
 	function refreshLabels():Void
 	{
 		shownVolume = SaveData.volume();
-		list.setLabel(0, "VOLUME  < " + Math.round(shownVolume * 100) + "% >");
-		list.setLabel(1, "FULLSCREEN  " + (SaveData.fullscreen() ? "ON" : "OFF"));
-		list.setLabel(2, "FPS COUNTER  " + (SaveData.showFps() ? "ON" : "OFF"));
-		list.setLabel(3, resetArmed ? "RESET BEST WAVE?  PRESS AGAIN" : "RESET BEST WAVE");
+		list.setLabel(0, Lang.t("options.volume", [Math.round(shownVolume * 100)]));
+		list.setLabel(1, Lang.t("options.fullscreen", [onOff(SaveData.fullscreen())]));
+		list.setLabel(2, Lang.t("options.fps", [onOff(SaveData.showFps())]));
+		list.setLabel(3, Lang.t("options.language", [Lang.t("lang.name")]));
+		list.setLabel(4, Lang.t(resetArmed ? "options.resetBestConfirm" : "options.resetBest"));
+		list.setLabel(5, Lang.t("common.back"));
+	}
+
+	function onOff(b:Bool):String
+		return Lang.t(b ? "common.on" : "common.off");
+
+	function switchLanguage():Void
+	{
+		Lang.cycle();
+		title.text = Lang.t("options.title");
+		title.font = Lang.font();
+		for (i in 0...6)
+			list.rowAt(i).font = Lang.font();
+		refreshLabels();
 	}
 
 	function choose(i:Int):Void
@@ -100,6 +117,9 @@ class OptionsSubState extends FlxSubState
 				SaveData.setShowFps(!SaveData.showFps());
 				SaveData.applySettings();
 			case 3:
+				switchLanguage();
+				return;
+			case 4:
 				if (resetArmed)
 				{
 					SaveData.resetBest();
@@ -129,6 +149,9 @@ class OptionsSubState extends FlxSubState
 			case 2:
 				SaveData.setShowFps(!SaveData.showFps());
 				SaveData.applySettings();
+			case 3:
+				switchLanguage();
+				return;
 		}
 		refreshLabels();
 	}

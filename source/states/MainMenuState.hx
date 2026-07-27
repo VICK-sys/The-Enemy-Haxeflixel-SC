@@ -13,11 +13,11 @@ import util.JaggedBand;
 import util.MenuSlash;
 import util.Music;
 import util.SaveData;
+import util.Lang;
 
 class MainMenuState extends FlxState
 {
 	static inline var ACCENT:Int = 0xFFE0132D;
-	static inline var SPLASH_TEXT:String = "WORK IN PROGRESS";
 	static inline var SPLASH_ANGLE:Float = -18;
 	static inline var SPLASH_THROB:Float = 0.09;
 	static inline var SPLASH_SPEED:Float = 3.4;
@@ -42,6 +42,7 @@ class MainMenuState extends FlxState
 	private var mapPick:Int = 0;
 	private var shutCurW:Int = 0;
 	private var shutCurH:Int = 0;
+	private var actions:Array<String> = [];
 
 	override public function create()
 	{
@@ -63,12 +64,16 @@ class MainMenuState extends FlxState
 		findMaps();
 
 		var labels = [playLabel()];
+		actions = ["play"];
 		#if desktop
-		labels.push("ONLINE");
+		labels.push(Lang.t("menu.online"));
+		actions.push("online");
 		#end
-		labels.push("OPTIONS");
+		labels.push(Lang.t("menu.options"));
+		actions.push("options");
 		#if !html5
-		labels.push("QUIT");
+		labels.push(Lang.t("menu.quit"));
+		actions.push("quit");
 		#end
 		list = new MenuList(labels, 360, 72, 44);
 		list.onChoose = choose;
@@ -76,13 +81,18 @@ class MainMenuState extends FlxState
 		add(list);
 
 		best = new FlxText(16, FlxG.height - 30, 0, "");
-		best.setFormat(null, 16, FlxColor.WHITE, LEFT);
+		best.setFormat(Lang.font(), 16, FlxColor.WHITE, LEFT);
 		best.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(best);
 		refreshBest();
 
 		subStateClosed.add(function(_)
 		{
+			if (Lang.consumeChanged())
+			{
+				FlxG.switchState(new MainMenuState());
+				return;
+			}
 			busy = false;
 			list.enabled = true;
 			list.restoreRows();
@@ -113,8 +123,8 @@ class MainMenuState extends FlxState
 		var titleBottom = title.y + probe.height;
 		probe.destroy();
 
-		splash = new FlxText(0, 0, 0, SPLASH_TEXT);
-		splash.setFormat(null, 26, FlxColor.YELLOW, LEFT);
+		splash = new FlxText(0, 0, 0, Lang.t("menu.splash"));
+		splash.setFormat(Lang.font(), 26, FlxColor.YELLOW, LEFT);
 		splash.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		splash.updateHitbox();
 		splash.angle = SPLASH_ANGLE;
@@ -147,7 +157,7 @@ class MainMenuState extends FlxState
 	function refreshBest():Void
 	{
 		var n = SaveData.bestWave();
-		best.text = n > 0 ? "BEST: WAVE " + n : "";
+		best.text = n > 0 ? Lang.t("menu.best", [n]) : "";
 	}
 
 	function choose(i:Int):Void
@@ -162,19 +172,14 @@ class MainMenuState extends FlxState
 
 	function commit(i:Int):Void
 	{
-		var label = list.rowAt(i).text;
-		if (StringTools.startsWith(label, "PLAY"))
+		switch (actions[i])
 		{
-			startGame();
-			return;
-		}
-
-		switch (label)
-		{
-			case "ONLINE":
+			case "play":
+				startGame();
+			case "online":
 				leaving = true;
 				wipe.close(function() FlxG.switchState(new OnlineState()));
-			case "OPTIONS":
+			case "options":
 				FlxG.inputs.reset();
 				openSubState(new OptionsSubState());
 			default:
@@ -194,7 +199,7 @@ class MainMenuState extends FlxState
 	}
 
 	function playLabel():String
-		return maps[mapPick] == 0 ? "PLAY" : "PLAY: SLOT " + maps[mapPick];
+		return maps[mapPick] == 0 ? Lang.t("menu.play") : Lang.t("menu.playSlot", [maps[mapPick]]);
 
 	function adjustMap(i:Int, dir:Int):Void
 	{

@@ -175,6 +175,18 @@ The line-of-sight and pathfinding component. A few times per second it checks a 
 
 Asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow`, which returns the loaded atlas for a png and xml pair.
 
+### Lang
+
+The string table for the game UI. It holds English and Japanese, and `Lang.t(key, args)` reads one line. Arguments replace the `{0}` and `{1}` markers in the line. An unknown key falls back to English, then to the key itself. A key therefore never renders as blank.
+
+The map editor keeps its English strings, because it is a build tool rather than a player screen.
+
+`Lang.font()` answers the font every UI text must use. English keeps flixel's default face, and Japanese takes `DotGothic16-Regular.ttf`. The default face has no kana or kanji, so the swap is what makes Japanese readable at all. The name tag over a remote player reads the same font.
+
+The boss name and the game title stay in the default face. Both read as logos rather than as sentences. The boss name also splits into one sprite per letter for its reveal, which needs stable Latin widths.
+
+A language change writes to the save and raises a flag. The main menu reads that flag with `consumeChanged()` and rebuilds itself. In a run, the pause screen relabels itself and the HUD re-applies the font. Nothing rebuilds the whole play state.
+
 ### GhostTrail
 
 A pooled afterimage trail. It fades its ghosts every tick. On a fixed cadence it stamps a copy of a source sprite, carrying position, angle, scale and colour. The time-stop player trail instead uses `stampFrame`, which copies an animated sprite's current frame with a forced tint. The thrown hammer, the orbiters, the Arrow Storm launch arrow and the time-stop trail all use it.

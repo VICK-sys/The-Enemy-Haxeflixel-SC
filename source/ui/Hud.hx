@@ -10,6 +10,7 @@ import flixel.util.FlxColor;
 import entities.enemy.Enemies;
 import util.Paths;
 import systems.PlayerCombat;
+import util.Lang;
 
 class Hud
 {
@@ -77,14 +78,14 @@ class Hud
 		state.add(gaugeBar);
 
 		ammoText = new FlxText(1000, 576, 240, "");
-		ammoText.setFormat(null, 30, FlxColor.WHITE, CENTER);
+		ammoText.setFormat(Lang.font(), 30, FlxColor.WHITE, CENTER);
 		ammoText.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
 		ammoText.cameras = [camUI];
 		ammoText.visible = false;
 		state.add(ammoText);
 
 		timeText = new FlxText(92, 616, 0, "");
-		timeText.setFormat(null, 14, FlxColor.WHITE, LEFT);
+		timeText.setFormat(Lang.font(), 14, FlxColor.WHITE, LEFT);
 		timeText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		timeText.cameras = [camUI];
 		state.add(timeText);
@@ -216,15 +217,15 @@ class Hud
 
 	public function showWave(n:Int):Void
 	{
-		waveText.text = "WAVE " + n;
+		waveText.text = Lang.t("hud.wave", [n]);
 		bannerText.color = FlxColor.WHITE;
-		showBanner("WAVE " + n);
+		showBanner(Lang.t("hud.wave", [n]));
 	}
 
 	public function showBoss():Void
 	{
 		bannerText.color = 0xFFE0132D;
-		bannerText.text = "BOSS APPROACHING";
+		bannerText.text = Lang.t("hud.bossApproaching");
 		bannerText.visible = true;
 		bannerText.alpha = 0;
 		bannerText.scale.set(1, 1);
@@ -293,13 +294,13 @@ class Hud
 
 	public function showDeath(wave:Int, best:Int):Void
 	{
-		deadText.text = "WAVE " + wave + "  -  BEST " + best + "\nPRESS R TO RESTART";
+		deadText.text = Lang.t("hud.death", [wave, best]);
 		deadText.visible = true;
 	}
 
 	public function showRespawn():Void
 	{
-		deadText.text = "RESPAWNING...";
+		deadText.text = Lang.t("hud.respawning");
 		deadText.visible = true;
 	}
 
@@ -317,10 +318,17 @@ class Hud
 		return s;
 	}
 
+	public function applyLanguage(wave:Int):Void
+	{
+		for (t in [waveText, bannerText, deadText, ammoText, timeText])
+			t.font = Lang.font();
+		waveText.text = Lang.t("hud.wave", [wave]);
+	}
+
 	function makeText(y:Float, size:Int):FlxText
 	{
 		var t = new FlxText(0, y, FlxG.width, "");
-		t.setFormat(null, size, FlxColor.WHITE, CENTER);
+		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		t.cameras = [camUI];
 		state.add(t);

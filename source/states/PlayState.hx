@@ -28,6 +28,7 @@ import util.DiscordPresence;
 import net.Net;
 import net.NetSync;
 import net.PuppetDirector;
+import util.Lang;
 
 class PlayState extends FlxState
 {
@@ -280,7 +281,7 @@ class PlayState extends FlxState
 			netSync.update(elapsed);
 		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
 		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
-		hud.setTimeStop(Net.active ? "OFF" : timeStop.hudLabel());
+		hud.setTimeStop(Net.active ? Lang.t("timestop.off") : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
 		flyIn.update(elapsed);
@@ -291,7 +292,13 @@ class PlayState extends FlxState
 		if (FlxG.keys.justPressed.ESCAPE && !status.dead && subState == null)
 		{
 			DiscordPresence.paused();
-			openSubState(new PauseSubState(hud.camUI));
+			var pause = new PauseSubState(hud.camUI);
+			pause.closeCallback = function()
+			{
+				if (Lang.consumeChanged())
+					hud.applyLanguage(director.wave);
+			};
+			openSubState(pause);
 		}
 
 		debugKeys();
@@ -394,7 +401,7 @@ class PlayState extends FlxState
 
 	function onNetDropped():Void
 	{
-		hud.showBanner("CONNECTION LOST");
+		hud.showBanner(Lang.t("hud.connectionLost"));
 		if (Net.isClient)
 		{
 			new flixel.util.FlxTimer().start(1.4, function(_)

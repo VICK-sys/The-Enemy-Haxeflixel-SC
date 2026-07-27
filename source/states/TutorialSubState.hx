@@ -15,6 +15,7 @@ import states.tutorial.SuperDemo;
 import states.tutorial.AbilitiesDemo;
 import states.tutorial.HealthDemo;
 import util.Paths;
+import util.Lang;
 
 class TutorialSubState extends FlxSubState
 {
@@ -24,15 +25,7 @@ class TutorialSubState extends FlxSubState
 	static inline var FADE_TIME:Float = 0.35;
 	static inline var OPEN_TIME:Float = 0.2;
 
-	static var TITLES:Array<String> = ["MOVE", "ATTACK", "WEAPONS", "SUPER", "ABILITIES", "HEALTH"];
-	static var DESCS:Array<String> = [
-		"WASD - move        SPACE - dash (2s cooldown)",
-		"Aim with the mouse\nLEFT CLICK - primary attack        RIGHT CLICK - secondary attack",
-		"One weapon per run - you pick it when the run starts",
-		"Q - super at full AP - every weapon has its own",
-		"E - TIME STOP: the arena freezes for 10s (30s cooldown)\nYou keep moving and attacking - press E again to end it early",
-		"Enemies drop hearts - walk into them to heal"
-	];
+	static var KEYS:Array<String> = ["move", "attack", "weapons", "super", "abilities", "health"];
 
 	private var camUI:FlxCamera;
 	private var titleText:FlxText;
@@ -82,7 +75,7 @@ class TutorialSubState extends FlxSubState
 	function uiText(y:Float, size:Int):FlxText
 	{
 		var t = new FlxText(0, y, FlxG.width, "");
-		t.setFormat(null, size, FlxColor.WHITE, CENTER);
+		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		t.cameras = [camUI];
 		add(t);
@@ -97,9 +90,9 @@ class TutorialSubState extends FlxSubState
 			demo.destroy();
 		}
 
-		titleText.text = TITLES[page];
-		descText.text = DESCS[page];
-		pageText.text = "A/<- <   " + (page + 1) + " / " + PAGES + "   > D/->        ENTER - PLAY";
+		titleText.text = Lang.t("tutorial." + KEYS[page] + ".title");
+		descText.text = Lang.t("tutorial." + KEYS[page] + ".desc");
+		pageText.text = Lang.t("tutorial.nav", [page + 1, PAGES]);
 
 		demo = switch (page)
 		{

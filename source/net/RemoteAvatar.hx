@@ -7,6 +7,7 @@ import systems.RenderLayers;
 import systems.weapons.HeldWeapon;
 import util.Paths;
 import util.SideView;
+import util.Lang;
 
 class RemoteAvatar
 {
@@ -62,7 +63,7 @@ class RemoteAvatar
 		layers.shadowLayer.add(shadow);
 
 		tag = new FlxText(0, 0, TAG_WIDTH, "");
-		tag.setFormat(null, 18, FlxColor.WHITE, CENTER);
+		tag.setFormat(Lang.font(), 18, FlxColor.WHITE, CENTER);
 		tag.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		tag.visible = false;
 		layers.tagLayer.add(tag);

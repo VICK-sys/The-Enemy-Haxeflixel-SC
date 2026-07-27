@@ -6,6 +6,7 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import util.Paths;
+import util.Lang;
 
 class WeaponsDemo extends TutorialDemo
 {
@@ -31,7 +32,7 @@ class WeaponsDemo extends TutorialDemo
 			itemBase.push(s.scale.y);
 
 			var l = new FlxText(0, TutorialDemo.CY + 90, 0, Std.string(i + 1));
-			l.setFormat(null, 24, FlxColor.WHITE, CENTER);
+			l.setFormat(Lang.font(), 24, FlxColor.WHITE, CENTER);
 			l.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 			l.cameras = [cam];
 			add(l);

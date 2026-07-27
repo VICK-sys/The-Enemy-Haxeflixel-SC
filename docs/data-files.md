@@ -180,6 +180,14 @@ A prop is solid only if it has a hitbox. The file `library/library.json` holds t
 
 Painted walls under or around a prop still work, and they put the collision in the tilemap instead.
 
+## Languages - assets/data/lang/&lt;code&gt;.json
+
+One flat object per language, from key to line. `en.json` is the source text, and `ja.json` is the Japanese. The two files must hold the same keys. They must also hold the same `{0}` and `{1}` markers per key, because the code passes the arguments by position.
+
+Japanese has no spaces, so the text field cannot wrap it. Write the line breaks into the Japanese lines by hand. Keep a line under about 34 full-width characters for the online help panel.
+
+To add a language, copy `en.json`, translate the values, and add the code to `Lang`. A face that covers the new script also has to go in `assets/fonts/`, and `Lang.font()` has to answer with it.
+
 ## Editor tuning - assets/data/editor.json
 
 Four groups hold the numbers. The `view` group covers start, min and max zoom, zoom step, and pan speed. The `palette` group covers panel width and height, padding, prop cell size, and max zoom. The `brush` group covers max size and undo depth. A `flashTime` value sits beside them.
