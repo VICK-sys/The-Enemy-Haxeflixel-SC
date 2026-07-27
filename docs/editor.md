@@ -97,7 +97,11 @@ Load drops an entry whose image no longer exists, rather than let it fail later.
 
 The pane owns the scaled preview, the grid overlay, and the hitbox rectangle with its handles. It owns the whole draw, move and resize gesture, and reports a finished box through one callback. The panel keeps the tabs, the file list and the buttons, and decides what the pane shows.
 
-There is one tab per kind. The discovered files sit on the left, and a preview sits on the right. You cannot guess one thing from an image, so the panel asks for it directly. That is the tile size, which you choose against a grid drawn over the preview.
+There is one tab per kind. The discovered files sit on the left, and a preview sits on the right. You cannot guess one thing from an image, so the panel asks for it directly. That is the tile size, which you set against a grid drawn over the preview.
+
+The TILE button takes a typed number rather than stepping through a fixed list. Click it, type the cell size in pixels, and press ENTER. The grid redraws on every keystroke, so you watch the lines walk onto the seams as you type. ESC keeps the value you had, and a second ESC closes the panel. An empty entry keeps the old value too.
+
+The field takes at most three digits, and it holds the result between 1 and 512. Art packs often cut a sheet on an odd number such as 20 or 36. A fixed list of the usual sizes cannot describe one.
 
 A wall does not arrive as a new look to choose between. There is no theme switcher, so nothing could choose it. An import therefore overrides the wall on the theme every map wears. The editor keeps the stock wall aside, so the button beside it can put things back.
 

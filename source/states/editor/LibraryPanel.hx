@@ -4,6 +4,7 @@ import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxState;
+import flixel.input.keyboard.FlxKey;
 import flixel.math.FlxRect;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
@@ -27,8 +28,10 @@ class LibraryPanel
 	static inline var CHIP_ON:Int = 0xFF3E3E3E;
 	static inline var DIM:Int = 0xFFB8B8B8;
 
+	static inline var TILE_MIN:Int = 1;
+	static inline var TILE_MAX:Int = 512;
+
 	static var TABS:Array<String> = ["TILESETS", "PROPS", "WALLS", "HITBOX"];
-	static var TILE_SIZES:Array<Int> = [8, 16, 24, 32, 48, 64];
 	static var SCALES:Array<Float> = [1, 2, 3, 4];
 
 	public var onAdded:String->Void;
@@ -67,7 +70,9 @@ class LibraryPanel
 	private var entries:Array<String> = [];
 	private var page:Int = 0;
 	private var sel:Int = -1;
-	private var tileIdx:Int = 2;
+	private var tileSize:Int = 24;
+	private var typingTile:Bool = false;
+	private var tileBuf:String = "";
 	private var scaleIdx:Int = 1;
 
 	public function new(state:FlxState, cam:FlxCamera, flash:String->Void, leftInset:Float, topInset:Float, bottomInset:Float)
@@ -158,6 +163,76 @@ class LibraryPanel
 	public function isOpen():Bool
 		return open;
 
+	public function escape():Void
+	{
+		if (typingTile)
+		{
+			endTileTyping(false);
+			return;
+		}
+		close();
+	}
+
+	function previewTile():Int
+	{
+		if (!typingTile)
+			return tileSize;
+		var n = Std.parseInt(tileBuf);
+		return n == null || n < TILE_MIN ? tileSize : clampTile(n);
+	}
+
+	function clampTile(n:Int):Int
+		return n < TILE_MIN ? TILE_MIN : (n > TILE_MAX ? TILE_MAX : n);
+
+	function endTileTyping(keep:Bool):Void
+	{
+		if (keep)
+		{
+			var n = Std.parseInt(tileBuf);
+			if (n != null && n >= TILE_MIN)
+				tileSize = clampTile(n);
+		}
+		typingTile = false;
+		tileBuf = "";
+		refresh();
+	}
+
+	function updateTileTyping():Void
+	{
+		var digits:Array<FlxKey> = [
+			FlxKey.ZERO, FlxKey.ONE, FlxKey.TWO, FlxKey.THREE, FlxKey.FOUR,
+			FlxKey.FIVE, FlxKey.SIX, FlxKey.SEVEN, FlxKey.EIGHT, FlxKey.NINE
+		];
+		var pads:Array<FlxKey> = [
+			FlxKey.NUMPADZERO, FlxKey.NUMPADONE, FlxKey.NUMPADTWO, FlxKey.NUMPADTHREE, FlxKey.NUMPADFOUR,
+			FlxKey.NUMPADFIVE, FlxKey.NUMPADSIX, FlxKey.NUMPADSEVEN, FlxKey.NUMPADEIGHT, FlxKey.NUMPADNINE
+		];
+
+		var changed = false;
+		for (n in 0...10)
+			if (FlxG.keys.anyJustPressed([digits[n]]) || FlxG.keys.anyJustPressed([pads[n]]))
+				if (tileBuf.length < 3)
+				{
+					tileBuf += Std.string(n);
+					changed = true;
+				}
+
+		if (FlxG.keys.justPressed.BACKSPACE && tileBuf.length > 0)
+		{
+			tileBuf = tileBuf.substr(0, tileBuf.length - 1);
+			changed = true;
+		}
+
+		if (FlxG.keys.justPressed.ENTER)
+		{
+			endTileTyping(true);
+			return;
+		}
+
+		if (changed)
+			refresh();
+	}
+
 	public function toggle():Void
 	{
 		show(!open);
@@ -199,6 +274,11 @@ class LibraryPanel
 
 	function show(on:Bool):Void
 	{
+		if (!on)
+		{
+			typingTile = false;
+			tileBuf = "";
+		}
 		open = on;
 		for (s in shell)
 			s.visible = on;
@@ -257,7 +337,7 @@ class LibraryPanel
 
 		btnLabels[optBtn].text = switch (kind)
 		{
-			case 0: "TILE " + TILE_SIZES[tileIdx];
+			case 0: typingTile ? "TILE " + tileBuf + "_" : "TILE " + tileSize;
 			case 1: "SCALE " + Std.int(SCALES[scaleIdx]);
 			case 2: "USE THE STOCK WALL";
 			default: "FILL ART";
@@ -289,7 +369,7 @@ class LibraryPanel
 			pane.clearContent();
 		else
 		{
-			pane.load(src, kind == 0 ? TILE_SIZES[tileIdx] : 0);
+			pane.load(src, kind == 0 ? previewTile() : 0);
 			pane.setEditable(kind == 3);
 			pane.setBox(kind == 3 ? Library.hitboxOf(entries[sel]) : null);
 		}
@@ -299,6 +379,8 @@ class LibraryPanel
 	{
 		if (!Library.available())
 			return "IMPORTING IS DESKTOP ONLY - THIS BUILD CANNOT READ FILES";
+		if (typingTile)
+			return "TYPE THE CELL SIZE IN PIXELS, THEN ENTER - ESC KEEPS THE OLD ONE\nTHE GRID FOLLOWS AS YOU TYPE, SO ZOOM IN AND CHECK IT LANDS ON THE SEAMS";
 		if (kind == 3)
 			return "BASE BAND FOR BUILDINGS - BLOCK ONLY THE GROUND SO YOU CAN WALK AROUND IT\nDRAG INSIDE TO MOVE, A HANDLE TO RESIZE - THE BOTTOM EDGE IS THE DEPTH LINE";
 
@@ -391,7 +473,8 @@ class LibraryPanel
 		switch (kind)
 		{
 			case 0:
-				tileIdx = (tileIdx + 1) % TILE_SIZES.length;
+				typingTile = true;
+				tileBuf = "";
 			case 1:
 				scaleIdx = (scaleIdx + 1) % SCALES.length;
 			case 2:
@@ -422,7 +505,7 @@ class LibraryPanel
 		switch (kind)
 		{
 			case 0:
-				flash("ADDED TILESET " + Library.addTileset(entries[sel], TILE_SIZES[tileIdx], TILE_SIZES[tileIdx]));
+				flash("ADDED TILESET " + Library.addTileset(entries[sel], tileSize, tileSize));
 			case 1:
 				flash("ADDED PROP " + Library.addProp(entries[sel], SCALES[scaleIdx]));
 			case 2:
@@ -442,6 +525,9 @@ class LibraryPanel
 		if (!open)
 			return;
 
+		if (typingTile)
+			updateTileTyping();
+
 		if (FlxG.mouse.justPressed)
 		{
 			var m = FlxG.mouse.getScreenPosition(cam);
@@ -452,6 +538,8 @@ class LibraryPanel
 					continue;
 				if (m.x >= r.x && m.x <= r.x + r.width && m.y >= r.y && m.y <= r.y + r.height)
 				{
+					if (typingTile && i != optBtn)
+						endTileTyping(true);
 					actions[i]();
 					return;
 				}
@@ -459,6 +547,8 @@ class LibraryPanel
 
 			if (m.x >= listX && m.x <= listX + 300 && m.y >= listY && m.y < listY + ROWS * ROW_H)
 			{
+				if (typingTile)
+					endTileTyping(true);
 				var idx = page * ROWS + Std.int((m.y - listY) / ROW_H);
 				if (idx < entries.length)
 				{

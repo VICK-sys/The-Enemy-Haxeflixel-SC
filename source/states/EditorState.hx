@@ -399,7 +399,7 @@ class EditorState extends FlxState
 		if (library.isOpen())
 		{
 			if (FlxG.keys.justPressed.ESCAPE)
-				library.close();
+				library.escape();
 			return;
 		}
 
