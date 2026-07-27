@@ -7,7 +7,6 @@ import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import util.Lang;
-import util.Paths;
 
 class DialogueBox
 {
@@ -17,7 +16,6 @@ class DialogueBox
 	static inline var EDGE:Int = 6;
 	static inline var PAD:Float = 26;
 	static inline var CHAR_TIME:Float = 0.024;
-	static inline var BLIP_EVERY:Int = 3;
 	static inline var BLINK:Float = 0.5;
 
 	public var open(default, null):Bool = false;
@@ -103,8 +101,6 @@ class DialogueBox
 			{
 				timer -= CHAR_TIME;
 				shown++;
-				if (shown % BLIP_EVERY == 0 && full.charAt(shown - 1) != " ")
-					FlxG.sound.play(Paths.sound("tick"), 0.18);
 			}
 			body.text = full.substr(0, shown);
 		}

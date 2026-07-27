@@ -177,7 +177,7 @@ Asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow`, w
 
 ### TreeMan and DialogueBox
 
-The man behind the tree. `TreeMan` runs only in the quiet room. It finds its spot from the `tree` prop rather than from a fixed coordinate, so moving the prop moves the man with it. He sits a little behind the trunk, so you have to walk round the tree to reach him.
+The man behind the tree. `TreeMan` runs only in the quiet room. It finds its spot from the `tree` prop rather than from a fixed coordinate, so moving the prop moves the man with it. He sits a little behind the trunk, so you have to walk round the tree to reach him. Nothing on screen says so.
 
 He has no sprite. You never see him, which is the point of him.
 
@@ -185,7 +185,7 @@ He has no sprite. You never see him, which is the point of him.
 
 The count is a static. Once he has said his piece, he stays gone for the rest of the session.
 
-`DialogueBox` is the box itself: a white border, a black fill, and a typewriter that ticks. It draws on the HUD camera, so the quiet room's zoom does not touch it. A press finishes the line early rather than skipping it, then the next press turns the page. The player cannot move while it is open.
+`DialogueBox` is the box itself: a white border, a black fill, and a silent typewriter. It draws on the HUD camera, so the quiet room's zoom does not touch it. A press finishes the line early rather than skipping it, then the next press turns the page. The player cannot move while it is open.
 
 The detour timer holds while a box is open. The room should never drop you part way through a sentence.
 

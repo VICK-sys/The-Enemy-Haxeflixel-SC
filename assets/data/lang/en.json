@@ -83,7 +83,6 @@
 	"online.connected": "CONNECTED - WAITING FOR HOST TO START",
 	"online.failed": "COULD NOT CONNECT TO {0}",
 
-	"talk.prompt": "Z / ENTER - TALK",
 	"talk.more": ">>",
 
 	"talk.man0.1": "I don't know how you got here.\nBut welcome all the same.",
