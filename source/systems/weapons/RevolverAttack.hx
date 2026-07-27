@@ -27,6 +27,7 @@ class RevolverAttack
 	private var reloading:Float = 0;
 	private var reloadFrom:Int = 0;
 	private var chambered:Int = 0;
+	private var reloadTotal:Float = 0;
 	private var fanning:Bool = false;
 	private var fanTimer:Float = 0;
 
@@ -52,7 +53,7 @@ class RevolverAttack
 	{
 		if (reloading <= 0)
 			return rounds;
-		var fill = 1 - reloading / cfg.reloadTime;
+		var fill = 1 - reloading / reloadTotal;
 		var n = reloadFrom + Math.floor(fill * (cfg.cylinder - reloadFrom));
 		if (n < reloadFrom)
 			n = reloadFrom;
@@ -63,7 +64,8 @@ class RevolverAttack
 	{
 		reloadFrom = n;
 		chambered = n;
-		reloading = cfg.reloadTime;
+		reloadTotal = cfg.reloadTime * (cfg.cylinder - n) / cfg.cylinder;
+		reloading = reloadTotal;
 	}
 
 	public function canFire():Bool
