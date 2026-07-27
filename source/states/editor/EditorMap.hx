@@ -31,6 +31,10 @@ class EditorMap
 
 	private var undoStack:Array<EditorSnapshot> = [];
 	private var undoDepth:Int;
+	private var tilesW:Int = 0;
+	private var tilesH:Int = 0;
+
+	public var loadDroppedFloor(default, null):Bool = false;
 
 	public function new(undoDepth:Int)
 	{
@@ -45,6 +49,26 @@ class EditorMap
 	public function tileset():TilesetData
 		return TilesetDataRegistry.get(tilesetIndex);
 
+	function resetTileGrid(csv:String):Void
+	{
+		var t = tileset();
+		tiles = DecorTiles.parse(csv, t);
+		tilesW = t == null ? 0 : DecorTiles.cols(t);
+		tilesH = t == null ? 0 : DecorTiles.rows(t);
+	}
+
+	public function syncTileGrid():Bool
+	{
+		var t = tileset();
+		if (t == null)
+			return false;
+		if (DecorTiles.cols(t) == tilesW && DecorTiles.rows(t) == tilesH)
+			return false;
+		resetTileGrid(null);
+		dirty = true;
+		return true;
+	}
+
 	public function blank():Void
 	{
 		walls = [for (i in 0...cols * rows) false];
@@ -53,7 +77,7 @@ class EditorMap
 		spawnY = rows * cell / 2;
 		props = [];
 		tilesetIndex = 0;
-		tiles = DecorTiles.parse(null, tileset());
+		resetTileGrid(null);
 		undoStack = [];
 	}
 
@@ -107,8 +131,11 @@ class EditorMap
 		if (prev == null)
 			return false;
 		walls = prev.walls;
-		tiles = prev.tiles;
 		props = prev.props;
+		if (prev.tiles.length == tilesW * tilesH)
+			tiles = prev.tiles;
+		else
+			resetTileGrid(null);
 		dirty = true;
 		return true;
 	}
@@ -152,7 +179,7 @@ class EditorMap
 	public function useTileset(i:Int):Void
 	{
 		tilesetIndex = i;
-		tiles = DecorTiles.parse(null, tileset());
+		resetTileGrid(null);
 		dirty = true;
 	}
 
@@ -171,7 +198,10 @@ class EditorMap
 		spawnY = stored.sy;
 		props = stored.props == null ? [] : stored.props;
 		tilesetIndex = TilesetDataRegistry.indexOf(stored.tileset);
-		tiles = DecorTiles.parse(stored.tiles, tileset());
+		var t = tileset();
+		var stale = t != null && stored.tileW != null && stored.tileW != 0 && stored.tileW != t.tileW;
+		resetTileGrid(stale ? null : stored.tiles);
+		loadDroppedFloor = stale;
 		undoStack = [];
 		dirty = false;
 	}
@@ -185,7 +215,8 @@ class EditorMap
 			csv: wallCsv(),
 			props: props,
 			tileset: t == null ? null : t.name,
-			tiles: tileCsv()
+			tiles: tileCsv(),
+			tileW: t == null ? 0 : t.tileW
 		});
 		dirty = false;
 	}

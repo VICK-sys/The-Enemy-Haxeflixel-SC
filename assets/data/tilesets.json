@@ -5,6 +5,12 @@
 			"image": "tilesets/OK_ME_MATO",
 			"tileW": 24,
 			"tileH": 24
+		},
+		{
+			"name": "Scarlet Forest",
+			"image": "tilesets/Scarlet Forest_transparent",
+			"tileW": 24,
+			"tileH": 24
 		}
 	]
 }

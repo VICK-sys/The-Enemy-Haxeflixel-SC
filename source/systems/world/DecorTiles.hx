@@ -104,7 +104,10 @@ class DecorTiles
 		{
 			var line = [];
 			for (c in 0...w)
-				line.push(Std.string(grid[r * w + c]));
+			{
+				var i = r * w + c;
+				line.push(Std.string(i < grid.length ? grid[i] : 0));
+			}
 			out.push(line.join(","));
 		}
 		return out.join("\n");

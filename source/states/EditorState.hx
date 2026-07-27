@@ -114,6 +114,8 @@ class EditorState extends FlxState
 		refreshAll();
 		showPalettes();
 		view = new EditorView(cfg.view, doc, cfg.ui.sidebar, cfg.ui.topbar, EditorHud.BAR);
+		if (doc.loadDroppedFloor)
+			hud.flash("CELL SIZE MOVED SINCE THIS MAP WAS SAVED - PAINTED FLOOR DROPPED");
 		hud.setHint(hintLine());
 		chrome.setMode(mode);
 		super.create();
@@ -140,6 +142,11 @@ class EditorState extends FlxState
 		switch (kind)
 		{
 			case "tilesets":
+				if (doc.syncTileGrid())
+				{
+					tileTool.rebuild();
+					hud.flash("CELL SIZE CHANGED - PAINTED FLOOR CLEARED");
+				}
 				tilePal.build(doc.tileset());
 				tileTool.refreshGhost();
 			case "props", "hitbox":
@@ -275,7 +282,7 @@ class EditorState extends FlxState
 		lastSlot = n;
 		doc.load(n);
 		refreshAll();
-		hud.flash("SLOT " + n);
+		hud.flash(doc.loadDroppedFloor ? "SLOT " + n + " - CELL SIZE MOVED, PAINTED FLOOR DROPPED" : "SLOT " + n);
 	}
 
 	function clearMap():Void

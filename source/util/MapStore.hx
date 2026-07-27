@@ -15,7 +15,8 @@ typedef StoredMap =
 	csv:String,
 	?props:Array<data.PropData.PropPlace>,
 	?tileset:String,
-	?tiles:String
+	?tiles:String,
+	?tileW:Int
 }
 
 class MapStore

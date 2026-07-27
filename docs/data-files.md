@@ -147,6 +147,10 @@ Each map holds the painted grid as its own CSV. Its cell size comes from the she
 
 A switch to a different sheet clears the painted layer. The cell size changes, and therefore the grid changes with it.
 
+Re-importing a sheet under its own name does the same thing, because that overwrites the cell size in place. The grid is a flat array read at one stride. Read the same array at a different stride and every row drifts. That shears a clean shape into diagonal bands. `EditorMap` therefore records the grid it built the array for, and drops the floor whenever the tileset moves away from it. The editor says so rather than losing the paint in silence.
+
+Each saved map also records `tileW`. Open a map after its tileset moved to another cell size, and the floor drops on load for the same reason. A map saved before this field existed has no `tileW`, and the editor trusts it.
+
 The floor layer goes in before the render layers, so it draws under everything that moves. It hides with the rest of the decoration during the boss fight.
 
 Painted tiles also make up the walls. Three passes fill a wall block, and each pass covers only what the last one left blank. First comes the theme's flat colour, then its repeating texture, then any tiles painted over that spot. The painted layer therefore wins.
