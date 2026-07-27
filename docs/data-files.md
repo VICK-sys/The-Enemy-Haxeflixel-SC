@@ -83,7 +83,7 @@ Combat balance for every weapon system, one object per system; field names match
 | `bowCharge` | charged shot: `minTime` below which a press is a plain tap shot, `fullTime` to reach full charge, `maxDamage` at full, and the `speedBonus`/`sizeBonus`/`knockBonus` multipliers applied across the charge range |
 | `arrowRain` | volley size, drop delay and stagger, spread, fall speed, hit radius |
 | `hook` | flight range, pull speed and timeout, grab and hold distances, spin windup, throw speed/duration/hit radius, release stun, and the damage dealt to enemies that cannot be grabbed |
-| `deadEye` | marking window, how far the world slows, cursor radius that paints a mark, delay between shots, damage per round |
+| `deadEye` | white flash length, sepia strength, fade-out length, cursor radius that paints a mark, delay between shots, damage per round |
 | `superOrbit` | blade count, fire gate |
 | `bounceStrike` | strike count, hop time, radius, damage, force, catapult speed |
 | `arrowStorm` | storm duration, spawn cadence, drops per tick |

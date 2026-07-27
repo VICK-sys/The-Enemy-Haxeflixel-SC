@@ -56,7 +56,7 @@ class Weapons
 		bounceStrike = new BounceStrike(player, fx, hits, held.sprite, shock);
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
 		hookArms = new HookArms(player, director, hits);
-		deadEye = new DeadEye(director, revolver, held);
+		deadEye = new DeadEye(player, director, revolver, held);
 		deadEye.onShot = function(bx, by, tx, ty, deg)
 			emitAttack(Shoot, bx, by, Math.cos(deg * Math.PI / 180), Math.sin(deg * Math.PI / 180), deg);
 	}

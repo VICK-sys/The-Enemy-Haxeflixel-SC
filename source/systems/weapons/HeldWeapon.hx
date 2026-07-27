@@ -45,6 +45,8 @@ class HeldWeapon
 	private var swingDir:Int = 1;
 	private var activeSwingTime:Float = SWING_TIME;
 	private var swingSweep:Bool = true;
+	private var aimLocked:Bool = false;
+	private var lockAngle:Float = 0;
 
 	public function new(player:Player, sprite:FlxSprite)
 	{
@@ -55,9 +57,19 @@ class HeldWeapon
 	function get_swinging():Bool
 		return swingTimer > 0;
 
+	public function lockAim(deg:Float):Void
+	{
+		aimLocked = true;
+		lockAngle = deg;
+	}
+
+	public function unlockAim():Void
+		aimLocked = false;
+
 	public function setKind(i:Int):Void
 	{
 		kind = i;
+		aimLocked = false;
 		attack = Swing;
 		swingTimer = 0;
 		sprite.flipX = false;
@@ -132,11 +144,24 @@ class HeldWeapon
 		}
 		else if (bowLike())
 		{
-			var pmx:Float = player.x + player.width * 0.5;
-			var pmy:Float = player.y + player.height * 0.5;
-			var dx:Float = FlxG.mouse.x - pmx;
-			var dy:Float = FlxG.mouse.y - pmy;
-			var len:Float = Math.sqrt(dx * dx + dy * dy);
+			var dx:Float;
+			var dy:Float;
+			var len:Float;
+			if (aimLocked)
+			{
+				var rad = lockAngle * Math.PI / 180;
+				dx = Math.cos(rad);
+				dy = Math.sin(rad);
+				len = 1;
+			}
+			else
+			{
+				var pmx:Float = player.x + player.width * 0.5;
+				var pmy:Float = player.y + player.height * 0.5;
+				dx = FlxG.mouse.x - pmx;
+				dy = FlxG.mouse.y - pmy;
+				len = Math.sqrt(dx * dx + dy * dy);
+			}
 			if (len > 0.001)
 			{
 				var reach = BOW_DIST * (1 - charge * CHARGE_DRAW);
@@ -179,6 +204,14 @@ class HeldWeapon
 
 	function trackCursor(mouseX:Float, mouseY:Float, elapsed:Float):Void
 	{
+		if (aimLocked)
+		{
+			sprite.flipX = false;
+			sprite.flipY = bowLike() && Math.abs(lockAngle) > 90;
+			sprite.angle = lockAngle;
+			return;
+		}
+
 		var pmx:Float = player.x + player.width * 0.5;
 		var pmy:Float = player.y + player.height * 0.5;
 		var theta:Float = Math.atan2(mouseY - pmy, mouseX - pmx) * 180 / Math.PI;

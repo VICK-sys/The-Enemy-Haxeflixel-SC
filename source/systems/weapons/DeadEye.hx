@@ -3,8 +3,10 @@ package systems.weapons;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
+import flixel.sound.FlxSound;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
+import entities.Player;
 import entities.enemy.Enemies;
 import systems.enemy.EnemyDirector;
 import data.WeaponData.WeaponDataRegistry;
@@ -14,38 +16,57 @@ import util.WorldClock;
 class DeadEye
 {
 	static inline var MARK_SIZE:Int = 24;
-	static inline var MARK_RING:Float = 10;
+	static inline var MARK_INSET:Float = 5;
 	static inline var MARK_THICK:Float = 3;
 	static inline var MARK_COLOR:Int = 0xFFE0132D;
 	static inline var MARK_SCALE:Float = 3;
 	static inline var PULSE_RATE:Float = 9;
-	static inline var PULSE_AMP:Float = 0.35;
+	static inline var PULSE_AMP:Float = 0.18;
+	static inline var SEPIA:Int = 0xFF8A5A22;
+	static inline var ARM_TIME:Float = 0.12;
 
 	public var markers:FlxTypedGroup<FlxSprite>;
+	public var overlay:FlxSprite;
 	public var active(get, never):Bool;
 	public var marking(get, never):Bool;
 	public var onShot:(Float, Float, Float, Float, Float) -> Void;
 
 	private var cfg = WeaponDataRegistry.get().deadEye;
+	private var player:Player;
 	private var director:EnemyDirector;
 	private var revolver:RevolverAttack;
 	private var held:HeldWeapon;
+	private var heartbeat:FlxSound;
 	private var phase:Int = 0;
-	private var timer:Float = 0;
+	private var flash:Float = 0;
+	private var fade:Float = 0;
+	private var arm:Float = 0;
 	private var shotTimer:Float = 0;
 	private var pulse:Float = 0;
+	private var blockSaved:Bool = false;
 	private var targets:Array<Enemies> = [];
 
-	public function new(director:EnemyDirector, revolver:RevolverAttack, held:HeldWeapon)
+	public function new(player:Player, director:EnemyDirector, revolver:RevolverAttack, held:HeldWeapon)
 	{
+		this.player = player;
 		this.director = director;
 		this.revolver = revolver;
 		this.held = held;
+
 		markers = new FlxTypedGroup<FlxSprite>();
+		heartbeat = FlxG.sound.load(Paths.sound("heartbeat"), 0.8, true);
+
+		overlay = new FlxSprite();
+		overlay.makeGraphic(4, 4, FlxColor.WHITE);
+		overlay.scale.set(400, 225);
+		overlay.updateHitbox();
+		overlay.setPosition(-160, -90);
+		overlay.scrollFactor.set();
+		overlay.alpha = 0;
 	}
 
 	function get_active():Bool
-		return phase != 0;
+		return phase == 1 || phase == 2;
 
 	function get_marking():Bool
 		return phase == 1;
@@ -59,18 +80,37 @@ class DeadEye
 			return;
 
 		phase = 1;
-		timer = cfg.markTime;
+		flash = cfg.flashTime;
+		arm = ARM_TIME;
 		pulse = 0;
 		targets = [];
-		WorldClock.superSlow = cfg.slowFactor;
+
+		WorldClock.superSlow = 0;
+		blockSaved = player.blockMovement;
+		player.blockMovement = true;
+
+		overlay.color = FlxColor.WHITE;
+		overlay.alpha = 1;
+
+		heartbeat.play(true);
 		FlxG.sound.play(Paths.sound("weapon/ascend"), 0.7);
 	}
 
 	public function cancel():Void
 	{
+		letGo();
 		phase = 0;
+		fade = 0;
+		overlay.alpha = 0;
+	}
+
+	function letGo():Void
+	{
 		targets = [];
 		WorldClock.superSlow = 1;
+		player.blockMovement = blockSaved;
+		held.unlockAim();
+		heartbeat.stop();
 		for (m in markers.members)
 			if (m != null)
 				m.kill();
@@ -81,17 +121,34 @@ class DeadEye
 		if (phase == 0)
 			return;
 
+		if (phase == 3)
+		{
+			fade -= elapsed;
+			if (fade > 0)
+				overlay.alpha = cfg.sepiaAlpha * (fade / cfg.fadeTime);
+			else
+			{
+				overlay.alpha = 0;
+				phase = 0;
+			}
+			return;
+		}
+
+		player.blockMovement = true;
+
 		if (phase == 1)
 			updateMarking(elapsed);
 		else
 			updateFiring(elapsed);
 
+		updateOverlay(elapsed);
 		placeMarkers(elapsed);
 	}
 
 	function updateMarking(elapsed:Float):Void
 	{
-		timer -= elapsed;
+		if (arm > 0)
+			arm -= elapsed;
 
 		if (targets.length < revolver.rounds)
 		{
@@ -99,21 +156,31 @@ class DeadEye
 			if (hit != null && !hit.isDead && targets.indexOf(hit) < 0)
 			{
 				targets.push(hit);
-				markers.recycle(FlxSprite, newMarker).revive();
-				FlxG.sound.play(Paths.sound("tick"), 0.5);
+				markers.recycle(FlxSprite, newMarker);
+				FlxG.sound.play(Paths.sound("tick"), 0.55);
 			}
 		}
 
-		if (FlxG.mouse.justPressed || timer <= 0)
+		if (arm <= 0 && FlxG.mouse.justPressed)
+			release();
+	}
+
+	public function release():Void
+	{
+		if (phase != 1)
+			return;
+
+		if (targets.length == 0)
 		{
-			if (targets.length == 0)
-			{
-				cancel();
-				return;
-			}
-			phase = 2;
-			shotTimer = 0;
+			cancel();
+			return;
 		}
+
+		phase = 2;
+		fade = cfg.fadeTime;
+		shotTimer = 0;
+		WorldClock.superSlow = 1;
+		heartbeat.stop();
 	}
 
 	function updateFiring(elapsed:Float):Void
@@ -133,14 +200,33 @@ class DeadEye
 			var by = held.handY();
 			var tx = t.x + t.width / 2;
 			var ty = t.y + t.height / 2;
+			held.lockAim(Math.atan2(ty - by, tx - bx) * 180 / Math.PI);
 			revolver.fireAt(bx, by, t, cfg.damage);
 			if (onShot != null)
 				onShot(bx, by, tx, ty, Math.atan2(ty - by, tx - bx) * 180 / Math.PI);
-			FlxG.camera.shake(0.003, 0.12);
+			FlxG.camera.shake(0.004, 0.14);
 			return;
 		}
 
-		cancel();
+		letGo();
+		phase = 3;
+	}
+
+	function updateOverlay(elapsed:Float):Void
+	{
+		if (phase == 1 && flash > 0)
+		{
+			flash -= elapsed;
+			var t = 1 - flash / cfg.flashTime;
+			if (t > 1)
+				t = 1;
+			overlay.color = FlxColor.interpolate(FlxColor.WHITE, SEPIA, t);
+			overlay.alpha = 1 - (1 - cfg.sepiaAlpha) * t;
+			return;
+		}
+
+		overlay.color = SEPIA;
+		overlay.alpha = cfg.sepiaAlpha;
 	}
 
 	function placeMarkers(elapsed:Float):Void
@@ -174,8 +260,11 @@ class DeadEye
 	{
 		var m = new FlxSprite();
 		m.makeGraphic(MARK_SIZE, MARK_SIZE, FlxColor.TRANSPARENT, true);
-		FlxSpriteUtil.drawCircle(m, MARK_SIZE / 2, MARK_SIZE / 2, MARK_RING, FlxColor.TRANSPARENT,
-			{color: MARK_COLOR, thickness: MARK_THICK});
+		var lo = MARK_INSET;
+		var hi = MARK_SIZE - MARK_INSET;
+		var style = {color: MARK_COLOR, thickness: MARK_THICK};
+		FlxSpriteUtil.drawLine(m, lo, lo, hi, hi, style);
+		FlxSpriteUtil.drawLine(m, hi, lo, lo, hi, style);
 		m.antialiasing = false;
 		m.scale.set(MARK_SCALE, MARK_SCALE);
 		return m;

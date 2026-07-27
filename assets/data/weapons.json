@@ -46,11 +46,12 @@
 		"snagDamage": 3
 	},
 	"deadEye": {
-		"markTime": 4.0,
-		"slowFactor": 0.22,
+		"flashTime": 0.18,
+		"sepiaAlpha": 0.42,
+		"fadeTime": 0.7,
 		"markRadius": 70,
 		"shotInterval": 0.14,
-		"damage": 4
+		"damage": 15
 	},
 	"superOrbit": { "count": 10, "fireGate": 0.08 },
 	"bounceStrike": { "strikes": 5, "hopTime": 0.55, "radius": 300, "damage": 2, "force": 4, "catapultSpeed": 720 },

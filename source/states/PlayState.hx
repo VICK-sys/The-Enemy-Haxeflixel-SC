@@ -120,7 +120,6 @@ class PlayState extends FlxState
 		add(combat.jab.slashes);
 		add(combat.bow.arrows);
 		add(combat.revolver.bullets);
-		add(combat.deadEye.markers);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
 		insert(members.indexOf(layers.entityLayer), combat.shock.cracks);
 		insert(members.indexOf(layers.entityLayer), combat.shock.rings);
@@ -142,6 +141,8 @@ class PlayState extends FlxState
 		add(props.overlay);
 
 		add(timeStop.overlay);
+		add(combat.deadEye.overlay);
+		add(combat.deadEye.markers);
 
 		hud = new Hud(this, status);
 		shift = new PerspectiveShift(arena, _player, director, combat, layers);
@@ -280,6 +281,7 @@ class PlayState extends FlxState
 		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
 		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
 	}
+
 
 
 

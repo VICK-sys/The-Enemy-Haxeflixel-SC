@@ -68,8 +68,9 @@ typedef HookConfig = {
 }
 
 typedef DeadEyeConfig = {
-	markTime:Float,
-	slowFactor:Float,
+	flashTime:Float,
+	sepiaAlpha:Float,
+	fadeTime:Float,
 	markRadius:Float,
 	shotInterval:Float,
 	damage:Int
