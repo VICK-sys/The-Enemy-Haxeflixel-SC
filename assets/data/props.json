@@ -17,6 +17,24 @@
 			"sheet": "props/rofelfanHouse",
 			"rect": [],
 			"scale": 2
+		},
+		{
+			"name": "tree",
+			"sheet": "props/tree",
+			"rect": [],
+			"scale": 7
+		},
+		{
+			"name": "treeBush",
+			"sheet": "props/treeBush",
+			"rect": [],
+			"scale": 7
+		},
+		{
+			"name": "treeBush2",
+			"sheet": "props/treeBush2",
+			"rect": [],
+			"scale": 7
 		}
 	]
 }
