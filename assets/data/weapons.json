@@ -1,6 +1,6 @@
 {
-	"swing": { "spawnDist": 110, "meleeRange": 175, "meleeArcCos": -0.5, "damage": 2 },
-	"jab": { "spawnDist": 85, "meleeRange": 130, "meleeArcCos": -0.2, "damage": 1 },
+	"swing": { "spawnDist": 145, "meleeRange": 245, "meleeArcCos": -0.5, "damage": 2, "effectScale": 1.4 },
+	"jab": { "spawnDist": 85, "meleeRange": 130, "meleeArcCos": -0.2, "damage": 1, "effectScale": 0.6 },
 	"hammer": { "reach": 15, "radius": 160, "damage": 2, "push": 1.6, "stunTime": 2.0 },
 	"revolver": {
 		"cylinder": 6,

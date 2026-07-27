@@ -16,23 +16,21 @@ class SwingAttack
 	private var cfg:SwingConfig;
 	private var director:EnemyDirector;
 	private var hits:HitPipeline;
-	private var effectScale:Float;
 	private var guardTimer:Float = 0;
 	private var guardX:Float = 1;
 	private var guardY:Float = 0;
 
-	public function new(director:EnemyDirector, hits:HitPipeline, cfg:SwingConfig, effectScale:Float = 1)
+	public function new(director:EnemyDirector, hits:HitPipeline, cfg:SwingConfig)
 	{
 		this.director = director;
 		this.hits = hits;
 		this.cfg = cfg;
-		this.effectScale = effectScale;
 		slashes = new FlxTypedGroup<SlashEffect>();
 	}
 
 	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
-		slashes.recycle(SlashEffect).fire(pmx + dx * cfg.spawnDist, pmy + dy * cfg.spawnDist, dx, dy, aimDeg, effectScale);
+		slashes.recycle(SlashEffect).fire(pmx + dx * cfg.spawnDist, pmy + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale);
 		strike(pmx, pmy, dx, dy);
 		guardTimer = GUARD_TIME;
 		guardX = dx;

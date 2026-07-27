@@ -16,7 +16,7 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `systems/weapons/BounceStrike.hx` | hop apex, somersault spin, hand pivot |
 | `systems/weapons/ArrowStorm.hx` | bow raise, launch arrow speed and scale, charge tint, trail settings |
 | `entities/weapon/SuperBlade.hx` | launch speed, range, spin, hit radius |
-| `entities/weapon/ThrownScythe.hx` | throw speed, spin rate, hit radius |
+| `entities/weapon/ThrownScythe.hx` | throw speed, spin rate, hit radius (the thrown hammer) |
 | `entities/HealthPickup.hx` | heal amount, lifetime |
 | `entities/weapon/SlashEffect.hx` | drift speed, effect lifetime |
 | `entities/weapon/Arrow.hx` | arrow speed, range, hit radius |

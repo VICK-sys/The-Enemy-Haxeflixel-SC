@@ -142,11 +142,11 @@ class RemoteFx
 		switch (mode)
 		{
 			case Swing:
-				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.swing.spawnDist, pmy + dy * cfg.swing.spawnDist, dx, dy, aimDeg);
+				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.swing.spawnDist, pmy + dy * cfg.swing.spawnDist, dx, dy, aimDeg, cfg.swing.effectScale);
 				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
 			case Jab:
-				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.jab.spawnDist, pmy + dy * cfg.jab.spawnDist, dx, dy, aimDeg, 0.6);
+				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.jab.spawnDist, pmy + dy * cfg.jab.spawnDist, dx, dy, aimDeg, cfg.jab.effectScale);
 				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
 			case Shoot:

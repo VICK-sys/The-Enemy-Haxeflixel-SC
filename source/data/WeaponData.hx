@@ -6,7 +6,8 @@ typedef SwingConfig = {
 	spawnDist:Float,
 	meleeRange:Float,
 	meleeArcCos:Float,
-	damage:Int
+	damage:Int,
+	effectScale:Float
 }
 
 typedef HammerConfig = {

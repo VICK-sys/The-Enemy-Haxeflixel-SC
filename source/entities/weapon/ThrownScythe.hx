@@ -6,7 +6,7 @@ import util.Paths;
 
 class ThrownScythe extends FlxSprite
 {
-	public static inline var RADIUS:Float = 90;
+	public static inline var RADIUS:Float = 120;
 
 	static inline var THROW_SPEED:Float = 1000;
 	static inline var SPIN:Float = 1500;

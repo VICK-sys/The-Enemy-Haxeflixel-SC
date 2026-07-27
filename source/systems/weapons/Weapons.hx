@@ -45,7 +45,7 @@ class Weapons
 		held = new HeldWeapon(player, scythe);
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
 		swing = new SwingAttack(director, hits, weaponCfg.swing);
-		jab = new SwingAttack(director, hits, weaponCfg.jab, 0.6);
+		jab = new SwingAttack(director, hits, weaponCfg.jab);
 		hammer = new HammerAttack(director, fx, hits);
 		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
