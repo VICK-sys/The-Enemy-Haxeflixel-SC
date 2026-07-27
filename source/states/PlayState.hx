@@ -62,6 +62,9 @@ class PlayState extends FlxState
 	private var flyX:Float = 0;
 	private var flyY:Float = 0;
 
+	function stageTrack():String
+		return util.CustomArena.quiet ? "stage/Man_music" : "stage/gloomDoomWoods";
+
 	function showDecor(on:Bool):Void
 	{
 		props.setDecorVisible(on);
@@ -190,7 +193,7 @@ class PlayState extends FlxState
 		else
 			openWeaponPick();
 
-		Music.play("stage/gloomDoomWoods", 0.3);
+		Music.play(stageTrack(), 0.3);
 
 		wipe = new IrisWipe(this);
 		wipe.open();
@@ -428,7 +431,7 @@ class PlayState extends FlxState
 		if (!Net.active)
 			shift.locked = false;
 		shift.restoreTotem();
-		Music.play("stage/gloomDoomWoods", 0.3);
+		Music.play(stageTrack(), 0.3);
 		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.8);
 	}
 

@@ -123,6 +123,8 @@ The main menu clears `CustomArena` on entry, so a normal PLAY is always the stoc
 
 A false `EnemyDirector.spawning` stops wave pacing and the boss intro. The per-enemy tick still runs, so anything already placed still behaves. A true `Weapons.disabled` drops every attack input and hides the held sprite. The weapon card and the tutorial both stay shut.
 
+The quiet room also takes its own music. `stageTrack()` answers `stage/Man_music` there and `stage/gloomDoomWoods` everywhere else. Both stage music calls read it, so the track holds even on the path back from a boss.
+
 The slot number carries this rather than a field in the map file. A field would not survive the next save, because the editor writes the map from its own document.
 
 ## Paintable tilesets - assets/data/tilesets.json
