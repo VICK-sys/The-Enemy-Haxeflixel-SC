@@ -5,9 +5,9 @@
 	"revolver": {
 		"cylinder": 8,
 		"damage": 2,
-		"fanDamage": 1,
 		"reloadTime": 1.1,
-		"spread": 16,
+		"fanInterval": 0.06,
+		"fanJitter": 7,
 		"speed": 2200,
 		"range": 1100,
 		"hitRadius": 26,

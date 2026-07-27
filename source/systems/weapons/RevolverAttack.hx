@@ -16,7 +16,8 @@ class RevolverAttack
 
 	public var bullets:FlxTypedGroup<Bullet>;
 	public var rounds:Int;
-	public var gauge(get, never):Float;
+	public var capacity(get, never):Int;
+	public var isReloading(get, never):Bool;
 
 	private var cfg = WeaponDataRegistry.get().revolver;
 	private var arena:Arena;
@@ -24,6 +25,8 @@ class RevolverAttack
 	private var fx:Fx;
 	private var hits:HitPipeline;
 	private var reloading:Float = 0;
+	private var fanning:Bool = false;
+	private var fanTimer:Float = 0;
 
 	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline)
 	{
@@ -35,18 +38,17 @@ class RevolverAttack
 		rounds = cfg.cylinder;
 	}
 
-	function get_gauge():Float
-	{
-		if (reloading > 0)
-			return 1 - reloading / cfg.reloadTime;
-		return rounds / cfg.cylinder;
-	}
+	function get_capacity():Int
+		return cfg.cylinder;
+
+	function get_isReloading():Bool
+		return reloading > 0;
 
 	public function canFire():Bool
-		return reloading <= 0 && rounds > 0;
+		return reloading <= 0 && !fanning && rounds > 0;
 
 	public function canFan():Bool
-		return reloading <= 0 && rounds > 0;
+		return reloading <= 0 && !fanning && rounds > 0;
 
 	public function fire(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
@@ -61,24 +63,14 @@ class RevolverAttack
 			reloading = cfg.reloadTime;
 	}
 
-	public function fanFire(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float):Void
+	public function fanFire():Void
 	{
 		if (!canFan())
 			return;
 
-		var n = rounds;
-		for (i in 0...n)
-		{
-			var t = n == 1 ? 0.0 : (i / (n - 1) - 0.5) * 2;
-			var deg = aimDeg + t * cfg.spread;
-			var rad = deg * Math.PI / 180;
-			spawn(bx, by, Math.cos(rad), Math.sin(rad), deg, cfg.fanDamage);
-		}
-		rounds = 0;
-		reloading = cfg.reloadTime;
-		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
-		FlxG.sound.play(Paths.sound("enemies/shoot"), 0.75);
-		FlxG.camera.shake(0.006, 0.2);
+		fanning = true;
+		fanTimer = 0;
+		FlxG.camera.shake(0.004, 0.25);
 	}
 
 	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Int):Void
@@ -90,10 +82,39 @@ class RevolverAttack
 	{
 		rounds = cfg.cylinder;
 		reloading = 0;
+		fanning = false;
+		fanTimer = 0;
 	}
 
-	public function update(elapsed:Float):Void
+	function fanShot(bx:Float, by:Float, aimDeg:Float):Void
 	{
+		var deg = aimDeg + (Math.random() * 2 - 1) * cfg.fanJitter;
+		var rad = deg * Math.PI / 180;
+		var jx = Math.cos(rad);
+		var jy = Math.sin(rad);
+		spawn(bx, by, jx, jy, deg, cfg.damage);
+		fx.sparksAt(bx + jx * MUZZLE, by + jy * MUZZLE);
+		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.5);
+		rounds--;
+		if (rounds <= 0)
+		{
+			fanning = false;
+			reloading = cfg.reloadTime;
+		}
+	}
+
+	public function update(elapsed:Float, bx:Float, by:Float, aimDeg:Float):Void
+	{
+		if (fanning)
+		{
+			fanTimer -= elapsed;
+			if (fanTimer <= 0)
+			{
+				fanTimer = cfg.fanInterval;
+				fanShot(bx, by, aimDeg);
+			}
+		}
+
 		for (b in bullets.members)
 		{
 			if (b == null || !b.exists)

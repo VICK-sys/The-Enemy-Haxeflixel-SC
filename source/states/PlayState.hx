@@ -251,7 +251,8 @@ class PlayState extends FlxState
 		if (netSync != null)
 			netSync.update(elapsed);
 		hud.setMode(combat.modeName());
-		hud.setGauge(gaugeFill(), combat.weapon == 1 || combat.weapon == 2);
+		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
+		hud.setAmmo(combat.revolver.rounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
 		hud.setTimeStop(Net.active ? "OFF" : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
@@ -283,8 +284,6 @@ class PlayState extends FlxState
 
 
 
-	function gaugeFill():Float
-		return combat.weapon == 1 ? combat.revolver.gauge : combat.bow.rainCharge;
 
 	function live(n:Int):Int
 		return n < 0 ? 0 : n;

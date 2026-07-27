@@ -88,7 +88,8 @@ class Weapons
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		jab.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		bow.update(elapsed);
-		revolver.update(elapsed);
+		var gunAim = aimFromPlayer();
+		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
 		hammer.update(elapsed);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
@@ -197,7 +198,7 @@ class Weapons
 		{
 			held.beginSwing(aim.deg, Fan);
 			emitAttack(Fan, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
-			revolver.fanFire(held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+			revolver.fanFire();
 			return;
 		}
 

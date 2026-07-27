@@ -23,6 +23,7 @@ class Hud
 	static inline var BOSS_BANNER_REST:Float = 250;
 	static inline var MODE_SWITCH_TIME:Float = 0.3;
 	static inline var STOP_TIMER_FADE:Float = 4;
+	static inline var RELOAD_TINT:Int = 0xFFFF7A7A;
 	static inline var ICON_X:Float = 560;
 	static inline var ICON_Y:Float = 652;
 
@@ -47,6 +48,7 @@ class Hud
 	private var stopTimerTarget:Float = 0;
 	private var modeSwitchTimer:Float = 0;
 	private var gaugeBar:FlxBar;
+	private var ammoText:FlxText;
 	private var iconBaseAngle:Float = 0;
 	private var iconScaleX:Float = 1;
 	private var iconScaleY:Float = 1;
@@ -79,6 +81,13 @@ class Hud
 		gaugeBar.cameras = [camUI];
 		gaugeBar.visible = false;
 		state.add(gaugeBar);
+
+		ammoText = new FlxText(1000, 576, 240, "");
+		ammoText.setFormat(null, 30, FlxColor.WHITE, CENTER);
+		ammoText.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
+		ammoText.cameras = [camUI];
+		ammoText.visible = false;
+		state.add(ammoText);
 
 		timeText = new FlxText(92, 616, 0, "");
 		timeText.setFormat(null, 14, FlxColor.WHITE, LEFT);
@@ -303,6 +312,17 @@ class Hud
 		gaugeBar.visible = shown;
 		if (shown)
 			gaugeBar.percent = fill * 100;
+	}
+
+	public function setAmmo(cur:Int, max:Int, reloading:Bool, shown:Bool):Void
+	{
+		ammoText.visible = shown;
+		if (!shown)
+			return;
+		var line = cur + " / " + max;
+		if (ammoText.text != line)
+			ammoText.text = line;
+		ammoText.color = reloading ? RELOAD_TINT : FlxColor.WHITE;
 	}
 
 	function applyModeIcon(name:String):Void

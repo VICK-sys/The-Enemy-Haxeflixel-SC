@@ -21,9 +21,9 @@ typedef HammerConfig = {
 typedef RevolverConfig = {
 	cylinder:Int,
 	damage:Int,
-	fanDamage:Int,
 	reloadTime:Float,
-	spread:Float,
+	fanInterval:Float,
+	fanJitter:Float,
 	speed:Float,
 	range:Float,
 	hitRadius:Float,
