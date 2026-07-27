@@ -2,15 +2,69 @@
 
 How the game moves between screens. The editor has its own page: [editor.md](editor.md).
 
-- `TitleSequence` - intro logo. ENTER skips. Applies the saved settings on boot, then switches to the main menu when done.
-- `MainMenuState` - the main menu: PLAY, OPTIONS, and QUIT (QUIT is desktop-only) on a black background framed by two pairs of scrolling `JaggedBand` teeth (a dark, slow, coarse pair behind a bright accent pair, drifting opposite ways for depth), with the title, a yellow splash line angled across the title's lower-right corner that throbs in and out, the best wave in the corner, and menu music. Navigated with W/S or the arrows plus ENTER, or by mouse hover and click. PLAY fades to black and switches to PlayState, and left/right on that row choose which map it starts - the stock arena, or any editor slot that has a save. It always opens on the stock arena, so the row reads PLAY rather than naming a slot you happened to edit last; OPTIONS opens `OptionsSubState`. The editor has no row of its own: it opens on F7, kept off the menu because it is a tool for whoever is building the game rather than a thing to offer a player. QUIT collapses the OS window like a CRT switching off, as a chain of three `FlxTween.num` tweens that drive the window's size and opacity: the frame is dropped so the window can shrink freely, its height squeezes to a horizontal sliver while the width holds, then the width pinches to a dot and the window fades out, and the last tween's completion shuts down Discord presence and exits. Windows will not shrink a window past about 36 px, which is why the last of the vanish is done with opacity rather than size. The collapse is desktop-only; other targets keep the plain fade-to-black exit.
-- `OptionsSubState` - the options panel over the menu: master volume (adjust with A/D or the arrows, or click to step), fullscreen toggle, FPS counter toggle, and a reset-best-wave action that asks for a second press within a few seconds to confirm. All settings apply immediately and persist in the save file. ESC or BACK closes it.
-- `PlayState` - constructs the systems in `create()`, calls them in order in `update()`, and handles the debug keys. It holds almost no gameplay logic of its own; what it does own is the wiring that needs two systems at once - what a deflected shot hits, which needs the director and the hit pipeline - and the camera. The camera sits at the midpoint between the player and the cursor, by feeding `targetOffset` the cursor's full offset from screen centre - the value that puts the camera centre exactly halfway between the two on screen. That offset is measured in screen space rather than world space on purpose: the world position of the cursor moves with the camera, so deriving the lean from it would feed back into itself.
-- `PauseSubState` - opened with ESC. Freezes the game and pauses all audio, dims the screen, closes on ESC. Volume keys work while open. QUIT TO MENU returns to the editor instead when the run came from a playtest - which is a flag the editor sets, not something inferred from the map being a custom one, since the menu can start a custom map too and those runs belong back at the menu.
-- `OnlineHelpSubState` - the co-op explainer, styled like the controls popup and shown the first time the online lobby opens each session; H reopens it. Three pages flipped with A/D: what co-op is, how to host or join (including the `IP:PORT` form when the host has fallen back to another port), and what behaves differently online. Because the lobby keeps updating while a substate is open - the socket has to stay serviced so a friend can still connect while you are reading - the lobby explicitly hands input ownership to the popup and skips its own key handling, which also stops one ENTER or ESC from being consumed twice.
-- `TutorialSubState` - the controls popup shown the first time PlayState opens each session. Six pages (move, attack, weapons, super, abilities, health) flipped with A/D or the arrow keys, each with a looping animated demo built from game sprites. The abilities page demos time stop: four enemies close in around the player until the stop triggers, then they freeze mid-stride while the player keeps running laps around them with the blue afterimage trail, steering clear of every frozen body, and everything ramps back up on release. The popup fades in on open; ENTER or ESC freezes the demo and fades it back out before starting the game. The wave timer is frozen while it is open. Each page's demo is its own class under `states/tutorial/` (MoveDemo, AttackDemo, WeaponsDemo, SuperDemo, AbilitiesDemo, HealthDemo), all extending `TutorialDemo` - a group base with the shared sprite/text/player factories, the demo clock, and a per-frame `step()` hook. The substate itself only owns the panel, the page texts, and page flipping; flipping destroys the old demo instance and constructs the next.
-- `WeaponPickSubState` - the run's one weapon choice, opened as PlayState starts. Four cards - hammer, revolver, crossbow, hook - picked with 1-4, A/D, the arrows or the mouse, confirmed with ENTER or a click. The pick is locked for the whole run: there is no mid-run switching, only the chosen weapon's primary and secondary attacks. Confirming reports where the chosen card's icon was sitting, and `WeaponFlyIn` throws that weapon from the card into the player's hand once every substate is out of the way - the tutorial opens straight after the pick on a first run, so the throw waits on that rather than playing behind it. It remembers the last choice so a repeat run or a map playtest is one keypress, and it ignores input for a moment after opening so the keypress that started the run cannot confirm it by accident. Online it is opened from the lobby instead of here, because a substate over PlayState would freeze the sim while the network kept feeding it packets - `OnlineState` runs the same card screen while nobody is in the game yet, and both routes write the same `lastPick` that PlayState equips.
-- `EditorState` - the map editor's coordinator. See [editor.md](editor.md).
+## TitleSequence
+
+The intro logo. ENTER skips it. It applies the saved settings on boot, then switches to the main menu when done.
+
+## MainMenuState
+
+PLAY, OPTIONS and QUIT on a black background. QUIT is desktop only. Two pairs of scrolling `JaggedBand` teeth frame the screen. A dark, slow, coarse pair sits behind a bright accent pair, and the two drift opposite ways for depth. A yellow splash line lies angled across the title's lower-right corner and throbs in and out. The best wave sits in the corner, over menu music.
+
+Navigate with W/S or the arrows plus ENTER, or with mouse hover and click.
+
+PLAY fades to black and switches to PlayState. Left and right on that row choose the map. The options are the stock arena, or any editor slot holding a save. The row always opens on the stock arena. It therefore reads PLAY, rather than naming a slot you edited last. OPTIONS opens `OptionsSubState`.
+
+The editor has no row of its own. F7 opens it. It stays off the menu on purpose. The editor serves whoever builds the game, and is not something to offer a player.
+
+QUIT collapses the OS window like a CRT switching off. Three chained `FlxTween.num` tweens drive the window size and opacity. The frame drops first, so the window can shrink freely. The height then squeezes to a horizontal sliver while the width holds. The width then pinches to a dot and the window fades out. When the last tween finishes, it shuts down Discord presence and exits.
+
+Windows will not shrink a window past about 36 px. That is why the end of the vanish uses opacity rather than size. The collapse is desktop only. Other targets keep the plain fade-to-black exit.
+
+## OptionsSubState
+
+The options panel over the menu. It holds master volume, a fullscreen toggle, an FPS counter toggle, and a reset-best-wave action. Adjust volume with A/D or the arrows, or click to step it. Reset-best-wave asks for a second press within a few seconds to confirm. Every setting applies at once and persists in the save file. ESC or BACK closes the panel.
+
+## PlayState
+
+It builds the systems in `create()`, calls them in order in `update()`, and handles the debug keys. It holds almost no gameplay logic of its own. What it does own is the wiring that needs two systems at once, plus the camera. The deflected-shot handler is one such piece, since it needs the director and the hit pipeline together.
+
+The camera sits at the midpoint between the player and the cursor. It feeds `targetOffset` the cursor's full offset from screen centre, which puts the camera centre exactly halfway between the two. That offset comes from screen space rather than world space on purpose. The cursor's world position moves with the camera, so deriving the lean from it would feed back into itself.
+
+## PauseSubState
+
+ESC opens it. It freezes the game, pauses all audio, and dims the screen. ESC closes it again. The volume keys still work while it is open.
+
+QUIT TO MENU returns to the editor instead when the run came from a playtest. The editor sets that flag itself. The state does not infer it from the map being custom. The menu can start a custom map too, and those runs belong back at the menu.
+
+## OnlineHelpSubState
+
+The co-op explainer, styled like the controls popup. It appears the first time the online lobby opens each session, and H reopens it. Three pages flip with A/D: what co-op is, how to host or join, and what behaves differently online. The hosting page covers the `IP:PORT` form for when the host has fallen back to another port.
+
+The lobby keeps updating while a substate is open. The socket has to stay serviced, so a friend can still connect while you read. The lobby therefore hands input ownership to the popup and skips its own key handling. That also stops one ENTER or ESC from counting twice.
+
+## TutorialSubState
+
+The controls popup, shown the first time PlayState opens each session. Six pages flip with A/D or the arrow keys: move, attack, weapons, super, abilities and health. Each page carries a looping animated demo built from game sprites.
+
+The abilities page demos time stop. Four enemies close in around the player until the stop triggers. They freeze mid-stride, while the player keeps running laps around them with the blue afterimage trail. The player steers clear of every frozen body, and everything ramps back up on release.
+
+The popup fades in on open. ENTER or ESC freezes the demo and fades it back out before the game starts. The wave timer stays frozen while the popup is open.
+
+Each page's demo is its own class under `states/tutorial/`: MoveDemo, AttackDemo, WeaponsDemo, SuperDemo, AbilitiesDemo and HealthDemo. All of them extend `TutorialDemo`. That group base holds the shared sprite, text and player factories, the demo clock, and a per-frame `step()` hook. The substate itself owns only the panel, the page texts and page flipping. Flipping destroys the old demo instance and builds the next.
+
+## WeaponPickSubState
+
+The run's one weapon choice, opened as PlayState starts. Four cards: hammer, revolver, crossbow and hook. Choose with 1-4, A/D, the arrows or the mouse, then confirm with ENTER or a click. The pick locks for the whole run. There is no mid-run switching, only the chosen weapon's primary and secondary attacks.
+
+Confirming reports where the chosen card's icon sat. The weapon then flies from that card into the player's hand. The throw belongs to `WeaponFlyIn`, which waits until every substate clears. The tutorial opens straight after the pick on a first run. The throw therefore waits on it, rather than playing behind the panel.
+
+The screen remembers the last choice, so a repeat run or a map playtest is one keypress. It also ignores input for a moment after it opens. The keypress that started the run therefore cannot confirm it by accident.
+
+Online, the lobby opens this screen instead. A substate over PlayState would freeze the sim while the network kept feeding it packets. The lobby runs the same card screen through `OnlineState`, while nobody is in the game yet. Both routes write the same `lastPick` that PlayState equips.
+
+## EditorState
+
+The map editor's coordinator. See [editor.md](editor.md).
 
 ---
 

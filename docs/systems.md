@@ -4,73 +4,246 @@ The per-run machinery owned by PlayState, the sprites it drives, and the shared 
 
 ## Systems (source/systems/)
 
-Each system is constructed once by PlayState and updated once per frame (except `MenuList`, which the menu states construct).
+PlayState builds each system once and updates it once per frame. The exception is `MenuList`, which the menu states build.
 
-- `Arena` - loads the background and collision tilemap, sets world and camera bounds, generates pillar sprites from the map data, and answers `wallAt(x, y)` (always false while side view is active). Also owns the side-view landscape: `buildSideAssets()` creates the sky gradient and ground slab, `applySideMorph(t)` interpolates the whole landscape between perspectives (the floor art sinks and dims, the sky curtain descends, the ground slab fades in, and every pillar stretches into its floating platform), and `sidePlatforms()` exposes the platform rectangles. Platform targets are computed alongside the pillars: same x, width at least 150 px, and a height mapped from how far north the pillar stands - north becomes high. Also owns the boss-intro transition: `beginBossTransition()` shakes the camera and fades a white overlay in, then swaps the background to the warping checkerboard grid (a `WarpShader` distorts it), clears the interior pillars (removes their sprites and empties their collision tiles for an open boss arena), and fades the white back out. `update(elapsed)` drives that sequence and advances the shader; `onWhiteout` fires once at the fully-white moment (used to cut the alarm and start the boss music). `endBossTransition()` reverses it after the boss dies - a quick white flash restores the normal background, removes the shader, and rebuilds the pillars (`restoreObstacles` reloads the map CSV), firing `onNormal` to restore the normal music.
-- `DecorTiles` - the painted floor layer: grid maths, CSV round-tripping, and building the tilemap from a map's tiles. Shared by the editor and the game. Purely decorative - it is never collided against.
-- `WallSkin` - how a run's walls look, read once from `CustomArena` at construction: the theme's colour and repeating texture, and the painted tiles stamped over them. Arena hands it each wall block to fill, which keeps Arena to geometry and the boss transition while the skin owns every pixel decision.
-- `Decor` - builds a map's decoration sprites from its placements, shared by the editor and the game so a map looks the same in both. Cuts each prop out of its sheet once and keeps it in flixel's cache under its own persistent key, since the cache is cleared between states and a plain BitmapData handed to `loadGraphic` would be disposed with it. Also owns the feet-anchored placement both sides use.
-- `Fx` - hitstop (time scale drops for a few frames on kills), camera shakes, hit spark bursts, the dash speed-line trail, and `bossBlast`, the boss death explosion built in one place so the host's real death and a client's mirrored one cannot drift apart.
-- `RenderLayers` - the shadow, entity, and tag render groups. The entity layer is sorted every frame by feet position so characters, pillars, and decorations overlap correctly; the tag layer sits above that sort so a name is never hidden by whoever stands behind it.
-- `PlayerCombat` - player health, the AP meter, damage intake, invincibility frames and blink, dash input, death and revive, and the run's kill counter. The HUD bars bind directly to its fields. Death is re-asserted every frame rather than only on the transition: several weapon systems clear `blockMovement` when they finish, and one that finishes after you die would otherwise hand control back, so while dead the block is reapplied and the death animation restored if anything overrode it. `Player` independently refuses to run its movement routine while `isDead`, which is what actually keeps a corpse from walking and playing an idle.
-- `EnemyDirector` - wave pacing and the per-enemy tick. It owns the rigs (enemy, shadow, contact hitbox) and walks them each frame for targeting, entry, shadows, contact damage and cleanup, and it answers the circle queries every weapon aims with. Three collaborators hold what it used to: `EnemySpawner` decides where an enemy goes - edge placement, the stuck watchdog and the rescue that frees a wedged enemy, all of which are the same question of finding clear ground. A spot counts as clear only if the foot box that actually collides with props is clear, sampled across the enemy's full width at its feet rather than at its body centre, because the two disagree and an enemy allowed to go solid on the strength of a clear centre wedges on the prop its feet are already inside. The watchdog treats an enemy as stuck when it is being driven but is not moving, rather than when it is merely standing still far away, so one wedged next to the player is caught too; the rescue then looks for clear ground in rings around where it stands and only falls back to relocating it near the player if nothing close is free; `EnemyShots` owns the projectile group, emitting what an enemy queued and killing shots on walls, props or the player; `BossDeath` runs the shake-then-explode sequence, which has its own lifetime and touches nothing else. `EnemyRig` moved to its own file so the spawner can take one. Callbacks that moved with a collaborator are forwarded as properties, since the network layer wraps them rather than just setting them. Every enemy is scaled as it spawns by `applyWaveScale`, which turns the wave number into health, speed and damage multipliers from the `scaling` block - the client applies the same thing in `addPuppet`, since contact damage is charged locally on each machine and would otherwise differ between the two. A randomly chosen wave (4-8, rolled once at startup) is the boss wave: it fires the `onBoss` callback (which starts the intro cinematic) and, after a short intro delay, spawns a single `"rofel"` enemy instead of the normal count. When the boss dies the director runs a defeat sequence - the boss shakes in place, then plays an explosion animation with a boom sound - and fires `onBossDefeated` (which reverts the arena and music to normal) once the explosion finishes. Also the single home of enemy hit queries: `firstInCircle` and `eachInCircle` do the nearest-hitbox-point circle test every attack uses (live enemies only; `firstInCircle` can skip seized ones).
+### Arena
 
-  A wave only ends once every enemy is dead, so one enemy that can never reach the player would hang the run forever. Two guards prevent that. Spawned enemies pass through walls while entering and only become solid once they are inside the arena *and* clear of any pillar, so they cannot turn solid inside one. Beyond that, any enemy that is more than 700 px away and has not moved for five seconds is relocated to a clear spot near the player, and as a backstop a wave running longer than 75 seconds relocates everything still alive. The distance condition is what makes this safe: enemies that legitimately stand still (a woodster shooting, which it only does within about 580 px) are never touched, and a chasing enemy is always moving. The boss is exempt, since its movement is its own choreography.
-- `Pickups` - the health pickup pool. Collected on player contact unless health is full.
-- `TimeStop` - the time-stop ability (E, cooldown driven by player.json): ramps a world-time factor from 1 to 0 over the slow phase, holds the world frozen for the stop duration, then ramps back. The factor is published through `WorldClock.scale` (read by enemies, enemy shots, and pickups, which scale or skip their own updates) and PlayState multiplies it into the elapsed passed to the director and arena, so wave timers, boss logic, and cinematics freeze too. The player, weapons, and player projectiles run at full speed throughout; seized enemies stay in player-time so the hook still works on frozen targets. Frozen enemies are immovable statues that deal no contact damage, and frozen shots hang harmlessly in the air. Music pitch rides the factor down (the record-slowdown effect), pauses at the full stop, and ramps back on resume. While time is slowed the player leaves a blue afterimage trail (frame-accurate ghosts via GhostTrail), and a subtle blue overlay tints the screen. The HUD shows READY / cooldown / STOPPED via `hudLabel()`. Dying cancels the stop.
-- `WeaponFlyIn` - the handover after the weapon pick: the chosen weapon arcs from its card to the player's hand, spinning and growing from card scale to held scale, with the real held sprite hidden until it lands. It draws on the UI camera and re-reads the hand every frame in screen space, so the throw still lands correctly while the camera is moving. Dying mid-flight drops it rather than handing a weapon to a corpse.
-- `MenuList` - the shared menu widget used by the main menu and options: a centered column of text rows with a bobbing weapon selector, W/S and arrow navigation, A/D value adjustment, mouse hover and click, and the move/select sounds. Owners supply `onChoose` and optional `onAdjust` callbacks and can rewrite row labels in place.
-- `Hud` - the UI camera, health and AP bars, wave counter and banner (the red BOSS APPROACHING banner shares the same text and slides down from the top), the mode indicator (label plus icon, animated on switch), the time-stop status label and fading countdown timer, death text with the best wave, and the custom cursor. Owns a `BossHud` and delegates the boss bar and screen flash to it.
-- `BossHud` - the boss-fight HUD pieces: the pulsing red screen flash and the boss health bar. `showBar(boss)` binds a bar to the boss's HP and plays its entrance: the bar expands out from a compressed sliver as it drops in from the top, then the name "Rofel" fades in letter by letter beneath it. The bar hides itself once the boss is gone.
-- `PerspectiveShift` (systems/perspective/) - the perspective totem and the top-down / side-view switch, split across `Totem`, `MeteorArrival` and `PerspectiveShift` itself. See [perspective.md](perspective.md).
+Loads the background and collision tilemap, sets world and camera bounds, and generates pillar sprites from the map data. It answers `wallAt(x, y)`, which is always false while side view is active.
+
+It also owns the side-view landscape. The sky gradient and ground slab come from `buildSideAssets()`. A call to `applySideMorph(t)` interpolates the whole landscape between perspectives. The floor art sinks and dims, and the sky curtain descends. The ground slab fades in, and every pillar stretches into its floating platform. The platform rectangles come from `sidePlatforms()`.
+
+Platform targets come out of the same pass as the pillars. Each keeps the pillar's x and takes a width of at least 150 px. Its height maps from how far north the pillar stands. North becomes high.
+
+It owns the boss-intro transition too. `beginBossTransition()` shakes the camera and fades a white overlay in. It then swaps the background for the warping checkerboard grid, which a `WarpShader` distorts. It clears the interior pillars for an open boss arena, removing their sprites and emptying their collision tiles. It then fades the white back out.
+
+That sequence runs from `update(elapsed)`, which also advances the shader. At the fully-white moment `onWhiteout` fires once, cutting the alarm and starting the boss music. After the boss dies, `endBossTransition()` reverses everything. A quick white flash restores the normal background and drops the shader. It rebuilds the pillars through `restoreObstacles`, which reloads the map CSV. It then fires `onNormal` to restore the normal music.
+
+### DecorTiles
+
+The painted floor layer: grid maths, CSV round-tripping, and building the tilemap from a map's tiles. The editor and the game share it. It is purely decorative, and nothing ever collides against it.
+
+### WallSkin
+
+How a run's walls look. It reads from `CustomArena` once at construction: the theme's colour and repeating texture, plus the painted tiles stamped over them. Arena hands it each wall block to fill. Arena therefore keeps to geometry and the boss transition, while the skin owns every pixel decision.
+
+### Decor
+
+Builds a map's decoration sprites from its placements. The editor and the game share it, so a map looks the same in both.
+
+It cuts each prop out of its sheet once and keeps it in flixel's cache under its own persistent key. The cache clears between states, and a plain BitmapData handed to `loadGraphic` would go with it. It also owns the feet-anchored placement both sides use.
+
+### Fx
+
+Hitstop, which drops the time scale for a few frames on kills. Camera shakes, hit spark bursts, and the dash speed-line trail. It also holds `bossBlast`, the boss death explosion. One place builds it, so the host's real death and a client's mirrored one cannot drift apart.
+
+### RenderLayers
+
+The shadow, entity and tag render groups. It sorts the entity layer every frame by feet position, so characters, pillars and decorations overlap correctly. The tag layer sits above that sort, so a name is never hidden by whoever stands behind it.
+
+### PlayerCombat
+
+Player health and the AP meter. Damage intake, invincibility frames and blink. Dash input, death and revive, and the run's kill counter. The HUD bars bind straight to its fields.
+
+It re-asserts death every frame, rather than only on the transition. Several weapon systems clear `blockMovement` when they finish, and one finishing after you die would otherwise hand control back. So while dead it reapplies the block, and restores the death animation if anything overrode it. Separately, `Player` refuses to run its movement routine while `isDead`. That is what actually keeps a corpse from walking and playing an idle.
+
+### EnemyDirector
+
+Wave pacing and the per-enemy tick. It owns the rigs: enemy, shadow and contact hitbox. It walks them each frame for targeting, entry, shadows, contact damage and cleanup. It also answers the circle queries every weapon aims with.
+
+Three collaborators hold what it used to. Where an enemy goes belongs to `EnemySpawner`: edge placement, the stuck watchdog, and the rescue that frees a wedged enemy. All three ask the same thing, which is where clear ground lies.
+
+A spot counts as clear only if the foot box that actually collides with props is clear. The check samples the enemy's full width at its feet, not its body centre. The two disagree. An enemy can go solid because its centre is clear. It then wedges on the prop its feet already sit inside.
+
+The watchdog treats an enemy as stuck when something drives it but it does not move. It does not simply look for an enemy standing still far away. One wedged next to the player is therefore caught too. The rescue then looks for clear ground in rings around where the enemy stands. It falls back to relocating near the player only when nothing close is free.
+
+`EnemyShots` owns the projectile group. It emits what an enemy queued, and kills shots on walls, props or the player. The shake-then-explode sequence lives in `BossDeath`. That has its own lifetime and touches nothing else. `EnemyRig` moved to its own file so the spawner can take one. The director forwards a callback that moved with a collaborator as a property. The network layer wraps them rather than simply setting them.
+
+`applyWaveScale` scales every enemy as it spawns. It turns the wave number into health, speed and damage multipliers from the `scaling` block. The client applies the same thing in `addPuppet`. Each machine charges contact damage locally, and the two would otherwise differ.
+
+A randomly chosen wave, 4 to 8 and rolled once at startup, is the first boss wave. It fires the `onBoss` callback, which starts the intro cinematic. After a short intro delay it spawns a single `"rofel"` enemy instead of the normal count.
+
+When the boss dies the director runs a defeat sequence. The boss shakes in place, then plays an explosion animation with a boom sound. Once the explosion finishes, `onBossDefeated` fires. That reverts the arena and music to normal.
+
+The director is also the single home of enemy hit queries. `firstInCircle` and `eachInCircle` run the nearest-hitbox-point circle test every attack uses. Both see live enemies only, and `firstInCircle` can skip seized ones.
+
+A wave ends only once every enemy is dead. One enemy that could never reach the player would therefore hang the run forever. Two guards prevent that.
+
+Spawned enemies pass through walls while entering. They turn solid only once they are inside the arena and clear of any pillar. They therefore cannot turn solid inside one. Beyond that the watchdog relocates a stuck enemy. As a backstop, a wave running longer than 75 seconds relocates everything still alive. The boss is exempt, since its movement is its own choreography.
+
+### Pickups
+
+The health pickup pool. The player collects one on contact, unless health is full.
+
+### TimeStop
+
+The time-stop ability on E, with a cooldown from player.json. It ramps a world-time factor from 1 to 0 over the slow phase. It holds the world frozen for the stop duration, then ramps back.
+
+It publishes that factor through `WorldClock`. Enemies, enemy shots and pickups read it, and scale or skip their own updates. PlayState multiplies it into the elapsed it passes to the director and arena. Wave timers, boss logic and cinematics therefore freeze too.
+
+The player, weapons and player projectiles run at full speed throughout. Seized enemies stay in player-time, so the hook still works on frozen targets. Frozen enemies are immovable statues that deal no contact damage, and frozen shots hang harmlessly in the air.
+
+Music pitch rides the factor down for the record-slowdown effect, pauses at the full stop, and ramps back on resume. While time runs slow the player leaves a blue afterimage trail, built from frame-accurate ghosts through GhostTrail. A subtle blue overlay tints the screen. The HUD shows READY, the cooldown, or STOPPED through `hudLabel()`. Dying cancels the stop.
+
+### WeaponFlyIn
+
+The handover after the weapon pick. The chosen weapon arcs from its card to the player's hand, spinning and growing from card scale to held scale. The real held sprite hides until it lands.
+
+It draws on the UI camera and re-reads the hand every frame in screen space. The throw therefore still lands correctly while the camera moves. Dying mid-flight drops the weapon rather than handing it to a corpse.
+
+### MenuList
+
+The shared menu widget used by the main menu and options. It is a centred column of text rows with a bobbing weapon selector. It takes W/S and arrow navigation, A/D value adjustment, mouse hover and click, and plays the move and select sounds. Owners supply `onChoose` and an optional `onAdjust`, and can rewrite row labels in place.
+
+### Hud
+
+The UI camera, health and AP bars, wave counter and banner. The red BOSS APPROACHING banner shares the same text and slides down from the top. It also owns the revolver ammo readout and the crossbow's blue gauge. It holds the time-stop status label and its fading countdown. It also holds the death text with the best wave, and the custom cursor. It owns a `BossHud`, and hands the boss bar and screen flash to it.
+
+### BossHud
+
+The boss-fight HUD pieces: the pulsing red screen flash and the boss health bar. A call to `showBar(boss)` binds a bar to the boss's HP and plays its entrance. The bar expands out from a compressed sliver as it drops in from the top. The name "Rofel" then fades in letter by letter beneath it. The bar hides itself once the boss is gone.
+
+### PerspectiveShift
+
+The perspective totem and the top-down / side-view switch, in `systems/perspective/`. It splits across `Totem`, `MeteorArrival` and `PerspectiveShift` itself. See [perspective.md](perspective.md).
 
 ## Entities (source/entities/)
 
-- `Player` - WASD movement with an acceleration ramp, dash, and the walk sound loop. Carries two skins: the top-down sparrow atlas and a side-view grid sheet described by `sideSkin` in player.json. `applySkin(side)` swaps the graphic and rebuilds the four animations under the same names, so every caller (hurt, death, the ghost trails) works against either. The hitbox stays 75x95 in both, so all movement and feet maths are perspective-independent; only the draw offset differs. The skin changes in `setSideMode`, which the shift calls once the morph finishes, so the player keeps its top-down look while the stage is folding over and turns 2D on the frame the new world settles. `baseOffsetY` is published here because the supers ride the player's draw offset for hover and somersault lift, and they must follow a skin change rather than a value cached at startup.
+### Player
 
-  `shadowCenterX` exists because the side sheet's artwork is not centred in its cells - the walk frames sit right of centre, so mirroring the sprite swings its visual centre by 28 px while a fixed shadow offset would not move. The player measures each cell's true content centre once when the sheet loads and reports where the shadow belongs, mirrored when facing left. That keeps the shadow under the character in every animation and re-derives itself if the sheet is redrawn.
-- `HealthPickup` - dropped heart. Restores health on contact, expires after a few seconds.
+WASD movement with an acceleration ramp, a dash, and the walk sound loop. It carries two skins: the top-down sparrow atlas, and a side-view grid sheet described by `sideSkin` in player.json.
 
-Weapon projectiles and visuals live in `source/entities/weapon/`:
+`applySkin(side)` swaps the graphic and rebuilds the four animations under the same names. Every caller therefore works against either skin, including hurt, death and the ghost trails. The hitbox stays 75x95 in both, so all movement and feet maths stay perspective-independent. Only the draw offset differs.
 
-- `SlashEffect` - the pooled swing visual. It drifts forward briefly and fades out; it carries no hitbox.
-- `ThrownWeapon` - the airborne hammer. Spins, stretches on release, throbs in flight, and hits each enemy once per flight leg (out and return).
-- `Orbiter` - one orbiter. Positioned by SuperOrbit while orbiting; once launched it flies straight, pierces (one hit per enemy), and fades at range.
-- `Arrow` - the bow mode's projectile. Flies straight and fast, dies on the first enemy hit or a wall, expires at range.
-- `HookShot` - the hook mode's projectile. Flies head-first; once latched it sticks to the hooked enemy until the throw resolves.
-- `RainArrow` - an arrow rain volley member. Either a fading skyward launch visual or a falling arrow that lands at its assigned impact point.
+The skin changes in `setSideMode`, which the shift calls once the morph finishes. The player therefore keeps its top-down look while the stage folds over. It turns 2D on the frame the new world settles.
 
-Enemy behavior lives in `source/entities/enemy/`:
+The field `baseOffsetY` is public here for the supers. They ride the player's draw offset for hover and somersault lift. They must follow a skin change, rather than a value cached at startup.
 
-- `Enemies` - the one enemy class. Loads its definition from JSON by kind (`"enemy"`, `"woodster"`, `"likwid"`). The sprite itself keeps only what every enemy has whatever it is doing - stats, damage and death, the seized and stunned and frozen states, and the walk-on entry - and hands the actual thinking to two behaviours it owns, in the same shape as the `AttackBehavior` it already carried. `EnemyBrain` is the top-down three-state FSM, Wandering, Following and Attacking, holding the wander timers and the pathing steer; `EnemySideStep` is how the same enemy moves once the world has flipped to side view, walking and hopping along the ground instead. Splitting them means neither has to test which mode the world is in - the sprite picks one and calls it. Wave-spawned enemies start off screen in an entering mode that walks them through the border wall before collision turns on. `unseize(releaseStun)` is the one release path for grabbed enemies: it clears the seize, restores drag, optionally applies a release stun, and grants the short throw grace that keeps a just-thrown enemy from hurting the player.
-- `EnemyNav` - line-of-sight and pathfinding component. A few times per second it checks a body-width corridor toward the target (two offset rays); when blocked it runs A* over the map, simplified with a body-sized box cast, and steers along the waypoints. Wall contact while chasing forces an immediate re-path.
-- `AttackBehavior`, `ChargeAttack`, `ShootAttack`, `RofelBoss` - the attack style interface and its implementations. A charge is a windup, a straight lunge, and a recovery. A shooter holds position, cycles its shoot animation, and requests a projectile on the loop frame. `RofelBoss` is the Rofel boss brain (see below).
-- `RofelBoss` - the wave-4 boss behavior, ported from the RofelShooter game. It kites the player (keeping a preferred distance band and strafing sideways, bouncing off walls) and cycles through Rofel's five guns - pistol, shotgun, sniper, revolver, laser - each with its own bullet sprite, speed, spread, damage, and burst pattern. A held gun sprite rotates to aim at the player and swaps per weapon. Enemies with the `"boss"` attack are `selfDriven`: they skip the normal wander/follow/attack FSM and run this brain directly.
-- `EnemyShot` - pooled enemy projectile. Carries its damage, speed, range, and optional sprite from the shot request; sprite bullets rotate to face travel.
-- `ShotSpec` - one queued shot request (direction, damage, speed, range, sprite, sound, optional spawn origin). Behaviors push these onto the enemy's `pendingShots`; the director drains and fires them. This lets the boss fire multi-bullet volleys with per-shot parameters.
+`shadowCenterX` exists because the side sheet's artwork is not centred in its cells. The walk frames sit right of centre. Mirroring the sprite therefore swings its visual centre by 28 px, while a fixed shadow offset would not move. The player measures each cell's true content centre once as the sheet loads. It then reports where the shadow belongs, mirrored when facing left. That keeps the shadow under the character in every animation, and re-derives itself if the sheet is redrawn.
+
+### HealthPickup
+
+A dropped heart. It restores health on contact and expires after a few seconds.
+
+## Weapon projectiles (source/entities/weapon/)
+
+- `SlashEffect` - the pooled swing visual. It drifts forward briefly and fades out, and carries no hitbox.
+- `ThrownWeapon` - the airborne hammer. It spins, stretches on release, throbs in flight, and hits each enemy once per flight leg, out and return.
+- `Orbiter` - one orbiter. SuperOrbit positions it while it circles. Once launched it flies straight, pierces with one hit per enemy, and fades at range.
+- `Arrow` - the bow's projectile. It flies straight and fast, dies on the first enemy hit or a wall, and expires at range.
+- `Bullet` - the revolver's round. It draws from `assets/images/bullets/`, round for a hand shot and long for a Dead Eye one. It draws at the same 4x as the player, so a bullet matches the pixel size of everything else. It dies on its first hit or at the end of its range.
+- `HookShot` - the hook's projectile. It flies head-first. Once latched it sticks to the hooked enemy until the throw resolves.
+- `RainArrow` - an arrow rain volley member. It is either a fading skyward launch visual, or a falling arrow that lands at its assigned impact point.
+
+## Enemy behaviour (source/entities/enemy/)
+
+### Enemies
+
+The one enemy class. It loads its definition from JSON by kind: `"enemy"`, `"woodster"` or `"likwid"`.
+
+The sprite keeps only what every enemy has, whatever it does. That is stats, damage and death, the seized, stunned and frozen states, and the walk-on entry. It hands the actual thinking to two behaviours it owns, in the same shape as the `AttackBehavior` it already carried.
+
+`EnemyBrain` is the top-down three-state FSM: Wandering, Following and Attacking. It holds the wander timers and the pathing steer. Once the world flips to side view, `EnemySideStep` takes over. It walks and hops along the ground instead.
+
+Split like that, neither one has to test which mode the world is in. The sprite picks one and calls it.
+
+Wave-spawned enemies start off screen in an entering mode. That walks them through the border wall before collision turns on. Grabbed enemies have one release path, `unseize(releaseStun)`. It clears the seize, restores drag, and optionally applies a release stun. It also grants the short throw grace that keeps a just-thrown enemy from hurting the player.
+
+### EnemyNav
+
+The line-of-sight and pathfinding component. A few times per second it checks a body-width corridor toward the target, using two offset rays. When a wall blocks that corridor, it runs A* over the map. It simplifies the result with a body-sized box cast, then steers along the waypoints. Wall contact while chasing forces an immediate re-path.
+
+### Attack behaviours
+
+`AttackBehavior`, `ChargeAttack`, `ShootAttack` and `RofelBoss` are the attack style interface and its implementations. A charge is a windup, a straight lunge and a recovery. A shooter holds position, cycles its shoot animation, and requests a projectile on the loop frame.
+
+`RofelBoss` is the boss brain, ported from the RofelShooter game. It kites the player, keeping a preferred distance band and strafing sideways, bouncing off walls. It cycles through Rofel's five guns: pistol, shotgun, sniper, revolver and laser. Each carries its own bullet sprite, speed, spread, damage and burst pattern. A held gun sprite rotates to aim at the player and swaps per weapon. Enemies with the `"boss"` attack are `selfDriven`, so they skip the normal FSM and run this brain directly.
+
+### Shots
+
+`EnemyShot` is the pooled enemy projectile. It carries its damage, speed, range and optional sprite from the shot request, and sprite bullets rotate to face travel.
+
+`ShotSpec` is one queued shot request: direction, damage, speed, range, sprite, sound, and an optional spawn origin. Behaviours push these onto the enemy's `pendingShots`, and the director drains and fires them. That lets the boss fire multi-bullet volleys with per-shot parameters.
 
 ## Data modules (source/data/)
 
-- `DataLoader` - reads and parses a JSON asset; throws with the path in the message if the file is missing.
+- `DataLoader` - reads and parses a JSON asset. It throws with the path in the message if the file does not exist.
 - `EnemyData`, `PlayerData`, `WaveData`, `ArenaData`, `WeaponData` - typedefs and parse-once registries for the files under `assets/data/`.
 
 ## Utilities (source/util/)
 
-- `Paths` - asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow` (returns the loaded atlas for a png/xml pair).
-- `GhostTrail` - pooled afterimage trail: fades its ghosts every tick and stamps a copy of a source sprite (position, angle, scale, color) on a fixed cadence. `stampFrame` instead copies an animated sprite's current frame with a forced tint (the time-stop player trail). Used by the thrown hammer, the orbiters, the Arrow Storm launch arrow, and the time-stop trail.
-- `WorldClock` - a single static `scale` (1 normal, 0 frozen) written by TimeStop and read by world entities that update through the display list.
-- `WarpShader` - a GLSL fragment shader that distorts a sprite's texture coordinates with time-driven sine waves. Applied to the boss-arena grid background; `advance(elapsed)` steps its time uniform.
-- `SaveData` - persistent save: best wave reached, the settings (master volume, fullscreen, FPS counter visibility), the last joined IP, and the online player name. `applySettings()` pushes the saved settings into the engine and is called at boot and whenever an option changes.
-- `CustomArena` - the map the editor asked the next run to use, as raw CSV plus a spawn point; null means the stock arena. Cleared at the main menu.
-- `MapStore` - the editor's five map slots; JSON files next to the executable on desktop, browser save on html5.
-- `MenuSlash` - the menu's confirm animation. The weapon selector winds up to the left of the chosen row, sweeps through it, and on contact the row is hidden and replaced by one sprite per letter that tumbles away under gravity and fades - so the option is cut apart and falls into the void before the choice is carried out. Letter widths are measured individually and then scaled to span the row's real width, which keeps the swap seamless at the moment the shards appear. Every menu choice routes through it, and returning from Options restores the shattered row.
-- `JaggedBand` - a sawtooth strip that scrolls sideways forever, used to frame the main menu. The tooth shape is the one from Will Boyd's "Hello Houdini: Jagged Edge with Mask" pen: walk across the width alternating between a peak and a valley, then close the polygon along the bottom and fill it. Rather than redraw that path every frame, the strip is drawn once at two teeth wider than the screen and simply slid left, wrapping every tooth width - so the motion costs nothing and never seams. `top` flips it vertically for the upper edge, and a negative speed scrolls the other way, which is how the menu gets its two mirrored pairs.
-- `IrisWipe` - the state transition: a black overlay with the game icon punched out of it as a transparent hole, which grows to reveal a state on arrival and shrinks to swallow it on the way out. The mask is built once and cached as a persistent `FlxGraphic` - the icon is drawn into a square bitmap and its alpha inverted, so the icon silhouette becomes the hole. It must be persistent: Flixel clears its bitmap cache between states, so a plain cached BitmapData is disposed after the first transition and every later wipe renders as a bare square. Four oversized black bars track the mask's edges so the screen stays covered no matter how small the hole gets. It draws on its own camera added on top, so it covers the HUD as well as the world, and `open` hides itself when finished so the icon's concave notches never linger over gameplay. Scale is driven by `FlxTween.num`; the fully open scale is set so the hole comfortably clears the screen, since anything smaller would pop black into the corners the moment a close began. Used by the title sequence, the menu, the pause menu's quit, and the death restart.
-- `Music` - the single owner of music playback. `play(name, volume, loop)` switches tracks only when the requested track differs from the current one; asking for the playing track just applies the volume, restores pitch, and resumes it if paused - which is what keeps the stage theme seamless across the menu, the game, pause-quit, and restarts.
-- `SideView` - global side-view state, following the WorldClock pattern: `active`, `morphing`, `groundY`, the platform rectangles, and the shared helpers used by the player, enemies, and pickups: gravity, one-way platform landing, `settle` (the snap-or-fall resolve every side-mode body runs each frame), and `placeShadow`. Physics values load from sideview.json in `reset()`. Shadows are anchored to each entity's existing feet offset, so a grounded character looks identical to top-down; in side view an airborne one drops its shadow onto the surface below (ground or platform), shrinking and fading with height. Reset by PlayState on every run.
-- `DiscordPresence` - Discord Rich Presence (Windows native only, via the `hxdiscord_rpc` haxelib; every method is a no-op on HTML5). Reads the application ID from `assets/data/discord.json` and stays silent if it is empty. PlayState feeds it the raw facts each frame (`playing(wave, bossFight, weapon, kills)`) and it diffs internally: wave changes, the boss fight, weapon switches, pause, and death push immediately, kill-count changes are throttled to one update every couple of seconds. Shows the current wave or boss fight plus the equipped weapon and kill count, run elapsed time via the start timestamp, the best wave on the menu and death screens, and image keys `icon` (large) and `hammer`/`revolver`/`crossbow`/`hook` (small, per weapon) for art uploaded to the Discord application.
-- `Bullet` - the revolver's round. Drawn from `assets/images/bullets/`, round for a hand shot and long for a Dead Eye one, at the same 4x the player is drawn at so a bullet has the same pixel size as everything else. Dies on its first hit or at the end of its range.
-- `PerfLog` - frame-time logger for native builds. Writes `perflog.txt` next to the executable: one aggregate line per second (average, worst, fps) plus immediate lines for spike frames and long gaps, each tagged with the live enemy count, pathfinding calls, projectile count (enemy shots, bullets, arrows, rain arrows, thrown hammer, hook), and wave.
+### Paths
+
+Asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow`, which returns the loaded atlas for a png and xml pair.
+
+### GhostTrail
+
+A pooled afterimage trail. It fades its ghosts every tick. On a fixed cadence it stamps a copy of a source sprite, carrying position, angle, scale and colour. The time-stop player trail instead uses `stampFrame`, which copies an animated sprite's current frame with a forced tint. The thrown hammer, the orbiters, the Arrow Storm launch arrow and the time-stop trail all use it.
+
+### WorldClock
+
+The world time scale, at 1 normal and 0 frozen. World entities that update through the display list read it.
+
+It holds two sources rather than one value. One belongs to `TimeStop`, the other to Dead Eye. The `scale` field reports whichever is slower. A single field could not survive two writers. Assignment happens every frame inside `TimeStop`, which would overwrite anything else before the enemies read it.
+
+### WarpShader
+
+A GLSL fragment shader that distorts a sprite's texture coordinates with time-driven sine waves. The boss-arena grid background uses it, and `advance(elapsed)` steps its time uniform.
+
+### SaveData
+
+The persistent save: best wave reached, the settings, the last joined IP, and the online player name. The settings are master volume, fullscreen, and FPS counter visibility. A call to `applySettings()` pushes them into the engine. It runs at boot and whenever an option changes.
+
+### CustomArena
+
+The map the editor asked the next run to use, as raw CSV plus a spawn point. Null means the stock arena. The main menu clears it.
+
+### MapStore
+
+The editor's five map slots. They are JSON files next to the executable on desktop, and browser save on html5.
+
+### MenuSlash
+
+The menu's confirm animation. The weapon selector winds up to the left of the chosen row and sweeps through it. On contact the row hides, and one sprite per letter replaces it. Those letters tumble away under gravity and fade. The option is therefore cut apart and falls into the void before the game acts on it.
+
+It measures letter widths individually, then scales them to span the row's real width. That keeps the swap smooth at the moment the shards appear. Every menu choice routes through it, and returning from Options restores the shattered row.
+
+### JaggedBand
+
+A sawtooth strip that scrolls sideways forever, used to frame the main menu. The tooth shape comes from Will Boyd's "Hello Houdini: Jagged Edge with Mask" pen. Walk across the width, alternating between a peak and a valley. Then close the polygon along the bottom and fill it.
+
+It does not redraw the strip every frame. It draws it once at two teeth wider than the screen, then simply slides it left, wrapping every tooth width. The motion therefore costs nothing and never shows a join. Setting `top` flips it vertically for the upper edge, and a negative speed scrolls the other way. That is how the menu gets its two mirrored pairs.
+
+### IrisWipe
+
+The state transition. A black overlay carries the game icon punched out of it as a transparent hole. The hole grows to reveal a state on arrival, and shrinks to swallow it on the way out.
+
+It builds the mask once and caches it as a persistent `FlxGraphic`. It draws the icon into a square bitmap and inverts its alpha, so the icon silhouette becomes the hole. It must be persistent. Flixel clears its bitmap cache between states. A plain cached BitmapData therefore dies after the first transition, and every later wipe renders as a bare square.
+
+Four oversized black bars track the mask's edges, so the screen stays covered however small the hole gets. It draws on its own camera added on top, so it covers the HUD as well as the world. When finished, `open` hides itself, so the icon's concave notches never linger over gameplay.
+
+`FlxTween.num` drives the scale. The fully open scale clears the screen comfortably. Anything smaller would pop black into the corners the moment a close began. The title sequence, the menu, the pause menu's quit and the death restart all use it.
+
+### Music
+
+The single owner of music playback. `play(name, volume, loop)` switches tracks only when the requested track differs from the current one. Asking for the playing track instead applies the volume, restores pitch, and resumes it if paused. That is what keeps the stage theme unbroken across the menu, the game, pause-quit and restarts.
+
+### SideView
+
+Global side-view state, following the WorldClock pattern. It holds `active`, `morphing`, `groundY`, the platform rectangles, and the shared helpers the player, enemies and pickups use. Those helpers are gravity, one-way platform landing, `settle` and `placeShadow`. `settle` is the snap-or-fall resolve every side-mode body runs each frame. Physics values load from sideview.json in `reset()`.
+
+Shadows anchor to each entity's existing feet offset, so a grounded character looks identical to top-down. In side view an airborne one drops its shadow onto the surface below, ground or platform. That shadow shrinks and fades with height. PlayState resets it on every run.
+
+### DiscordPresence
+
+Discord Rich Presence, Windows native only, through the `hxdiscord_rpc` haxelib. Every method is a no-op on HTML5. It reads the application ID from `assets/data/discord.json`, and stays silent if that is empty.
+
+PlayState feeds it the raw facts each frame through `playing(wave, bossFight, weapon, kills)`, and it diffs internally. Wave changes, the boss fight, weapon switches, pause and death push immediately. Kill-count changes throttle to one update every couple of seconds.
+
+It shows the current wave or boss fight, plus the equipped weapon and kill count. It shows run elapsed time through the start timestamp, and the best wave on the menu and death screens. Image keys are `icon` for the large slot, and `hammer`, `revolver`, `crossbow` or `hook` for the small per-weapon slot. You upload that art to the Discord application.
+
+### PerfLog
+
+A frame-time logger for native builds. It writes `perflog.txt` next to the executable. Each second gets one aggregate line of average, worst and fps. Spike frames and long gaps get an immediate line. Every line carries the live enemy count, pathfinding calls, projectile count and wave. The projectile count covers enemy shots, bullets, arrows, rain arrows, the thrown hammer and the hook.
 
 ---
 

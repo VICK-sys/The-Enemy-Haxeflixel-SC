@@ -1,26 +1,50 @@
 # THE ENEMY
 
-Top-down action game built with HaxeFlixel. Fight waves of enemies with a mouse-aimed arsenal, in waves that keep getting bigger and harder for as long as you last, with a boss returning every few waves.
+Top-down action game built with HaxeFlixel. Fight waves of enemies with a mouse-aimed arsenal. The waves keep getting bigger and harder for as long as you last, and a boss returns every few waves.
 
-The main menu has PLAY, OPTIONS (master volume, fullscreen, FPS counter, reset best wave), and QUIT, navigated with W/S and ENTER or the mouse. A controls popup with animated demos appears the first time you play; flip pages with A/D and press ENTER to start.
+The main menu holds PLAY, OPTIONS and QUIT. Navigate it with W/S and ENTER, or with the mouse. Options covers master volume, fullscreen, the FPS counter and reset best wave. A controls popup with animated demos appears the first time you play. Flip its pages with A/D, then press ENTER to start.
 
 ## Online co-op (desktop)
 
-Two players. From the main menu choose ONLINE. One player picks HOST GAME (this listens on TCP port 7777 - forward that port on your router and share your public IP), the other picks JOIN GAME and types the host's IP. If port 7777 is busy the host falls back to the next free port and shows it; in that case the friend joins with `IP:port`. The host presses ENTER once the friend is connected. Time stop is disabled online, Dead Eye marks without stopping the world, and death respawns you after a few seconds instead of ending the run.
+Choose ONLINE on the main menu. One player picks HOST GAME, which listens on TCP port 7777. Forward that port on your router and share your public IP. The other player picks JOIN GAME and types the host's IP.
+
+If port 7777 is busy, the host falls back to the next free port and shows it. The friend then joins with `IP:port`. The host presses ENTER once the friend has joined.
+
+Each player chooses a weapon in the online menu before the run starts. TAB opens that choice again once you host or join.
+
+Time stop is off online. Dead Eye marks without stopping the world. Death respawns you after a few seconds instead of ending the run.
 
 ## Controls
 
 - WASD - move
-- Mouse - aim, left click for the primary attack, right click for the secondary
-- Hammer - swing / throw. Revolver - shoot / fan the hammer, which rips through every remaining round in one continuous burst. Eight rounds, fired as fast as you can click; running dry reloads on its own, or press R to top up early. Crossbow - charged shot (hold to charge, release to fire; a full charge pierces and can be fired back to back, a tap cannot) / arrow rain when its meter is full. Hook - quick jab / grab
-- Melee attacks (the hammer swing and the hook jab) deflect enemy bullets back at whoever fired them
-- Q - super (needs a full AP meter): the hammer orbits blades you launch with left click; the revolver enters Dead Eye, stopping the world while you paint a target for every round left in the cylinder, then empties it into them on the fire button; the crossbow does Arrow Storm (an arena-wide downpour); the hook extends two auto-grabbing arms that snatch and hurl enemies
-- SPACE - dash (2 second cooldown)
-- W - jump in side view (press again in the air for a double jump)
-- E - time stop (30 second cooldown): the world winds down to a complete stop for 10 seconds while you keep moving and attacking at full speed
+- Mouse - aim. Left click is the primary attack, right click the secondary.
+- SPACE - dash, with a 2 second cooldown
+- W - jump in side view. Press again in the air for a double jump.
+- E - time stop, with a 30 second cooldown. The world winds down to a complete stop for 10 seconds. You keep moving and attacking at full speed.
+- Q - super, once the AP meter is full
+- R - reload the revolver early. It also restarts the run after death.
 - ESC - pause
 - ENTER - skip the intro
-- R - reload the revolver early; restart after death
+
+## Weapons
+
+You pick one weapon at the start and keep it for the whole run.
+
+- Hammer - swing, or throw.
+- Revolver - shoot, or fan the hammer. Fanning rips through every remaining round in one burst. Six rounds, fired as fast as you can click. Running dry reloads on its own, or press R to top up early.
+- Crossbow - a charged shot. Hold to charge, release to fire. A full charge pierces and can fire back to back, a tap cannot. Arrow rain is the secondary, once its meter fills.
+- Hook - a quick jab, or a grab.
+
+Melee attacks deflect enemy bullets back at whoever fired them. That covers the hammer swing and the hook jab.
+
+## Supers
+
+Q fires the super once the AP meter is full. Each weapon has its own.
+
+- Hammer - orbits blades around you. Left click launches them.
+- Revolver - Dead Eye. The world stops while you paint a target for every round left in the cylinder. The fire button then empties the cylinder into them.
+- Crossbow - Arrow Storm, an arena-wide downpour.
+- Hook - two auto-grabbing arms that snatch and hurl enemies.
 
 ## Debug keys
 
@@ -40,8 +64,6 @@ haxelib run lime build html5
 
 ## Discord Rich Presence
 
-Each player chooses their own weapon from the online menu before the run begins, or with TAB once hosting or connected.
-
-The Windows build can show your current wave, boss fight, equipped weapon, kill count, and run time on Discord. To enable it, create an application at [discord.com/developers/applications](https://discord.com/developers/applications), copy its Application ID into `assets/data/discord.json`, and optionally upload Rich Presence art assets named `icon`, `hammer`, `revolver`, `crossbow`, and `hook`. Leaving the ID empty keeps presence off.
+The Windows build can show your wave, boss fight, equipped weapon, kill count and run time on Discord. To switch it on, create an application at [discord.com/developers/applications](https://discord.com/developers/applications). Copy its Application ID into `assets/data/discord.json`. You can also upload Rich Presence art named `icon`, `hammer`, `revolver`, `crossbow` and `hook`. An empty ID keeps presence off.
 
 Code and data reference: [DOCS.md](DOCS.md)

@@ -2,7 +2,7 @@
 
 Code and data reference for THE ENEMY. Controls and build commands are in [README.md](README.md).
 
-Split by concern - start with whichever part you are touching.
+The pages split by concern. Start with the part your change touches.
 
 | Page | What is in it |
 | --- | --- |
