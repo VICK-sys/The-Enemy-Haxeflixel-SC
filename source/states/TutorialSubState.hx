@@ -29,7 +29,7 @@ class TutorialSubState extends FlxSubState
 		"WASD - move        SPACE - dash (2s cooldown)",
 		"Aim with the mouse\nLEFT CLICK - primary attack        RIGHT CLICK - secondary attack",
 		"One weapon per run - you pick it when the run starts",
-		"Q - super at full AP - the hammer, crossbow and hook each have one",
+		"Q - super at full AP - every weapon has its own",
 		"E - TIME STOP: the arena freezes for 10s (30s cooldown)\nYou keep moving and attacking - press E again to end it early",
 		"Enemies drop hearts - walk into them to heal"
 	];

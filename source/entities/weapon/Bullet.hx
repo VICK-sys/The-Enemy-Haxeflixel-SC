@@ -1,5 +1,6 @@
 package entities.weapon;
 
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import util.Paths;
 
@@ -11,6 +12,7 @@ class Bullet extends FlxSprite
 	public var dirY:Float = 0;
 	public var damage:Int = 2;
 	public var knock:Float = 1;
+	public var seek:FlxObject = null;
 
 	private var life:Float = 0;
 
@@ -29,6 +31,7 @@ class Bullet extends FlxSprite
 		revive();
 		this.damage = damage;
 		this.knock = knock;
+		seek = null;
 		setPosition(cx - width / 2, cy - height / 2);
 		dirX = dx;
 		dirY = dy;

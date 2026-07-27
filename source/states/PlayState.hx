@@ -75,7 +75,7 @@ class PlayState extends FlxState
 	override public function create()
 	{
 		SideView.reset();
-		WorldClock.scale = 1;
+		WorldClock.reset();
 		persistentUpdate = Net.active;
 		fx = new Fx();
 
@@ -120,6 +120,7 @@ class PlayState extends FlxState
 		add(combat.jab.slashes);
 		add(combat.bow.arrows);
 		add(combat.revolver.bullets);
+		add(combat.deadEye.markers);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
 		insert(members.indexOf(layers.entityLayer), combat.shock.cracks);
 		insert(members.indexOf(layers.entityLayer), combat.shock.rings);
@@ -279,6 +280,7 @@ class PlayState extends FlxState
 		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
 		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
 	}
+
 
 
 

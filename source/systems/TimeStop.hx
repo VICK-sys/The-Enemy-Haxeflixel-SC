@@ -66,7 +66,7 @@ class TimeStop
 		overlay.scrollFactor.set();
 		overlay.alpha = 0;
 
-		WorldClock.scale = 1;
+		WorldClock.reset();
 	}
 
 	function get_active():Bool
@@ -135,7 +135,7 @@ class TimeStop
 				}
 		}
 
-		WorldClock.scale = factor;
+		WorldClock.timeStop = factor;
 		applyMusicPitch();
 		overlay.alpha = (1 - factor) * OVERLAY_MAX;
 		updateTrail(elapsed);

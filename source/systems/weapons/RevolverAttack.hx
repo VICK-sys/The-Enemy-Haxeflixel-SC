@@ -63,6 +63,32 @@ class RevolverAttack
 			reloading = cfg.reloadTime;
 	}
 
+	public function fireAt(bx:Float, by:Float, target:entities.enemy.Enemies, damage:Int):Void
+	{
+		if (rounds <= 0 || target == null)
+			return;
+
+		var dx = target.x + target.width / 2 - bx;
+		var dy = target.y + target.height / 2 - by;
+		var len = Math.sqrt(dx * dx + dy * dy);
+		if (len <= 0)
+		{
+			dx = 1;
+			dy = 0;
+			len = 1;
+		}
+		dx /= len;
+		dy /= len;
+
+		var b = spawn(bx, by, dx, dy, Math.atan2(dy, dx) * 180 / Math.PI, damage);
+		b.seek = target;
+		rounds--;
+		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
+		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.7);
+		if (rounds <= 0)
+			reloading = cfg.reloadTime;
+	}
+
 	public function beginReload():Bool
 	{
 		if (reloading > 0 || fanning || rounds >= cfg.cylinder)
@@ -82,9 +108,31 @@ class RevolverAttack
 		FlxG.camera.shake(0.004, 0.25);
 	}
 
-	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Int):Void
+	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Int):Bullet
 	{
-		bullets.recycle(Bullet).fire(bx + dx * MUZZLE, by + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock);
+		var b = bullets.recycle(Bullet);
+		b.fire(bx + dx * MUZZLE, by + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock);
+		return b;
+	}
+
+	function steer(b:Bullet):Void
+	{
+		if (b.seek == null)
+			return;
+		if (!b.seek.exists)
+		{
+			b.seek = null;
+			return;
+		}
+		var dx = b.seek.x + b.seek.width / 2 - (b.x + b.width / 2);
+		var dy = b.seek.y + b.seek.height / 2 - (b.y + b.height / 2);
+		var len = Math.sqrt(dx * dx + dy * dy);
+		if (len <= 0)
+			return;
+		b.dirX = dx / len;
+		b.dirY = dy / len;
+		b.velocity.set(b.dirX * cfg.speed, b.dirY * cfg.speed);
+		b.angle = Math.atan2(b.dirY, b.dirX) * 180 / Math.PI;
 	}
 
 	public function reset():Void
@@ -128,6 +176,8 @@ class RevolverAttack
 		{
 			if (b == null || !b.exists)
 				continue;
+
+			steer(b);
 
 			var cx = b.x + b.width / 2;
 			var cy = b.y + b.height / 2;

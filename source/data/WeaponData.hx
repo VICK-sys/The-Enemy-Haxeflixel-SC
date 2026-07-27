@@ -67,6 +67,14 @@ typedef HookConfig = {
 	snagDamage:Int
 }
 
+typedef DeadEyeConfig = {
+	markTime:Float,
+	slowFactor:Float,
+	markRadius:Float,
+	shotInterval:Float,
+	damage:Int
+}
+
 typedef SuperOrbitConfig = {
 	count:Int,
 	fireGate:Float
@@ -109,6 +117,7 @@ typedef WeaponsData = {
 	bowCharge:BowChargeConfig,
 	arrowRain:ArrowRainConfig,
 	hook:HookConfig,
+	deadEye:DeadEyeConfig,
 	superOrbit:SuperOrbitConfig,
 	bounceStrike:BounceStrikeConfig,
 	arrowStorm:ArrowStormConfig,

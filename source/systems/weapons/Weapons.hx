@@ -26,6 +26,7 @@ class Weapons
 	public var bounceStrike:BounceStrike;
 	public var arrowStorm:ArrowStorm;
 	public var hookArms:HookArms;
+	public var deadEye:DeadEye;
 	public var weapon:Int = 0;
 	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float) -> Void;
 	public var onSuper:Int -> Void;
@@ -55,6 +56,9 @@ class Weapons
 		bounceStrike = new BounceStrike(player, fx, hits, held.sprite, shock);
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
 		hookArms = new HookArms(player, director, hits);
+		deadEye = new DeadEye(director, revolver, held);
+		deadEye.onShot = function(bx, by, tx, ty, deg)
+			emitAttack(Shoot, bx, by, Math.cos(deg * Math.PI / 180), Math.sin(deg * Math.PI / 180), deg);
 	}
 
 	public var superBusy(get, never):Bool;
@@ -101,6 +105,9 @@ class Weapons
 		if (status.dead && bounceStrike.active)
 			bounceStrike.cancel();
 		hookArms.update(elapsed);
+		if (status.dead && deadEye.active)
+			deadEye.cancel();
+		deadEye.update(elapsed);
 		updateHeldHook();
 		updateHeldArms();
 	}
@@ -115,7 +122,7 @@ class Weapons
 	}
 
 	public function hasSuper():Bool
-		return weapon != 1;
+		return weapon != 1 || deadEye.canActivate();
 
 	public function equip(i:Int):Void
 	{
@@ -176,7 +183,7 @@ class Weapons
 
 	function updateGunInput():Void
 	{
-		if (throwAttack.airborne)
+		if (throwAttack.airborne || deadEye.active)
 			return;
 
 		if (FlxG.keys.justPressed.R)
@@ -215,9 +222,9 @@ class Weapons
 			switch (weapon)
 			{
 				case 0: superOrbit.activate();
+				case 1: deadEye.activate();
 				case 2: arrowStorm.activate();
-				case 3: hookArms.activate();
-				default:
+				default: hookArms.activate();
 			}
 			if (onSuper != null)
 				onSuper(weapon);

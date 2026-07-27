@@ -45,6 +45,13 @@
 		"releaseStun": 0.35,
 		"snagDamage": 3
 	},
+	"deadEye": {
+		"markTime": 4.0,
+		"slowFactor": 0.22,
+		"markRadius": 70,
+		"shotInterval": 0.14,
+		"damage": 4
+	},
 	"superOrbit": { "count": 10, "fireGate": 0.08 },
 	"bounceStrike": { "strikes": 5, "hopTime": 0.55, "radius": 300, "damage": 2, "force": 4, "catapultSpeed": 720 },
 	"arrowStorm": { "stormTime": 3.0, "spawnInterval": 0.06, "dropsPer": 2 },
