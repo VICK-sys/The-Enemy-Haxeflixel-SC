@@ -60,6 +60,8 @@ class HeldWeapon
 		kind = i;
 		attack = Swing;
 		swingTimer = 0;
+		sprite.flipX = false;
+		sprite.flipY = false;
 		applyGraphic();
 	}
 
@@ -184,20 +186,34 @@ class HeldWeapon
 		if (raining())
 		{
 			sprite.flipX = false;
+			sprite.flipY = false;
 			target = -90;
 		}
 		else if (bowLike())
 		{
 			sprite.flipX = false;
+			updateAimFlip(theta);
 			target = theta;
 		}
 		else
 		{
+			sprite.flipY = false;
 			updateFlip(theta);
 			target = sprite.flipX ? theta - 180 : theta;
 		}
 		var delta:Float = ((target - sprite.angle) % 360 + 540) % 360 - 180;
 		sprite.angle += delta * (1 - Math.pow(1 - AIM_LERP, elapsed * 60));
+	}
+
+	function updateAimFlip(deg:Float):Void
+	{
+		var want:Bool = sprite.flipY;
+		var a:Float = Math.abs(deg);
+		if (a > 90 + FLIP_MARGIN)
+			want = true;
+		else if (a < 90 - FLIP_MARGIN)
+			want = false;
+		sprite.flipY = want;
 	}
 
 	function updateFlip(deg:Float):Void

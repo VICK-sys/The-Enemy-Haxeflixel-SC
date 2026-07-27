@@ -27,6 +27,7 @@ class RemoteAvatar
 	private var heldOX:Float = 30;
 	private var heldOY:Float = 65;
 
+	static inline var REVOLVER_INDEX:Int = 1;
 	static inline var BOW_INDEX:Int = 2;
 	static inline var OFFSET_Y:Float = -17;
 	static inline var TAG_UP:Float = 46;
@@ -92,7 +93,7 @@ class RemoteAvatar
 			weaponIdx = wi;
 			held.loadGraphic(Paths.image(WEAPON_IMAGES[wi]));
 
-			if (wi == BOW_INDEX)
+			if (wi == REVOLVER_INDEX || wi == BOW_INDEX)
 				held.origin.set(held.width * 0.5, held.height * 0.5);
 			else
 				held.origin.set(held.width * 0.5, held.height);
@@ -100,6 +101,7 @@ class RemoteAvatar
 		held.visible = m.hv;
 		held.angle = m.ha;
 		held.flipX = m.hf;
+		held.flipY = m.hg == true;
 
 		var ho:Array<Dynamic> = m.ho;
 		if (ho != null)

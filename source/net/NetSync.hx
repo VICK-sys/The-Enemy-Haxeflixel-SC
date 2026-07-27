@@ -355,6 +355,7 @@ class NetSync
 			hv: held.visible && scythe.visible,
 			ha: r1(held.angle),
 			hf: held.flipX,
+			hg: held.flipY,
 			ho: [r1(held.x - player.x), r1(held.y - player.y), r2(held.scale.x), r2(combat.held.charge)],
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
 			sb: combat.superScythes.active(),
