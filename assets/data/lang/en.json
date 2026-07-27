@@ -1,10 +1,8 @@
 {
 	"lang.name": "ENGLISH",
-
 	"common.on": "ON",
 	"common.off": "OFF",
 	"common.back": "BACK",
-
 	"menu.splash": "WORK IN PROGRESS",
 	"menu.play": "PLAY",
 	"menu.playSlot": "PLAY: SLOT {0}",
@@ -12,12 +10,10 @@
 	"menu.options": "OPTIONS",
 	"menu.quit": "QUIT",
 	"menu.best": "BEST: WAVE {0}",
-
 	"pause.title": "PAUSED",
 	"pause.resume": "RESUME",
 	"pause.options": "OPTIONS",
 	"pause.quit": "QUIT TO MENU",
-
 	"options.title": "OPTIONS",
 	"options.volume": "VOLUME  < {0}% >",
 	"options.fullscreen": "FULLSCREEN  {0}",
@@ -25,7 +21,6 @@
 	"options.language": "LANGUAGE  < {0} >",
 	"options.resetBest": "RESET BEST WAVE",
 	"options.resetBestConfirm": "RESET BEST WAVE?  PRESS AGAIN",
-
 	"weapon.hammer": "HAMMER",
 	"weapon.revolver": "REVOLVER",
 	"weapon.crossbow": "CROSSBOW",
@@ -34,22 +29,18 @@
 	"weapon.revolver.blurb": "SHOOT  /  FAN THE HAMMER",
 	"weapon.crossbow.blurb": "CHARGE SHOT  /  ARROW RAIN",
 	"weapon.hook.blurb": "JAB  /  GRAB",
-
 	"weaponPick.title": "CHOOSE YOUR WEAPON",
 	"weaponPick.sub": "ONE FOR THE WHOLE RUN - THERE IS NO SWAPPING LATER",
 	"weaponPick.hint": "1-4 OR A/D OR THE ARROWS TO CHOOSE        ENTER OR CLICK TO LOCK IT IN",
-
 	"hud.wave": "WAVE {0}",
 	"hud.bossApproaching": "BOSS APPROACHING",
 	"hud.death": "WAVE {0}  -  BEST {1}\nPRESS R TO RESTART",
 	"hud.respawning": "RESPAWNING...",
 	"hud.connectionLost": "CONNECTION LOST",
-
 	"timestop.stopped": "TIME STOPPED",
 	"timestop.cooldown": "TIME {0}",
 	"timestop.ready": "TIME READY",
 	"timestop.off": "OFF",
-
 	"tutorial.nav": "A/<- <   {0} / {1}   > D/->        ENTER - PLAY",
 	"tutorial.move.title": "MOVE",
 	"tutorial.move.desc": "WASD - move        SPACE - dash (2s cooldown)",
@@ -63,7 +54,6 @@
 	"tutorial.abilities.desc": "E - TIME STOP: the arena freezes for 10s (30s cooldown)\nYou keep moving and attacking - press E again to end it early",
 	"tutorial.health.title": "HEALTH",
 	"tutorial.health.desc": "Enemies drop hearts - walk into them to heal",
-
 	"online.title": "ONLINE",
 	"online.host": "HOST GAME",
 	"online.join": "JOIN GAME",
@@ -82,22 +72,19 @@
 	"online.connecting": "CONNECTING...",
 	"online.connected": "CONNECTED - WAITING FOR HOST TO START",
 	"online.failed": "COULD NOT CONNECT TO {0}",
-
 	"talk.more": ">>",
-
-	"talk.man0.1": "I don't know how you got here.\nBut welcome all the same.",
-
-	"talk.man1.1": "Looking for something?\nThere are no secrets here, I'm afraid.\n\nJust me. Alone. Behind this tree.",
-
-	"talk.man2.1": "Maybe you would like to hear a story.",
-	"talk.man2.2": "There was a boy with a decent life ahead of him.\nLoving parents. A brother. Friends.",
-	"talk.man2.3": "Then one day tragedy struck.\nNothing was ever the same after that.\n\nHis parents separated, and the friends he\nheld close drifted away.",
-	"talk.man2.4": "He wants to go back to the time before it.\nHe can't. None of us can.",
-	"talk.man2.5": "But we can choose not to forget the good\nthat came before.\n\nWe can carry it with us, and keep going.",
-	"talk.man2.6": "Don't forget those times.\nRight?",
-
-	"talk.man3.1": "(The man behind the tree had made his peace,\nand vanished.)",
-
+	"talk.man0.1": "* I don't know how you got here.\n* But welcome all the same.",
+	"talk.man1.1": "* Looking for something?\n* There are no secrets here, I'm afraid.",
+	"talk.man1.2": "* Just me. Alone. Behind this tree.",
+	"talk.man2.1": "* Maybe you would like to hear a story.",
+	"talk.man2.2": "* There was a boy with a decent life ahead of him.\n* Loving parents. A brother. Friends.",
+	"talk.man2.3": "* Then one day tragedy struck.\n* Nothing was ever the same after that.",
+	"talk.man2.4": "* His parents separated, and the friends he\n  held close drifted away.",
+	"talk.man2.5": "* He wants to go back to the time before it.\n* He can't. None of us can.",
+	"talk.man2.6": "* But we can choose not to forget the good\n  that came before.",
+	"talk.man2.7": "* We can carry it with us, and keep going.",
+	"talk.man2.8": "* Don't forget those times.\n* Right?",
+	"talk.man3.1": "* (The man behind the tree had made his peace,\n  and vanished.)",
 	"onlineHelp.nav": "A/<- <   {0} / {1}   > D/->        ENTER - CLOSE",
 	"onlineHelp.p1.title": "ONLINE CO-OP",
 	"onlineHelp.p1.body": "Fight the waves together - up to {0} of you.\n\nOne of you HOSTS and runs the game.\nEveryone else JOINS and fights alongside.\n\nYou share the wave counter and the boss,\nbut you each keep your own health and AP.\n\nFriends can drop in after the run has begun.",

@@ -45,10 +45,10 @@ class DialogueBox
 		panel.makeGraphic(Std.int(w), Std.int(HEIGHT), FlxColor.BLACK);
 
 		body = new FlxText(SIDE + PAD, y + PAD, w - PAD * 2, "");
-		body.setFormat(Lang.font(), 24, FlxColor.WHITE, LEFT);
+		body.setFormat(Lang.font(), 30, FlxColor.WHITE, LEFT);
 
 		more = new FlxText(0, y + HEIGHT - 40, FlxG.width - SIDE - PAD, "");
-		more.setFormat(Lang.font(), 18, FlxColor.WHITE, RIGHT);
+		more.setFormat(Lang.font(), 22, FlxColor.WHITE, RIGHT);
 
 		for (s in [edge, panel, (cast body : FlxSprite), (cast more : FlxSprite)])
 		{
