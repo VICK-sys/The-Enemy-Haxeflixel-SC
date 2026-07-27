@@ -6,6 +6,7 @@
 	"maxCount": 15,
 	"bossWaveMin": 4,
 	"bossWaveRange": 4,
+	"bossRepeat": 6,
 	"scaling": {
 		"hpPerWave": 0.1,
 		"hpMax": 8.0,

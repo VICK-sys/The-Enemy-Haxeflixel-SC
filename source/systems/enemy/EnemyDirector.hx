@@ -194,13 +194,22 @@ class EnemyDirector
 		e.applyScale(ramp(s.hpPerWave, s.hpMax), ramp(s.speedPerWave, s.speedMax), ramp(s.damagePerWave, s.damageMax));
 	}
 
+	function isBossWave(n:Int):Bool
+	{
+		if (n < bossWave)
+			return false;
+		if (n == bossWave)
+			return true;
+		return waveData.bossRepeat > 0 && (n - bossWave) % waveData.bossRepeat == 0;
+	}
+
 	function startWave():Void
 	{
 		wave++;
 		if (onWave != null)
 			onWave(wave);
 
-		if (wave == bossWave)
+		if (isBossWave(wave))
 		{
 			if (onBoss != null)
 				onBoss();

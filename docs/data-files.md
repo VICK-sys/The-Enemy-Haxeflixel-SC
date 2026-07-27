@@ -36,7 +36,8 @@ To add an enemy type: put an atlas under `assets/images/enemies/`, add a JSON fi
 | `breather` | seconds between waves, before `scaling` shortens it |
 | `baseCount`, `countPerWave` | enemy count = baseCount + wave x countPerWave |
 | `maxCount` | count cap |
-| `bossWaveMin`, `bossWaveRange` | the boss wave is `bossWaveMin + random(0..bossWaveRange)`, rolled once per run |
+| `bossWaveMin`, `bossWaveRange` | the first boss wave is `bossWaveMin + random(0..bossWaveRange)`, rolled once per run |
+| `bossRepeat` | waves between bosses after the first. 0 means the boss happens once and never again |
 | `waves` | array of `{types}` spawn pools; the first entry is wave 1, and the last entry repeats for every later wave. Repeat a type inside a pool to weight it. |
 | `scaling` | how a wave hardens with its number, applied to every enemy as it spawns |
 
