@@ -63,6 +63,15 @@ class RevolverAttack
 			reloading = cfg.reloadTime;
 	}
 
+	public function beginReload():Bool
+	{
+		if (reloading > 0 || fanning || rounds >= cfg.cylinder)
+			return false;
+
+		reloading = cfg.reloadTime;
+		return true;
+	}
+
 	public function fanFire():Void
 	{
 		if (!canFan())

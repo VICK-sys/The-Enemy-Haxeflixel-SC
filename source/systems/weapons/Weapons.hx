@@ -192,6 +192,9 @@ class Weapons
 		if (throwAttack.airborne)
 			return;
 
+		if (FlxG.keys.justPressed.R)
+			revolver.beginReload();
+
 		var aim = aimFromPlayer();
 
 		if (FlxG.mouse.justPressedRight && revolver.canFan())
