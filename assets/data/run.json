@@ -1,5 +1,12 @@
 {
 	"min": 1,
 	"max": 100,
-	"events": []
+	"events": [
+		{
+			"name": "treeRoom",
+			"min": 66,
+			"max": 66,
+			"note": "one boss wave becomes a visit to the slot 2 room instead"
+		}
+	]
 }

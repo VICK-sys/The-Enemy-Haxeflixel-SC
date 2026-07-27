@@ -230,6 +230,14 @@ Use `Run.inRange(lo, hi)` to check a window inline for something not worth a nam
 
 The value persists in the save, beside the best wave and the settings. It survives a restart until something rerolls it.
 
+`treeRoom` is the first event to read it. On a save that rolled 66, one boss wave turns into a visit to the quiet room. `Detour` holds that logic.
+
+Four things must hold. The value sits in the window, a 1 in 66 roll comes up, the run is solo, and a slot 2 map is on disk. It fires at most once. The menu and the restart both clear the mark.
+
+The visit saves the run before it swaps arenas: wave, boss wave, health, AP, kills and weapon. A timer sends you back after 20 seconds, and `resumeAfter` puts the director where it was.
+
+That boss wave is spent. The run picks up on the wave after it, and the next boss arrives on its usual schedule.
+
 ## Themes - assets/data/themes.json
 
 An array of `themes`. The first entry is the look every map wears. There is no in-editor switcher, so the rest stay inert unless code selects them.

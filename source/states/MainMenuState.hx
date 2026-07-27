@@ -51,6 +51,7 @@ class MainMenuState extends FlxState
 		FlxG.mouse.visible = true;
 		DiscordPresence.menu();
 		util.CustomArena.clear();
+		util.Detour.reset();
 
 		addBands();
 

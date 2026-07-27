@@ -63,6 +63,31 @@ class PlayState extends FlxState
 	private var flyPick:Int = -1;
 	private var flyX:Float = 0;
 	private var flyY:Float = 0;
+	private var detourLeft:Float = 0;
+
+	function tryDetour(bossWave:Int):Bool
+	{
+		if (!util.Detour.rolls())
+			return false;
+		if (!util.Detour.begin(director.wave, bossWave, status.health, status.itemBar, status.kills, combat.weapon))
+			return false;
+		restarting = true;
+		wipe.close(function() FlxG.switchState(new PlayState()));
+		return true;
+	}
+
+	function updateDetour(elapsed:Float):Void
+	{
+		if (detourLeft <= 0)
+			return;
+		detourLeft -= elapsed;
+		if (detourLeft > 0)
+			return;
+		detourLeft = 0;
+		util.Detour.leave();
+		restarting = true;
+		wipe.close(function() FlxG.switchState(new PlayState()));
+	}
 
 	function stageTrack():String
 		return util.CustomArena.quiet ? "stage/Man_music" : "stage/gloomDoomWoods";
@@ -79,6 +104,7 @@ class PlayState extends FlxState
 		if (restarting)
 			return;
 		restarting = true;
+		util.Detour.reset();
 		wipe.close(function() FlxG.resetState());
 	}
 
@@ -165,6 +191,7 @@ class PlayState extends FlxState
 		director.onBossSpawn = hud.showBossBar;
 		director.onBossDefeated = onBossDefeated;
 		director.onFriendlyShot = onDeflectedShot;
+		director.bossVeto = tryDetour;
 		arena.onNormal = onArenaNormal;
 		perf = new PerfLog();
 
@@ -184,6 +211,10 @@ class PlayState extends FlxState
 		DiscordPresence.beginRun();
 
 		combat.equip(WeaponPickSubState.lastPick);
+		var resumed = util.Detour.resuming();
+		if (resumed)
+			util.Detour.restore(status, combat, director);
+
 		if (util.CustomArena.quiet)
 		{
 			combat.disabled = true;
@@ -191,7 +222,11 @@ class PlayState extends FlxState
 			heldSprite.visible = false;
 			_player.setSizeScale(QUIET_PLAYER_SCALE);
 			FlxG.camera.zoom = QUIET_ZOOM;
+			if (util.Detour.inRoom)
+				detourLeft = util.Detour.STAY;
 		}
+		else if (resumed)
+			hud.showWave(director.wave);
 		else if (Net.active)
 			openTutorialIfNew();
 		else
@@ -314,6 +349,7 @@ class PlayState extends FlxState
 			openSubState(pause);
 		}
 
+		updateDetour(elapsed);
 		debugKeys();
 
 		var projectiles = live(director.shots.countLiving()) + live(combat.revolver.bullets.countLiving())

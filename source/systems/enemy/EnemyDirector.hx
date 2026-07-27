@@ -25,6 +25,7 @@ class EnemyDirector
 	public var shots(get, never):FlxTypedGroup<EnemyShot>;
 	public var onWave:Int->Void;
 	public var onBoss:Void->Void;
+	public var bossVeto:Int->Bool;
 	public var onBossSpawn:Enemies->Void;
 	public var onProbe:(Float, Float, Float) -> Void;
 
@@ -201,6 +202,13 @@ class EnemyDirector
 		e.applyScale(ramp(s.hpPerWave, s.hpMax), ramp(s.speedPerWave, s.speedMax), ramp(s.damagePerWave, s.damageMax));
 	}
 
+	public function resumeAfter(atWave:Int, atBossWave:Int):Void
+	{
+		wave = atWave;
+		bossWave = atBossWave;
+		betweenWaves = breatherTime();
+	}
+
 	function isBossWave(n:Int):Bool
 	{
 		if (n < bossWave)
@@ -218,6 +226,8 @@ class EnemyDirector
 
 		if (isBossWave(wave))
 		{
+			if (bossVeto != null && bossVeto(bossWave))
+				return;
 			if (onBoss != null)
 				onBoss();
 			bossPending = true;
