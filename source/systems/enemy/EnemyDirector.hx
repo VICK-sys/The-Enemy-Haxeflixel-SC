@@ -178,7 +178,7 @@ class EnemyDirector
 	function ramp(perWave:Float, cap:Float):Float
 	{
 		var m = 1 + (wave - 1) * perWave;
-		return m > cap ? cap : m;
+		return cap > 0 && m > cap ? cap : m;
 	}
 
 	function breatherTime():Float
@@ -219,7 +219,7 @@ class EnemyDirector
 		}
 
 		var count = waveData.baseCount + wave * waveData.countPerWave;
-		if (count > waveData.maxCount)
+		if (waveData.maxCount > 0 && count > waveData.maxCount)
 			count = waveData.maxCount;
 		var poolIndex = wave - 1;
 		if (poolIndex >= waveData.waves.length)

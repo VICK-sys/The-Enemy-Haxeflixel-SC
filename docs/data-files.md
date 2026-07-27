@@ -35,7 +35,7 @@ To add an enemy type: put an atlas under `assets/images/enemies/`, add a JSON fi
 | `firstDelay` | seconds before wave 1 |
 | `breather` | seconds between waves, before `scaling` shortens it |
 | `baseCount`, `countPerWave` | enemy count = baseCount + wave x countPerWave |
-| `maxCount` | count cap |
+| `maxCount` | count cap, or 0 for no cap |
 | `bossWaveMin`, `bossWaveRange` | the first boss wave is `bossWaveMin + random(0..bossWaveRange)`, rolled once per run |
 | `bossRepeat` | waves between bosses after the first. 0 means the boss happens once and never again |
 | `waves` | array of `{types}` spawn pools; the first entry is wave 1, and the last entry repeats for every later wave. Repeat a type inside a pool to weight it. |
@@ -43,16 +43,16 @@ To add an enemy type: put an atlas under `assets/images/enemies/`, add a JSON fi
 
 ### scaling - assets/data/waves.json
 
-Each multiplier is `1 + (wave - 1) x perWave`, held at its `Max`, and applied to the values the enemy just read from its own JSON. Wave 1 always multiplies by 1, so the enemy files stay the source of truth for how something starts.
+Each multiplier is `1 + (wave - 1) x perWave`, held at its `Max` unless that is 0, which means no ceiling, and applied to the values the enemy just read from its own JSON. Wave 1 always multiplies by 1, so the enemy files stay the source of truth for how something starts.
 
 | Field | Meaning |
 |---|---|
-| `hpPerWave`, `hpMax` | health multiplier. The main lever, and the ceiling is set high enough that health keeps climbing for as long as anyone plays |
-| `speedPerWave`, `speedMax` | movement multiplier. Capped much lower on purpose: past a point extra speed stops being difficulty and starts being undodgeable |
+| `hpPerWave`, `hpMax` | health multiplier |
+| `speedPerWave`, `speedMax` | movement multiplier. Enemies pass the player's 450 speed around wave 30 and keep going, so late runs are outrun rather than kited |
 | `damagePerWave`, `damageMax` | contact and shot damage multiplier |
 | `breatherPerWave`, `breatherMin` | seconds taken off the gap between waves each wave, down to a floor |
 
-Enemy count is not part of this - it keeps its own `maxCount` cap, because count is what costs frames. Difficulty past that cap comes from the multipliers instead, which cost nothing.
+Enemy count is not part of this - it grows on its own from `baseCount` and `countPerWave`, and `maxCount` decides whether it ever stops. Count is the expensive kind of difficulty: every live enemy pathfinds against `EnemyNav`'s per-frame budget and crowd separation compares every pair. The multipliers cost nothing by comparison.
 
 ## Player - assets/data/player.json
 
