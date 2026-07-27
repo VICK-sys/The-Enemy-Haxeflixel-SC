@@ -19,7 +19,9 @@
 
 	Releasing unfreezes the world and walks the marks in order at `shotInterval`, one round each, while the sepia fades out. The held revolver locks to each target as it shoots it - `HeldWeapon.lockAim` snaps the angle rather than easing toward the cursor, and the same lock drives the hand offset so the gun does not sit pointing one way and reaching another.
 
-	The rounds home. `Bullet.seek` holds the enemy it was fired at and `RevolverAttack.steer` re-aims every frame, because a mark that walks away between being painted and being shot would otherwise make the super miss the one thing it promises. They are still ordinary bullets - a wall between you and a mark stops them, and a mark that dies early frees the shot for nothing.
+	The rounds home and belong to their mark. `Bullet.seek` holds the enemy it was fired at: `RevolverAttack.steer` re-aims every frame so a mark that walks away is still hit, and the hit test asks only about that one enemy, so the round passes through anything standing in the way. Without that, two marks in a line meant the front one soaked both rounds and the one behind it was never touched - each mark already has a round of its own, so a round spent on the wrong enemy is a round lost. A wall still stops them, and a mark that dies before its round lands frees the shot for nothing.
+
+	Ordinary revolver fire is unchanged and still stops at the first enemy it meets; only a round with a mark behind it ignores bystanders.
 
 	The freeze is not the super's to own. `TimeStop` writes `WorldClock.scale` unconditionally every frame, so a second writer would have been overwritten before the enemies ever read it; `WorldClock` now takes the two sources separately and hands out whichever is slower.
 

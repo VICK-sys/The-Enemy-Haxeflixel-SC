@@ -295,6 +295,7 @@ class PlayState extends FlxState
 
 
 
+
 	function live(n:Int):Int
 		return n < 0 ? 0 : n;
 

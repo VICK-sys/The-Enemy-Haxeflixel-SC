@@ -119,7 +119,7 @@ class RevolverAttack
 	{
 		if (b.seek == null)
 			return;
-		if (!b.seek.exists)
+		if (!b.seek.exists || b.seek.isDead)
 		{
 			b.seek = null;
 			return;
@@ -186,6 +186,20 @@ class RevolverAttack
 			if (arena.wallAt(px, py) || PropBlock.at(px, py))
 			{
 				b.kill();
+				continue;
+			}
+
+			if (b.seek != null)
+			{
+				var tcx = b.seek.x + b.seek.width / 2;
+				var tcy = b.seek.y + b.seek.height / 2;
+				var dx = tcx - cx;
+				var dy = tcy - cy;
+				if (dx * dx + dy * dy <= cfg.hitRadius * cfg.hitRadius || b.seek.overlaps(b))
+				{
+					hits.damageN(b.seek, b.dirX * b.knock, b.dirY * b.knock, b.damage);
+					b.kill();
+				}
 				continue;
 			}
 

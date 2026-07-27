@@ -1,7 +1,7 @@
 package entities.weapon;
 
-import flixel.FlxObject;
 import flixel.FlxSprite;
+import entities.enemy.Enemies;
 import util.Paths;
 
 class Bullet extends FlxSprite
@@ -12,7 +12,7 @@ class Bullet extends FlxSprite
 	public var dirY:Float = 0;
 	public var damage:Int = 2;
 	public var knock:Float = 1;
-	public var seek:FlxObject = null;
+	public var seek:Enemies = null;
 
 	private var life:Float = 0;
 
