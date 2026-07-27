@@ -132,7 +132,11 @@ class DeadEye
 	public function update(elapsed:Float):Void
 	{
 		if (phase == 0)
+		{
+			if (overlay.alpha != 0)
+				overlay.alpha = 0;
 			return;
+		}
 
 		if (phase == 3)
 		{
@@ -154,6 +158,9 @@ class DeadEye
 			updateMarking(elapsed);
 		else
 			updateFiring(elapsed);
+
+		if (phase == 0)
+			return;
 
 		updateOverlay(elapsed);
 		placeMarkers(elapsed);

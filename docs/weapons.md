@@ -158,6 +158,10 @@ Activation decides `froze` once, and every restore path keys off it.
 
 The freeze is not the super's to own. Every frame, `TimeStop` writes `WorldClock.scale` unconditionally. A second writer would therefore lose before the enemies ever read it. The clock now takes the two sources separately, inside `WorldClock`, and hands out whichever is slower.
 
+A cancel can happen part way through a frame, so `update` re-reads the phase after the marking step and stops there if it went to zero. Without that check, `updateOverlay` ran on behalf of a super that had already ended, and painted the full sepia back over the screen. The next frame then returned at the top, because the phase was zero, and nothing ever cleared it. The wash stayed for the rest of the run. Firing with nothing marked was the way in.
+
+The idle branch now also forces the overlay clear rather than only returning. A phase of zero means no wash, so any path that ends the super without tidying up heals itself on the next frame.
+
 The fade outlives the super. Ending the shots and running the overlay down are separate steps. A call to `letGo` returns the world, the player and the aim. A fourth phase then runs the overlay down on its own. Folded together, the last frame re-applied a fade the state machine had already stopped updating. That pinned a permanent sepia tint over the game.
 
 ## SuperOrbit
