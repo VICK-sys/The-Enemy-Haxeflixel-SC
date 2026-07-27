@@ -24,6 +24,7 @@ class OnlineState extends FlxState
 	private var nameMode:Bool = false;
 	private var playerName:String = "";
 	private var nameText:FlxText;
+	private var weaponText:FlxText;
 
 	static inline var NAME_MAX:Int = 12;
 	private var hosting:Bool = false;
@@ -42,26 +43,31 @@ class OnlineState extends FlxState
 		title.setBorderStyle(OUTLINE, ACCENT, 4);
 		add(title);
 
-		list = new MenuList(["HOST GAME", "JOIN GAME", "SET NAME", "BACK"], 268, 62, 32);
+		list = new MenuList(["HOST GAME", "JOIN GAME", "WEAPON", "SET NAME", "BACK"], 236, 58, 32);
 		list.onChoose = choose;
 		add(list);
 
-		nameText = new FlxText(0, 528, FlxG.width, "");
+		weaponText = new FlxText(0, 514, FlxG.width, "");
+		weaponText.setFormat(null, 22, FlxColor.WHITE, CENTER);
+		weaponText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		add(weaponText);
+
+		nameText = new FlxText(0, 546, FlxG.width, "");
 		nameText.setFormat(null, 22, FlxColor.WHITE, CENTER);
 		nameText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(nameText);
 
-		ipText = new FlxText(0, 560, FlxG.width, "");
+		ipText = new FlxText(0, 578, FlxG.width, "");
 		ipText.setFormat(null, 24, FlxColor.WHITE, CENTER);
 		ipText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(ipText);
 
-		status = new FlxText(0, 600, FlxG.width, "");
+		status = new FlxText(0, 620, FlxG.width, "");
 		status.setFormat(null, 20, FlxColor.YELLOW, CENTER);
 		status.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(status);
 
-		var hint = new FlxText(0, FlxG.height - 32, FlxG.width, "H - HOW TO PLAY ONLINE");
+		var hint = new FlxText(0, FlxG.height - 32, FlxG.width, "H - HOW TO PLAY ONLINE        TAB - CHANGE WEAPON");
 		hint.setFormat(null, 16, FlxColor.WHITE, CENTER);
 		hint.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		hint.alpha = 0.7;
@@ -70,8 +76,13 @@ class OnlineState extends FlxState
 		ip = SaveData.lastIp();
 		playerName = SaveData.playerName();
 		refreshName();
+		refreshWeapon();
 
-		subStateClosed.add(function(_) list.enabled = !typing && !busy);
+		subStateClosed.add(function(_)
+		{
+			FlxG.mouse.visible = true;
+			list.enabled = !typing && !busy;
+		});
 
 		wipe = new IrisWipe(this);
 		wipe.open();
@@ -113,6 +124,8 @@ class OnlineState extends FlxState
 			case 1:
 				beginTyping();
 			case 2:
+				openWeaponPick();
+			case 3:
 				beginNaming();
 			default:
 				back();
@@ -157,6 +170,24 @@ class OnlineState extends FlxState
 		status.text = "TYPE THE HOST'S IP, THEN ENTER\nESC - cancel";
 		refreshIp();
 	}
+
+	function openWeaponPick():Void
+	{
+		list.enabled = false;
+		var picker = new WeaponPickSubState(FlxG.camera);
+		picker.closeCallback = function()
+		{
+			refreshWeapon();
+			if (waiting || hosting)
+				list.enabled = false;
+			else
+				releaseMenu();
+		};
+		openSubState(picker);
+	}
+
+	function refreshWeapon():Void
+		weaponText.text = "WEAPON: " + WeaponPickSubState.nameOf(WeaponPickSubState.lastPick);
 
 	function beginNaming():Void
 	{
@@ -219,6 +250,7 @@ class OnlineState extends FlxState
 		wipe.close(function() FlxG.switchState(new MainMenuState()));
 	}
 
+
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
@@ -264,6 +296,9 @@ class OnlineState extends FlxState
 
 		if (FlxG.keys.justPressed.H && !typing && !busy)
 			openHelp();
+
+		if (FlxG.keys.justPressed.TAB && !typing)
+			openWeaponPick();
 
 		if (FlxG.keys.justPressed.ESCAPE)
 		{

@@ -53,6 +53,10 @@ class WeaponPickSubState extends FlxSubState
 	];
 
 	static var NAMES:Array<String> = ["HAMMER", "REVOLVER", "CROSSBOW", "HOOK"];
+
+	public static function nameOf(i:Int):String
+		return i >= 0 && i < NAMES.length ? NAMES[i] : NAMES[0];
+
 	static var ART:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/hook"];
 	static var BLURBS:Array<String> = [
 		"SWING  /  THROW",
