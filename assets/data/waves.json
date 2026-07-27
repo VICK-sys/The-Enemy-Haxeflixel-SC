@@ -6,6 +6,16 @@
 	"maxCount": 15,
 	"bossWaveMin": 4,
 	"bossWaveRange": 4,
+	"scaling": {
+		"hpPerWave": 0.1,
+		"hpMax": 8.0,
+		"speedPerWave": 0.025,
+		"speedMax": 1.5,
+		"damagePerWave": 0.04,
+		"damageMax": 3.0,
+		"breatherPerWave": 0.12,
+		"breatherMin": 1.0
+	},
 	"waves": [
 		{ "types": ["enemy"] },
 		{ "types": ["enemy", "woodster", "woodster"] },

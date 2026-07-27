@@ -140,6 +140,7 @@ class EnemyDirector
 
 		bossPending = false;
 		var boss = new Enemies("rofel");
+		applyWaveScale(boss);
 		spawner.placeAtEdge(boss);
 		register(boss);
 		bossDeath.watch(boss);
@@ -160,7 +161,7 @@ class EnemyDirector
 
 		if (waveCleared())
 		{
-			betweenWaves = waveData.breather;
+			betweenWaves = breatherTime();
 			return;
 		}
 
@@ -172,6 +173,25 @@ class EnemyDirector
 		for (rig in rigs)
 			if (rig.enemy.exists && !rig.enemy.isDead && !rig.enemy.seized && !rig.enemy.selfDriven)
 				spawner.rescue(rig);
+	}
+
+	function ramp(perWave:Float, cap:Float):Float
+	{
+		var m = 1 + (wave - 1) * perWave;
+		return m > cap ? cap : m;
+	}
+
+	function breatherTime():Float
+	{
+		var s = waveData.scaling;
+		var b = waveData.breather - (wave - 1) * s.breatherPerWave;
+		return b < s.breatherMin ? s.breatherMin : b;
+	}
+
+	private function applyWaveScale(e:Enemies):Void
+	{
+		var s = waveData.scaling;
+		e.applyScale(ramp(s.hpPerWave, s.hpMax), ramp(s.speedPerWave, s.speedMax), ramp(s.damagePerWave, s.damageMax));
 	}
 
 	function startWave():Void
@@ -200,6 +220,7 @@ class EnemyDirector
 		for (i in 0...count)
 		{
 			var e = new Enemies(pool[Std.random(pool.length)]);
+			applyWaveScale(e);
 			spawner.placeAtEdge(e);
 			register(e);
 		}

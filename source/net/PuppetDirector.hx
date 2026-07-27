@@ -17,6 +17,7 @@ class PuppetDirector extends EnemyDirector
 	public function addPuppet(e:Enemies):Void
 	{
 		e.puppet = true;
+		applyWaveScale(e);
 		register(e);
 	}
 

@@ -6,6 +6,17 @@ typedef WavePool = {
 	types:Array<String>
 }
 
+typedef WaveScaling = {
+	hpPerWave:Float,
+	hpMax:Float,
+	speedPerWave:Float,
+	speedMax:Float,
+	damagePerWave:Float,
+	damageMax:Float,
+	breatherPerWave:Float,
+	breatherMin:Float
+}
+
 typedef WaveData = {
 	firstDelay:Float,
 	breather:Float,
@@ -14,6 +25,7 @@ typedef WaveData = {
 	maxCount:Int,
 	bossWaveMin:Int,
 	bossWaveRange:Int,
+	scaling:WaveScaling,
 	waves:Array<WavePool>
 }
 

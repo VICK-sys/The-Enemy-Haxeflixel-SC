@@ -33,11 +33,25 @@ To add an enemy type: put an atlas under `assets/images/enemies/`, add a JSON fi
 | Field | Meaning |
 |---|---|
 | `firstDelay` | seconds before wave 1 |
-| `breather` | seconds between waves |
+| `breather` | seconds between waves, before `scaling` shortens it |
 | `baseCount`, `countPerWave` | enemy count = baseCount + wave x countPerWave |
 | `maxCount` | count cap |
 | `bossWaveMin`, `bossWaveRange` | the boss wave is `bossWaveMin + random(0..bossWaveRange)`, rolled once per run |
 | `waves` | array of `{types}` spawn pools; the first entry is wave 1, and the last entry repeats for every later wave. Repeat a type inside a pool to weight it. |
+| `scaling` | how a wave hardens with its number, applied to every enemy as it spawns |
+
+### scaling - assets/data/waves.json
+
+Each multiplier is `1 + (wave - 1) x perWave`, held at its `Max`, and applied to the values the enemy just read from its own JSON. Wave 1 always multiplies by 1, so the enemy files stay the source of truth for how something starts.
+
+| Field | Meaning |
+|---|---|
+| `hpPerWave`, `hpMax` | health multiplier. The main lever, and the ceiling is set high enough that health keeps climbing for as long as anyone plays |
+| `speedPerWave`, `speedMax` | movement multiplier. Capped much lower on purpose: past a point extra speed stops being difficulty and starts being undodgeable |
+| `damagePerWave`, `damageMax` | contact and shot damage multiplier |
+| `breatherPerWave`, `breatherMin` | seconds taken off the gap between waves each wave, down to a floor |
+
+Enemy count is not part of this - it keeps its own `maxCount` cap, because count is what costs frames. Difficulty past that cap comes from the multipliers instead, which cost nothing.
 
 ## Player - assets/data/player.json
 

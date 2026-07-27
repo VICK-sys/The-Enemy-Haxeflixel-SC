@@ -53,6 +53,16 @@ class Enemies extends FlxSprite
 	public var shadowOffXFlip:Float = 22;
 	public var shadowOffY:Float = 90;
 
+	public function applyScale(hpMult:Float, speedMult:Float, damageMult:Float):Void
+	{
+		hp = Math.round(hp * hpMult);
+		if (hp < 1)
+			hp = 1;
+		speed *= speedMult;
+		contactDamage *= damageMult;
+		shotDamage *= damageMult;
+	}
+
 	public var feetY(get, never):Float;
 
 	function get_feetY():Float
