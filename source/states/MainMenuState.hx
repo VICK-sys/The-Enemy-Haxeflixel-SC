@@ -182,6 +182,7 @@ class MainMenuState extends FlxState
 		}
 	}
 
+
 	function findMaps():Void
 	{
 		maps = [0];
@@ -190,9 +191,6 @@ class MainMenuState extends FlxState
 				maps.push(s);
 
 		mapPick = 0;
-		for (i in 0...maps.length)
-			if (maps[i] == EditorState.lastSlot)
-				mapPick = i;
 	}
 
 	function playLabel():String
