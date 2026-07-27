@@ -90,9 +90,9 @@ class OptionsSubState extends FlxSubState
 	function onOff(b:Bool):String
 		return Lang.t(b ? "common.on" : "common.off");
 
-	function switchLanguage():Void
+	function switchLanguage(dir:Int = 1):Void
 	{
-		Lang.cycle();
+		Lang.cycle(dir);
 		title.text = Lang.t("options.title");
 		title.font = Lang.font();
 		for (i in 0...6)
@@ -150,7 +150,7 @@ class OptionsSubState extends FlxSubState
 				SaveData.setShowFps(!SaveData.showFps());
 				SaveData.applySettings();
 			case 3:
-				switchLanguage();
+				switchLanguage(dir);
 				return;
 		}
 		refreshLabels();

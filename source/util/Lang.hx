@@ -6,7 +6,9 @@ class Lang
 {
 	public static inline var EN:String = "en";
 	public static inline var JA:String = "ja";
+	public static inline var ES:String = "es";
 
+	public static var codes(default, null):Array<String> = [EN, ES, JA];
 	public static var code(default, null):String = EN;
 
 	static var table:Dynamic;
@@ -21,13 +23,16 @@ class Lang
 
 	public static function set(c:String):Void
 	{
-		code = c == JA ? JA : EN;
+		code = codes.indexOf(c) >= 0 ? c : EN;
 		table = code == EN ? base : read(code);
 	}
 
-	public static function cycle():Void
+	public static function cycle(dir:Int = 1):Void
 	{
-		set(code == EN ? JA : EN);
+		var i = codes.indexOf(code);
+		if (i < 0)
+			i = 0;
+		set(codes[(i + dir + codes.length) % codes.length]);
 		SaveData.setLanguage(code);
 		dirty = true;
 	}
@@ -40,7 +45,7 @@ class Lang
 	}
 
 	public static function font():String
-		return code == JA ? Paths.font("DotGothic16-Regular") : null;
+		return code == EN ? null : Paths.font("DotGothic16-Regular");
 
 	public static function t(key:String, ?args:Array<Dynamic>):String
 	{

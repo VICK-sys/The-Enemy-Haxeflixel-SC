@@ -177,11 +177,17 @@ Asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow`, w
 
 ### Lang
 
-The string table for the game UI. It holds English and Japanese, and `Lang.t(key, args)` reads one line. Arguments replace the `{0}` and `{1}` markers in the line. An unknown key falls back to English, then to the key itself. A key therefore never renders as blank.
+The string table for the game UI. It holds English, Spanish and Japanese, and `Lang.t(key, args)` reads one line. Arguments replace the `{0}` and `{1}` markers in the line. An unknown key falls back to English, then to the key itself. A key therefore never renders as blank.
+
+`Lang.cycle(dir)` steps through `Lang.codes` in either direction, so the option row answers both left and right.
 
 The map editor keeps its English strings, because it is a build tool rather than a player screen.
 
-`Lang.font()` answers the font every UI text must use. English keeps flixel's default face, and Japanese takes `DotGothic16-Regular.ttf`. The default face has no kana or kanji, so the swap is what makes Japanese readable at all. The name tag over a remote player reads the same font.
+`Lang.font()` answers the font every UI text must use. English keeps flixel's default face, and every other language takes `DotGothic16-Regular.ttf`.
+
+That default face is the reason for the split. It carries no kana and no kanji, so Japanese cannot render in it at all. It also draws every accented capital as a lowercase glyph, which turns `RÉCORD` into `RéCORD`. It draws the inverted exclamation mark as a plain `i`. The UI is all capitals, so Spanish needs the swap as much as Japanese does.
+
+The name tag over a remote player reads the same font.
 
 The boss name and the game title stay in the default face. Both read as logos rather than as sentences. The boss name also splits into one sprite per letter for its reveal, which needs stable Latin widths.
 

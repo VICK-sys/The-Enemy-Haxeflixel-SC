@@ -182,11 +182,13 @@ Painted walls under or around a prop still work, and they put the collision in t
 
 ## Languages - assets/data/lang/&lt;code&gt;.json
 
-One flat object per language, from key to line. `en.json` is the source text, and `ja.json` is the Japanese. The two files must hold the same keys. They must also hold the same `{0}` and `{1}` markers per key, because the code passes the arguments by position.
+One flat object per language, from key to line. `en.json` is the source text, and `es.json` and `ja.json` sit beside it. All three must hold the same keys. They must also hold the same `{0}` and `{1}` markers per key, because the code passes the arguments by position.
 
-Japanese has no spaces, so the text field cannot wrap it. Write the line breaks into the Japanese lines by hand. Keep a line under about 34 full-width characters for the online help panel.
+Every line has to fit its box. Spanish runs longer than English, and the weapon card blurb has only 224 px. That one line therefore carries a hand-placed break.
 
-To add a language, copy `en.json`, translate the values, and add the code to `Lang`. A face that covers the new script also has to go in `assets/fonts/`, and `Lang.font()` has to answer with it.
+Japanese has no spaces, so the text field cannot wrap it at all. Write the breaks into those lines by hand. Keep a line under about 34 full-width characters for the online help panel.
+
+To add a language, copy `en.json`, translate the values, and add the code to `Lang.codes`. Check that the face in `Lang.font()` covers the script.
 
 ## Editor tuning - assets/data/editor.json
 
