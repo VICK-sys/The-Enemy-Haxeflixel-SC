@@ -33,6 +33,8 @@ import util.Lang;
 class PlayState extends FlxState
 {
 	static inline var CURSOR_LEAN:Float = 1.0;
+	static inline var QUIET_PLAYER_SCALE:Float = 1.5;
+	static inline var QUIET_ZOOM:Float = 0.7;
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
 	static inline var DEFLECT_PUSH:Float = 1.2;
@@ -187,6 +189,8 @@ class PlayState extends FlxState
 			combat.disabled = true;
 			director.spawning = false;
 			heldSprite.visible = false;
+			_player.setSizeScale(QUIET_PLAYER_SCALE);
+			FlxG.camera.zoom = QUIET_ZOOM;
 		}
 		else if (Net.active)
 			openTutorialIfNew();

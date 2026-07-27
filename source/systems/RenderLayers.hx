@@ -59,7 +59,8 @@ class RenderLayers
 	public function update():Void
 	{
 		playerShadow.x = player.shadowCenterX - playerShadow.width / 2;
-		SideView.placeShadow(playerShadow, player.x, player.width, player.y + player.height, player.feetY, player.shadowScaleX, 4);
+		SideView.placeShadow(playerShadow, player.x, player.width, player.y + player.height, player.feetY, player.shadowScaleX,
+			player.shadowScaleY);
 		entityLayer.sort(sortByFeet, FlxSort.ASCENDING);
 	}
 

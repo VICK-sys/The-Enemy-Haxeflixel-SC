@@ -3,7 +3,6 @@
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
-import flixel.sound.FlxSound;
 import util.Paths;
 import util.SideView;
 import data.PlayerData;
@@ -16,7 +15,21 @@ class Player extends FlxSprite
 	public var feetY(get, never):Float;
 
 	function get_feetY():Float
-		return y + FEET;
+		return y + FEET * sizeScale;
+
+	public var sizeScale(default, null):Float = 1;
+
+	public function setSizeScale(k:Float):Void
+	{
+		if (k == sizeScale)
+			return;
+		var footX = x + width * 0.5;
+		var footY = feetY;
+		sizeScale = k;
+		applySkin(SideView.active);
+		x = footX - width * 0.5;
+		y = footY - FEET * sizeScale;
+	}
 
 	public var blockMovement:Bool = false;
 	public var isDead:Bool = false;
@@ -26,8 +39,6 @@ class Player extends FlxSprite
 
 	private var data:PlayerData;
 	private var initialSpeed:Float = 0;
-	private var walkingSound:FlxSound;
-	private var walkSound:Bool = false;
 	private var prevBottom:Float = 0;
 	private var jumpsLeft:Int = 2;
 	private var frameCentre:Array<Float> = [];
@@ -41,8 +52,6 @@ class Player extends FlxSprite
 		applySkin(false);
 		initialSpeed = data.rampStart;
 		drag.x = drag.y = data.drag;
-
-		walkingSound = FlxG.sound.load(Paths.sound("walk/wave"), 1, true);
 	}
 
 	public function applySkin(side:Bool):Void
@@ -78,9 +87,12 @@ class Player extends FlxSprite
 			graphic.persist = true;
 
 		antialiasing = false;
-		width = 75;
-		height = 95;
-		scale.set(4, 4);
+		width = 75 * sizeScale;
+		height = 95 * sizeScale;
+		scale.set(4 * sizeScale, 4 * sizeScale);
+		if (sizeScale != 1)
+			offset.set(sizeScale * offset.x + frameWidth * 0.5 * (1 - sizeScale),
+				sizeScale * offset.y + frameHeight * 0.5 * (1 - sizeScale));
 		baseOffsetY = offset.y;
 		flipX = wasFlip;
 		animation.play(wasAnim == null ? "idle" : wasAnim, true);
@@ -117,14 +129,19 @@ class Player extends FlxSprite
 	public var shadowScaleX(get, never):Float;
 
 	function get_shadowScaleX():Float
-		return frameCentre.length > 0 ? data.sideSkin.shadowScaleX : 4;
+		return (frameCentre.length > 0 ? data.sideSkin.shadowScaleX : 4) * sizeScale;
+
+	public var shadowScaleY(get, never):Float;
+
+	function get_shadowScaleY():Float
+		return 4 * sizeScale;
 
 	public var shadowCenterX(get, never):Float;
 
 	function get_shadowCenterX():Float
 	{
 		if (frameCentre.length == 0)
-			return x + 36;
+			return x + 36 * sizeScale;
 
 		var i = animation.frameIndex;
 		var cp = i >= 0 && i < frameCentre.length ? frameCentre[i] : frameWidth * 0.5;
@@ -180,12 +197,6 @@ class Player extends FlxSprite
 		else if (!blockMovement && !isDead)
 			movement(elapsed);
 
-		if((isDead || floating) && walkSound)
-		{
-			walkingSound.stop();
-			walkSound = false;
-		}
-
 		prevBottom = y + height;
 		super.update(elapsed);
 	}
@@ -212,14 +223,7 @@ class Player extends FlxSprite
 				velocity.x = left ? -initialSpeed : initialSpeed;
 				flipX = left;
 				if (grounded)
-				{
 					this.animation.play("walk");
-					if (!walkSound && !isDead)
-					{
-						walkingSound.play();
-						walkSound = true;
-					}
-				}
 			}
 			else
 			{
@@ -239,16 +243,8 @@ class Player extends FlxSprite
 		else if (grounded)
 			velocity.x = 0;
 
-		if (!grounded)
-		{
-			if (!isDead)
-				this.animation.play(velocity.y < 0 ? "jump" : "fall");
-			if (walkSound)
-			{
-				walkingSound.stop();
-				walkSound = false;
-			}
-		}
+		if (!grounded && !isDead)
+			this.animation.play(velocity.y < 0 ? "jump" : "fall");
 
 		if (x < 24)
 			x = 24;
@@ -281,12 +277,6 @@ class Player extends FlxSprite
 		if (up || down || left || right)
 		{
 			var newAngle:Float = 0;
-
-			if(!walkSound && !isDead && !floating)
-			{
-				walkingSound.play();
-				walkSound = true;
-			}
 
 			if(initialSpeed < data.moveSpeed)
 			{
@@ -343,12 +333,6 @@ class Player extends FlxSprite
 		else
 		{
 			this.animation.play("idle");
-
-			if(walkSound)
-			{
-				walkingSound.stop();
-				walkSound = false;
-			}
 
 			initialSpeed = data.rampReset;
 		}
