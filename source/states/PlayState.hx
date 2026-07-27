@@ -56,6 +56,10 @@ class PlayState extends FlxState
 	private var netSync:NetSync;
 	private var props:systems.world.PropWorld;
 	private var floor:flixel.tile.FlxTilemap;
+	private var flyIn:ui.WeaponFlyIn;
+	private var flyPick:Int = -1;
+	private var flyX:Float = 0;
+	private var flyY:Float = 0;
 
 	function showDecor(on:Bool):Void
 	{
@@ -145,6 +149,8 @@ class PlayState extends FlxState
 		add(combat.deadEye.markers);
 
 		hud = new Hud(this, status);
+		flyIn = new ui.WeaponFlyIn(hud.camUI, combat.held);
+		add(flyIn.sprite);
 		shift = new PerspectiveShift(arena, _player, director, combat, layers);
 		shift.disabled = true;
 		director.onProbe = shift.onProbe;
@@ -188,7 +194,13 @@ class PlayState extends FlxState
 	function openWeaponPick():Void
 	{
 		var picker = new WeaponPickSubState(hud.camUI);
-		picker.onPicked = function(i) combat.equip(i);
+		picker.onPicked = function(i)
+		{
+			combat.equip(i);
+			flyPick = i;
+			flyX = picker.pickedX;
+			flyY = picker.pickedY;
+		};
 		picker.closeCallback = openTutorialIfNew;
 		openSubState(picker);
 	}
@@ -196,10 +208,23 @@ class PlayState extends FlxState
 	function openTutorialIfNew():Void
 	{
 		if (TutorialSubState.shown || Net.active)
+		{
+			startFlyIn();
 			return;
+		}
 		TutorialSubState.shown = true;
-		openSubState(new TutorialSubState(hud.camUI));
+		var tutorial = new TutorialSubState(hud.camUI);
+		tutorial.closeCallback = startFlyIn;
+		openSubState(tutorial);
 		DiscordPresence.tutorial();
+	}
+
+	function startFlyIn():Void
+	{
+		if (flyPick < 0)
+			return;
+		flyIn.begin(WeaponPickSubState.artOf(flyPick), flyX, flyY);
+		flyPick = -1;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -232,6 +257,7 @@ class PlayState extends FlxState
 		if (status.consumeJustDied())
 		{
 			layers.playerShadow.visible = false;
+			flyIn.drop();
 			heldSprite.visible = false;
 			if (!Net.active)
 			{
@@ -257,6 +283,7 @@ class PlayState extends FlxState
 		hud.setTimeStop(Net.active ? "OFF" : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
+		flyIn.update(elapsed);
 
 		if (subState == null && !status.dead)
 			DiscordPresence.playing(director.wave, bossFight, combat.weapon, status.kills);
@@ -281,6 +308,7 @@ class PlayState extends FlxState
 		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
 		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
 	}
+
 
 
 

@@ -57,6 +57,9 @@ class WeaponPickSubState extends FlxSubState
 	public static function nameOf(i:Int):String
 		return i >= 0 && i < NAMES.length ? NAMES[i] : NAMES[0];
 
+	public static function artOf(i:Int):String
+		return i >= 0 && i < ART.length ? ART[i] : ART[0];
+
 	static var ART:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/hook"];
 	static var BLURBS:Array<String> = [
 		"SWING  /  THROW",
@@ -66,6 +69,8 @@ class WeaponPickSubState extends FlxSubState
 	];
 
 	public var onPicked:Int->Void;
+	public var pickedX(default, null):Float = 0;
+	public var pickedY(default, null):Float = 0;
 
 	private var camUI:FlxCamera;
 	private var cards:Array<Card> = [];
@@ -289,6 +294,9 @@ class WeaponPickSubState extends FlxSubState
 	{
 		done = true;
 		lastPick = pick;
+		var icon = cards[pick].icon;
+		pickedX = icon.x + icon.width * 0.5;
+		pickedY = icon.y + icon.height * 0.5;
 		if (onPicked != null)
 			onPicked(pick);
 		close();
