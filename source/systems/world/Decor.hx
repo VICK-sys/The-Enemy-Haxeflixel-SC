@@ -115,7 +115,8 @@ class Decor
 		return group;
 	}
 
-	public static function build(list:Array<PropPlace>, into:flixel.group.FlxGroup.FlxTypedGroup<FlxSprite>):Array<FlxSprite>
+	public static function build(list:Array<PropPlace>, into:flixel.group.FlxGroup.FlxTypedGroup<FlxSprite>,
+			?names:Array<String>):Array<FlxSprite>
 	{
 		var out:Array<FlxSprite> = [];
 		if (list == null)
@@ -129,6 +130,8 @@ class Decor
 			place(s, pl.x, pl.y);
 			into.add(s);
 			out.push(s);
+			if (names != null)
+				names.push(pl.n);
 		}
 		return out;
 	}

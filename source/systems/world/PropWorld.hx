@@ -14,13 +14,23 @@ class PropWorld
 	private var player:Player;
 	private var layers:RenderLayers;
 	private var decor:Array<FlxSprite> = [];
+	private var decorNames:Array<String> = [];
+
+	public function named(name:String):Array<FlxSprite>
+	{
+		var out:Array<FlxSprite> = [];
+		for (i in 0...decor.length)
+			if (decorNames[i] == name)
+				out.push(decor[i]);
+		return out;
+	}
 
 	public function new(player:Player, layers:RenderLayers)
 	{
 		this.player = player;
 		this.layers = layers;
 
-		decor = Decor.build(CustomArena.props, layers.entityLayer);
+		decor = Decor.build(CustomArena.props, layers.entityLayer, decorNames);
 		solids = Decor.solids(CustomArena.props);
 		PropBlock.solids = solids;
 

@@ -175,6 +175,12 @@ The line-of-sight and pathfinding component. A few times per second it checks a 
 
 Asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow`, which returns the loaded atlas for a png and xml pair.
 
+### BushDrift
+
+The canopy never sits still. `BushDrift` walks a prop round a tiny square, three pixels out from where the map placed it, at five pixels a second. `treeBush` runs it one way, and `treeBush2` runs the same square backwards. The two layers therefore pull against each other, and the red mass breathes.
+
+It moves `x` and `y`, not the draw offset. A `PropSprite` caches its sort key in `sortY` when the map places it, so a moving prop keeps its place in the depth order. Without that cache, three pixels would flip the two bushes past the trunk and past each other on every lap.
+
 ### TreeMan and DialogueBox
 
 The man behind the tree. `TreeMan` runs only in the quiet room. It finds its spot from the `tree` prop rather than from a fixed coordinate, so moving the prop moves the man with it. He sits a little behind the trunk, so you have to walk round the tree to reach him. Nothing on screen says so.
