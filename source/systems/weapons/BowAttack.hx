@@ -115,7 +115,6 @@ class BowAttack
 		var arrow = arrows.recycle(Arrow);
 		arrow.fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,
 			1 + power * cfg.sizeBonus, 1 + power * cfg.knockBonus);
-		cooldown = cfg.shotCooldown;
 		FlxG.sound.play(Paths.sound("bow"), 0.7 + power * 0.3);
 		if (power >= 1)
 		{
@@ -123,6 +122,8 @@ class BowAttack
 			fx.sparksAt(bx + dx * 30, by + dy * 30);
 			FlxG.camera.shake(0.004, 0.18);
 		}
+		else
+			cooldown = cfg.shotCooldown;
 	}
 
 	public function rainFire(tx:Float, ty:Float, bx:Float, by:Float):Void

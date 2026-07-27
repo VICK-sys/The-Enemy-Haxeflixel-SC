@@ -12,7 +12,7 @@ Two players. From the main menu choose ONLINE. One player picks HOST GAME (this 
 
 - WASD - move
 - Mouse - aim, left click for the primary attack, right click for the secondary
-- Hammer - swing / throw. Revolver - shoot / fan the hammer, which rips through every remaining round in one continuous burst. Eight rounds, fired as fast as you can click; running dry reloads on its own, or press R to top up early. Crossbow - charged shot (hold to charge, release to fire; a full charge pierces) / arrow rain when its meter is full. Hook - quick jab / grab
+- Hammer - swing / throw. Revolver - shoot / fan the hammer, which rips through every remaining round in one continuous burst. Eight rounds, fired as fast as you can click; running dry reloads on its own, or press R to top up early. Crossbow - charged shot (hold to charge, release to fire; a full charge pierces and can be fired back to back, a tap cannot) / arrow rain when its meter is full. Hook - quick jab / grab
 - Melee attacks (the hammer swing and the hook jab) deflect enemy bullets back at whoever fired them
 - Q - super (needs a full AP meter): the hammer orbits blades you launch with left click; the crossbow does Arrow Storm (an arena-wide downpour); the hook extends two auto-grabbing arms that snatch and hurl enemies. The revolver has none yet
 - SPACE - dash (2 second cooldown)
