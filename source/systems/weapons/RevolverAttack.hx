@@ -25,6 +25,7 @@ class RevolverAttack
 	private var fx:Fx;
 	private var hits:HitPipeline;
 	private var reloading:Float = 0;
+	private var reloadFrom:Int = 0;
 	private var fanning:Bool = false;
 	private var fanTimer:Float = 0;
 
@@ -44,6 +45,25 @@ class RevolverAttack
 	function get_isReloading():Bool
 		return reloading > 0;
 
+	public var displayRounds(get, never):Int;
+
+	function get_displayRounds():Int
+	{
+		if (reloading <= 0)
+			return rounds;
+		var fill = 1 - reloading / cfg.reloadTime;
+		var n = reloadFrom + Math.floor(fill * (cfg.cylinder - reloadFrom));
+		if (n < reloadFrom)
+			n = reloadFrom;
+		return n > cfg.cylinder ? cfg.cylinder : n;
+	}
+
+	function beginReloadFrom(n:Int):Void
+	{
+		reloadFrom = n;
+		reloading = cfg.reloadTime;
+	}
+
 	public function canFire():Bool
 		return reloading <= 0 && !fanning && rounds > 0;
 
@@ -60,7 +80,7 @@ class RevolverAttack
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.65);
 		if (rounds <= 0)
-			reloading = cfg.reloadTime;
+			beginReloadFrom(0);
 	}
 
 	public function fireAt(bx:Float, by:Float, target:entities.enemy.Enemies, damage:Int):Void
@@ -86,7 +106,7 @@ class RevolverAttack
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.7);
 		if (rounds <= 0)
-			reloading = cfg.reloadTime;
+			beginReloadFrom(0);
 	}
 
 	public function beginReload():Bool
@@ -94,7 +114,7 @@ class RevolverAttack
 		if (reloading > 0 || fanning || rounds >= cfg.cylinder)
 			return false;
 
-		reloading = cfg.reloadTime;
+		beginReloadFrom(rounds);
 		return true;
 	}
 
@@ -157,7 +177,7 @@ class RevolverAttack
 		if (rounds <= 0)
 		{
 			fanning = false;
-			reloading = cfg.reloadTime;
+			beginReloadFrom(0);
 		}
 	}
 

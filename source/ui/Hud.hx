@@ -23,6 +23,8 @@ class Hud
 	static inline var BOSS_BANNER_REST:Float = 250;
 	static inline var STOP_TIMER_FADE:Float = 4;
 	static inline var RELOAD_TINT:Int = 0xFFFF7A7A;
+	static inline var AMMO_POP_TIME:Float = 0.14;
+	static inline var AMMO_POP_AMP:Float = 0.4;
 
 	public var camUI:FlxCamera;
 
@@ -42,6 +44,8 @@ class Hud
 	private var stopTimerTarget:Float = 0;
 	private var gaugeBar:FlxBar;
 	private var ammoText:FlxText;
+	private var ammoShown:Int = -1;
+	private var ammoPop:Float = 0;
 
 	public function new(state:FlxState, status:PlayerCombat)
 	{
@@ -125,6 +129,14 @@ class Hud
 	public function update(elapsed:Float):Void
 	{
 		customCursor.setPosition(FlxG.mouse.screenX - 5, FlxG.mouse.screenY);
+
+		if (ammoPop > 0)
+		{
+			ammoPop -= elapsed;
+			var t = ammoPop > 0 ? ammoPop / AMMO_POP_TIME : 0;
+			var s = 1 + AMMO_POP_AMP * t;
+			ammoText.scale.set(s, s);
+		}
 
 		if (stopTimerText.alpha != stopTimerTarget)
 		{
@@ -270,9 +282,12 @@ class Hud
 		ammoText.visible = shown;
 		if (!shown)
 			return;
-		var line = cur + " / " + max;
-		if (ammoText.text != line)
-			ammoText.text = line;
+		if (cur != ammoShown)
+		{
+			ammoShown = cur;
+			ammoText.text = cur + " / " + max;
+			ammoPop = AMMO_POP_TIME;
+		}
 		ammoText.color = reloading ? RELOAD_TINT : FlxColor.WHITE;
 	}
 

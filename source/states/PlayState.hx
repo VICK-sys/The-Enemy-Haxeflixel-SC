@@ -279,7 +279,7 @@ class PlayState extends FlxState
 		if (netSync != null)
 			netSync.update(elapsed);
 		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
-		hud.setAmmo(combat.revolver.rounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
+		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
 		hud.setTimeStop(Net.active ? "OFF" : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
@@ -308,6 +308,7 @@ class PlayState extends FlxState
 		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
 		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
 	}
+
 
 
 
