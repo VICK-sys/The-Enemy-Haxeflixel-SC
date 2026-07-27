@@ -126,6 +126,9 @@ class Weapons
 		return WEAPON_NAMES[weapon];
 	}
 
+	public function hasSuper():Bool
+		return weapon != 1;
+
 	public function equip(i:Int):Void
 	{
 		weapon = i < 0 || i >= WEAPON_NAMES.length ? 0 : i;
@@ -214,15 +217,16 @@ class Weapons
 			return;
 		}
 
-		if (FlxG.keys.justPressed.Q && status.canSuper() && !superScythes.active() && !throwAttack.airborne && !hookAttack.busy)
+		if (FlxG.keys.justPressed.Q && hasSuper() && status.canSuper() && !superScythes.active() && !throwAttack.airborne
+			&& !hookAttack.busy)
 		{
 			status.spendSuper();
 			switch (weapon)
 			{
 				case 0: superScythes.activate();
-				case 1: bounceStrike.activate();
 				case 2: arrowStorm.activate();
-				default: hookArms.activate();
+				case 3: hookArms.activate();
+				default:
 			}
 			if (onSuper != null)
 				onSuper(weapon);

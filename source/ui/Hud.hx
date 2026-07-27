@@ -322,11 +322,6 @@ class Hud
 			modeIcon.loadGraphic(Paths.image("items/revolver"));
 			iconBaseAngle = 0;
 		}
-		else if (name == "BOUNCE STRIKE")
-		{
-			modeIcon.loadGraphic(Paths.image("items/revolver"));
-			iconBaseAngle = -20;
-		}
 		else if (name == "CROSSBOW")
 		{
 			modeIcon.loadGraphic(Paths.image("items/crossbow"));
