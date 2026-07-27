@@ -23,6 +23,8 @@
 
 	Ordinary revolver fire is unchanged and still stops at the first enemy it meets; only a round with a mark behind it ignores bystanders.
 
+	The freeze is solo only. Online the flash, the sepia, the heartbeat, the marking and the volley all still happen, but the clock is never touched and the player is never rooted - you paint targets while the fight carries on, and a three second timer releases the shots if you do not. Freezing would not have worked in either direction: the host owns the enemies, so a host freezing its own world streams still positions and stops the guest's game with no warning and no end, while a guest freezing its clock stops nothing at all, because `PuppetMirror` lerps enemies toward streamed positions on raw elapsed and never reads `WorldClock`. It would have rooted the guest in place while everything kept coming. `froze` is decided once at activation and every restore path keys off it.
+
 	The freeze is not the super's to own. `TimeStop` writes `WorldClock.scale` unconditionally every frame, so a second writer would have been overwritten before the enemies ever read it; `WorldClock` now takes the two sources separately and hands out whichever is slower.
 
 	The fade outlives the super. Ending the shots and holding the overlay are separate steps - `letGo` returns the world, the player and the aim, then a fourth phase runs the overlay down on its own. Folding them together left the last frame re-applying a fade the state machine had already stopped updating, which pinned a permanent sepia tint over the game.

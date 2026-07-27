@@ -6,7 +6,7 @@ The main menu has PLAY, OPTIONS (master volume, fullscreen, FPS counter, reset b
 
 ## Online co-op (desktop)
 
-Two players. From the main menu choose ONLINE. One player picks HOST GAME (this listens on TCP port 7777 - forward that port on your router and share your public IP), the other picks JOIN GAME and types the host's IP. If port 7777 is busy the host falls back to the next free port and shows it; in that case the friend joins with `IP:port`. The host presses ENTER once the friend is connected. Time stop is disabled online, and death respawns you after a few seconds instead of ending the run.
+Two players. From the main menu choose ONLINE. One player picks HOST GAME (this listens on TCP port 7777 - forward that port on your router and share your public IP), the other picks JOIN GAME and types the host's IP. If port 7777 is busy the host falls back to the next free port and shows it; in that case the friend joins with `IP:port`. The host presses ENTER once the friend is connected. Time stop is disabled online, Dead Eye marks without stopping the world, and death respawns you after a few seconds instead of ending the run.
 
 ## Controls
 

@@ -7,6 +7,7 @@ import flixel.sound.FlxSound;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
 import entities.Player;
+import net.Net;
 import entities.enemy.Enemies;
 import systems.enemy.EnemyDirector;
 import data.WeaponData.WeaponDataRegistry;
@@ -24,6 +25,7 @@ class DeadEye
 	static inline var PULSE_AMP:Float = 0.18;
 	static inline var SEPIA:Int = 0xFF8A5A22;
 	static inline var ARM_TIME:Float = 0.12;
+	static inline var LIVE_MARK_TIME:Float = 3;
 
 	public var markers:FlxTypedGroup<FlxSprite>;
 	public var overlay:FlxSprite;
@@ -44,6 +46,8 @@ class DeadEye
 	private var shotTimer:Float = 0;
 	private var pulse:Float = 0;
 	private var blockSaved:Bool = false;
+	private var froze:Bool = false;
+	private var liveTimer:Float = 0;
 	private var targets:Array<Enemies> = [];
 
 	public function new(player:Player, director:EnemyDirector, revolver:RevolverAttack, held:HeldWeapon)
@@ -85,9 +89,15 @@ class DeadEye
 		pulse = 0;
 		targets = [];
 
-		WorldClock.superSlow = 0;
-		blockSaved = player.blockMovement;
-		player.blockMovement = true;
+		froze = !Net.active;
+		if (froze)
+		{
+			WorldClock.superSlow = 0;
+			blockSaved = player.blockMovement;
+			player.blockMovement = true;
+		}
+		else
+			liveTimer = LIVE_MARK_TIME;
 
 		overlay.color = FlxColor.WHITE;
 		overlay.alpha = 1;
@@ -107,8 +117,11 @@ class DeadEye
 	function letGo():Void
 	{
 		targets = [];
-		WorldClock.superSlow = 1;
-		player.blockMovement = blockSaved;
+		if (froze)
+		{
+			WorldClock.superSlow = 1;
+			player.blockMovement = blockSaved;
+		}
 		held.unlockAim();
 		heartbeat.stop();
 		for (m in markers.members)
@@ -134,7 +147,8 @@ class DeadEye
 			return;
 		}
 
-		player.blockMovement = true;
+		if (froze)
+			player.blockMovement = true;
 
 		if (phase == 1)
 			updateMarking(elapsed);
@@ -149,6 +163,16 @@ class DeadEye
 	{
 		if (arm > 0)
 			arm -= elapsed;
+
+		if (!froze)
+		{
+			liveTimer -= elapsed;
+			if (liveTimer <= 0)
+			{
+				release();
+				return;
+			}
+		}
 
 		if (targets.length < revolver.rounds)
 		{
@@ -179,7 +203,8 @@ class DeadEye
 		phase = 2;
 		fade = cfg.fadeTime;
 		shotTimer = 0;
-		WorldClock.superSlow = 1;
+		if (froze)
+			WorldClock.superSlow = 1;
 		heartbeat.stop();
 	}
 
