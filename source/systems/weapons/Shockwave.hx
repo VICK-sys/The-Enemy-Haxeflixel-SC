@@ -21,14 +21,14 @@ class Shockwave
 	private var cfg = WeaponDataRegistry.get().shockwave;
 	private var director:EnemyDirector;
 	private var hits:HitPipeline;
-	private var stunTime:Float;
+	public var stunTime:Float;
 	private var waves:Array<Wave> = [];
 
-	public function new(director:EnemyDirector, hits:HitPipeline, stunTime:Float)
+	public function new(director:EnemyDirector, hits:HitPipeline)
 	{
 		this.director = director;
 		this.hits = hits;
-		this.stunTime = stunTime;
+		stunTime = cfg.stunTime;
 		rings = new FlxTypedGroup<FlxSprite>();
 		cracks = new FlxTypedGroup<CrackSprite>();
 	}

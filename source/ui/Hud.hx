@@ -21,11 +21,8 @@ class Hud
 	static inline var BOSS_BANNER_FADE:Float = 0.7;
 	static inline var BOSS_BANNER_TOP:Float = -70;
 	static inline var BOSS_BANNER_REST:Float = 250;
-	static inline var MODE_SWITCH_TIME:Float = 0.3;
 	static inline var STOP_TIMER_FADE:Float = 4;
 	static inline var RELOAD_TINT:Int = 0xFFFF7A7A;
-	static inline var ICON_X:Float = 560;
-	static inline var ICON_Y:Float = 652;
 
 	public var camUI:FlxCamera;
 
@@ -35,23 +32,16 @@ class Hud
 	private var waveText:FlxText;
 	private var bannerText:FlxText;
 	private var deadText:FlxText;
-	private var modeText:FlxText;
-	private var modeIcon:FlxSprite;
 	private var bossHud:BossHud;
 	private var bannerTimer:Float = 0;
 	private var bossSlide:Bool = false;
 	private var bannerFading:Bool = false;
 	private var bannerFadeTimer:Float = 0;
-	private var currentMode:String = "";
 	private var timeText:FlxText;
 	private var stopTimerText:FlxText;
 	private var stopTimerTarget:Float = 0;
-	private var modeSwitchTimer:Float = 0;
 	private var gaugeBar:FlxBar;
 	private var ammoText:FlxText;
-	private var iconBaseAngle:Float = 0;
-	private var iconScaleX:Float = 1;
-	private var iconScaleY:Float = 1;
 
 	public function new(state:FlxState, status:PlayerCombat)
 	{
@@ -105,12 +95,6 @@ class Hud
 		bannerText = makeText(250, 48);
 		deadText = makeText(380, 24);
 		deadText.visible = false;
-		modeText = makeText(645, 12);
-
-		modeIcon = new FlxSprite();
-		modeIcon.antialiasing = false;
-		modeIcon.cameras = [camUI];
-		state.add(modeIcon);
 
 		bossHud = new BossHud(state, camUI);
 
@@ -168,29 +152,6 @@ class Hud
 				bannerText.angle = 0;
 				bannerText.y = 48;
 				bossSlide = false;
-			}
-		}
-
-		if (modeSwitchTimer > 0)
-		{
-			modeSwitchTimer -= elapsed;
-			var p = 1 - modeSwitchTimer / MODE_SWITCH_TIME;
-			if (p > 1)
-				p = 1;
-			var ease = 1 - (1 - p) * (1 - p) * (1 - p);
-			var mult = 1 + (1 - ease) * 1.2;
-			modeIcon.scale.set(iconScaleX * mult, iconScaleY * mult);
-			modeIcon.angle = iconBaseAngle - 180 * (1 - ease);
-			modeIcon.alpha = ease;
-			modeText.scale.set(1 + (1 - ease) * 0.6, 1 + (1 - ease) * 0.6);
-			modeText.alpha = 0.3 + 0.7 * ease;
-			if (modeSwitchTimer <= 0)
-			{
-				modeIcon.scale.set(iconScaleX, iconScaleY);
-				modeIcon.angle = iconBaseAngle;
-				modeIcon.alpha = 1;
-				modeText.scale.set(1, 1);
-				modeText.alpha = 1;
 			}
 		}
 
@@ -297,16 +258,6 @@ class Hud
 		bannerTimer = BANNER_TIME;
 	}
 
-	public function setMode(name:String):Void
-	{
-		if (name == currentMode)
-			return;
-		currentMode = name;
-		modeText.text = "WEAPON: " + name;
-		applyModeIcon(name);
-		modeSwitchTimer = MODE_SWITCH_TIME;
-	}
-
 	public function setGauge(fill:Float, shown:Bool):Void
 	{
 		gaugeBar.visible = shown;
@@ -323,47 +274,6 @@ class Hud
 		if (ammoText.text != line)
 			ammoText.text = line;
 		ammoText.color = reloading ? RELOAD_TINT : FlxColor.WHITE;
-	}
-
-	function applyModeIcon(name:String):Void
-	{
-		if (name == "HAMMER")
-		{
-			modeIcon.loadGraphic(Paths.image("items/hammer"));
-			iconBaseAngle = 15;
-		}
-		else if (name.indexOf("SUPER") == 0)
-		{
-			modeIcon.loadGraphic(Paths.image("items/hammer"));
-			iconBaseAngle = 30;
-		}
-		else if (name == "REVOLVER")
-		{
-			modeIcon.loadGraphic(Paths.image("items/revolver"));
-			iconBaseAngle = 0;
-		}
-		else if (name == "CROSSBOW")
-		{
-			modeIcon.loadGraphic(Paths.image("items/crossbow"));
-			iconBaseAngle = 0;
-		}
-		else if (name == "ARROW STORM")
-		{
-			modeIcon.loadGraphic(Paths.image("items/crossbow"));
-			iconBaseAngle = -45;
-		}
-		else
-		{
-			modeIcon.loadGraphic(Paths.image("items/hook"));
-			iconBaseAngle = 30;
-		}
-		modeIcon.setGraphicSize(34, 0);
-		modeIcon.updateHitbox();
-		iconScaleX = modeIcon.scale.x;
-		iconScaleY = modeIcon.scale.y;
-		modeIcon.x = ICON_X - modeIcon.width / 2;
-		modeIcon.y = ICON_Y - modeIcon.height / 2;
-		modeIcon.angle = iconBaseAngle;
 	}
 
 	public function showDeath(wave:Int, best:Int):Void

@@ -11,13 +11,13 @@ import systems.Pickups;
 
 class Weapons
 {
-	static var WEAPON_NAMES:Array<String> = ["HAMMER", "REVOLVER", "CROSSBOW", "HOOK"];
+	static inline var WEAPON_COUNT:Int = 4;
 
 	public var held:HeldWeapon;
 	public var hits:HitPipeline;
 	public var swing:SwingAttack;
 	public var jab:SwingAttack;
-	public var hammer:HammerAttack;
+	public var shock:Shockwave;
 	public var revolver:RevolverAttack;
 	public var bow:BowAttack;
 	public var throwAttack:ThrowAttack;
@@ -46,13 +46,13 @@ class Weapons
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
 		swing = new SwingAttack(director, hits, weaponCfg.swing);
 		jab = new SwingAttack(director, hits, weaponCfg.jab);
-		hammer = new HammerAttack(director, fx, hits);
+		shock = new Shockwave(director, hits);
 		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, scythe, arena, director, status, hits);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
 		superScythes = new SuperScythes(player, scythe, arena, director, status, fx, hits);
-		bounceStrike = new BounceStrike(player, fx, hits, held.sprite, hammer.shock);
+		bounceStrike = new BounceStrike(player, fx, hits, held.sprite, shock);
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
 		hookArms = new HookArms(player, director, hits);
 	}
@@ -90,7 +90,7 @@ class Weapons
 		bow.update(elapsed);
 		var gunAim = aimFromPlayer();
 		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
-		hammer.update(elapsed);
+		shock.update(elapsed);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
 		superScythes.update(elapsed);
@@ -114,25 +114,12 @@ class Weapons
 		wasArms = hookArms.active;
 	}
 
-	public function modeName():String
-	{
-		if (bounceStrike.active)
-			return "BOUNCE STRIKE";
-		if (arrowStorm.active)
-			return "ARROW STORM";
-		if (hookArms.active)
-			return "ARMS";
-		if (superScythes.active())
-			return "SUPER " + superScythes.orbiterCount();
-		return WEAPON_NAMES[weapon];
-	}
-
 	public function hasSuper():Bool
 		return weapon != 1;
 
 	public function equip(i:Int):Void
 	{
-		weapon = i < 0 || i >= WEAPON_NAMES.length ? 0 : i;
+		weapon = i < 0 || i >= WEAPON_COUNT ? 0 : i;
 		bow.cancelCharge();
 		revolver.reset();
 		held.setKind(weapon);

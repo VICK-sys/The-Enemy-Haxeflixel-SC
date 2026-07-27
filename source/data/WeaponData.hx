@@ -10,14 +10,6 @@ typedef SwingConfig = {
 	effectScale:Float
 }
 
-typedef HammerConfig = {
-	reach:Float,
-	radius:Float,
-	damage:Int,
-	push:Float,
-	stunTime:Float
-}
-
 typedef RevolverConfig = {
 	cylinder:Int,
 	damage:Int,
@@ -32,7 +24,8 @@ typedef RevolverConfig = {
 
 typedef ShockwaveConfig = {
 	waveRadius:Float,
-	waveTime:Float
+	waveTime:Float,
+	stunTime:Float
 }
 
 typedef ThrownConfig = {
@@ -110,7 +103,6 @@ typedef HookArmsConfig = {
 typedef WeaponsData = {
 	swing:SwingConfig,
 	jab:SwingConfig,
-	hammer:HammerConfig,
 	revolver:RevolverConfig,
 	shockwave:ShockwaveConfig,
 	thrown:ThrownConfig,

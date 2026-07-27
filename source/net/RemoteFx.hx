@@ -60,7 +60,8 @@ class RemoteFx
 		this.fx = fx;
 		this.avatar = avatar;
 
-		shock = new Shockwave(director, hits, 0);
+		shock = new Shockwave(director, hits);
+		shock.stunTime = 0;
 		rain = new ArrowRain(fx, hits);
 		rain.cosmetic = true;
 

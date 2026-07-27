@@ -14,7 +14,7 @@ class DiscordPresence
 	#if hxdiscord_rpc
 	static inline var FLUSH_INTERVAL:Float = 2.0;
 
-	static var WEAPON_NAMES:Array<String> = ["Scythe", "Hammer", "Bow", "Hook"];
+	static var WEAPON_NAMES:Array<String> = ["Hammer", "Revolver", "Crossbow", "Hook"];
 	static var WEAPON_KEYS:Array<String> = ["scythe", "hammer", "bow", "hook"];
 
 	static var presence:DiscordRichPresence = DiscordRichPresence.create();

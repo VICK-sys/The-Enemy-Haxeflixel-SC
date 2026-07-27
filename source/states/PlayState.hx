@@ -121,8 +121,8 @@ class PlayState extends FlxState
 		add(combat.bow.arrows);
 		add(combat.revolver.bullets);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
-		insert(members.indexOf(layers.entityLayer), combat.hammer.shock.cracks);
-		insert(members.indexOf(layers.entityLayer), combat.hammer.shock.rings);
+		insert(members.indexOf(layers.entityLayer), combat.shock.cracks);
+		insert(members.indexOf(layers.entityLayer), combat.shock.rings);
 		add(combat.bow.rain.arrows);
 		add(combat.arrowStorm.trail.group);
 		add(combat.arrowStorm.superArrow);
@@ -250,7 +250,6 @@ class PlayState extends FlxState
 		director.updateShots();
 		if (netSync != null)
 			netSync.update(elapsed);
-		hud.setMode(combat.modeName());
 		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
 		hud.setAmmo(combat.revolver.rounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
 		hud.setTimeStop(Net.active ? "OFF" : timeStop.hudLabel());
