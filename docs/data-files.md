@@ -246,6 +246,10 @@ Know one thing before you add art: **the game never draws the collision tileset*
 
 `wallColor` is RGB only on purpose. A full ARGB literal like `0xFF1C1010` is larger than a signed 32-bit int. A parse of it clamps to `0x7FFFFFFF`, and every wall comes out translucent white. The code ORs the alpha on instead.
 
+The colour is the base coat under a wall block, and a painted tile covers it. An unpainted cell over a wall therefore shows this colour raw. The first theme holds black for that reason. Erase a tile over a wall and the hole reads as void, rather than as a patch of a different colour.
+
+Only player maps read the theme. `WallSkin` gives up early unless `CustomArena` is active, so the stock arena keeps the `0xFF1C1010` default that the class itself holds.
+
 `wallRect` is what makes an art-pack sheet work directly. Point it at the one patch you want repeated, rather than slice the sheet into a new file. To add a theme, write a JSON entry and supply the images. No code changes:
 
 ```json

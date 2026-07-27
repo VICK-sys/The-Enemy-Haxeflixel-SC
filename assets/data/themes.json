@@ -5,7 +5,7 @@
 			"background": "stages/theEnemy",
 			"wall": "",
 			"wallRect": [],
-			"wallColor": "1C1010"
+			"wallColor": "000000"
 		},
 		{
 			"name": "VOID GRID",
