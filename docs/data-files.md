@@ -119,6 +119,12 @@ Playing one sets `CustomArena`, a static the Arena constructor checks. When set,
 
 The main menu clears `CustomArena` on entry, so a normal PLAY is always the stock arena. Online runs start only from the menu, so custom maps cannot desync a co-op session.
 
+`CustomArena` also records which slot a map came from, and slot 2 is the quiet room. It runs no waves and hands you no weapon.
+
+A false `EnemyDirector.spawning` stops wave pacing and the boss intro. The per-enemy tick still runs, so anything already placed still behaves. A true `Weapons.disabled` drops every attack input and hides the held sprite. The weapon card and the tutorial both stay shut.
+
+The slot number carries this rather than a field in the map file. A field would not survive the next save, because the editor writes the map from its own document.
+
 ## Paintable tilesets - assets/data/tilesets.json
 
 An array of `tilesets`, the sheets the editor can paint floor art from. This is the layer to reach for when you want to *place* tiles from an art pack.

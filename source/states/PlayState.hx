@@ -179,7 +179,13 @@ class PlayState extends FlxState
 		DiscordPresence.beginRun();
 
 		combat.equip(WeaponPickSubState.lastPick);
-		if (Net.active)
+		if (util.CustomArena.quiet)
+		{
+			combat.disabled = true;
+			director.spawning = false;
+			heldSprite.visible = false;
+		}
+		else if (Net.active)
 			openTutorialIfNew();
 		else
 			openWeaponPick();

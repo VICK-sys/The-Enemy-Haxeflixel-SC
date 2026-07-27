@@ -21,6 +21,7 @@ class EnemyDirector
 	static inline var WAVE_TIMEOUT:Float = 75;
 
 	public var wave:Int = 0;
+	public var spawning:Bool = true;
 	public var shots(get, never):FlxTypedGroup<EnemyShot>;
 	public var onWave:Int->Void;
 	public var onBoss:Void->Void;
@@ -123,6 +124,12 @@ class EnemyDirector
 
 	public function update(elapsed:Float):Void
 	{
+		if (!spawning)
+		{
+			updateRigs(elapsed);
+			return;
+		}
+
 		if (bossPending)
 			updateBossIntro(elapsed);
 		else if (!status.dead)

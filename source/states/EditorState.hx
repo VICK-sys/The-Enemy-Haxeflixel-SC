@@ -335,6 +335,7 @@ class EditorState extends FlxState
 		var t = doc.tileset();
 		CustomArena.setTiles(t == null ? null : t.name, doc.tileCsv());
 		CustomArena.fromEditor = true;
+		CustomArena.slot = slot;
 		FlxG.mouse.visible = false;
 		FlxG.switchState(new PlayState());
 	}

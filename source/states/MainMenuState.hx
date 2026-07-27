@@ -217,7 +217,7 @@ class MainMenuState extends FlxState
 
 		var m = util.MapStore.load(maps[mapPick]);
 		if (m != null)
-			util.CustomArena.fromStored(m);
+			util.CustomArena.fromStored(m, maps[mapPick]);
 	}
 
 	function startGame():Void

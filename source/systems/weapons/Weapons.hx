@@ -28,6 +28,7 @@ class Weapons
 	public var hookArms:HookArms;
 	public var deadEye:DeadEye;
 	public var weapon:Int = 0;
+	public var disabled:Bool = false;
 	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float) -> Void;
 	public var onSuper:Int -> Void;
 	public var onSuperLaunch:(Float, Float) -> Void;
@@ -85,6 +86,12 @@ class Weapons
 
 	public function update(elapsed:Float):Void
 	{
+		if (disabled)
+		{
+			held.sprite.visible = false;
+			return;
+		}
+
 		held.charge = bow.charging ? bow.charge : 0;
 		if (!superBusy)
 			held.update(elapsed);
