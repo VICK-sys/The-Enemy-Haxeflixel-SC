@@ -144,7 +144,7 @@ class PlayState extends FlxState
 
 		hud = new Hud(this, status);
 		shift = new PerspectiveShift(arena, _player, director, combat, layers);
-		shift.disabled = util.CustomArena.active;
+		shift.disabled = true;
 		director.onProbe = shift.onProbe;
 		director.onWave = onWaveStarted;
 		director.onBoss = onBossWave;

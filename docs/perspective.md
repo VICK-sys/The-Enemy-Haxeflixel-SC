@@ -2,6 +2,8 @@
 
 The totem that crashes into the arena, and the top-down / side-view switch it triggers. Timing and tuning come from [sideview.json](data-files.md).
 
+The totem is currently switched off everywhere: `PlayState` sets `shift.disabled = true`, which stops `MeteorArrival.tryBegin` before it picks a landing spot, so nothing falls and nothing can be hit. The rest of this page still describes what the system does, and clearing that one flag brings all of it back.
+
 ## The three classes
 
 `systems/perspective/` splits the feature three ways:
