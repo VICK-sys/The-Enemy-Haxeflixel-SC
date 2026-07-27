@@ -1,9 +1,12 @@
 package entities.weapon;
 
 import flixel.FlxSprite;
+import util.Paths;
 
 class Bullet extends FlxSprite
 {
+	static inline var SCALE:Float = 2;
+
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
 	public var damage:Int = 2;
@@ -14,9 +17,10 @@ class Bullet extends FlxSprite
 	public function new()
 	{
 		super();
-		makeGraphic(8, 3, 0xFFFFE08A);
+		loadGraphic(Paths.image("enemies/rofel_bullet"));
 		antialiasing = false;
-		scale.set(3, 3);
+		scale.set(SCALE, SCALE);
+		updateHitbox();
 	}
 
 	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, damage:Int, speed:Float, range:Float,
