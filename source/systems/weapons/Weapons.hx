@@ -215,6 +215,12 @@ class Weapons
 			return;
 		}
 
+		if (FlxG.keys.justPressed.Q && deadEye.marking)
+		{
+			deadEye.cancel();
+			return;
+		}
+
 		if (FlxG.keys.justPressed.Q && hasSuper() && status.canSuper() && !superOrbit.active() && !throwAttack.airborne
 			&& !hookAttack.busy)
 		{

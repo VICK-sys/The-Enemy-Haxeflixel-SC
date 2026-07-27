@@ -138,6 +138,8 @@ The revolver super. Q whites the screen out, then settles into a sepia wash over
 
 Sweeping the cursor over an enemy marks it, one mark per round left in the cylinder. A full cylinder therefore marks six, and a nearly spent one marks one. There is no timer, and it holds until you press fire. Marking nothing and firing cancels without spending anything.
 
+A second press of Q backs out. It answers only while you are still marking, so nothing can stop the volley once it starts. The world, the aim lock and the marks all reset through `cancel`, the same path a dead player takes. The AP does not come back. Without that cost, Q would be a free pause button that freezes the fight and shows you the whole arena.
+
 Releasing unfreezes the world and walks the marks in order at `shotInterval`, one round each, while the sepia fades out. The held revolver locks onto each target as it shoots it. A call to `HeldWeapon.lockAim` snaps the angle instead of easing toward the cursor. The same lock drives the hand offset. The gun therefore never points one way while reaching another.
 
 The rounds home, and each belongs to its mark. Every round remembers its target in `Bullet.seek`. Every frame, `RevolverAttack.steer` re-aims that round, so a mark that walks away is still hit. The hit test asks only about that one enemy, so the round passes through anything in the way.
