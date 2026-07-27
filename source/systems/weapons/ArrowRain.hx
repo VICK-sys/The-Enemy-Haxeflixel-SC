@@ -103,7 +103,7 @@ class ArrowRain
 		fx.sparksAt(ix, iy);
 		if (soundTimer <= 0)
 		{
-			FlxG.sound.play(Paths.sound("scythe/slice"), 0.25);
+			FlxG.sound.play(Paths.sound("weapon/slice"), 0.25);
 			soundTimer = 0.05;
 		}
 		if (!cosmetic)

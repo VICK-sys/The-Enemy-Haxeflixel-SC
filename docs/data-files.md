@@ -68,7 +68,7 @@ Combat balance for every weapon system, one object per system; field names match
 | `bowCharge` | charged shot: `minTime` below which a press is a plain tap shot, `fullTime` to reach full charge, `maxDamage` at full, and the `speedBonus`/`sizeBonus`/`knockBonus` multipliers applied across the charge range |
 | `arrowRain` | volley size, drop delay and stagger, spread, fall speed, hit radius |
 | `hook` | flight range, pull speed and timeout, grab and hold distances, spin windup, throw speed/duration/hit radius, release stun, and the damage dealt to enemies that cannot be grabbed |
-| `superScythes` | blade count, fire gate |
+| `superOrbit` | blade count, fire gate |
 | `bounceStrike` | strike count, hop time, radius, damage, force, catapult speed |
 | `arrowStorm` | storm duration, spawn cadence, drops per tick |
 | `hookArms` | reach and reach speed, grab radius, reel speed, grab distance, throw force, damage, cooldown, whip time, super duration |
@@ -79,7 +79,7 @@ Presentation constants (trail settings, rope geometry, rest poses, ring radii, a
 
 | Field | Meaning |
 |---|---|
-| `clientId` | Discord application ID for Rich Presence. Empty string disables presence. Create an application at discord.com/developers/applications, copy its Application ID here, and optionally upload Rich Presence art assets named `icon`, `scythe`, `hammer`, `bow`, `hook`. |
+| `clientId` | Discord application ID for Rich Presence. Empty string disables presence. Create an application at discord.com/developers/applications, copy its Application ID here, and optionally upload Rich Presence art assets named `icon`, `hammer`, `revolver`, `crossbow`, `hook`. |
 
 ## Arena - assets/data/arena.json
 

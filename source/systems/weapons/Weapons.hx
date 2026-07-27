@@ -22,7 +22,7 @@ class Weapons
 	public var bow:BowAttack;
 	public var throwAttack:ThrowAttack;
 	public var hookAttack:HookAttack;
-	public var superScythes:SuperScythes;
+	public var superOrbit:SuperOrbit;
 	public var bounceStrike:BounceStrike;
 	public var arrowStorm:ArrowStorm;
 	public var hookArms:HookArms;
@@ -36,22 +36,22 @@ class Weapons
 	private var wasHookBusy:Bool = false;
 	private var wasArms:Bool = false;
 
-	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, pickups:Pickups)
+	public function new(player:Player, heldSprite:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, pickups:Pickups)
 	{
 		this.player = player;
 		this.status = status;
 		hits = new HitPipeline(status, fx, pickups, director);
 		hits.owner = player;
-		held = new HeldWeapon(player, scythe);
+		held = new HeldWeapon(player, heldSprite);
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
 		swing = new SwingAttack(director, hits, weaponCfg.swing);
 		jab = new SwingAttack(director, hits, weaponCfg.jab);
 		shock = new Shockwave(director, hits);
 		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
-		throwAttack = new ThrowAttack(player, scythe, arena, director, status, hits);
+		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
-		superScythes = new SuperScythes(player, scythe, arena, director, status, fx, hits);
+		superOrbit = new SuperOrbit(player, heldSprite, arena, director, status, fx, hits);
 		bounceStrike = new BounceStrike(player, fx, hits, held.sprite, shock);
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
 		hookArms = new HookArms(player, director, hits);
@@ -60,12 +60,12 @@ class Weapons
 	public var superBusy(get, never):Bool;
 
 	function get_superBusy():Bool
-		return superScythes.activating || bounceStrike.active || arrowStorm.active || hookArms.active;
+		return superOrbit.activating || bounceStrike.active || arrowStorm.active || hookArms.active;
 
 	public var playerBusy(get, never):Bool;
 
 	function get_playerBusy():Bool
-		return superBusy || superScythes.active();
+		return superBusy || superOrbit.active();
 
 	public function anchorHeld():Void
 	{
@@ -93,7 +93,7 @@ class Weapons
 		shock.update(elapsed);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
-		superScythes.update(elapsed);
+		superOrbit.update(elapsed);
 		bounceStrike.update(elapsed);
 		arrowStorm.update(elapsed);
 		if (status.dead && hookArms.active)
@@ -208,13 +208,13 @@ class Weapons
 			return;
 		}
 
-		if (FlxG.keys.justPressed.Q && hasSuper() && status.canSuper() && !superScythes.active() && !throwAttack.airborne
+		if (FlxG.keys.justPressed.Q && hasSuper() && status.canSuper() && !superOrbit.active() && !throwAttack.airborne
 			&& !hookAttack.busy)
 		{
 			status.spendSuper();
 			switch (weapon)
 			{
-				case 0: superScythes.activate();
+				case 0: superOrbit.activate();
 				case 2: arrowStorm.activate();
 				case 3: hookArms.activate();
 				default:
@@ -248,11 +248,11 @@ class Weapons
 		var dy:Float = aim.dy;
 		var aimDeg:Float = aim.deg;
 
-		if (superScythes.active())
+		if (superOrbit.active())
 		{
 			if (!leftClick)
 				return;
-			superScythes.tryLaunch(FlxG.mouse.x, FlxG.mouse.y);
+			superOrbit.tryLaunch(FlxG.mouse.x, FlxG.mouse.y);
 			if (onSuperLaunch != null)
 				onSuperLaunch(FlxG.mouse.x, FlxG.mouse.y);
 			return;

@@ -126,7 +126,7 @@ class AbilitiesDemo extends TutorialDemo
 					cycleIndex = 3;
 					cycleTimer = recoverTime;
 					keyFlash = 1;
-					FlxG.sound.play(Paths.sound("scythe/catch"), 0.4);
+					FlxG.sound.play(Paths.sound("weapon/catch"), 0.4);
 				}
 			case 3:
 				var t = 1 - cycleTimer / recoverTime;

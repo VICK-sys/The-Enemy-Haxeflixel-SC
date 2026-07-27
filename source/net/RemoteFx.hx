@@ -8,7 +8,7 @@ import entities.weapon.Arrow;
 import entities.weapon.Bullet;
 import entities.weapon.HookShot;
 import entities.weapon.SlashEffect;
-import entities.weapon.ThrownScythe;
+import entities.weapon.ThrownWeapon;
 import systems.enemy.EnemyDirector;
 import systems.Fx;
 import systems.RenderLayers;
@@ -17,7 +17,7 @@ import systems.weapons.ArrowStorm;
 import systems.weapons.HitPipeline;
 import systems.weapons.Rope;
 import systems.weapons.Shockwave;
-import systems.weapons.SuperScythes;
+import systems.weapons.SuperOrbit;
 import systems.weapons.WeaponMode;
 import data.WeaponData.WeaponDataRegistry;
 import util.GhostTrail;
@@ -33,13 +33,13 @@ class RemoteFx
 	private var bullets:FlxTypedGroup<Bullet>;
 	private var rope:FlxTypedGroup<FlxSprite>;
 	private var hook:HookShot;
-	private var thrown:ThrownScythe;
+	private var thrown:ThrownWeapon;
 	private var shock:Shockwave;
 	private var rain:ArrowRain;
 	private var thrownTrail:GhostTrail;
 
 	private var avatar:RemoteAvatar;
-	private var blades:SuperScythes;
+	private var blades:SuperOrbit;
 	private var storm:ArrowStorm;
 	private var arms:RemoteArms;
 
@@ -72,11 +72,11 @@ class RemoteFx
 
 		hook = new HookShot();
 		hook.kill();
-		thrown = new ThrownScythe();
+		thrown = new ThrownWeapon();
 		thrown.kill();
 		thrownTrail = new GhostTrail("items/hammer", 0.45, 3, 0.035);
 
-		blades = SuperScythes.decoration(avatar.sprite, fx);
+		blades = SuperOrbit.decoration(avatar.sprite, fx);
 		var dummyBow = new FlxSprite();
 		dummyBow.loadGraphic(Paths.image("items/crossbow"));
 		storm = new ArrowStorm(avatar.sprite, dummyBow, rain);
@@ -173,10 +173,10 @@ class RemoteFx
 				FlxG.sound.play(Paths.sound("bow"), 0.5);
 
 			case Throw:
-				FlxG.sound.play(Paths.sound("scythe/throw"), 0.5);
+				FlxG.sound.play(Paths.sound("weapon/throw"), 0.5);
 
 			case Hook:
-				FlxG.sound.play(Paths.sound("scythe/throw"), 0.5);
+				FlxG.sound.play(Paths.sound("weapon/throw"), 0.5);
 		}
 	}
 

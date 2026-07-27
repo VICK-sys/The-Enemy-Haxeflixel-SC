@@ -45,7 +45,7 @@
 		"releaseStun": 0.35,
 		"snagDamage": 3
 	},
-	"superScythes": { "count": 10, "fireGate": 0.08 },
+	"superOrbit": { "count": 10, "fireGate": 0.08 },
 	"bounceStrike": { "strikes": 5, "hopTime": 0.55, "radius": 300, "damage": 2, "force": 4, "catapultSpeed": 720 },
 	"arrowStorm": { "stormTime": 3.0, "spawnInterval": 0.06, "dropsPer": 2 },
 	"hookArms": {

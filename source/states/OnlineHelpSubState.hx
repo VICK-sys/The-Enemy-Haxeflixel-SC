@@ -94,8 +94,8 @@ class OnlineHelpSubState extends FlxSubState
 					+ "online - both rewrite the whole world, which\n"
 					+ "only works when one player owns it.\n\n"
 					+ "You will see everything your friend throws\n"
-					+ "out - arrows, slashes, shockwaves, the hook,\n"
-					+ "the thrown scythe and all four SUPERS.";
+					+ "out - bullets, arrows, slashes, the hook,\n"
+					+ "the thrown hammer and every SUPER.";
 		}
 	}
 
@@ -183,6 +183,6 @@ class OnlineHelpSubState extends FlxSubState
 	{
 		page = (page + dir + PAGES) % PAGES;
 		buildPage();
-		FlxG.sound.play(Paths.sound("scythe/slice"), 0.3);
+		FlxG.sound.play(Paths.sound("weapon/slice"), 0.3);
 	}
 }

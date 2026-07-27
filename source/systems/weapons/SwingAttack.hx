@@ -78,7 +78,7 @@ class SwingAttack
 				continue;
 
 			shot.deflect();
-			FlxG.sound.play(Paths.sound("scythe/catch"), 0.5);
+			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
 		}
 	}
 }

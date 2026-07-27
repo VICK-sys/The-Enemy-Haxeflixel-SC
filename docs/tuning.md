@@ -12,11 +12,11 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `systems/weapons/HookArms.hx` | rest pose geometry and tilt, rope curve fraction, eases, whip arc and radius, extend delay |
 | `systems/weapons/ArrowRain.hx` | drop height, launch visual count and speed |
 | `systems/weapons/Shockwave.hx` | ring texture base size, crack lifetime |
-| `systems/weapons/SuperScythes.hx` | ring radii, carousel speed, depth scaling, hover and landing feel, deploy timings, trail settings |
+| `systems/weapons/SuperOrbit.hx` | ring radii, carousel speed, depth scaling, hover and landing feel, deploy timings, trail settings |
 | `systems/weapons/BounceStrike.hx` | hop apex, somersault spin, hand pivot |
 | `systems/weapons/ArrowStorm.hx` | bow raise, launch arrow speed and scale, charge tint, trail settings |
-| `entities/weapon/SuperBlade.hx` | launch speed, range, spin, hit radius |
-| `entities/weapon/ThrownScythe.hx` | throw speed, spin rate, hit radius (the thrown hammer) |
+| `entities/weapon/Orbiter.hx` | launch speed, range, spin, hit radius |
+| `entities/weapon/ThrownWeapon.hx` | throw speed, spin rate, hit radius (the thrown hammer) |
 | `entities/HealthPickup.hx` | heal amount, lifetime |
 | `entities/weapon/SlashEffect.hx` | drift speed, effect lifetime |
 | `entities/weapon/Arrow.hx` | arrow speed, range, hit radius |

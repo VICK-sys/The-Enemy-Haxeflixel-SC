@@ -28,13 +28,13 @@ class HeldWeapon
 	static inline var CHARGE_DRAW:Float = 0.35;
 	public static inline var CHARGE_TINT:Int = 0xFF9BE9FF;
 
-	public static inline var SCYTHE:Int = 0;
+	public static inline var HAMMER:Int = 0;
 	public static inline var REVOLVER:Int = 1;
 	public static inline var BOW:Int = 2;
 	public static inline var HOOK:Int = 3;
 
 	public var sprite:FlxSprite;
-	public var kind:Int = SCYTHE;
+	public var kind:Int = HAMMER;
 	public var charge:Float = 0;
 	public var swinging(get, never):Bool;
 

@@ -19,45 +19,45 @@ class MenuSlash
 
 	private var state:FlxState;
 	private var row:FlxText;
-	private var scythe:FlxSprite;
+	private var marker:FlxSprite;
 	private var onDone:Void->Void;
 	private var midX:Float;
 	private var cy:Float;
 
-	public static function play(state:FlxState, row:FlxText, scythe:FlxSprite, onDone:Void->Void):Void
+	public static function play(state:FlxState, row:FlxText, marker:FlxSprite, onDone:Void->Void):Void
 	{
-		new MenuSlash(state, row, scythe, onDone);
+		new MenuSlash(state, row, marker, onDone);
 	}
 
-	function new(state:FlxState, row:FlxText, scythe:FlxSprite, onDone:Void->Void)
+	function new(state:FlxState, row:FlxText, marker:FlxSprite, onDone:Void->Void)
 	{
 		this.state = state;
 		this.row = row;
-		this.scythe = scythe;
+		this.marker = marker;
 		this.onDone = onDone;
 
-		cy = row.y + row.height * 0.5 - scythe.height * 0.5;
-		midX = row.x + row.width * 0.5 - scythe.width * 0.5;
+		cy = row.y + row.height * 0.5 - marker.height * 0.5;
+		midX = row.x + row.width * 0.5 - marker.width * 0.5;
 
-		FlxTween.tween(scythe, {x: row.x - scythe.width - 70, y: cy - 46, angle: -125}, AIM_TIME,
+		FlxTween.tween(marker, {x: row.x - marker.width - 70, y: cy - 46, angle: -125}, AIM_TIME,
 			{ease: FlxEase.backOut, onComplete: cut});
 	}
 
 	function cut(_:FlxTween):Void
 	{
 		FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.8);
-		FlxTween.tween(scythe, {x: midX, y: cy, angle: -20}, CUT_TIME, {ease: FlxEase.quadIn, onComplete: shatter});
+		FlxTween.tween(marker, {x: midX, y: cy, angle: -20}, CUT_TIME, {ease: FlxEase.quadIn, onComplete: shatter});
 	}
 
 	function shatter(_:FlxTween):Void
 	{
-		FlxG.sound.play(Paths.sound("scythe/slice"), 0.7);
+		FlxG.sound.play(Paths.sound("weapon/slice"), 0.7);
 		FlxG.camera.shake(0.013, 0.3);
 
 		spawnLetters();
 		row.visible = false;
 
-		FlxTween.tween(scythe, {x: row.x + row.width + 60, y: cy + 26, angle: 55}, FOLLOW_TIME, {ease: FlxEase.quadOut});
+		FlxTween.tween(marker, {x: row.x + row.width + 60, y: cy + 26, angle: 55}, FOLLOW_TIME, {ease: FlxEase.quadOut});
 		new FlxTimer().start(LINGER, function(_)
 		{
 			if (onDone != null)
@@ -102,7 +102,7 @@ class MenuSlash
 
 		t.moves = true;
 
-		var away = (x + w * 0.5 - midX - scythe.width * 0.5) / Math.max(1, row.width * 0.5);
+		var away = (x + w * 0.5 - midX - marker.width * 0.5) / Math.max(1, row.width * 0.5);
 		t.velocity.set(away * FlxG.random.float(90, 210) + FlxG.random.float(-40, 40), FlxG.random.float(-320, -140));
 		t.acceleration.y = GRAVITY;
 		t.angularVelocity = FlxG.random.float(-420, 420);

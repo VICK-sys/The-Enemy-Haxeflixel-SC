@@ -15,7 +15,7 @@ class DiscordPresence
 	static inline var FLUSH_INTERVAL:Float = 2.0;
 
 	static var WEAPON_NAMES:Array<String> = ["Hammer", "Revolver", "Crossbow", "Hook"];
-	static var WEAPON_KEYS:Array<String> = ["scythe", "hammer", "bow", "hook"];
+	static var WEAPON_KEYS:Array<String> = ["hammer", "revolver", "crossbow", "hook"];
 
 	static var presence:DiscordRichPresence = DiscordRichPresence.create();
 	static var alive:Bool = false;

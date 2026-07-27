@@ -83,7 +83,7 @@ class HookAttack
 		fireY = pmy + dy * SPAWN_DIST;
 		hook.fire(fireX, fireY, dx, dy, aimDeg);
 		phase = Flying;
-		FlxG.sound.play(Paths.sound("scythe/throw"), 0.6);
+		FlxG.sound.play(Paths.sound("weapon/throw"), 0.6);
 	}
 
 	public function throwHeld(dx:Float, dy:Float):Void
@@ -198,7 +198,7 @@ class HookAttack
 		{
 			victim.velocity.set(0, 0);
 			phase = Holding;
-			FlxG.sound.play(Paths.sound("scythe/catch"), 0.4);
+			FlxG.sound.play(Paths.sound("weapon/catch"), 0.4);
 			return;
 		}
 
@@ -291,7 +291,7 @@ class HookAttack
 		{
 			hook.kill();
 			phase = Idle;
-			FlxG.sound.play(Paths.sound("scythe/catch"), 0.35);
+			FlxG.sound.play(Paths.sound("weapon/catch"), 0.35);
 			return;
 		}
 

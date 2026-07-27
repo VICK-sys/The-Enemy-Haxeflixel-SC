@@ -5,7 +5,7 @@ import flixel.FlxSprite;
 import flixel.sound.FlxSound;
 import entities.Player;
 import entities.enemy.EnemyNav;
-import entities.weapon.ThrownScythe;
+import entities.weapon.ThrownWeapon;
 import systems.world.Arena;
 import systems.enemy.EnemyDirector;
 import systems.PlayerCombat;
@@ -22,12 +22,12 @@ class ThrowAttack
 	static inline var TRAIL_ALPHA:Float = 0.45;
 	static inline var TRAIL_FADE:Float = 3;
 
-	public var thrown:ThrownScythe;
+	public var thrown:ThrownWeapon;
 	public var trail:GhostTrail;
 	public var airborne(get, never):Bool;
 
 	private var player:Player;
-	private var scythe:FlxSprite;
+	private var heldSprite:FlxSprite;
 	private var arena:Arena;
 	private var director:EnemyDirector;
 	private var status:PlayerCombat;
@@ -36,17 +36,17 @@ class ThrowAttack
 	private var spinSound:FlxSound;
 	private var nav:EnemyNav;
 
-	public function new(player:Player, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, hits:HitPipeline)
+	public function new(player:Player, heldSprite:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, hits:HitPipeline)
 	{
 		this.player = player;
-		this.scythe = scythe;
+		this.heldSprite = heldSprite;
 		this.arena = arena;
 		this.director = director;
 		this.status = status;
 		this.hits = hits;
-		thrown = new ThrownScythe();
+		thrown = new ThrownWeapon();
 		trail = new GhostTrail("items/hammer", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
-		spinSound = FlxG.sound.load(Paths.sound("scythe/spin"), 0.5, true);
+		spinSound = FlxG.sound.load(Paths.sound("weapon/spin"), 0.5, true);
 		nav = new EnemyNav();
 		nav.map = arena.map;
 		nav.bodyRadius = 60;
@@ -58,9 +58,9 @@ class ThrowAttack
 
 	public function launch(pmx:Float, pmy:Float, dx:Float, dy:Float):Void
 	{
-		scythe.visible = false;
+		heldSprite.visible = false;
 		thrown.throwAt(pmx + dx * SPAWN_DIST, pmy + dy * SPAWN_DIST, dx, dy);
-		FlxG.sound.play(Paths.sound("scythe/throw"), 0.8);
+		FlxG.sound.play(Paths.sound("weapon/throw"), 0.8);
 		spinSound.play(true);
 	}
 
@@ -113,10 +113,10 @@ class ThrowAttack
 			if (rlen < CATCH_DIST)
 			{
 				thrown.kill();
-				scythe.visible = true;
+				heldSprite.visible = true;
 				spinSound.stop();
 				nav.clear();
-				FlxG.sound.play(Paths.sound("scythe/catch"), 0.7);
+				FlxG.sound.play(Paths.sound("weapon/catch"), 0.7);
 				return;
 			}
 			nav.tick(elapsed, cx, cy, pmx, pmy);
@@ -128,7 +128,7 @@ class ThrowAttack
 
 		var pushX = vx;
 		var pushY = vy;
-		director.eachInCircle(cx, cy, ThrownScythe.RADIUS, function(e)
+		director.eachInCircle(cx, cy, ThrownWeapon.RADIUS, function(e)
 		{
 			if (thrown.hasHit(e))
 				return;

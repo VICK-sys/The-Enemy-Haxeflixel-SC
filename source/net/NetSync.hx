@@ -35,7 +35,7 @@ class NetSync
 	private var combat:Weapons;
 	private var pickups:Pickups;
 	private var hud:Hud;
-	private var scythe:FlxSprite;
+	private var heldSprite:FlxSprite;
 
 	private var roster:PeerRoster;
 	private var mirror:PuppetMirror;
@@ -45,7 +45,7 @@ class NetSync
 	private var droppedHandled:Bool = false;
 
 	public function new(player:Player, status:PlayerCombat, arena:Arena, layers:RenderLayers, director:EnemyDirector,
-			combat:Weapons, pickups:Pickups, hud:Hud, scythe:FlxSprite)
+			combat:Weapons, pickups:Pickups, hud:Hud, heldSprite:FlxSprite)
 	{
 		this.player = player;
 		this.status = status;
@@ -55,7 +55,7 @@ class NetSync
 		this.combat = combat;
 		this.pickups = pickups;
 		this.hud = hud;
-		this.scythe = scythe;
+		this.heldSprite = heldSprite;
 
 		roster = new PeerRoster(function()
 		{
@@ -352,13 +352,13 @@ class NetSync
 			fx: player.flipX,
 			an: player.animation.name,
 			wi: combat.weapon,
-			hv: held.visible && scythe.visible,
+			hv: held.visible && heldSprite.visible,
 			ha: r1(held.angle),
 			hf: held.flipX,
 			hg: held.flipY,
 			ho: [r1(held.x - player.x), r1(held.y - player.y), r2(held.scale.x), r2(combat.held.charge)],
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
-			sb: combat.superScythes.active(),
+			sb: combat.superOrbit.active(),
 			dd: status.dead,
 			ar: armWire(),
 			hk: hookShot.exists ? [r1(hookShot.x), r1(hookShot.y), r1(hookShot.angle), r1(combat.held.handX()), r1(combat.held.handY())] : null,
@@ -399,7 +399,7 @@ class NetSync
 			status.health = status.healthMax * 0.5;
 			player.setPosition(arena.spawnX, arena.spawnY);
 			layers.playerShadow.visible = true;
-			scythe.visible = true;
+			heldSprite.visible = true;
 			hud.hideDeath();
 		}
 	}

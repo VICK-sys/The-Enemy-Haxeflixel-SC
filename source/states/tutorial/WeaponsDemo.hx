@@ -49,7 +49,7 @@ class WeaponsDemo extends TutorialDemo
 			cycleTimer = 0.9;
 			cycleIndex = (cycleIndex + 1) % 4;
 			switchTimer = 0.3;
-			FlxG.sound.play(Paths.sound("scythe/catch"), 0.25);
+			FlxG.sound.play(Paths.sound("weapon/catch"), 0.25);
 		}
 		if (switchTimer > 0)
 			switchTimer -= elapsed;

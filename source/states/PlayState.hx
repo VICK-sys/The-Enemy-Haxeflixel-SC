@@ -39,7 +39,7 @@ class PlayState extends FlxState
 	private var fx:Fx;
 	private var arena:Arena;
 	private var _player:Player;
-	private var scythe:FlxSprite;
+	private var heldSprite:FlxSprite;
 	private var layers:RenderLayers;
 	private var status:PlayerCombat;
 	private var pickups:Pickups;
@@ -90,17 +90,17 @@ class PlayState extends FlxState
 		FlxG.camera.setScrollBoundsRect(0, 0, arena.width, arena.height);
 		FlxG.camera.zoom = 1;
 
-		scythe = new FlxSprite(0, 0, Paths.image("items/hammer"));
-		scythe.scale.set(4, 4);
-		scythe.origin.set(scythe.width * 0.5, scythe.height);
-		scythe.x = _player.x - scythe.origin.x + 30;
-		scythe.y = _player.y - scythe.origin.y + 65;
+		heldSprite = new FlxSprite(0, 0, Paths.image("items/hammer"));
+		heldSprite.scale.set(4, 4);
+		heldSprite.origin.set(heldSprite.width * 0.5, heldSprite.height);
+		heldSprite.x = _player.x - heldSprite.origin.x + 30;
+		heldSprite.y = _player.y - heldSprite.origin.y + 65;
 
 		floor = systems.world.DecorTiles.build(util.CustomArena.tiles, util.CustomArena.tileset);
 		if (floor != null)
 			add(floor);
 
-		layers = new RenderLayers(this, _player, scythe);
+		layers = new RenderLayers(this, _player, heldSprite);
 		arena.addPillars(layers.entityLayer);
 		props = new systems.world.PropWorld(_player, layers);
 		add(props.solids);
@@ -114,7 +114,7 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
 		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status) : new EnemyDirector(_player, arena, layers, status);
 		director.solids = props.solids;
-		combat = new Weapons(_player, scythe, arena, director, status, fx, pickups);
+		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups);
 
 		add(combat.swing.slashes);
 		add(combat.jab.slashes);
@@ -132,9 +132,9 @@ class PlayState extends FlxState
 		add(combat.hookArms.frontGroup);
 		add(combat.throwAttack.trail.group);
 		add(combat.throwAttack.thrown);
-		insert(members.indexOf(layers.entityLayer), combat.superScythes.trail.group);
-		insert(members.indexOf(layers.entityLayer), combat.superScythes.backLayer);
-		add(combat.superScythes.frontLayer);
+		insert(members.indexOf(layers.entityLayer), combat.superOrbit.trail.group);
+		insert(members.indexOf(layers.entityLayer), combat.superOrbit.backLayer);
+		add(combat.superOrbit.frontLayer);
 		add(fx.sparks);
 		add(director.shots);
 
@@ -158,7 +158,7 @@ class PlayState extends FlxState
 		{
 			shift.locked = true;
 			Net.inGame = true;
-			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, hud, scythe);
+			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
 			netSync.onWaveEvt = onWaveStarted;
 			netSync.onBossEvt = onBossWave;
@@ -230,7 +230,7 @@ class PlayState extends FlxState
 		if (status.consumeJustDied())
 		{
 			layers.playerShadow.visible = false;
-			scythe.visible = false;
+			heldSprite.visible = false;
 			if (!Net.active)
 			{
 				hud.showDeath(director.wave, SaveData.bestWave());
@@ -242,7 +242,7 @@ class PlayState extends FlxState
 		pickups.update();
 		layers.update();
 		props.update();
-		scythe.alpha = props.buried ? 0 : 1;
+		heldSprite.alpha = props.buried ? 0 : 1;
 		combat.swing.slashes.visible = !props.buried;
 		combat.jab.slashes.visible = !props.buried;
 		if (!frozen && !inputLocked)
@@ -279,6 +279,7 @@ class PlayState extends FlxState
 		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
 		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
 	}
+
 
 
 
@@ -394,7 +395,7 @@ class PlayState extends FlxState
 		{
 			status.revive();
 			layers.playerShadow.visible = true;
-			scythe.visible = true;
+			heldSprite.visible = true;
 			hud.hideDeath();
 		}
 

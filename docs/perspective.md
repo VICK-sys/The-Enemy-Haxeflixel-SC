@@ -26,7 +26,7 @@ Until it lands the totem is invisible and inert. Afterwards it listens to every 
 
 The impact shockwave runs through that same hit query, so the landing starts the totem's hit cooldown before firing the blast - otherwise the meteor would trigger itself and flip the world the instant it touched down.
 
-Totem hits are ignored while a super is running or scythe blades still orbit, since those systems drive the player and their own sprites.
+Totem hits are ignored while a super is running or orbiters still circle, since those systems drive the player and their own sprites.
 
 The totem wears one of two faces, `stage/totem_top` in top-down and `stage/totem_side` in side view, swapped as each morph begins so it shows the mode it is taking you to; the glow is the same art blended additively behind it. Its crash site becomes the position it returns to when reverting from side view.
 

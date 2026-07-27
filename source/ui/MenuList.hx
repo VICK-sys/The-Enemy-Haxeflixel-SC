@@ -64,9 +64,9 @@ class MenuList extends FlxGroup
 	public function rowAt(i:Int):FlxText
 		return rows[i];
 
-	public var scythe(get, never):FlxSprite;
+	public var marker(get, never):FlxSprite;
 
-	function get_scythe():FlxSprite
+	function get_marker():FlxSprite
 		return selector;
 
 	public function restoreRows():Void
@@ -110,7 +110,7 @@ class MenuList extends FlxGroup
 		var clicked = FlxG.mouse.justPressed && FlxG.mouse.overlaps(rows[index], rowCamera(index));
 		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE || clicked)
 		{
-			FlxG.sound.play(Paths.sound("scythe/catch"), 0.5);
+			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
 			if (onChoose != null)
 				onChoose(index);
 		}
@@ -153,7 +153,7 @@ class MenuList extends FlxGroup
 	{
 		if (onAdjust == null)
 			return;
-		FlxG.sound.play(Paths.sound("scythe/slice"), 0.2);
+		FlxG.sound.play(Paths.sound("weapon/slice"), 0.2);
 		onAdjust(index, dir);
 	}
 
@@ -165,7 +165,7 @@ class MenuList extends FlxGroup
 
 	function blip():Void
 	{
-		FlxG.sound.play(Paths.sound("scythe/slice"), 0.25);
+		FlxG.sound.play(Paths.sound("weapon/slice"), 0.25);
 	}
 
 	function positionSelector(elapsed:Float):Void

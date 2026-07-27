@@ -5,7 +5,7 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import util.Paths;
 
-class SuperBlade extends FlxSprite
+class Orbiter extends FlxSprite
 {
 	public static inline var RADIUS:Float = 45;
 
@@ -72,7 +72,7 @@ class SuperBlade extends FlxSprite
 		velocity.set(0, 0);
 		riseBaseY = y;
 		hitList.resize(0);
-		FlxG.sound.play(Paths.sound("scythe/slice"), 0.35);
+		FlxG.sound.play(Paths.sound("weapon/slice"), 0.35);
 	}
 
 	public function hasHit(e:FlxObject):Bool
@@ -129,7 +129,7 @@ class SuperBlade extends FlxSprite
 					angle = targetAngle;
 					velocity.set(dirX * LAUNCH_SPEED, dirY * LAUNCH_SPEED);
 					life = RANGE / LAUNCH_SPEED;
-					FlxG.sound.play(Paths.sound("scythe/throw"), 0.7);
+					FlxG.sound.play(Paths.sound("weapon/throw"), 0.7);
 				}
 			default:
 				if (!fading)

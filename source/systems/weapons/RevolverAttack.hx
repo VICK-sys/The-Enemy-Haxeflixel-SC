@@ -153,7 +153,7 @@ class RevolverAttack
 			if (reloading <= 0)
 			{
 				rounds = cfg.cylinder;
-				FlxG.sound.play(Paths.sound("scythe/catch"), 0.35);
+				FlxG.sound.play(Paths.sound("weapon/catch"), 0.35);
 			}
 		}
 	}

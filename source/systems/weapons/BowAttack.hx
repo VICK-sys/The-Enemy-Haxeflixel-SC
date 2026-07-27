@@ -40,7 +40,7 @@ class BowAttack
 		this.hits = hits;
 		arrows = new FlxTypedGroup<Arrow>();
 		rain = new ArrowRain(fx, hits);
-		drawSound = FlxG.sound.load(Paths.sound("scythe/spin"), 0.4, true);
+		drawSound = FlxG.sound.load(Paths.sound("weapon/spin"), 0.4, true);
 	}
 
 	function get_charge():Float
@@ -98,7 +98,7 @@ class BowAttack
 		if (!fullNoted && charge >= 1)
 		{
 			fullNoted = true;
-			FlxG.sound.play(Paths.sound("scythe/catch"), 0.5);
+			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
 		}
 	}
 

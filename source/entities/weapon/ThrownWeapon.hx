@@ -4,7 +4,7 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import util.Paths;
 
-class ThrownScythe extends FlxSprite
+class ThrownWeapon extends FlxSprite
 {
 	public static inline var RADIUS:Float = 120;
 

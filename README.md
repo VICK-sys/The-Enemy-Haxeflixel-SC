@@ -41,6 +41,6 @@ haxelib run lime build html5
 
 ## Discord Rich Presence
 
-The Windows build can show your current wave, boss fight, equipped weapon, kill count, and run time on Discord. To enable it, create an application at [discord.com/developers/applications](https://discord.com/developers/applications), copy its Application ID into `assets/data/discord.json`, and optionally upload Rich Presence art assets named `icon`, `scythe`, `hammer`, `bow`, and `hook`. Leaving the ID empty keeps presence off.
+The Windows build can show your current wave, boss fight, equipped weapon, kill count, and run time on Discord. To enable it, create an application at [discord.com/developers/applications](https://discord.com/developers/applications), copy its Application ID into `assets/data/discord.json`, and optionally upload Rich Presence art assets named `icon`, `hammer`, `revolver`, `crossbow`, and `hook`. Leaving the ID empty keeps presence off.
 
 Code and data reference: [DOCS.md](DOCS.md)

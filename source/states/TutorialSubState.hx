@@ -193,6 +193,6 @@ class TutorialSubState extends FlxSubState
 	{
 		page = (page + dir + PAGES) % PAGES;
 		buildPage();
-		FlxG.sound.play(Paths.sound("scythe/slice"), 0.3);
+		FlxG.sound.play(Paths.sound("weapon/slice"), 0.3);
 	}
 }

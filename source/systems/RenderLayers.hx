@@ -18,12 +18,12 @@ class RenderLayers
 	public var playerShadow:FlxSprite;
 
 	private var player:Player;
-	private var scythe:FlxSprite;
+	private var heldSprite:FlxSprite;
 
-	public function new(state:FlxState, player:Player, scythe:FlxSprite)
+	public function new(state:FlxState, player:Player, heldSprite:FlxSprite)
 	{
 		this.player = player;
-		this.scythe = scythe;
+		this.heldSprite = heldSprite;
 
 		shadowLayer = new FlxTypedGroup<FlxSprite>();
 		state.add(shadowLayer);
@@ -35,7 +35,7 @@ class RenderLayers
 		entityLayer = new FlxTypedGroup<FlxSprite>();
 		state.add(entityLayer);
 		entityLayer.add(player);
-		entityLayer.add(scythe);
+		entityLayer.add(heldSprite);
 
 		tagLayer = new FlxTypedGroup<FlxSprite>();
 		state.add(tagLayer);
@@ -73,7 +73,7 @@ class RenderLayers
 
 	function sortKey(s:FlxSprite):Float
 	{
-		if (s == scythe)
+		if (s == heldSprite)
 			return player.feetY + 1;
 		if (s == player)
 			return player.feetY;

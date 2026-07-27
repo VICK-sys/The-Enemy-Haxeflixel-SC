@@ -67,7 +67,7 @@ typedef HookConfig = {
 	snagDamage:Int
 }
 
-typedef SuperScythesConfig = {
+typedef SuperOrbitConfig = {
 	count:Int,
 	fireGate:Float
 }
@@ -109,7 +109,7 @@ typedef WeaponsData = {
 	bowCharge:BowChargeConfig,
 	arrowRain:ArrowRainConfig,
 	hook:HookConfig,
-	superScythes:SuperScythesConfig,
+	superOrbit:SuperOrbitConfig,
 	bounceStrike:BounceStrikeConfig,
 	arrowStorm:ArrowStormConfig,
 	hookArms:HookArmsConfig

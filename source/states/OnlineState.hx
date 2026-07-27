@@ -98,7 +98,7 @@ class OnlineState extends FlxState
 
 		busy = true;
 		list.enabled = false;
-		MenuSlash.play(this, list.rowAt(i), list.scythe, function() commit(i));
+		MenuSlash.play(this, list.rowAt(i), list.marker, function() commit(i));
 	}
 
 	function commit(i:Int):Void

@@ -5,7 +5,7 @@ import flixel.FlxSprite;
 import flixel.sound.FlxSound;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
-import entities.weapon.SuperBlade;
+import entities.weapon.Orbiter;
 import systems.world.Arena;
 import systems.enemy.EnemyDirector;
 import systems.PlayerCombat;
@@ -14,7 +14,7 @@ import data.WeaponData.WeaponDataRegistry;
 import util.GhostTrail;
 import util.Paths;
 
-class SuperScythes
+class SuperOrbit
 {
 	static inline var RING_RX:Float = 130;
 	static inline var RING_RY:Float = 45;
@@ -33,22 +33,22 @@ class SuperScythes
 	static inline var TRAIL_ALPHA:Float = 0.3;
 	static inline var TRAIL_FADE:Float = 4;
 
-	public var backLayer:FlxTypedGroup<SuperBlade>;
-	public var frontLayer:FlxTypedGroup<SuperBlade>;
+	public var backLayer:FlxTypedGroup<Orbiter>;
+	public var frontLayer:FlxTypedGroup<Orbiter>;
 	public var trail:GhostTrail;
 
 	public var cosmetic:Bool = false;
 
 	private var player:FlxSprite;
 	private var owner:Player;
-	private var scythe:FlxSprite;
+	private var heldSprite:FlxSprite;
 	private var arena:Arena;
 	private var director:EnemyDirector;
 	private var status:PlayerCombat;
 	private var hits:HitPipeline;
 	private var spinSound:FlxSound;
-	private var cfg = WeaponDataRegistry.get().superScythes;
-	private var pool:Array<SuperBlade> = [];
+	private var cfg = WeaponDataRegistry.get().superOrbit;
+	private var pool:Array<Orbiter> = [];
 	private var ringAngle:Float = 0;
 	private var fireGate:Float = 0;
 	private var fx:Fx;
@@ -61,9 +61,9 @@ class SuperScythes
 	private var wasActive:Bool = false;
 	private var ascendTimer:Float = 0;
 	private var deployTimer:Float = 0;
-	private var scytheStartX:Float = 0;
-	private var scytheStartY:Float = 0;
-	private var scytheStartAngle:Float = 0;
+	private var heldStartX:Float = 0;
+	private var heldStartY:Float = 0;
+	private var heldStartAngle:Float = 0;
 
 	public var activating(get, never):Bool;
 
@@ -72,18 +72,18 @@ class SuperScythes
 		return ascendTimer > 0;
 	}
 
-	public static function decoration(body:FlxSprite, fx:Fx):SuperScythes
+	public static function decoration(body:FlxSprite, fx:Fx):SuperOrbit
 	{
-		var s = new SuperScythes(body, null, null, null, null, fx, null);
+		var s = new SuperOrbit(body, null, null, null, null, fx, null);
 		s.cosmetic = true;
 		return s;
 	}
 
-	public function new(player:FlxSprite, scythe:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, hits:HitPipeline)
+	public function new(player:FlxSprite, heldSprite:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, hits:HitPipeline)
 	{
 		this.player = player;
 		this.owner = Std.isOfType(player, Player) ? cast player : null;
-		this.scythe = scythe;
+		this.heldSprite = heldSprite;
 		this.arena = arena;
 		this.director = director;
 		this.status = status;
@@ -91,10 +91,10 @@ class SuperScythes
 		this.hits = hits;
 		baseScaleX = player.scale.x;
 		baseScaleY = player.scale.y;
-		backLayer = new FlxTypedGroup<SuperBlade>();
-		frontLayer = new FlxTypedGroup<SuperBlade>();
+		backLayer = new FlxTypedGroup<Orbiter>();
+		frontLayer = new FlxTypedGroup<Orbiter>();
 		trail = new GhostTrail("items/hammer", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
-		spinSound = FlxG.sound.load(Paths.sound("scythe/spin"), 0.35, true);
+		spinSound = FlxG.sound.load(Paths.sound("weapon/spin"), 0.35, true);
 	}
 
 	public function orbiterCount():Int
@@ -123,13 +123,13 @@ class SuperScythes
 	public function activate():Void
 	{
 		ascendTimer = ASCEND_TIME;
-		if (scythe != null)
+		if (heldSprite != null)
 		{
-			scytheStartX = scythe.x;
-			scytheStartY = scythe.y;
-			scytheStartAngle = scythe.angle;
+			heldStartX = heldSprite.x;
+			heldStartY = heldSprite.y;
+			heldStartAngle = heldSprite.angle;
 		}
-		FlxG.sound.play(Paths.sound("scythe/ascend"), 0.7);
+		FlxG.sound.play(Paths.sound("weapon/ascend"), 0.7);
 	}
 
 	function deployBlades():Void
@@ -145,24 +145,24 @@ class SuperScythes
 		}
 		ringAngle = 0;
 		deployTimer = DEPLOY_TIME;
-		if (scythe != null)
-			scythe.visible = false;
-		FlxG.sound.play(Paths.sound("scythe/split"), 0.7);
+		if (heldSprite != null)
+			heldSprite.visible = false;
+		FlxG.sound.play(Paths.sound("weapon/split"), 0.7);
 		spinSound.play(true);
 	}
 
-	function obtainBlade():SuperBlade
+	function obtainBlade():Orbiter
 	{
 		for (b in pool)
 			if (!b.exists)
 				return b;
-		var b = new SuperBlade();
+		var b = new Orbiter();
 		pool.push(b);
 		frontLayer.add(b);
 		return b;
 	}
 
-	function setLayer(b:SuperBlade, front:Bool):Void
+	function setLayer(b:Orbiter, front:Bool):Void
 	{
 		var to = front ? frontLayer : backLayer;
 		if (to.members.indexOf(b) >= 0)
@@ -191,7 +191,7 @@ class SuperScythes
 		adx /= alen;
 		ady /= alen;
 
-		var best:SuperBlade = null;
+		var best:Orbiter = null;
 		var bestDot:Float = -999;
 		for (b in pool)
 		{
@@ -233,16 +233,16 @@ class SuperScythes
 			{
 				ascendTimer -= elapsed;
 
-				if (scythe != null)
+				if (heldSprite != null)
 				{
 					var p = 1 - Math.max(0, ascendTimer) / ASCEND_TIME;
 					var ease = 1 - (1 - p) * (1 - p) * (1 - p);
-					var apexX = player.x + player.width * 0.5 - scythe.width / 2;
-					var apexY = player.y + player.height * 0.5 - APEX_HEIGHT - scythe.height / 2;
-					scythe.x = scytheStartX + (apexX - scytheStartX) * ease;
-					scythe.y = scytheStartY + (apexY - scytheStartY) * ease;
-					var delta = ((0 - scytheStartAngle) % 360 + 540) % 360 - 180;
-					scythe.angle = scytheStartAngle + delta * ease;
+					var apexX = player.x + player.width * 0.5 - heldSprite.width / 2;
+					var apexY = player.y + player.height * 0.5 - APEX_HEIGHT - heldSprite.height / 2;
+					heldSprite.x = heldStartX + (apexX - heldStartX) * ease;
+					heldSprite.y = heldStartY + (apexY - heldStartY) * ease;
+					var delta = ((0 - heldStartAngle) % 360 + 540) % 360 - 180;
+					heldSprite.angle = heldStartAngle + delta * ease;
 				}
 				if (ascendTimer <= 0)
 					deployBlades();
@@ -259,7 +259,7 @@ class SuperScythes
 
 		var isActive = active();
 		if (!cosmetic && wasActive && !isActive && !status.dead)
-			scythe.visible = true;
+			heldSprite.visible = true;
 		wasActive = isActive;
 
 		hoverTime += elapsed;
@@ -279,7 +279,7 @@ class SuperScythes
 				if (cosmetic || !status.dead)
 				{
 					squashTimer = SQUASH_TIME;
-					FlxG.sound.play(Paths.sound("scythe/catch"), 0.45);
+					FlxG.sound.play(Paths.sound("weapon/catch"), 0.45);
 					fx.sparksAt(player.x + player.width * 0.5, player.y + player.height);
 				}
 			}
@@ -339,15 +339,15 @@ class SuperScythes
 			{
 				var cx = b.x + b.width / 2;
 				var cy = b.y + b.height / 2;
-				if (arena.wallAt(cx + b.dirX * SuperBlade.RADIUS, cy + b.dirY * SuperBlade.RADIUS)
-					|| systems.world.PropBlock.at(cx + b.dirX * SuperBlade.RADIUS, cy + b.dirY * SuperBlade.RADIUS))
+				if (arena.wallAt(cx + b.dirX * Orbiter.RADIUS, cy + b.dirY * Orbiter.RADIUS)
+					|| systems.world.PropBlock.at(cx + b.dirX * Orbiter.RADIUS, cy + b.dirY * Orbiter.RADIUS))
 				{
 					b.velocity.set(0, 0);
 					b.fading = true;
 					continue;
 				}
 				var blade = b;
-				director.eachInCircle(cx, cy, SuperBlade.RADIUS, function(e)
+				director.eachInCircle(cx, cy, Orbiter.RADIUS, function(e)
 				{
 					if (blade.hasHit(e))
 						return;

@@ -182,7 +182,7 @@ class TimeStop
 		phase = Recovering;
 		timer = recoverTime;
 		if (playSound)
-			FlxG.sound.play(Paths.sound("scythe/catch"), 0.5);
+			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
 	}
 
 	function applyMusicPitch():Void
