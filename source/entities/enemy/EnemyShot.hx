@@ -6,7 +6,12 @@ import util.WorldClock;
 
 class EnemyShot extends FlxSprite
 {
+	public static inline var DEFAULT_SPRITE:String = "bullets/bullet_enemy";
+	public static inline var TURNED_SPRITE:String = "bullets/bullet_player";
+
 	static inline var DEFLECT_BOOST:Float = 1.35;
+	static inline var SCALE:Float = 4;
+	static inline var HIT:Float = 48;
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
@@ -20,35 +25,32 @@ class EnemyShot extends FlxSprite
 	public function new()
 	{
 		super();
-		makeGraphic(12, 12, 0xFF6FBF3F);
 		antialiasing = false;
+		use(DEFAULT_SPRITE);
+	}
+
+	function use(key:String):Void
+	{
+		spriteKey = key;
+		loadGraphic(Paths.image(key));
+		scale.set(SCALE, SCALE);
+		updateHitbox();
+		setSize(HIT, HIT);
+		centerOffsets();
 	}
 
 	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, damage:Float, speed:Float, range:Float, sprite:String = null):Void
 	{
 		revive();
-		if (sprite != spriteKey)
-		{
-			spriteKey = sprite;
-			if (sprite == null)
-			{
-				makeGraphic(12, 12, 0xFF6FBF3F);
-				scale.set(1, 1);
-			}
-			else
-			{
-				loadGraphic(Paths.image(sprite));
-				scale.set(3, 3);
-				updateHitbox();
-			}
-		}
+		var want = sprite == null ? DEFAULT_SPRITE : sprite;
+		if (want != spriteKey)
+			use(want);
 		setPosition(cx - width / 2, cy - height / 2);
 		dirX = dx;
 		dirY = dy;
 		this.damage = damage;
 		friendly = false;
-		setColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
-		angle = sprite == null ? 0 : Math.atan2(dy, dx) * 180 / Math.PI;
+		angle = Math.atan2(dy, dx) * 180 / Math.PI;
 		velocity.set(dx * speed, dy * speed);
 		fullLife = range / speed;
 		life = fullLife;
@@ -59,11 +61,10 @@ class EnemyShot extends FlxSprite
 		dirX = -dirX;
 		dirY = -dirY;
 		velocity.set(-velocity.x * DEFLECT_BOOST, -velocity.y * DEFLECT_BOOST);
-		if (spriteKey != null)
-			angle = Math.atan2(dirY, dirX) * 180 / Math.PI;
+		angle = Math.atan2(dirY, dirX) * 180 / Math.PI;
 		life = fullLife;
 		friendly = true;
-		setColorTransform(1, 1, 1, 1, 0, 90, 150, 0);
+		use(TURNED_SPRITE);
 	}
 
 	override public function update(elapsed:Float):Void

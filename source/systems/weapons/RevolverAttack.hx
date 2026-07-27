@@ -55,7 +55,7 @@ class RevolverAttack
 		if (!canFire())
 			return;
 
-		spawn(bx, by, dx, dy, aimDeg, cfg.damage);
+		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.ROUND);
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.65);
@@ -80,7 +80,7 @@ class RevolverAttack
 		dx /= len;
 		dy /= len;
 
-		var b = spawn(bx, by, dx, dy, Math.atan2(dy, dx) * 180 / Math.PI, damage);
+		var b = spawn(bx, by, dx, dy, Math.atan2(dy, dx) * 180 / Math.PI, damage, Bullet.LONG);
 		b.seek = target;
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
@@ -108,9 +108,10 @@ class RevolverAttack
 		FlxG.camera.shake(0.004, 0.25);
 	}
 
-	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Int):Bullet
+	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Int, key:String):Bullet
 	{
 		var b = bullets.recycle(Bullet);
+		b.setSprite(key);
 		b.fire(bx + dx * MUZZLE, by + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock);
 		return b;
 	}
@@ -149,7 +150,7 @@ class RevolverAttack
 		var rad = deg * Math.PI / 180;
 		var jx = Math.cos(rad);
 		var jy = Math.sin(rad);
-		spawn(bx, by, jx, jy, deg, cfg.damage);
+		spawn(bx, by, jx, jy, deg, cfg.damage, Bullet.ROUND);
 		fx.sparksAt(bx + jx * MUZZLE, by + jy * MUZZLE);
 		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.5);
 		rounds--;

@@ -6,7 +6,11 @@ import util.Paths;
 
 class Bullet extends FlxSprite
 {
-	static inline var SCALE:Float = 2;
+	public static inline var ROUND:String = "bullets/bullet_player";
+	public static inline var LONG:String = "bullets/bullet_long_player";
+
+	static inline var SCALE:Float = 4;
+	static inline var HIT:Float = 48;
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
@@ -15,14 +19,25 @@ class Bullet extends FlxSprite
 	public var seek:Enemies = null;
 
 	private var life:Float = 0;
+	private var spriteKey:String = null;
 
 	public function new()
 	{
 		super();
-		loadGraphic(Paths.image("enemies/rofel_bullet"));
 		antialiasing = false;
+		setSprite(ROUND);
+	}
+
+	public function setSprite(key:String):Void
+	{
+		if (key == spriteKey)
+			return;
+		spriteKey = key;
+		loadGraphic(Paths.image(key));
 		scale.set(SCALE, SCALE);
 		updateHitbox();
+		setSize(HIT, HIT);
+		centerOffsets();
 	}
 
 	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, damage:Int, speed:Float, range:Float,

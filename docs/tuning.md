@@ -21,9 +21,9 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `entities/HealthPickup.hx` | heal amount, lifetime |
 | `entities/weapon/SlashEffect.hx` | drift speed, effect lifetime |
 | `entities/weapon/Arrow.hx` | arrow speed, range, hit radius |
-| `entities/weapon/Bullet.hx` | bullet sprite scale |
+| `entities/weapon/Bullet.hx` | bullet sprite scale and hitbox size |
 | `systems/weapons/RevolverAttack.hx` | muzzle offset |
-| `entities/enemy/EnemyShot.hx` | deflected shot speed boost |
+| `entities/enemy/EnemyShot.hx` | shot sprite scale and hitbox size, deflected shot speed boost |
 | `states/PlayState.hx` | deflected shot hit radius, damage, knockback |
 | `entities/weapon/HookShot.hx` | hook speed, hit radius |
 | `entities/enemy/Enemies.hx` | wander and idle durations, hit flash time |
