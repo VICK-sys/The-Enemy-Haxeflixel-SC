@@ -227,7 +227,7 @@ class EnemyDirector
 
 			if (e.entering && e.x > ENTER_MARGIN && e.y > ENTER_MARGIN
 				&& e.x + e.width < arena.width - ENTER_MARGIN && e.y + e.height < arena.height - ENTER_MARGIN
-				&& spawner.clearOfWalls(e.x, e.y, e.width, e.height))
+				&& spawner.spotClear(e, e.x, e.y))
 			{
 				e.entering = false;
 				e.allowCollisions = ANY;

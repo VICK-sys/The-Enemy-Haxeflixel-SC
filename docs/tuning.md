@@ -27,7 +27,7 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `entities/enemy/RofelBoss.hx` | gun sprite scale, shot sound (the movement and gun stats live in `rofel.json`) |
 | `entities/enemy/EnemyNav.hx` | waypoint radius, body radius default; the repath interval is in `tick()` |
 | `systems/EnemyDirector.hx` | off-screen entry margin, boss intro delay, wave stall timeout |
-| `systems/EnemySpawner.hx` | edge spawn margins and spread, stuck-enemy watchdog thresholds, rescue distances |
+| `systems/enemy/EnemySpawner.hx` | edge spawn margins and spread, stuck watchdog time and drive threshold, local unstick rings, rescue distances |
 | `systems/EnemyShots.hx` | shot wall probe |
 | `systems/BossDeath.hx` | boss death shake duration and amplitude |
 | `systems/Fx.hx` | hitstop length, shake strengths, spark settings, dash line fade |

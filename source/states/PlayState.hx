@@ -31,6 +31,7 @@ import net.PuppetDirector;
 
 class PlayState extends FlxState
 {
+	static inline var CURSOR_LEAN:Float = 0.5;
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
 	static inline var DEFLECT_PUSH:Float = 1.2;
@@ -205,6 +206,8 @@ class PlayState extends FlxState
 		var frozen = SideView.morphing;
 		var inputLocked = Net.active && subState != null;
 
+		updateCameraLean();
+
 		if (!frozen && !Net.active)
 			timeStop.update(elapsed);
 
@@ -269,8 +272,16 @@ class PlayState extends FlxState
 		perf.frame(director.enemyCount(), EnemyNav.usedBudget(), projectiles, director.wave);
 	}
 
+	function updateCameraLean():Void
+	{
+		var sx = FlxG.mouse.x - FlxG.camera.scroll.x - FlxG.width * 0.5;
+		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
+		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
+	}
+
 	function live(n:Int):Int
 		return n < 0 ? 0 : n;
+
 
 
 	function onDeflectedShot(shot:entities.enemy.EnemyShot):Bool
