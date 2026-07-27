@@ -175,6 +175,20 @@ The line-of-sight and pathfinding component. A few times per second it checks a 
 
 Asset path builders: `image`, `sound`, `music`, `file`, `json`, and `sparrow`, which returns the loaded atlas for a png and xml pair.
 
+### TreeMan and DialogueBox
+
+The man behind the tree. `TreeMan` runs only in the quiet room. It finds its spot from the `tree` prop rather than from a fixed coordinate, so moving the prop moves the man with it. He sits a little behind the trunk, so you have to walk round the tree to reach him.
+
+He has no sprite. You never see him, which is the point of him.
+
+`TreeMan.told` counts the talks and picks the next block of lines. It reads `talk.man<n>.1`, then `.2`, and stops when a key comes back unresolved. A block therefore grows or shrinks by editing the language file alone. After the last block he answers nothing more.
+
+The count is a static. Once he has said his piece, he stays gone for the rest of the session.
+
+`DialogueBox` is the box itself: a white border, a black fill, and a typewriter that ticks. It draws on the HUD camera, so the quiet room's zoom does not touch it. A press finishes the line early rather than skipping it, then the next press turns the page. The player cannot move while it is open.
+
+The detour timer holds while a box is open. The room should never drop you part way through a sentence.
+
 ### Lang
 
 The string table for the game UI. It holds English, Spanish and Japanese, and `Lang.t(key, args)` reads one line. Arguments replace the `{0}` and `{1}` markers in the line. An unknown key falls back to English, then to the key itself. A key therefore never renders as blank.

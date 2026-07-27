@@ -83,6 +83,22 @@
 	"online.connected": "CONNECTED - WAITING FOR HOST TO START",
 	"online.failed": "COULD NOT CONNECT TO {0}",
 
+	"talk.prompt": "Z / ENTER - TALK",
+	"talk.more": ">>",
+
+	"talk.man0.1": "I don't know how you got here.\nBut welcome all the same.",
+
+	"talk.man1.1": "Looking for something?\nThere are no secrets here, I'm afraid.\n\nJust me. Alone. Behind this tree.",
+
+	"talk.man2.1": "Maybe you would like to hear a story.",
+	"talk.man2.2": "There was a boy with a decent life ahead of him.\nLoving parents. A brother. Friends.",
+	"talk.man2.3": "Then one day tragedy struck.\nNothing was ever the same after that.\n\nHis parents separated, and the friends he\nheld close drifted away.",
+	"talk.man2.4": "He wants to go back to the time before it.\nHe can't. None of us can.",
+	"talk.man2.5": "But we can choose not to forget the good\nthat came before.\n\nWe can carry it with us, and keep going.",
+	"talk.man2.6": "Don't forget those times.\nRight?",
+
+	"talk.man3.1": "(The man behind the tree had made his peace,\nand vanished.)",
+
 	"onlineHelp.nav": "A/<- <   {0} / {1}   > D/->        ENTER - CLOSE",
 	"onlineHelp.p1.title": "ONLINE CO-OP",
 	"onlineHelp.p1.body": "Fight the waves together - up to {0} of you.\n\nOne of you HOSTS and runs the game.\nEveryone else JOINS and fights alongside.\n\nYou share the wave counter and the boss,\nbut you each keep your own health and AP.\n\nFriends can drop in after the run has begun.",

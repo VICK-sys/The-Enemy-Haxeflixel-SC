@@ -64,6 +64,7 @@ class PlayState extends FlxState
 	private var flyX:Float = 0;
 	private var flyY:Float = 0;
 	private var detourLeft:Float = 0;
+	private var treeMan:systems.TreeMan;
 
 	function tryDetour(bossWave:Int):Bool
 	{
@@ -78,7 +79,12 @@ class PlayState extends FlxState
 
 	function updateDetour(elapsed:Float):Void
 	{
+		if (treeMan != null)
+			treeMan.update(elapsed);
+
 		if (detourLeft <= 0)
+			return;
+		if (treeMan != null && treeMan.talking)
 			return;
 		detourLeft -= elapsed;
 		if (detourLeft > 0)
@@ -87,6 +93,16 @@ class PlayState extends FlxState
 		util.Detour.leave();
 		restarting = true;
 		wipe.close(function() FlxG.switchState(new PlayState()));
+	}
+
+	function addTreeMan():Void
+	{
+		for (p in util.CustomArena.props)
+			if (p.n == "tree")
+			{
+				treeMan = new systems.TreeMan(this, hud.camUI, _player, p.x, p.y);
+				return;
+			}
 	}
 
 	function stageTrack():String
@@ -222,6 +238,7 @@ class PlayState extends FlxState
 			heldSprite.visible = false;
 			_player.setSizeScale(QUIET_PLAYER_SCALE);
 			FlxG.camera.zoom = QUIET_ZOOM;
+			addTreeMan();
 			if (util.Detour.inRoom)
 				detourLeft = util.Detour.STAY;
 		}
