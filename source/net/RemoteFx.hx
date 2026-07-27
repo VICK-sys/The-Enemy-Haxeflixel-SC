@@ -5,6 +5,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.weapon.Arrow;
+import entities.weapon.Bullet;
 import entities.weapon.HookShot;
 import entities.weapon.SlashEffect;
 import entities.weapon.ThrownScythe;
@@ -29,6 +30,7 @@ class RemoteFx
 
 	private var slashes:FlxTypedGroup<SlashEffect>;
 	private var arrows:FlxTypedGroup<Arrow>;
+	private var bullets:FlxTypedGroup<Bullet>;
 	private var rope:FlxTypedGroup<FlxSprite>;
 	private var hook:HookShot;
 	private var thrown:ThrownScythe;
@@ -64,17 +66,18 @@ class RemoteFx
 
 		slashes = new FlxTypedGroup<SlashEffect>();
 		arrows = new FlxTypedGroup<Arrow>();
+		bullets = new FlxTypedGroup<Bullet>();
 		rope = new FlxTypedGroup<FlxSprite>();
 
 		hook = new HookShot();
 		hook.kill();
 		thrown = new ThrownScythe();
 		thrown.kill();
-		thrownTrail = new GhostTrail("items/mufu_scythe", 0.45, 3, 0.035);
+		thrownTrail = new GhostTrail("items/hammer", 0.45, 3, 0.035);
 
 		blades = SuperScythes.decoration(avatar.sprite, fx);
 		var dummyBow = new FlxSprite();
-		dummyBow.loadGraphic(Paths.image("items/mufu_bow"));
+		dummyBow.loadGraphic(Paths.image("items/crossbow"));
 		storm = new ArrowStorm(avatar.sprite, dummyBow, rain);
 		arms = new RemoteArms(avatar.sprite);
 
@@ -89,6 +92,7 @@ class RemoteFx
 		for (c in arms.claws)
 			state.insert(below, c);
 		state.add(arrows);
+		state.add(bullets);
 		state.add(rain.arrows);
 		state.add(slashes);
 		state.add(rope);
@@ -145,9 +149,15 @@ class RemoteFx
 				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.jab.spawnDist, pmy + dy * cfg.jab.spawnDist, dx, dy, aimDeg, 0.6);
 				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
-			case Hammer:
-				fx.sparksAt(pmx + dx * cfg.hammer.reach, pmy + dy * cfg.hammer.reach);
-				FlxG.sound.play(Paths.sound("hammer"), 0.5);
+			case Shoot:
+				var rc = cfg.revolver;
+				bullets.recycle(Bullet).fire(pmx + dx * 24, pmy + dy * 24, dx, dy, aimDeg, rc.damage, rc.speed, rc.range, rc.knock);
+				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
+				FlxG.sound.play(Paths.sound("enemies/pistol"), 0.45);
+
+			case Fan:
+				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
+				FlxG.sound.play(Paths.sound("enemies/shoot"), 0.5);
 
 			case Bow:
 				var bc = cfg.bowCharge;

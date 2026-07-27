@@ -36,7 +36,7 @@ class SuperBlade extends FlxSprite
 	public function new()
 	{
 		super();
-		loadGraphic(Paths.image("items/mufu_scythe"));
+		loadGraphic(Paths.image("items/hammer"));
 		antialiasing = false;
 		scale.set(3, 3);
 	}

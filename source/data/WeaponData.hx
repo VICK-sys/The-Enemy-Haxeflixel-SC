@@ -17,6 +17,19 @@ typedef HammerConfig = {
 	stunTime:Float
 }
 
+typedef RevolverConfig = {
+	cylinder:Int,
+	damage:Int,
+	fanDamage:Int,
+	shotCooldown:Float,
+	reloadTime:Float,
+	spread:Float,
+	speed:Float,
+	range:Float,
+	hitRadius:Float,
+	knock:Float
+}
+
 typedef ShockwaveConfig = {
 	waveRadius:Float,
 	waveTime:Float
@@ -98,6 +111,7 @@ typedef WeaponsData = {
 	swing:SwingConfig,
 	jab:SwingConfig,
 	hammer:HammerConfig,
+	revolver:RevolverConfig,
 	shockwave:ShockwaveConfig,
 	thrown:ThrownConfig,
 	bowCharge:BowChargeConfig,

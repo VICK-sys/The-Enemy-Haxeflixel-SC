@@ -52,11 +52,11 @@ class WeaponPickSubState extends FlxSubState
 		[-1, -1], [1, -1], [-1, 1], [1, 1]
 	];
 
-	static var NAMES:Array<String> = ["SCYTHE", "HAMMER", "BOW", "HOOK"];
-	static var ART:Array<String> = ["items/mufu_scythe", "items/mufu_hammer", "items/mufu_bow", "items/mufu_hook"];
+	static var NAMES:Array<String> = ["HAMMER", "REVOLVER", "CROSSBOW", "HOOK"];
+	static var ART:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/hook"];
 	static var BLURBS:Array<String> = [
-		"SLASH  /  THROW",
-		"SLAM",
+		"SWING  /  THROW",
+		"SHOOT  /  FAN THE HAMMER",
 		"CHARGE SHOT  /  ARROW RAIN",
 		"JAB  /  GRAB"
 	];

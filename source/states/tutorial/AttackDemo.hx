@@ -31,7 +31,7 @@ class AttackDemo extends TutorialDemo
 		slash.kill();
 
 		held = sprite();
-		held.loadGraphic(Paths.image("items/mufu_scythe"));
+		held.loadGraphic(Paths.image("items/hammer"));
 		held.scale.set(4, 4);
 		held.origin.set(held.width * 0.5, held.height);
 

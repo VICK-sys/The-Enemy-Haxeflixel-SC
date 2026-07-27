@@ -62,6 +62,7 @@ Combat balance for every weapon system, one object per system; field names match
 |---|---|
 | `swing` | melee range and arc, slash spawn distance |
 | `jab` | hook jab spawn distance, reach, arc, damage |
+| `revolver` | cylinder size, shot and fan damage, fire cooldown, reload time, fan spread, bullet speed/range/hit radius/knockback |
 | `hammer` | reach, radius, damage, push, shockwave stun length |
 | `shockwave` | wave radius and expansion time |
 | `thrown` | throw distance, return speed |

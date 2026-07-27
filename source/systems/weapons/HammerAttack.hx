@@ -24,17 +24,6 @@ class HammerAttack
 		shock = new Shockwave(director, hits, cfg.stunTime);
 	}
 
-	public function slam(pmx:Float, pmy:Float, dx:Float, dy:Float):Void
-	{
-		var ix = pmx + dx * cfg.reach;
-		var iy = pmy + dy * cfg.reach;
-		fx.sparksAt(ix, iy);
-		fx.slamShake();
-		hits.blastRadial(ix, iy, cfg.radius, cfg.push, cfg.damage, dx, dy);
-		FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.7);
-		FlxG.sound.play(Paths.sound("hammer"), 0.8);
-	}
-
 	public function update(elapsed:Float):Void
 	{
 		shock.update(elapsed);

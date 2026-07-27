@@ -16,7 +16,8 @@ class HeldWeapon
 	static inline var RECOIL_SCALE:Float = 0.8;
 	static inline var AIM_LERP:Float = 0.25;
 	static inline var FLIP_MARGIN:Float = 12;
-	static inline var HAMMER_SWING_TIME:Float = 0.45;
+	static inline var SHOOT_TIME:Float = 0.12;
+	static inline var FAN_TIME:Float = 0.3;
 	static inline var BOW_TIME:Float = 0.3;
 	static inline var BOW_DIST:Float = 55;
 	static inline var RAIN_TIME:Float = 0.6;
@@ -28,7 +29,7 @@ class HeldWeapon
 	public static inline var CHARGE_TINT:Int = 0xFF9BE9FF;
 
 	public static inline var SCYTHE:Int = 0;
-	public static inline var HAMMER:Int = 1;
+	public static inline var REVOLVER:Int = 1;
 	public static inline var BOW:Int = 2;
 	public static inline var HOOK:Int = 3;
 
@@ -86,7 +87,8 @@ class HeldWeapon
 		swingSweep = !bowLike();
 		activeSwingTime = switch (mode)
 		{
-			case Hammer: HAMMER_SWING_TIME;
+			case Shoot: SHOOT_TIME;
+			case Fan: FAN_TIME;
 			case Bow: BOW_TIME;
 			case Rain: RAIN_TIME;
 			case Hook: HOOK_TIME;
@@ -97,7 +99,7 @@ class HeldWeapon
 	}
 
 	function bowLike():Bool
-		return kind == BOW;
+		return kind == BOW || kind == REVOLVER;
 
 	function raining():Bool
 		return attack == Rain && swingTimer > 0;
@@ -106,10 +108,10 @@ class HeldWeapon
 	{
 		var img = switch (kind)
 		{
-			case 1: "items/mufu_hammer";
-			case 2: "items/mufu_bow";
-			case 3: "items/mufu_hook";
-			default: "items/mufu_scythe";
+			case 1: "items/revolver";
+			case 2: "items/crossbow";
+			case 3: "items/hook";
+			default: "items/hammer";
 		};
 		sprite.loadGraphic(Paths.image(img));
 		if (bowLike())
@@ -126,7 +128,7 @@ class HeldWeapon
 		{
 			sprite.y = player.y - sprite.origin.y - RAIN_RAISE;
 		}
-		else if (kind == BOW)
+		else if (bowLike())
 		{
 			var pmx:Float = player.x + player.width * 0.5;
 			var pmy:Float = player.y + player.height * 0.5;
@@ -184,7 +186,7 @@ class HeldWeapon
 			sprite.flipX = false;
 			target = -90;
 		}
-		else if (kind == BOW)
+		else if (bowLike())
 		{
 			sprite.flipX = false;
 			target = theta;

@@ -45,7 +45,7 @@ class ThrowAttack
 		this.status = status;
 		this.hits = hits;
 		thrown = new ThrownScythe();
-		trail = new GhostTrail("items/mufu_scythe", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
+		trail = new GhostTrail("items/hammer", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
 		spinSound = FlxG.sound.load(Paths.sound("scythe/spin"), 0.5, true);
 		nav = new EnemyNav();
 		nav.map = arena.map;

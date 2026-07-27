@@ -22,7 +22,7 @@ class HookShot extends FlxSprite
 	public function new()
 	{
 		super();
-		loadGraphic(Paths.image("items/mufu_hook"));
+		loadGraphic(Paths.image("items/hook"));
 		antialiasing = false;
 		scale.set(4, 4);
 	}

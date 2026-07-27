@@ -93,7 +93,7 @@ class SuperScythes
 		baseScaleY = player.scale.y;
 		backLayer = new FlxTypedGroup<SuperBlade>();
 		frontLayer = new FlxTypedGroup<SuperBlade>();
-		trail = new GhostTrail("items/mufu_scythe", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
+		trail = new GhostTrail("items/hammer", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
 		spinSound = FlxG.sound.load(Paths.sound("scythe/spin"), 0.35, true);
 	}
 

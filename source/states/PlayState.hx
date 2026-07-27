@@ -90,7 +90,7 @@ class PlayState extends FlxState
 		FlxG.camera.setScrollBoundsRect(0, 0, arena.width, arena.height);
 		FlxG.camera.zoom = 1;
 
-		scythe = new FlxSprite(0, 0, Paths.image("items/mufu_scythe"));
+		scythe = new FlxSprite(0, 0, Paths.image("items/hammer"));
 		scythe.scale.set(4, 4);
 		scythe.origin.set(scythe.width * 0.5, scythe.height);
 		scythe.x = _player.x - scythe.origin.x + 30;
@@ -119,6 +119,7 @@ class PlayState extends FlxState
 		add(combat.swing.slashes);
 		add(combat.jab.slashes);
 		add(combat.bow.arrows);
+		add(combat.revolver.bullets);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
 		insert(members.indexOf(layers.entityLayer), combat.hammer.shock.cracks);
 		insert(members.indexOf(layers.entityLayer), combat.hammer.shock.rings);
@@ -250,7 +251,7 @@ class PlayState extends FlxState
 		if (netSync != null)
 			netSync.update(elapsed);
 		hud.setMode(combat.modeName());
-		hud.setRain(combat.bow.rainCharge, combat.weapon == 2);
+		hud.setGauge(gaugeFill(), combat.weapon == 1 || combat.weapon == 2);
 		hud.setTimeStop(Net.active ? "OFF" : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
@@ -266,7 +267,7 @@ class PlayState extends FlxState
 
 		debugKeys();
 
-		var projectiles = live(director.shots.countLiving())
+		var projectiles = live(director.shots.countLiving()) + live(combat.revolver.bullets.countLiving())
 			+ live(combat.bow.arrows.countLiving()) + live(combat.bow.rain.arrows.countLiving())
 			+ (combat.throwAttack.airborne ? 1 : 0) + (combat.hookAttack.hook.exists ? 1 : 0);
 		perf.frame(director.enemyCount(), EnemyNav.usedBudget(), projectiles, director.wave);
@@ -278,6 +279,10 @@ class PlayState extends FlxState
 		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
 		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
 	}
+
+
+	function gaugeFill():Float
+		return combat.weapon == 1 ? combat.revolver.gauge : combat.bow.rainCharge;
 
 	function live(n:Int):Int
 		return n < 0 ? 0 : n;

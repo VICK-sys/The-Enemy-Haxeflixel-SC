@@ -4,7 +4,8 @@ enum WeaponMode
 {
 	Swing;
 	Throw;
-	Hammer;
+	Shoot;
+	Fan;
 	Bow;
 	Rain;
 	Hook;

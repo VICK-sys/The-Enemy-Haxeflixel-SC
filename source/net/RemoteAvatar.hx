@@ -13,7 +13,7 @@ class RemoteAvatar
 	static inline var LERP:Float = 12;
 	static inline var SNAP_DIST:Float = 260;
 
-	static var WEAPON_IMAGES:Array<String> = ["items/mufu_scythe", "items/mufu_hammer", "items/mufu_bow", "items/mufu_hook"];
+	static var WEAPON_IMAGES:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/hook"];
 
 	public var sprite:FlxSprite;
 	public var held:FlxSprite;

@@ -11,13 +11,14 @@ import systems.Pickups;
 
 class Weapons
 {
-	static var WEAPON_NAMES:Array<String> = ["SCYTHE", "HAMMER", "BOW", "HOOK"];
+	static var WEAPON_NAMES:Array<String> = ["HAMMER", "REVOLVER", "CROSSBOW", "HOOK"];
 
 	public var held:HeldWeapon;
 	public var hits:HitPipeline;
 	public var swing:SwingAttack;
 	public var jab:SwingAttack;
 	public var hammer:HammerAttack;
+	public var revolver:RevolverAttack;
 	public var bow:BowAttack;
 	public var throwAttack:ThrowAttack;
 	public var hookAttack:HookAttack;
@@ -46,6 +47,7 @@ class Weapons
 		swing = new SwingAttack(director, hits, weaponCfg.swing);
 		jab = new SwingAttack(director, hits, weaponCfg.jab, 0.6);
 		hammer = new HammerAttack(director, fx, hits);
+		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, scythe, arena, director, status, hits);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
@@ -86,6 +88,7 @@ class Weapons
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		jab.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		bow.update(elapsed);
+		revolver.update(elapsed);
 		hammer.update(elapsed);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
@@ -127,6 +130,7 @@ class Weapons
 	{
 		weapon = i < 0 || i >= WEAPON_NAMES.length ? 0 : i;
 		bow.cancelCharge();
+		revolver.reset();
 		held.setKind(weapon);
 	}
 
@@ -179,6 +183,29 @@ class Weapons
 		}
 	}
 
+	function updateGunInput():Void
+	{
+		if (throwAttack.airborne)
+			return;
+
+		var aim = aimFromPlayer();
+
+		if (FlxG.mouse.justPressedRight && revolver.canFan())
+		{
+			held.beginSwing(aim.deg, Fan);
+			emitAttack(Fan, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+			revolver.fanFire(held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+			return;
+		}
+
+		if (FlxG.mouse.pressed && revolver.canFire())
+		{
+			held.beginSwing(aim.deg, Shoot);
+			emitAttack(Shoot, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+			revolver.fire(held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+		}
+	}
+
 	function updateAttackInput():Void
 	{
 		if (status.dead || superBusy)
@@ -199,6 +226,12 @@ class Weapons
 			}
 			if (onSuper != null)
 				onSuper(weapon);
+			return;
+		}
+
+		if (weapon == 1)
+		{
+			updateGunInput();
 			return;
 		}
 
@@ -250,10 +283,6 @@ class Weapons
 	{
 		switch (weapon)
 		{
-			case 1:
-				held.beginSwing(aimDeg, Hammer);
-				emitAttack(Hammer, pmx, pmy, dx, dy, aimDeg);
-				hammer.slam(pmx, pmy, dx, dy);
 			case 3:
 				held.beginSwing(aimDeg, Jab);
 				emitAttack(Jab, pmx, pmy, dx, dy, aimDeg);

@@ -120,12 +120,12 @@ class MenuList extends FlxGroup
 
 	static function selectorGraphic():FlxGraphic
 	{
-		var key = "menuScytheOutline";
+		var key = "menuWeaponOutline";
 		var cached = FlxG.bitmap.get(key);
 		if (cached != null)
 			return cached;
 
-		var src = FlxG.bitmap.add(Paths.image("items/mufu_scythe")).bitmap;
+		var src = FlxG.bitmap.add(Paths.image("items/hammer")).bitmap;
 		var sil = new BitmapData(src.width, src.height, true, 0);
 		for (y in 0...src.height)
 			for (x in 0...src.width)

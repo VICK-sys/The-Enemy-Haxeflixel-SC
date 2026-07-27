@@ -17,7 +17,7 @@ class SuperDemo extends TutorialDemo
 		for (i in 0...6)
 		{
 			var b = sprite();
-			b.loadGraphic(Paths.image("items/mufu_scythe"));
+			b.loadGraphic(Paths.image("items/hammer"));
 			b.scale.set(3, 3);
 			blades.push(b);
 		}
