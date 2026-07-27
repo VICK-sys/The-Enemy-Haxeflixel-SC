@@ -11,6 +11,12 @@
 			"image": "tilesets/Scarlet Forest_transparent",
 			"tileW": 24,
 			"tileH": 24
+		},
+		{
+			"name": "Room Flats",
+			"image": "tilesets/roomFlats",
+			"tileW": 24,
+			"tileH": 24
 		}
 	]
 }
