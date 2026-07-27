@@ -80,7 +80,7 @@ class RevolverAttack
 		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.ROUND);
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
-		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.65);
+		FlxG.sound.play(Paths.sound("revolver"), 0.7);
 		if (rounds <= 0)
 			beginReloadFrom(0);
 	}
@@ -106,7 +106,7 @@ class RevolverAttack
 		b.seek = target;
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
-		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.7);
+		FlxG.sound.play(Paths.sound("revolver"), 0.75);
 		if (rounds <= 0)
 			beginReloadFrom(0);
 	}
@@ -174,7 +174,7 @@ class RevolverAttack
 		var jy = Math.sin(rad);
 		spawn(bx, by, jx, jy, deg, cfg.damage, Bullet.ROUND);
 		fx.sparksAt(bx + jx * MUZZLE, by + jy * MUZZLE);
-		FlxG.sound.play(Paths.sound("enemies/pistol"), 0.5);
+		FlxG.sound.play(Paths.sound("revolver"), 0.55);
 		rounds--;
 		if (rounds <= 0)
 		{

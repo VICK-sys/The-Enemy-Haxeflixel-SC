@@ -154,7 +154,7 @@ class RemoteFx
 				var rc = cfg.revolver;
 				bullets.recycle(Bullet).fire(pmx + dx * 24, pmy + dy * 24, dx, dy, aimDeg, rc.damage, rc.speed, rc.range, rc.knock);
 				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
-				FlxG.sound.play(Paths.sound("enemies/pistol"), 0.45);
+				FlxG.sound.play(Paths.sound("revolver"), 0.5);
 
 			case Fan:
 				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
