@@ -48,6 +48,13 @@ class Enemies extends FlxSprite
 	public var stun:Float = 0;
 	public var flashTimer:Float = 0;
 
+	private var braceFrames:Int = 0;
+	private var braceVX:Float = 0;
+	private var braceVY:Float = 0;
+	private var braceAmp:Float = 0;
+	private var braceOffX:Float = 0;
+	private var braceOffY:Float = 0;
+
 	public var shadowOffX:Float = 32;
 	public var shadowOffXFlip:Float = 22;
 	public var shadowOffY:Float = 90;
@@ -177,6 +184,19 @@ class Enemies extends FlxSprite
 		}
 	}
 
+	public function brace(frames:Int, amp:Float):Void
+	{
+		if (isDead || frames <= 1 || amp <= 0)
+			return;
+		braceVX = velocity.x;
+		braceVY = velocity.y;
+		velocity.set(0, 0);
+		braceOffX = offset.x;
+		braceOffY = offset.y;
+		braceAmp = amp;
+		braceFrames = frames;
+	}
+
     override public function update(elapsed:Float):Void
 	{
 		if (puppet)
@@ -222,6 +242,20 @@ class Enemies extends FlxSprite
 
 		if (seized)
 			return;
+
+		if (braceFrames > 0)
+		{
+			braceFrames--;
+			if (braceFrames > 0)
+				offset.set(braceOffX + FlxG.random.float(-braceAmp, braceAmp),
+					braceOffY + FlxG.random.float(-braceAmp, braceAmp));
+			else
+			{
+				offset.set(braceOffX, braceOffY);
+				velocity.set(braceVX, braceVY);
+			}
+			return;
+		}
 
 		if (stun > 0)
 		{

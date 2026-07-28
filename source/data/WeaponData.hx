@@ -11,7 +11,8 @@ typedef SwingConfig = {
 	hitstop:Int,
 	hitstopScale:Float,
 	hitShake:Float,
-	knock:Float
+	knock:Float,
+	hitBrace:Float
 }
 
 typedef RevolverConfig = {
