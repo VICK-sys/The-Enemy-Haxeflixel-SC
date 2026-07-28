@@ -12,7 +12,9 @@ The client runs its own full weapon stack against *puppets*. A puppet is a real 
 
 Puppets live in a `PuppetDirector`. That `EnemyDirector` subclass swaps spawning and AI for snapshot application. It keeps the rigs, shadows, hitboxes and hit queries. Everything the client's weapons need therefore runs the same code as solo play. That covers `firstInCircle`, contact damage, and enemy shots hurting the player.
 
-A landed client attack draws its own feedback at once, then sends a damage *claim*. That feedback is sparks, sound and a hit flash. The host applies the claim and owns the result. The death comes back in the next snapshot. The client takes the kill for the super meter if it claimed that enemy recently. When the boss dies, the host drops five scrap and a health pickup where it fell; each guest drops its own five scrap at the mirrored blast, and the health pickup reaches them through the snapshot like any other.
+A landed client attack draws its own feedback at once, then sends a damage *claim*. That feedback is sparks, sound and a hit flash. The host applies the claim and owns the result. The death comes back in the next snapshot. The client takes the kill for the super meter if it claimed that enemy recently.
+
+The shop round runs on four messages. The host's `lvl` opens every peer's shop. A player entering sends `lvlin`, which puts the LEVELING note over them on every other screen. Closing the menu, or a shop timing out unvisited, sends `lvldone`, and the host releases with `lvlgo` once everyone has reported. Nobody is pulled into a menu by someone else; the broadcast opens shops, not screens. When the boss dies, the host drops five scrap and a health pickup where it fell; each guest drops its own five scrap at the mirrored blast, and the health pickup reaches them through the snapshot like any other.
 
 ## What each side sees
 

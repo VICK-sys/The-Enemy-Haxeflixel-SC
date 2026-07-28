@@ -58,6 +58,7 @@ class PlayState extends FlxState
 	private var levelDone:Bool = false;
 	private var levelClock:Float = 0;
 	private var levelAcks:Map<Int, Bool>;
+	private var levelNeed:Int = 0;
 	private var perf:PerfLog;
 	private var bossAlarm:FlxSound;
 	private var bossFight:Bool = false;
@@ -240,7 +241,7 @@ class PlayState extends FlxState
 		hud = new Hud(this, status);
 		shop.addTo(this);
 		shop.onEnter = enterShop;
-		shop.onClose = releaseShopHold;
+		shop.onClose = onShopClosed;
 		flyIn = new ui.WeaponFlyIn(hud.camUI, combat.held);
 		add(flyIn.sprite);
 		director.onWave = onWaveStarted;
@@ -259,7 +260,8 @@ class PlayState extends FlxState
 			Net.inGame = true;
 			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
-			netSync.onLevelOpen = beginLevelUp;
+			netSync.onLevelOpen = openShopRound;
+			netSync.onLevelIn = onPeerEnteredShop;
 			netSync.onLevelAck = noteLevelAck;
 			netSync.onLevelGo = releaseLevelUp;
 			netSync.onWaveEvt = onWaveStarted;
@@ -450,78 +452,68 @@ class PlayState extends FlxState
 	{
 		if (director.wave <= 0 || director.wave % systems.Shop.EVERY != 0)
 			return;
+		openShopRound();
+		if (Net.isHost)
+			Net.send({t: "lvl"});
+	}
+
+	function openShopRound():Void
+	{
 		shop.setOpen(true);
 		hud.showBanner(Lang.t("shop.open"));
 		if (!Net.active || Net.isHost)
 			director.holdWave = true;
+		if (Net.active)
+		{
+			levelHold = true;
+			levelDone = false;
+			levelClock = 0;
+			if (Net.isHost)
+			{
+				levelAcks = new Map();
+				levelNeed = Net.guestCount + 1;
+			}
+		}
 	}
 
 	function enterShop():Void
 	{
-		if (!shop.open)
+		if (!shop.open || status.dead || restarting || subState != null)
 			return;
-		if (offerLevelUp())
-			shop.dismiss();
+		FlxG.inputs.reset();
+		var screen = new LevelUpSubState(hud.camUI);
+		screen.onSpent = syncScrap;
+		screen.closeCallback = finishShopping;
+		openSubState(screen);
+		shop.dismiss();
+		if (Net.active)
+			Net.send({t: "lvlin"});
 	}
 
 	function syncScrap():Void
 		hud.setExp(util.Levels.exp);
 
-	function releaseShopHold():Void
+	function finishShopping():Void
 	{
-		if (!Net.active || Net.isHost)
+		if (!Net.active)
+		{
 			director.holdWave = false;
-	}
-
-	function offerLevelUp():Bool
-	{
-		if (status.dead || restarting || subState != null || levelHold)
-			return false;
-
-		if (Net.active)
-		{
-			if (!Net.isHost)
-				return false;
-			Net.send({t: "lvl"});
-			beginLevelUp();
-			return true;
-		}
-
-		FlxG.inputs.reset();
-		var screen = new LevelUpSubState(hud.camUI);
-		screen.onSpent = syncScrap;
-		screen.closeCallback = releaseShopHold;
-		openSubState(screen);
-		return true;
-	}
-
-	function beginLevelUp():Void
-	{
-		if (levelHold)
-			return;
-		levelHold = true;
-		levelDone = false;
-		levelClock = 0;
-		levelAcks = new Map();
-		if (Net.isHost)
-			director.holdWave = true;
-		if (netSync != null)
-			netSync.setAllLeveling(true);
-
-		if (status.dead || restarting || subState != null || !util.Levels.canSpend())
-		{
-			finishLevelUp();
 			return;
 		}
-
-		FlxG.inputs.reset();
-		var screen = new LevelUpSubState(hud.camUI);
-		screen.onSpent = syncScrap;
-		screen.closeCallback = finishLevelUp;
-		openSubState(screen);
+		sendShopDone();
 	}
 
-	function finishLevelUp():Void
+	function onShopClosed():Void
+	{
+		if (!Net.active)
+		{
+			director.holdWave = false;
+			return;
+		}
+		sendShopDone();
+	}
+
+	function sendShopDone():Void
 	{
 		if (!levelHold || levelDone)
 			return;
@@ -529,6 +521,12 @@ class PlayState extends FlxState
 		Net.send({t: "lvldone"});
 		if (Net.isHost)
 			noteLevelAck(Net.selfId);
+	}
+
+	function onPeerEnteredShop(id:Int):Void
+	{
+		if (netSync != null)
+			netSync.setLeveling(id, true);
 	}
 
 	function noteLevelAck(id:Int):Void
@@ -541,7 +539,7 @@ class PlayState extends FlxState
 		var got = 0;
 		for (v in levelAcks)
 			got++;
-		if (got >= Net.guestCount + 1)
+		if (got >= levelNeed)
 			releaseLevelUp();
 	}
 
@@ -553,6 +551,7 @@ class PlayState extends FlxState
 			Net.send({t: "lvlgo"});
 		levelHold = false;
 		levelAcks = null;
+		shop.setOpen(false);
 		director.holdWave = false;
 		if (netSync != null)
 			netSync.setAllLeveling(false);

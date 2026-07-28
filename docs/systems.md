@@ -140,7 +140,7 @@ Two things end the hold. Shopping ends it when the screen closes, and a forty fi
 
 The shop hides and returns with the rest of the decor, so the boss whiteout takes it away and the arena restoring brings it back. It stops answering the ENTER key while hidden, so it cannot be entered through a boss fight.
 
-In co-op the shop is shared. One player reaching it opens the screen for everyone through the existing level handshake, which already holds the wave until every peer is done.
+In co-op the shop round is shared but the shopping is not. The host's tenth wave broadcasts the round, every peer's shutter rolls up, and each player walks to their own shop and spends alone while the others keep playing. A player in the menu wears the LEVELING note. The wave stays held until every peer reports done, by shopping or by letting the shop time out, and the host's sixty second cap backstops the lot.
 
 ### BossHud
 

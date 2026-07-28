@@ -44,6 +44,7 @@ class NetSync
 	private var frame:Int = 0;
 	private var nextEnemyId:Int = 1;
 	public var onLevelOpen:Void->Void;
+	public var onLevelIn:Int->Void;
 	public var onLevelAck:Int->Void;
 	public var onLevelGo:Void->Void;
 
@@ -256,6 +257,10 @@ class NetSync
 			case "lvl" if (Net.isClient):
 				if (onLevelOpen != null)
 					onLevelOpen();
+
+			case "lvlin":
+				if (onLevelIn != null)
+					onLevelIn(msg.f);
 
 			case "lvldone":
 				if (onLevelAck != null)
