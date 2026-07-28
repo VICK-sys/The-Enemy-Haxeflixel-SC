@@ -66,6 +66,8 @@ It counts from what was left rather than from zero. Reloading early with three s
 
 `rounds` itself does not move until the reload finishes, so nothing can fire off a half-full display. The blue bar stays with the crossbow's arrow rain, which is a continuous charge with no count to show.
 
+The crossbow borrows the same bar. A tap shot puts the bow on `shotCooldown`, and that cooldown drives the bar exactly as a reload does, with its own crank sound. A full charge shot skips the cooldown entirely, so the bar is the reward for not waiting as much as the punishment for tapping.
+
 ### The reload bar
 
 `ReloadBar` puts a second readout in the world, above the player's head. A bracketed track holds a single line that crosses it from left to right over the reload. The screen corner holds the count, and the track holds the time.

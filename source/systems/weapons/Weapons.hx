@@ -101,7 +101,10 @@ class Weapons
 		bow.update(elapsed);
 		var gunAim = aimFromPlayer();
 		if (status.dead)
+		{
 			revolver.cancelFan();
+			bow.hushReload();
+		}
 		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
 		shock.update(elapsed);
 		hookAttack.update(elapsed);

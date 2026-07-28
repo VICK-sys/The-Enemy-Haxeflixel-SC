@@ -397,7 +397,9 @@ class PlayState extends FlxState
 			netSync.update(elapsed);
 		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
 		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
-		reloadBar.update(combat.weapon == 1 && !combat.disabled && !status.dead && combat.revolver.isReloading, combat.revolver.reloadProgress);
+		var recharging = combat.weapon == 1 ? combat.revolver.isReloading : (combat.weapon == 2 && combat.bow.recovering);
+		var rechargeAt = combat.weapon == 1 ? combat.revolver.reloadProgress : combat.bow.recoverProgress;
+		reloadBar.update(recharging && !combat.disabled && !status.dead, rechargeAt);
 		hud.setExp(util.Levels.exp);
 		hud.setTimeStop(Net.active ? Lang.t("timestop.off") : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());

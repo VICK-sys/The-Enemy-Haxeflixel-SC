@@ -30,7 +30,9 @@ class BowAttack
 	private var chargeTime:Float = 0;
 	private var fullNoted:Bool = false;
 	private var cooldown:Float = 0;
+	private var cooldownTotal:Float = 0;
 	private var drawSound:FlxSound;
+	private var reloadSound:FlxSound;
 
 	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline)
 	{
@@ -41,6 +43,7 @@ class BowAttack
 		arrows = new FlxTypedGroup<Arrow>();
 		rain = new ArrowRain(fx, hits);
 		drawSound = FlxG.sound.load(Paths.sound("weapon/spin"), 0.4, true);
+		reloadSound = FlxG.sound.load(Paths.sound("weapon/crossbowReload"), 0.55);
 	}
 
 	function get_charge():Float
@@ -56,6 +59,20 @@ class BowAttack
 	function get_ready():Bool
 		return cooldown <= 0;
 
+	public var recovering(get, never):Bool;
+
+	function get_recovering():Bool
+		return cooldown > 0;
+
+	public var recoverProgress(get, never):Float;
+
+	function get_recoverProgress():Float
+	{
+		if (cooldown <= 0 || cooldownTotal <= 0)
+			return 0;
+		return 1 - cooldown / cooldownTotal;
+	}
+
 	public var rainReady(get, never):Bool;
 
 	function get_rainReady():Bool
@@ -68,6 +85,12 @@ class BowAttack
 		charging = true;
 		chargeTime = 0;
 		fullNoted = false;
+	}
+
+	public function hushReload():Void
+	{
+		if (reloadSound != null && reloadSound.playing)
+			reloadSound.stop();
 	}
 
 	public function cancelCharge():Void
@@ -123,7 +146,13 @@ class BowAttack
 			FlxG.camera.shake(0.004, 0.18);
 		}
 		else
-			cooldown = cfg.shotCooldown * util.Levels.actionScale();
+		{
+			cooldownTotal = cfg.shotCooldown * util.Levels.actionScale();
+			cooldown = cooldownTotal;
+			if (reloadSound.playing)
+				reloadSound.stop();
+			reloadSound.play(true);
+		}
 	}
 
 	public function rainFire(tx:Float, ty:Float, bx:Float, by:Float):Void
