@@ -25,6 +25,10 @@ class LevelUpSubState extends FlxSubState
 	static inline var RIGHT_W:Float = 564;
 	static inline var PANEL_H:Float = 430;
 	static inline var ROW:Float = 40;
+	static inline var ARROW_W:Float = 30;
+	static inline var ARROW_PAD:Float = 9;
+	static inline var LESS_X:Float = LEFT_X + LEFT_W - 198;
+	static inline var MORE_X:Float = LEFT_X + LEFT_W - 54;
 
 	static var STATS:Array<String> = ["vigor", "endurance", "strength", "dexterity"];
 
@@ -83,8 +87,8 @@ class LevelUpSubState extends FlxSubState
 			vals.push(v);
 		}
 
-		less = text(LEFT_X + LEFT_W - 198, 0, 30, "<", 24, GOLD, CENTER);
-		more = text(LEFT_X + LEFT_W - 54, 0, 30, ">", 24, GOLD, CENTER);
+		less = text(LESS_X, 0, ARROW_W, "<", 24, GOLD, CENTER);
+		more = text(MORE_X, 0, ARROW_W, ">", 24, GOLD, CENTER);
 		ui(less);
 		ui(more);
 
@@ -224,6 +228,21 @@ class LevelUpSubState extends FlxSubState
 		super.close();
 	}
 
+	/** -1 the refund arrow, 1 the buy arrow, 0 neither. Only answers for arrows actually on screen. */
+	function arrowAt(mx:Float, my:Float):Int
+	{
+		if (pick >= STATS.length)
+			return 0;
+		var top = TOP + 137 + pick * ROW;
+		if (my < top || my > top + ROW - 6)
+			return 0;
+		if (less.visible && mx >= LESS_X - ARROW_PAD && mx <= LESS_X + ARROW_W + ARROW_PAD)
+			return -1;
+		if (more.visible && mx >= MORE_X - ARROW_PAD && mx <= MORE_X + ARROW_W + ARROW_PAD)
+			return 1;
+		return 0;
+	}
+
 	function rowAt(mx:Float, my:Float):Int
 	{
 		for (i in 0...STATS.length)
@@ -249,15 +268,26 @@ class LevelUpSubState extends FlxSubState
 			pick = over;
 			refresh();
 		}
-		if (FlxG.mouse.justPressed && over >= 0)
+		if (FlxG.mouse.justPressed)
 		{
-			pick = over;
-			if (pick >= STATS.length)
+			var hit = arrowAt(m.x, m.y);
+			if (hit != 0)
 			{
-				close();
-				return;
+				if (hit > 0)
+					buy();
+				else
+					sell();
 			}
-			refresh();
+			else if (over >= 0)
+			{
+				pick = over;
+				if (pick >= STATS.length)
+				{
+					close();
+					return;
+				}
+				refresh();
+			}
 		}
 
 		if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP)

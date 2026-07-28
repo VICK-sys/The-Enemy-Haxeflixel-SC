@@ -211,6 +211,8 @@ Nothing carries. A run starts at zero exp and zero points every time, from the m
 
 A round is a wave, not a run. `EnemyDirector` calls `onWaveCleared` when the last enemy of a wave dies and the breather starts. The screen opens only when you can afford a level, so a round you cannot spend on never interrupts you. Nothing happens on death.
 
+Points can be taken back. A refund returns what the level being dropped costs now, not what that point cost when it was bought, because it is a level that is being undone rather than a purchase. Any point can go back, including one bought on an earlier visit, so a build is never locked in by a shop closing.
+
 The screen shows what a point buys before you spend it. The left panel holds the level, the exp and the cost of the next one, then the four stats. The right panel holds what those stats drive, each as the value now and the value after. Only a row the highlighted stat would move lights up.
 
 | Field | Meaning |
