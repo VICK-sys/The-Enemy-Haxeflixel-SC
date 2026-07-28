@@ -42,7 +42,9 @@ class Hud
 	static inline var SUPER_Y:Float = 17;
 	static inline var AMMO_RIGHT:Float = 1264;
 	static inline var AMMO_BOTTOM:Float = 704;
-	static inline var PIP_GAP:Float = 8;
+	static inline var AMMO_MID:Float = 34;
+	static inline var PIP_GAP:Float = 4;
+	static inline var CAP_GAP:Float = 6;
 
 	public var camUI:FlxCamera;
 
@@ -76,10 +78,11 @@ class Hud
 	private var hpClip:FlxRect;
 	private var hpShown:Float = -1;
 	private var bulletPips:Array<FlxSprite> = [];
-	private var bulletPlates:Array<FlxSprite> = [];
 	private var bulletsShown:Int = -1;
 	private var arrowPip:FlxSprite;
 	private var arrowShown:Bool = true;
+	private var capTop:FlxSprite;
+	private var capBottom:FlxSprite;
 	private var cursorPoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 	private var pieces:Array<flixel.FlxBasic> = [];
 	private var hudOn:Bool = true;
@@ -115,8 +118,15 @@ class Hud
 		state.add(piece(gaugeBack));
 		state.add(piece(gaugeFill));
 
+		capTop = makeUiSprite(0, 0, "ammo_indicator");
+		capBottom = makeUiSprite(0, 0, "ammo_indicator");
+		capBottom.flipY = true;
+		capTop.visible = false;
+		capBottom.visible = false;
+		state.add(piece(capTop));
+		state.add(piece(capBottom));
+
 		arrowPip = makeUiSprite(0, 0, "ammo_arrow");
-		arrowPip.setPosition(AMMO_RIGHT - arrowPip.width, AMMO_BOTTOM - arrowPip.height);
 		arrowPip.visible = false;
 		state.add(piece(arrowPip));
 
@@ -172,12 +182,7 @@ class Hud
 		{
 			gaugeBack.visible = false;
 			gaugeFill.visible = false;
-			arrowPip.visible = false;
-			for (p in bulletPips)
-				p.visible = false;
-			for (p in bulletPlates)
-				p.visible = false;
-			bulletsShown = -1;
+			hideAmmo();
 			stopTimerText.visible = false;
 			bannerText.visible = bannerTimer > 0 || bannerFading;
 			deadText.visible = false;
@@ -440,54 +445,95 @@ class Hud
 		gaugeFill.clipRect = gaugeClip;
 	}
 
+	function stackCaps(rows:Int, rowH:Float):Float
+	{
+		var span = rows * rowH + (rows - 1) * PIP_GAP;
+		var top = AMMO_BOTTOM - capTop.height * 2 - CAP_GAP * 2 - span;
+		var midX = AMMO_RIGHT - AMMO_MID;
+		capTop.setPosition(midX - capTop.width * 0.5, top);
+		capBottom.setPosition(midX - capBottom.width * 0.5, AMMO_BOTTOM - capBottom.height);
+		capTop.visible = true;
+		capBottom.visible = true;
+		return top + capTop.height + CAP_GAP;
+	}
+
+	function hideAmmo():Void
+	{
+		capTop.visible = false;
+		capBottom.visible = false;
+		arrowPip.visible = false;
+		for (p in bulletPips)
+			p.visible = false;
+		bulletsShown = -1;
+	}
+
 	public function setAmmo(cur:Int, max:Int, reloading:Bool, shown:Bool):Void
 	{
 		while (bulletPips.length < max)
 		{
-			var plate = makeUiSprite(0, 0, "ammo_indicator");
 			var p = makeUiSprite(0, 0, "ammo_bullet");
-			var rowLeft = AMMO_RIGHT - max * plate.width - (max - 1) * PIP_GAP;
-			var px = rowLeft + bulletPips.length * (plate.width + PIP_GAP);
-			plate.setPosition(px, AMMO_BOTTOM - plate.height);
-			p.setPosition(px + (plate.width - p.width) * 0.5, AMMO_BOTTOM - p.height);
-			plate.visible = false;
 			p.visible = false;
-			state.add(piece(plate));
 			state.add(piece(p));
-			bulletPlates.push(plate);
 			bulletPips.push(p);
 		}
 
 		if (!shown || !hudOn)
 		{
 			if (bulletsShown != -1)
-				for (i in 0...bulletPips.length)
+			{
+				for (p in bulletPips)
+					p.visible = false;
+				bulletsShown = -1;
+				if (!arrowPip.visible)
 				{
-					bulletPips[i].visible = false;
-					bulletPlates[i].visible = false;
+					capTop.visible = false;
+					capBottom.visible = false;
 				}
-			bulletsShown = -1;
+			}
 			return;
 		}
 
 		if (cur == bulletsShown)
 			return;
 		bulletsShown = cur;
+
+		var pipH = bulletPips[0].height;
+		var y = stackCaps(max, pipH);
+		var midX = AMMO_RIGHT - AMMO_MID;
 		for (i in 0...bulletPips.length)
 		{
-			bulletPips[i].loadGraphic(Paths.image("ui/" + (i < cur ? "ammo_bullet" : "ammo_bullet_empty")));
-			bulletPips[i].visible = true;
-			bulletPlates[i].visible = true;
+			var p = bulletPips[i];
+			var full = i >= max - cur;
+			reskin(p, full ? "ammo_bullet" : "ammo_bullet_empty");
+			p.setPosition(midX - p.width * 0.5, y + i * (pipH + PIP_GAP));
+			p.visible = i < max;
 		}
 	}
 
 	public function setBowLoaded(loaded:Bool, shown:Bool):Void
 	{
-		arrowPip.visible = shown && hudOn;
-		if (!shown || loaded == arrowShown)
+		if (!shown || !hudOn)
+		{
+			if (arrowPip.visible)
+			{
+				arrowPip.visible = false;
+				if (bulletsShown == -1)
+				{
+					capTop.visible = false;
+					capBottom.visible = false;
+				}
+			}
 			return;
-		arrowShown = loaded;
-		arrowPip.loadGraphic(Paths.image("ui/" + (loaded ? "ammo_arrow" : "ammo_arrow_empty")));
+		}
+
+		if (!arrowPip.visible || loaded != arrowShown)
+		{
+			arrowShown = loaded;
+			reskin(arrowPip, loaded ? "ammo_arrow" : "ammo_arrow_empty");
+			var y = stackCaps(1, arrowPip.height);
+			arrowPip.setPosition(AMMO_RIGHT - AMMO_MID - arrowPip.width * 0.5, y);
+			arrowPip.visible = true;
+		}
 	}
 
 	public function showDeath(wave:Int, best:Int):Void
@@ -522,6 +568,14 @@ class Hud
 		s.updateHitbox();
 		s.setPosition(x, y);
 		return s;
+	}
+
+	function reskin(s:FlxSprite, name:String):Void
+	{
+		s.loadGraphic(Paths.image("ui/" + name));
+		s.antialiasing = false;
+		s.scale.set(UI_SCALE, UI_SCALE);
+		s.updateHitbox();
 	}
 
 	public function applyLanguage(wave:Int):Void
