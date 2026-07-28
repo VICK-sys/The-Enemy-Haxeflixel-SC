@@ -17,13 +17,11 @@ class Weapons
 	public var hits:HitPipeline;
 	public var swing:SwingAttack;
 	public var jab:SwingAttack;
-	public var shock:Shockwave;
 	public var revolver:RevolverAttack;
 	public var bow:BowAttack;
 	public var throwAttack:ThrowAttack;
 	public var hookAttack:HookAttack;
 	public var superOrbit:SuperOrbit;
-	public var bounceStrike:BounceStrike;
 	public var arrowStorm:ArrowStorm;
 	public var hookArms:HookArms;
 	public var deadEye:DeadEye;
@@ -48,13 +46,11 @@ class Weapons
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
 		swing = new SwingAttack(director, hits, fx, weaponCfg.swing);
 		jab = new SwingAttack(director, hits, fx, weaponCfg.jab);
-		shock = new Shockwave(director, hits);
 		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
 		superOrbit = new SuperOrbit(player, heldSprite, arena, director, status, fx, hits);
-		bounceStrike = new BounceStrike(player, fx, hits, held.sprite, shock);
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
 		hookArms = new HookArms(player, director, hits);
 		deadEye = new DeadEye(player, director, revolver, held);
@@ -65,7 +61,7 @@ class Weapons
 	public var superBusy(get, never):Bool;
 
 	function get_superBusy():Bool
-		return superOrbit.activating || bounceStrike.active || arrowStorm.active || hookArms.active;
+		return superOrbit.activating || arrowStorm.active || hookArms.active;
 
 	public var playerBusy(get, never):Bool;
 
@@ -106,16 +102,12 @@ class Weapons
 			bow.hushReload();
 		}
 		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
-		shock.update(elapsed);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
 		superOrbit.update(elapsed);
-		bounceStrike.update(elapsed);
 		arrowStorm.update(elapsed);
 		if (status.dead && hookArms.active)
 			hookArms.deactivate();
-		if (status.dead && bounceStrike.active)
-			bounceStrike.cancel();
 		if (status.dead && arrowStorm.active)
 			arrowStorm.cancel();
 		hookArms.update(elapsed);

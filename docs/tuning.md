@@ -11,10 +11,8 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `systems/weapons/HookAttack.hx` | spawn distance, wall probe, retract speed, catch radius, rope handle length |
 | `systems/weapons/HookArms.hx` | rest pose geometry and tilt, rope curve fraction, eases, whip arc and radius, extend delay |
 | `systems/weapons/ArrowRain.hx` | drop height, launch visual count and speed |
-| `systems/weapons/Shockwave.hx` | ring texture base size, crack lifetime |
 | `systems/weapons/DeadEye.hx` | X marker size, colour, thickness, scale and pulse. Sepia tone. Input arm delay |
 | `systems/weapons/SuperOrbit.hx` | ring radii, carousel speed, depth scaling, hover and landing feel, deploy timings, trail settings |
-| `systems/weapons/BounceStrike.hx` | hop apex, somersault spin, hand pivot |
 | `systems/weapons/ArrowStorm.hx` | bow raise, launch arrow speed and scale, charge tint, trail settings |
 | `entities/weapon/Orbiter.hx` | launch speed, range, spin, hit radius |
 | `entities/weapon/ThrownWeapon.hx` | throw speed, spin rate, hit radius (the thrown hammer) |

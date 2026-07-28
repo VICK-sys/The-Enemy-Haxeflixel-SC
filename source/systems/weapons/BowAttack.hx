@@ -54,11 +54,6 @@ class BowAttack
 		return t < 0 ? 0 : (t > 1 ? 1 : t);
 	}
 
-	public var ready(get, never):Bool;
-
-	function get_ready():Bool
-		return cooldown <= 0;
-
 	public var recovering(get, never):Bool;
 
 	function get_recovering():Bool

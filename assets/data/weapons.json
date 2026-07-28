@@ -12,7 +12,6 @@
 		"hitRadius": 26,
 		"knock": 1.2
 	},
-	"shockwave": { "waveRadius": 380, "waveTime": 0.45, "stunTime": 2.0 },
 	"thrown": { "maxDist": 500, "returnSpeed": 1250 },
 	"bowCharge": {
 		"minTime": 0.15,
@@ -54,7 +53,6 @@
 		"damage": 15
 	},
 	"superOrbit": { "count": 10, "fireGate": 0.08 },
-	"bounceStrike": { "strikes": 5, "hopTime": 0.55, "radius": 300, "damage": 2, "force": 4, "catapultSpeed": 720 },
 	"arrowStorm": { "stormTime": 3.0, "spawnInterval": 0.06, "dropsPer": 2 },
 	"hookArms": {
 		"reach": 540,

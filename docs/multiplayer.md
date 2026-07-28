@@ -61,8 +61,6 @@ What a remote machine can reproduce decides how each other super replicates.
 
 The blade ring and the arrow storm replay from their activation alone. A call to `SuperOrbit.decoration()` builds a copy with no player, arena, director or hit pipeline. That strips the damage and the writes to the body. Blade launches arrive as one event each. The storm scatters its drops at random, and nobody can tell the two machines picked different points.
 
-Bounce strike does not replay at all. It moves the player itself, so the avatar's own position stream already shows it. Only the shockwave per slam needs sending.
-
 The hook arms stream their claws, because they grab enemies. Which enemy is nearest can differ between machines. The grabbed enemy is host-authoritative already, so it gets dragged around correctly on its own. Rope curves rebuild locally from the streamed control points. They anchor to the interpolated body, so they stay attached while it moves.
 
 Supers also lift, spin and squash the player's body. Those three ride along in the avatar packet, and no machine recomputes them. That is what keeps the decoration copies out of the body entirely.

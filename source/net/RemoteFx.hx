@@ -16,7 +16,6 @@ import systems.weapons.ArrowRain;
 import systems.weapons.ArrowStorm;
 import systems.weapons.HitPipeline;
 import systems.weapons.Rope;
-import systems.weapons.Shockwave;
 import systems.weapons.SuperOrbit;
 import systems.weapons.WeaponMode;
 import data.WeaponData.WeaponDataRegistry;
@@ -34,7 +33,6 @@ class RemoteFx
 	private var rope:FlxTypedGroup<FlxSprite>;
 	private var hook:HookShot;
 	private var thrown:ThrownWeapon;
-	private var shock:Shockwave;
 	private var rain:ArrowRain;
 	private var thrownTrail:GhostTrail;
 
@@ -60,8 +58,6 @@ class RemoteFx
 		this.fx = fx;
 		this.avatar = avatar;
 
-		shock = new Shockwave(director, hits);
-		shock.stunTime = 0;
 		rain = new ArrowRain(fx, hits);
 		rain.cosmetic = true;
 
@@ -83,8 +79,6 @@ class RemoteFx
 		arms = new RemoteArms(avatar.sprite);
 
 		var below = state.members.indexOf(layers.entityLayer);
-		state.insert(below, shock.cracks);
-		state.insert(below, shock.rings);
 		state.insert(below, rain.markers);
 		state.insert(below, blades.trail.group);
 		state.insert(below, blades.backLayer);
@@ -124,14 +118,6 @@ class RemoteFx
 	{
 		if (!on && blades.active())
 			blades.clear();
-	}
-
-	public function slam(x:Float, y:Float):Void
-	{
-		fx.sparksAt(x, y);
-		fx.slamShake();
-		shock.blast(x, y, false);
-		FlxG.sound.play(Paths.sound("hammer"), 1);
 	}
 
 	public function setArms(rows:Array<Dynamic>):Void
@@ -231,7 +217,6 @@ class RemoteFx
 
 	public function update(elapsed:Float):Void
 	{
-		shock.update(elapsed);
 		rain.update(elapsed);
 		blades.update(elapsed);
 		storm.update(elapsed);

@@ -82,18 +82,7 @@ class HitPipeline
 			onClaim(e, pushX, pushY, damage, stunTime);
 	}
 
-	public function stun(e:Enemies, pushX:Float, pushY:Float, duration:Float):Void
-	{
-		if (remote)
-		{
-			claim(e, pushX * 0.2, pushY * 0.2, 0, duration);
-			return;
-		}
-		applyHit(e, pushX * 0.2, pushY * 0.2, 0, true);
-		e.stun = duration;
-	}
-
-	public function blastRadial(cx:Float, cy:Float, radius:Float, force:Float, damage:Int, fallbackX:Float = 0, fallbackY:Float = -1):Void
+	public function blastRadial(cx:Float, cy:Float, radius:Float, force:Float, damage:Int):Void
 	{
 		director.eachInCircle(cx, cy, radius, function(e)
 		{
@@ -102,8 +91,8 @@ class HitPipeline
 			var len = Math.sqrt(ex * ex + ey * ey);
 			if (len <= 0)
 			{
-				ex = fallbackX;
-				ey = fallbackY;
+				ex = 0;
+				ey = -1;
 				len = 1;
 			}
 			damageN(e, ex / len * force, ey / len * force, damage);

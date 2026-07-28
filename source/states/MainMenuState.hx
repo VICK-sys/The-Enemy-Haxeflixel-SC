@@ -38,7 +38,7 @@ class MainMenuState extends FlxState
 	private var shutY:Int = 0;
 	private var shutW:Int = 0;
 	private var shutH:Int = 0;
-	private var maps:Array<Int> = [0];
+	private var maps:Array<Int>;
 	private var mapPick:Int = 0;
 	private var shutCurW:Int = 0;
 	private var shutCurH:Int = 0;

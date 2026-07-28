@@ -40,7 +40,7 @@ class Enemies extends FlxSprite
 	public var explodes:Bool = false;
 	public var gun:FlxSprite = null;
 	public var pathing:EnemyNav = new EnemyNav();
-	public var attack:AttackBehavior = new ChargeAttack();
+	public var attack:AttackBehavior;
 	public var pendingShots:Array<ShotSpec> = [];
 
 	private var shotPool:Array<ShotSpec> = [];

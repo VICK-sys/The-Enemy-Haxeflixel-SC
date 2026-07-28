@@ -83,14 +83,12 @@ Combat balance for every weapon system, one object per system. Field names match
 | `hitBrace` | how far the struck enemy shakes, in pixels, while the hitstop holds. Zero means it takes the hit and goes straight away |
 | `hitstop`, `hitstopScale`, `hitShake` | how hard a connecting melee blow bites: frames held, the speed held at, and the shake. Set per weapon, so the hammer can land heavier than the jab |
 | `revolver` | cylinder size and damage. Reload time, which is flat and does not follow the number of rounds missing. Fan interval and jitter. Bullet speed, range, hit radius and knockback |
-| `shockwave` | wave radius, expansion time, and how long it stuns |
 | `thrown` | throw distance, return speed |
 | `bowCharge` | charged shot. A press below `minTime` is a plain tap shot. `fullTime` is the time to full charge, and `maxDamage` is the damage there. The `speedBonus`/`sizeBonus`/`knockBonus` multipliers scale across the charge range |
 | `arrowRain` | volley size, drop delay and stagger, spread, fall speed, hit radius |
 | `hook` | flight range. Pull speed and timeout. Grab and hold distances. Spin windup. Throw speed, duration and hit radius. Release stun, and the damage for enemies you cannot grab |
 | `deadEye` | white flash length, sepia strength, fade-out length, cursor radius that paints a mark, delay between shots, damage per round |
 | `superOrbit` | blade count, fire gate |
-| `bounceStrike` | strike count, hop time, radius, damage, force, catapult speed |
 | `arrowStorm` | storm duration, spawn cadence, drops per tick |
 | `hookArms` | reach and reach speed, grab radius, reel speed, grab distance, throw force, damage, cooldown, whip time, super duration |
 
@@ -262,7 +260,7 @@ A hidden number, rolled once per run, in the manner of the one Undertale keeps. 
 
 `Run.allows("name")` is the question gameplay asks. It is true only when the current value falls inside that event's window. An undefined name answers false, so a typo hides content rather than shows it.
 
-Use `Run.inRange(lo, hi)` to check a window inline for something not worth a name. Use `Run.force(v)` to pin a value for testing. Finally, `Run.report()` prints the roll with every event, and whether it is live.
+`Run.allows` is the whole runtime surface. Anything else, like pinning a value for a test, goes through the save value directly.
 
 The value persists in the save, beside the best wave and the settings. It survives a restart until something rerolls it.
 

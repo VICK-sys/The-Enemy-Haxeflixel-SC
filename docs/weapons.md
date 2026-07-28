@@ -8,7 +8,7 @@ It splits the two buttons. Left click runs `primary`, right click runs `secondar
 
 It triggers the supers on Q at a full meter. The hammer launches SuperOrbit, the revolver DeadEye, the crossbow ArrowStorm, and the hook HookArms. `hasSuper` still gates the key. Dead Eye needs a round in the cylinder. The meter should not go on a super that cannot fire.
 
-It also handles attack input dispatch: super priority, the held-enemy throw intercept, and the aim math. It hides the held weapon while the hook is out or a bounce runs. Everything else goes to the systems below.
+It also handles attack input dispatch: super priority, the held-enemy throw intercept, and the aim math. It hides the held weapon while the hook is out. Everything else goes to the systems below.
 
 ## WeaponMode
 
@@ -16,9 +16,9 @@ Names the attack that just fired. It drives the held sprite's swing duration, th
 
 ## HitPipeline
 
-The shared hit pipeline. It applies damage with a hit sound, sparks, kill rewards and drop rolls. It also offers a zero-damage stun hit with a caller-supplied duration.
+The shared hit pipeline. It applies damage with a hit sound, sparks, kill rewards and drop rolls.
 
-`blastRadial` is the shared area hit. It damages every enemy in a circle and flings them outward from the centre. Bounce Strike and landing rain arrows both use it.
+`blastRadial` is the shared area hit. It damages every enemy in a circle and flings them outward from the centre. Landing rain arrows use it.
 
 ## Rope
 
@@ -110,16 +110,6 @@ The shot charges. Holding the attack button builds charge, and releasing looses 
 
 A looping tension sound rises in pitch with the charge. It starts only once the hold passes `minTime`, so tap shots stay silent instead of clipping it. Full charge arrives at `fullTime` with its own sound, and is the only point that awards top damage. Holding longer simply keeps it there. The charge cancels if the player dies, switches weapon, or starts a throw.
 
-## Shockwave
-
-Bounce Strike's ground slam, owned by `Weapons` directly. It reads its own stun length from config. On its own copy, `RemoteFx` zeroes `stunTime`. A replicated slam therefore decorates without touching the sim. That is the same trick `ArrowRain.cosmetic` uses.
-
-The slam hits the ground at the aim point. It spawns a temporary cracked-ground decal and an expanding ring. The ring stuns every enemy it passes, with a staggered no-damage hit plus a long stun. The wave ignores walls.
-
-The ring is an ellipse squashed to 0.7, so it reads as a circle drawn on the floor.
-
-Grounding the centre also fixes the knockback for free. The push direction comes from that centre, and now points outward and slightly up. Bounce Strike's slams route through `blast()`.
-
 ## ArrowRain
 
 The bow's secondary. The bow rises above the player's head and points skyward. Firing launches a fanned burst of arrows up from it. A staggered volley then falls onto a scatter of points around the cursor.
@@ -155,12 +145,6 @@ Each arm works alone. It finds the nearest enemy, grabs it, reels it up, whips i
 The crossbow super. Q with the crossbow equipped drains a full super meter. It fires one supercharged arrow straight up from the bow. It is a big glowing arrow with a fading trail.
 
 The storm proper starts once that arrow clears the top of the screen. The bow stays raised skyward while arrows carpet the whole visible arena for a few seconds. Drops spawn across the camera view on a fast cadence, reusing ArrowRain's drop, marker and landing machinery. The player can still move throughout.
-
-## BounceStrike
-
-A three-hit bounce, and currently unreachable. It was the old hammer slot's super, and the revolver that replaced that slot does not use it. The class is still built and ticked, so it can attach to a weapon again without a rebuild.
-
-A full super meter drains it and plays a three-hit bounce. Each hit is a ground slam, a big area attack that flings caught enemies away with heavy force. Each slam launches the player into the air in a somersault, and landing fires the next. Control returns after three. Movement locks for the duration, and the held hammer hides.
 
 ## DeadEye
 

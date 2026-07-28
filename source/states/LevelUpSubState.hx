@@ -45,7 +45,6 @@ class LevelUpSubState extends FlxSubState
 	private var marker:FlxSprite;
 	private var accept:FlxText;
 	private var head:Array<FlxText> = [];
-	private var outName:Array<FlxText> = [];
 	private var outNow:Array<FlxText> = [];
 	private var outNext:Array<FlxText> = [];
 	private var arrows:Array<FlxText> = [];
@@ -111,7 +110,6 @@ class LevelUpSubState extends FlxSubState
 			ui(a);
 			ui(g);
 			ui(b);
-			outName.push(n);
 			outNow.push(a);
 			arrows.push(g);
 			outNext.push(b);

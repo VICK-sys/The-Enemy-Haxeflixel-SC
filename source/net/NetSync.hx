@@ -97,7 +97,6 @@ class NetSync
 
 		combat.onSuper = function(kind) Net.send({t: "sup", k: kind});
 		combat.onSuperLaunch = function(tx, ty) Net.send({t: "sla", x: r1(tx), y: r1(ty)});
-		combat.bounceStrike.onSlam = function(x, y) Net.send({t: "slm", x: r1(x), y: r1(y)});
 
 		if (Net.isHost)
 			wireHost();
@@ -251,11 +250,6 @@ class NetSync
 				var p = roster.get(msg.f);
 				if (p != null && p.fx != null)
 					p.fx.superLaunch(msg.x, msg.y);
-
-			case "slm":
-				var p = roster.get(msg.f);
-				if (p != null && p.fx != null)
-					p.fx.slam(msg.x, msg.y);
 
 			case "nm":
 				var p = roster.get(msg.f);

@@ -43,13 +43,6 @@ class Scraps
 		s.drop(cx, cy);
 	}
 
-	public function clear():Void
-	{
-		for (s in group.members)
-			if (s != null && s.exists)
-				s.kill();
-	}
-
 	public function update(elapsed:Float):Void
 	{
 		if (status.dead)

@@ -21,11 +21,6 @@ class PuppetDirector extends EnemyDirector
 		register(e);
 	}
 
-	public function setWave(n:Int):Void
-	{
-		wave = n;
-	}
-
 	override public function collide():Void {}
 
 	override public function update(elapsed:Float):Void

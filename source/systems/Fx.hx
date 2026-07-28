@@ -108,11 +108,6 @@ class Fx
 		FlxG.camera.shake(0.012, 0.2);
 	}
 
-	public function slamShake():Void
-	{
-		FlxG.camera.shake(0.009, 0.15);
-	}
-
 	public static function bossBlast(cx:Float, cy:Float):FlxSprite
 	{
 		var boom = new FlxSprite();

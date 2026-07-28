@@ -161,8 +161,6 @@ class PlayState extends FlxState
 		add(combat.bow.arrows);
 		add(combat.revolver.bullets);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
-		insert(members.indexOf(layers.entityLayer), combat.shock.cracks);
-		insert(members.indexOf(layers.entityLayer), combat.shock.rings);
 		add(combat.bow.rain.arrows);
 		add(combat.arrowStorm.trail.group);
 		add(combat.arrowStorm.superArrow);

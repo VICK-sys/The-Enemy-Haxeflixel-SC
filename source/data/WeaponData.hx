@@ -27,12 +27,6 @@ typedef RevolverConfig = {
 	knock:Float
 }
 
-typedef ShockwaveConfig = {
-	waveRadius:Float,
-	waveTime:Float,
-	stunTime:Float
-}
-
 typedef ThrownConfig = {
 	maxDist:Float,
 	returnSpeed:Float
@@ -86,15 +80,6 @@ typedef SuperOrbitConfig = {
 	fireGate:Float
 }
 
-typedef BounceStrikeConfig = {
-	strikes:Int,
-	hopTime:Float,
-	radius:Float,
-	damage:Int,
-	force:Float,
-	catapultSpeed:Float
-}
-
 typedef ArrowStormConfig = {
 	stormTime:Float,
 	spawnInterval:Float,
@@ -118,14 +103,12 @@ typedef WeaponsData = {
 	swing:SwingConfig,
 	jab:SwingConfig,
 	revolver:RevolverConfig,
-	shockwave:ShockwaveConfig,
 	thrown:ThrownConfig,
 	bowCharge:BowChargeConfig,
 	arrowRain:ArrowRainConfig,
 	hook:HookConfig,
 	deadEye:DeadEyeConfig,
 	superOrbit:SuperOrbitConfig,
-	bounceStrike:BounceStrikeConfig,
 	arrowStorm:ArrowStormConfig,
 	hookArms:HookArmsConfig
 }
