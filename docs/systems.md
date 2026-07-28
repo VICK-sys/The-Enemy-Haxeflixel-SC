@@ -189,7 +189,9 @@ They leave from the underside of the art, not from a guessed rectangle. The clas
 
 The reading is in source pixels, and the spawn converts through the sprite's live position and scale. The bush drifts, so the petals leave from where it is at that moment.
 
-They draw in their own group above the entity layer, so a petal passes over the walls rather than behind them. The pool holds twelve and recycles the dead, so nothing is built while the room runs.
+They draw in their own group, and that group goes in above the occlusion overlay rather than merely above the entity layer. Standing behind the tree makes the player buried, and `PropWorld` answers that by redrawing the front of the sorted layer over everything under it. A petal group below that overlay therefore vanished behind the walls for exactly as long as the player stood behind the tree.
+
+The pool holds twelve and recycles the dead, so nothing is built while the room runs.
 
 ### TreeMan and DialogueBox
 

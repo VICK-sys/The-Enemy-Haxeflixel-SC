@@ -168,7 +168,6 @@ class PlayState extends FlxState
 		for (s in props.named("treeBush2"))
 		{
 			petals = new systems.PetalFall(s, "props/treeBush2");
-			add(petals.group);
 			break;
 		}
 
@@ -206,6 +205,9 @@ class PlayState extends FlxState
 		add(director.shots);
 
 		add(props.overlay);
+
+		if (petals != null)
+			add(petals.group);
 
 		add(timeStop.overlay);
 		add(combat.deadEye.overlay);

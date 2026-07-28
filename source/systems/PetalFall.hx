@@ -21,7 +21,6 @@ class PetalFall
 	static inline var SWAY_RATE:Float = 2.1;
 	static inline var HOLD:Float = 0.45;
 
-	// only the right of the bush sheds, and only from the underside of the art
 	static inline var RIGHT_FROM:Float = 0.5;
 	static inline var ALPHA_FLOOR:Int = 20;
 
@@ -129,7 +128,6 @@ class PetalFall
 			if (s.exists)
 				continue;
 
-			// the bush drifts, so read where it is right now
 			var pick = FlxG.random.int(0, edgeX.length - 1);
 			var x = bush.x + edgeX[pick] * bush.scale.x;
 			var y = bush.y + edgeY[pick] * bush.scale.y;
