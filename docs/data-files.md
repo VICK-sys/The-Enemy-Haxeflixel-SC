@@ -202,7 +202,7 @@ To add a language, copy `en.json`, translate the values, and add the code to `La
 
 ## Levelling - assets/data/levels.json
 
-Souls style stat allocation, for the length of one run. Scrap and waves pay exp, and the end of a round opens the screen that spends it.
+Souls style stat allocation, for the length of one run. Scrap and waves pay exp, and the repair shop spends it. The shop opens every tenth round, so the screen appears far less often than it once did and each visit carries more scrap.
 
 Nothing carries. A run starts at zero exp and zero points every time, from the menu and from a restart. `Levels` therefore holds no save at all, which is why the stats cannot drift out of step with a save written by an older build. What a run earns, that run spends.
 

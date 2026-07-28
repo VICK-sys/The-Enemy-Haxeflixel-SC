@@ -1,6 +1,13 @@
 {
 	"props": [
 		{
+			"name": "repairShop",
+			"sheet": "props/repairShop",
+			"rect": [],
+			"scale": 4,
+			"hitbox": [9, 53, 98, 22]
+		},
+		{
 			"name": "shop",
 			"sheet": "props/shop",
 			"rect": [],

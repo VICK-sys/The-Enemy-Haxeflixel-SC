@@ -53,6 +53,7 @@ class PlayState extends FlxState
 	private var combat:Weapons;
 	private var hud:Hud;
 	private var reloadBar:ui.ReloadBar;
+	private var shop:systems.Shop;
 	private var levelHold:Bool = false;
 	private var levelDone:Bool = false;
 	private var levelClock:Float = 0;
@@ -172,6 +173,10 @@ class PlayState extends FlxState
 		props = new systems.world.PropWorld(_player, layers);
 		add(props.solids);
 
+		shop = new systems.Shop(_player, layers);
+		for (s in shop.solid())
+			props.solids.add(s);
+
 		bushes = new systems.BushDrift();
 		for (s in props.named("treeBush"))
 			bushes.add(s, false);
@@ -232,10 +237,13 @@ class PlayState extends FlxState
 		add(combat.deadEye.markers);
 
 		hud = new Hud(this, status);
+		shop.addTo(this);
+		shop.onEnter = enterShop;
+		shop.onClose = releaseShopHold;
 		flyIn = new ui.WeaponFlyIn(hud.camUI, combat.held);
 		add(flyIn.sprite);
 		director.onWave = onWaveStarted;
-		director.onWaveCleared = offerLevelUp;
+		director.onWaveCleared = onRoundCleared;
 		director.onBoss = onBossWave;
 		director.onBossSpawn = hud.showBossBar;
 		director.onBossDefeated = onBossDefeated;
@@ -372,6 +380,7 @@ class PlayState extends FlxState
 		layers.update();
 		props.update();
 		bushes.update(elapsed);
+		shop.update(elapsed);
 		if (petals != null)
 			petals.update(elapsed);
 		heldSprite.alpha = props.buried ? 0 : 1;
@@ -435,6 +444,30 @@ class PlayState extends FlxState
 		return true;
 	}
 
+	function onRoundCleared():Void
+	{
+		if (director.wave <= 0 || director.wave % systems.Shop.EVERY != 0)
+			return;
+		shop.setOpen(true);
+		hud.showBanner(Lang.t("shop.open"));
+		if (!Net.active || Net.isHost)
+			director.holdWave = true;
+	}
+
+	function enterShop():Void
+	{
+		if (!shop.open)
+			return;
+		if (offerLevelUp())
+			shop.dismiss();
+	}
+
+	function releaseShopHold():Void
+	{
+		if (!Net.active || Net.isHost)
+			director.holdWave = false;
+	}
+
 	function offerLevelUp():Bool
 	{
 		if (status.dead || restarting || subState != null || levelHold)
@@ -449,10 +482,10 @@ class PlayState extends FlxState
 			return true;
 		}
 
-		if (!util.Levels.canSpend())
-			return false;
 		FlxG.inputs.reset();
-		openSubState(new LevelUpSubState(hud.camUI));
+		var screen = new LevelUpSubState(hud.camUI);
+		screen.closeCallback = releaseShopHold;
+		openSubState(screen);
 		return true;
 	}
 

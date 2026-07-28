@@ -122,6 +122,16 @@ Each peer reports `lvldone` when its screen closes. The host counts one per gues
 
 While a player is still spending, their avatar carries a gold `LEVELING UP` note above their name. It goes up for everyone when the screen opens and comes down per player as each `lvldone` arrives, so the note always matches who you are actually waiting on.
 
+### Shop
+
+The repair shop stands at the top of the arena for the whole run, greyed out and solid. Its counter blocks movement, so you walk up to it rather than through it.
+
+Clearing a round no longer offers a level. Every tenth round does: the shop lights up, a banner announces it, and the next wave holds while it is open. Walk into range and a prompt appears; ENTER or Z opens the screen that spends scrap, which is the same screen the stats allocator always used.
+
+Two things end the hold. Shopping ends it when the screen closes, and a forty five second cap ends it if nobody comes, so a player who ignores the shop cannot stall their own run. `dismiss()` exists for the first case: it shuts the shop without releasing the hold, because the screen the player just opened owns the hold from that moment.
+
+In co-op the shop is shared. One player reaching it opens the screen for everyone through the existing level handshake, which already holds the wave until every peer is done.
+
 ### BossHud
 
 The boss-fight HUD pieces: the pulsing red screen flash and the boss health bar. A call to `showBar(boss)` binds a bar to the boss's HP and plays its entrance. The bar expands out from a compressed sliver as it drops in from the top. The name "Rofel" then fades in letter by letter beneath it. The bar hides itself once the boss is gone.

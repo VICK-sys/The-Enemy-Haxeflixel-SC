@@ -32,6 +32,8 @@
 	"weaponPick.title": "ELIGE TU ARMA",
 	"weaponPick.sub": "UNA PARA TODA LA PARTIDA - NO SE PUEDE CAMBIAR",
 	"weaponPick.hint": "1-4 O A/D O LAS FLECHAS PARA ELEGIR        ENTER O CLIC PARA CONFIRMAR",
+	"shop.open": "TIENDA ABIERTA",
+	"shop.enter": "ENTER - TALLER",
 	"hud.wave": "OLEADA {0}",
 	"hud.bossApproaching": "EL JEFE SE ACERCA",
 	"hud.death": "OLEADA {0}  -  RÉCORD {1}\nPULSA R PARA REINTENTAR",

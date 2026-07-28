@@ -32,6 +32,8 @@
 	"weaponPick.title": "CHOOSE YOUR WEAPON",
 	"weaponPick.sub": "ONE FOR THE WHOLE RUN - THERE IS NO SWAPPING LATER",
 	"weaponPick.hint": "1-4 OR A/D OR THE ARROWS TO CHOOSE        ENTER OR CLICK TO LOCK IT IN",
+	"shop.open": "SHOP OPEN",
+	"shop.enter": "ENTER - REPAIR SHOP",
 	"hud.wave": "WAVE {0}",
 	"hud.bossApproaching": "BOSS APPROACHING",
 	"hud.death": "WAVE {0}  -  BEST {1}\nPRESS R TO RESTART",

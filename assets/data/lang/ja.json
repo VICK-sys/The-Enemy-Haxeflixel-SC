@@ -32,6 +32,8 @@
 	"weaponPick.title": "武器をえらべ",
 	"weaponPick.sub": "1回のランで1つだけ - あとから変更はできない",
 	"weaponPick.hint": "1-4 か A/D か 矢印キーでえらぶ        ENTER かクリックで決定",
+	"shop.open": "ショップ オープン",
+	"shop.enter": "ENTER - しゅうりや",
 	"hud.wave": "ウェーブ {0}",
 	"hud.bossApproaching": "ボスが近づいている",
 	"hud.death": "ウェーブ {0}  -  最高 {1}\nRキーでリスタート",
