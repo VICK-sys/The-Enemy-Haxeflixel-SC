@@ -27,6 +27,14 @@ class Hud
 	static inline var RELOAD_TINT:Int = 0xFFFF7A7A;
 	static inline var AMMO_POP_TIME:Float = 0.14;
 	static inline var AMMO_POP_AMP:Float = 0.4;
+	static inline var SCRAP_RIGHT:Float = 18;
+	static inline var SCRAP_TOP:Float = 12;
+	static inline var SCRAP_GAP:Float = 10;
+	static inline var SCRAP_DROP:Float = 4;
+	static inline var SCRAP_SIZE:Int = 34;
+	static inline var SCRAP_ICON_SCALE:Float = 3;
+	static inline var SCRAP_SHADE:Float = 0.45;
+
 	static inline var SUPER_LEFT:Float = 3;
 	static inline var SUPER_SPAN:Float = 29;
 	static inline var GAUGE_LEFT:Float = 3;
@@ -41,6 +49,10 @@ class Hud
 	private var customCursor:FlxSprite;
 	private var waveText:FlxText;
 	private var expText:FlxText;
+	private var expShade:FlxText;
+	private var scrapIcon:FlxSprite;
+	private var scrapIconShade:FlxSprite;
+	private var expShown:Int = -1;
 	private var bannerText:FlxText;
 	private var deadText:FlxText;
 	private var bossHud:BossHud;
@@ -115,11 +127,15 @@ class Hud
 		stopTimerText.visible = false;
 
 		waveText = makeText(8, 16);
-		expText = new FlxText(0, 14, FlxG.width - 18, "");
-		expText.setFormat(Lang.font(), 22, 0xFFE8C860, RIGHT);
-		expText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
-		expText.cameras = [camUI];
+		scrapIconShade = makeScrapIcon(true);
+		scrapIcon = makeScrapIcon(false);
+		expShade = makeScrapText(true);
+		expText = makeScrapText(false);
+		state.add(scrapIconShade);
+		state.add(expShade);
+		state.add(scrapIcon);
 		state.add(expText);
+		setExp(0);
 		bannerText = makeText(250, 48);
 		deadText = makeText(380, 24);
 		deadText.visible = false;
@@ -254,8 +270,54 @@ class Hud
 		superFill.clipRect = superClip;
 	}
 
+	function makeScrapIcon(shade:Bool):FlxSprite
+	{
+		var s = new FlxSprite();
+		s.loadGraphic(Paths.image("items/scrap"));
+		s.antialiasing = false;
+		s.scale.set(SCRAP_ICON_SCALE, SCRAP_ICON_SCALE);
+		s.updateHitbox();
+		s.cameras = [camUI];
+		if (shade)
+		{
+			s.color = FlxColor.BLACK;
+			s.alpha = SCRAP_SHADE;
+		}
+		return s;
+	}
+
+	function makeScrapText(shade:Bool):FlxText
+	{
+		var t = new FlxText(0, 0, 0, "");
+		t.setFormat(Lang.font(), SCRAP_SIZE, shade ? FlxColor.BLACK : FlxColor.WHITE, LEFT);
+		if (!shade)
+			t.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
+		if (shade)
+			t.alpha = SCRAP_SHADE;
+		t.cameras = [camUI];
+		return t;
+	}
+
 	public function setExp(n:Int):Void
-		expText.text = Lang.t("hud.exp", [n]);
+	{
+		if (n == expShown)
+			return;
+		expShown = n;
+		var label = Std.string(n);
+		expText.text = label;
+		expShade.text = label;
+		layoutScrap();
+	}
+
+	function layoutScrap():Void
+	{
+		expText.x = FlxG.width - SCRAP_RIGHT - expText.width;
+		expText.y = SCRAP_TOP;
+		scrapIcon.x = expText.x - scrapIcon.width - SCRAP_GAP;
+		scrapIcon.y = SCRAP_TOP + (expText.height - scrapIcon.height) * 0.5;
+		expShade.setPosition(expText.x + SCRAP_DROP, expText.y + SCRAP_DROP);
+		scrapIconShade.setPosition(scrapIcon.x + SCRAP_DROP, scrapIcon.y + SCRAP_DROP);
+	}
 
 	public function showWave(n:Int):Void
 	{
@@ -366,8 +428,9 @@ class Hud
 
 	public function applyLanguage(wave:Int):Void
 	{
-		for (t in [waveText, expText, bannerText, deadText, ammoText, timeText])
+		for (t in [waveText, expText, expShade, bannerText, deadText, ammoText, timeText])
 			t.font = Lang.font();
+		layoutScrap();
 		waveText.text = Lang.t("hud.wave", [wave]);
 	}
 
