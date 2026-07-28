@@ -49,6 +49,7 @@ class Weapons
 		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
+		throwAttack.onCaught = function() swing.coolFor(weaponCfg.thrown.catchCooldown);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
 		superOrbit = new SuperOrbit(player, heldSprite, arena, director, status, fx, hits);
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
@@ -95,7 +96,7 @@ class Weapons
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		jab.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		bow.update(elapsed);
-		var gunAim = aimFromPlayer();
+		var gunAim = aimFrom(held.handX(), held.handY());
 		if (status.dead)
 		{
 			revolver.cancelFan();
@@ -139,11 +140,12 @@ class Weapons
 	}
 
 	function aimFromPlayer():{dx:Float, dy:Float, deg:Float}
+		return aimFrom(player.x + player.width * 0.5, player.y + player.height * 0.5);
+
+	function aimFrom(ox:Float, oy:Float):{dx:Float, dy:Float, deg:Float}
 	{
-		var pmx:Float = player.x + player.width * 0.5;
-		var pmy:Float = player.y + player.height * 0.5;
-		var dx:Float = FlxG.mouse.x - pmx;
-		var dy:Float = FlxG.mouse.y - pmy;
+		var dx:Float = FlxG.mouse.x - ox;
+		var dy:Float = FlxG.mouse.y - oy;
 		var len:Float = Math.sqrt(dx * dx + dy * dy);
 		if (len < 0.001)
 		{
@@ -180,10 +182,11 @@ class Weapons
 		if (bow.charging && !FlxG.mouse.pressed)
 		{
 			var aim = aimFromPlayer();
+			var shot = aimFrom(held.handX(), held.handY());
 			var power = bow.charge;
 			held.beginSwing(aim.deg, Bow);
-			bow.release(held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
-			emitAttack(Bow, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg, power);
+			bow.release(held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
+			emitAttack(Bow, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg, power);
 		}
 	}
 
@@ -196,11 +199,12 @@ class Weapons
 			revolver.beginReload();
 
 		var aim = aimFromPlayer();
+		var shot = aimFrom(held.handX(), held.handY());
 
 		if (FlxG.mouse.justPressedRight && revolver.canFan())
 		{
 			held.beginSwing(aim.deg, Fan);
-			emitAttack(Fan, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+			emitAttack(Fan, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
 			revolver.fanFire();
 			return;
 		}
@@ -208,8 +212,8 @@ class Weapons
 		if (FlxG.mouse.justPressed && revolver.canFire())
 		{
 			held.beginSwing(aim.deg, Shoot);
-			emitAttack(Shoot, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
-			revolver.fire(held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
+			emitAttack(Shoot, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
+			revolver.fire(held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
 		}
 	}
 
@@ -302,6 +306,8 @@ class Weapons
 				emitAttack(Jab, pmx, pmy, dx, dy, aimDeg);
 				jab.fire(pmx, pmy, dx, dy, aimDeg);
 			default:
+				if (!swing.ready)
+					return;
 				held.beginSwing(aimDeg, Swing);
 				emitAttack(Swing, pmx, pmy, dx, dy, aimDeg);
 				swing.fire(pmx, pmy, dx, dy, aimDeg);
@@ -313,6 +319,8 @@ class Weapons
 		switch (weapon)
 		{
 			case 0:
+				if (!swing.ready)
+					return;
 				throwAttack.launch(pmx, pmy, dx, dy);
 				emitAttack(Throw, pmx, pmy, dx, dy, aimDeg);
 			case 3:

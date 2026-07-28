@@ -42,6 +42,8 @@ The shared melee. `Weapons` builds two of them from separate config blocks. The 
 
 Each fire spawns a slash effect and strikes every enemy inside its arc. It also opens a short guard window, during which it deflects enemy shots. The window runs for `GUARD_TIME` rather than only the frame of the click, so a swing catches bullets that arrive mid-animation. A deflected shot swaps to the player bullet sprite rather than taking a tint. A round coming back at its owner therefore reads as yours.
 
+The hammer's block also carries a `cooldown`. Each swing starts it, and both the next swing and the throw wait for it out. Catching a thrown hammer starts the shorter `catchCooldown` from the thrown block, so a catch cannot chain straight into a hit. The jab sets no cooldown and keeps its old cadence. The reload bar above the player shows the wait, the same way it shows a reload. Dexterity shortens it like every other recovery.
+
 ## RevolverAttack
 
 The revolver. Every shot it fires plays `revolver`, whether aimed, fanned or from Dead Eye. The boss keeps `enemies/pistol`, so the two guns no longer sound the same.
@@ -74,7 +76,7 @@ The crossbow borrows the same bar. Every shot puts the bow on `shotCooldown`, an
 
 It draws from `reloadProgress`, which is the fraction of `reloadTotal` already served.
 
-The travel is measured off the art rather than written down. `traceTrack` reads the widest run of pure white across the middle row of `reload_bar`, which is the channel between the two end caps, and the line sweeps that run. Hard coded numbers had already gone stale once when the bar was redrawn wider, leaving the line stopping short of the right cap. `PlayState` shows it only while the revolver is held, live and reloading, and it follows the player every frame. Because the reload runs to a flat time, the line always crosses at one speed. It reads as a clock rather than as a count.
+The travel is measured off the art rather than written down. `traceTrack` reads the widest run of pure white across the middle row of `reload_bar`, which is the channel between the two end caps, and the line sweeps that run. Hard coded numbers had already gone stale once when the bar was redrawn wider, leaving the line stopping short of the right cap. `PlayState` shows it while the held weapon recovers: the revolver's reload, the crossbow's crank, or the hammer's swing cooldown. It follows the player every frame. Because each recovery runs to a flat time, the line always crosses at one speed. It reads as a clock rather than as a count.
 
 It sits after `props.overlay` in the display list, above the wall redraw that buries the player behind a prop. A timer you cannot see is worth nothing, so it stays readable even from behind the scenery.
 

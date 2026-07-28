@@ -20,6 +20,35 @@ class SwingAttack
 	private var guardTimer:Float = 0;
 	private var guardX:Float = 1;
 	private var guardY:Float = 0;
+	private var cooldown:Float = 0;
+	private var cooldownTotal:Float = 0;
+
+	public var ready(get, never):Bool;
+
+	function get_ready():Bool
+		return cooldown <= 0;
+
+	public var recovering(get, never):Bool;
+
+	function get_recovering():Bool
+		return cooldown > 0;
+
+	public var recoverProgress(get, never):Float;
+
+	function get_recoverProgress():Float
+	{
+		if (cooldown <= 0 || cooldownTotal <= 0)
+			return 0;
+		return 1 - cooldown / cooldownTotal;
+	}
+
+	public function coolFor(time:Float):Void
+	{
+		if (time <= 0)
+			return;
+		cooldownTotal = time * util.Levels.actionScale();
+		cooldown = cooldownTotal;
+	}
 
 	public function new(director:EnemyDirector, hits:HitPipeline, fx:systems.Fx, cfg:SwingConfig)
 	{
@@ -32,6 +61,8 @@ class SwingAttack
 
 	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
+		if (cfg.cooldown != null)
+			coolFor(cfg.cooldown);
 		slashes.recycle(SlashEffect).fire(pmx + dx * cfg.spawnDist, pmy + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale);
 		strike(pmx, pmy, dx, dy);
 		guardTimer = GUARD_TIME;
@@ -43,6 +74,8 @@ class SwingAttack
 
 	public function update(elapsed:Float, pmx:Float, pmy:Float):Void
 	{
+		if (cooldown > 0)
+			cooldown -= elapsed;
 		if (guardTimer <= 0)
 			return;
 		guardTimer -= elapsed;

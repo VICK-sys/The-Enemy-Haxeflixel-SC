@@ -12,7 +12,8 @@ typedef SwingConfig = {
 	hitstopScale:Float,
 	hitShake:Float,
 	knock:Float,
-	hitBrace:Float
+	hitBrace:Float,
+	?cooldown:Float
 }
 
 typedef RevolverConfig = {
@@ -29,7 +30,8 @@ typedef RevolverConfig = {
 
 typedef ThrownConfig = {
 	maxDist:Float,
-	returnSpeed:Float
+	returnSpeed:Float,
+	catchCooldown:Float
 }
 
 typedef BowChargeConfig = {

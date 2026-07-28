@@ -25,6 +25,7 @@ class ThrowAttack
 	public var thrown:ThrownWeapon;
 	public var trail:GhostTrail;
 	public var airborne(get, never):Bool;
+	public var onCaught:Void->Void;
 
 	private var player:Player;
 	private var heldSprite:FlxSprite;
@@ -117,6 +118,8 @@ class ThrowAttack
 				spinSound.stop();
 				nav.clear();
 				FlxG.sound.play(Paths.sound("weapon/catch"), 0.7);
+				if (onCaught != null)
+					onCaught();
 				return;
 			}
 			nav.tick(elapsed, cx, cy, pmx, pmy);

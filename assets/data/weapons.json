@@ -1,5 +1,5 @@
 {
-	"swing": { "spawnDist": 145, "meleeRange": 245, "meleeArcCos": -0.5, "damage": 2, "effectScale": 1.4, "hitstop": 10, "hitstopScale": 0.06, "hitShake": 0.007, "knock": 3.2, "hitBrace": 7 },
+	"swing": { "spawnDist": 145, "meleeRange": 245, "meleeArcCos": -0.5, "damage": 2, "effectScale": 1.4, "hitstop": 10, "hitstopScale": 0.06, "hitShake": 0.007, "knock": 3.2, "hitBrace": 7, "cooldown": 0.85 },
 	"jab": { "spawnDist": 85, "meleeRange": 130, "meleeArcCos": -0.2, "damage": 1, "effectScale": 0.6, "hitstop": 2, "hitstopScale": 0.3, "hitShake": 0.002, "knock": 0.5, "hitBrace": 0 },
 	"revolver": {
 		"cylinder": 6,
@@ -12,7 +12,7 @@
 		"hitRadius": 26,
 		"knock": 1.2
 	},
-	"thrown": { "maxDist": 500, "returnSpeed": 1250 },
+	"thrown": { "maxDist": 500, "returnSpeed": 1250, "catchCooldown": 0.45 },
 	"bowCharge": {
 		"minTime": 0.15,
 		"fullTime": 1.0,
