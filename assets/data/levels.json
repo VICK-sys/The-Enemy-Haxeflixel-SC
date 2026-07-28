@@ -6,11 +6,11 @@
 	"costFlat": 12,
 	"vigorPerPoint": 0.2,
 	"enduranceDashPerPoint": 0.035,
-	"enduranceApPerPoint": 0.06,
+	"enduranceSuperPerPoint": 0.06,
 	"strengthPerPoints": 2,
 	"dexterityPerPoint": 0.03,
 	"enduranceDashFloor": 0.45,
-	"enduranceApCap": 3.0,
+	"enduranceSuperCap": 3.0,
 	"strengthMax": 8,
 	"dexterityFloor": 0.45
 }

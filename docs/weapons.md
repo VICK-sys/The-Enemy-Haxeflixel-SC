@@ -6,7 +6,7 @@ The combat coordinator. It owns the weapon for the run, which `equip` sets once 
 
 It splits the two buttons. Left click runs `primary`, right click runs `secondary`, and both key on the equipped weapon.
 
-It triggers the supers on Q at full AP. The hammer launches SuperOrbit, the revolver DeadEye, the crossbow ArrowStorm, and the hook HookArms. `hasSuper` still gates the key. Dead Eye needs a round in the cylinder. The meter should not go on a super that cannot fire.
+It triggers the supers on Q at a full meter. The hammer launches SuperOrbit, the revolver DeadEye, the crossbow ArrowStorm, and the hook HookArms. `hasSuper` still gates the key. Dead Eye needs a round in the cylinder. The meter should not go on a super that cannot fire.
 
 It also handles attack input dispatch: super priority, the held-enemy throw intercept, and the aim math. It hides the held weapon while the hook is out or a bounce runs. Everything else goes to the systems below.
 
@@ -124,13 +124,13 @@ The boomerang throw. It covers the thrown hammer's flight: out leg, wall turnaro
 
 ## HookArms
 
-The hook super. Q with the hook equipped and a full AP meter drains the meter. It then extends two mechanical hook-arms from the player's back, rendered behind them, for a few seconds.
+The hook super. Q with the hook equipped and a full super meter drains the meter. It then extends two mechanical hook-arms from the player's back, rendered behind them, for a few seconds.
 
 Each arm works alone. It finds the nearest enemy, grabs it, reels it up, whips it in an arc and hurls it. It does that automatically and continuously. The arms rest tilted, and their curved ropes trail with inertia. They retract into the body when the super ends. The held hook hides, and the player can still move.
 
 ## ArrowStorm
 
-The crossbow super. Q with the crossbow equipped drains a full AP meter. It fires one supercharged arrow straight up from the bow. It is a big glowing arrow with a fading trail.
+The crossbow super. Q with the crossbow equipped drains a full super meter. It fires one supercharged arrow straight up from the bow. It is a big glowing arrow with a fading trail.
 
 The storm proper starts once that arrow clears the top of the screen. The bow stays raised skyward while arrows carpet the whole visible arena for a few seconds. Drops spawn across the camera view on a fast cadence, reusing ArrowRain's drop, marker and landing machinery. The player can still move throughout.
 
@@ -138,7 +138,7 @@ The storm proper starts once that arrow clears the top of the screen. The bow st
 
 A three-hit bounce, and currently unreachable. It was the old hammer slot's super, and the revolver that replaced that slot does not use it. The class is still built and ticked, so it can attach to a weapon again without a rebuild.
 
-A full AP meter drains it and plays a three-hit bounce. Each hit is a ground slam, a big area attack that flings caught enemies away with heavy force. Each slam launches the player into the air in a somersault, and landing fires the next. Control returns after three. Movement locks for the duration, and the held hammer hides.
+A full super meter drains it and plays a three-hit bounce. Each hit is a ground slam, a big area attack that flings caught enemies away with heavy force. Each slam launches the player into the air in a somersault, and landing fires the next. Control returns after three. Movement locks for the duration, and the held hammer hides.
 
 ## DeadEye
 
@@ -146,7 +146,7 @@ The revolver super. Q whites the screen out, then settles into a sepia wash over
 
 Sweeping the cursor over an enemy marks it, one mark per round left in the cylinder. A full cylinder therefore marks six, and a nearly spent one marks one. There is no timer, and it holds until you press fire. Marking nothing and firing cancels without spending anything.
 
-A second press of Q backs out. It answers only while you are still marking, so nothing can stop the volley once it starts. The world, the aim lock and the marks all reset through `cancel`, the same path a dead player takes. The AP does not come back. Without that cost, Q would be a free pause button that freezes the fight and shows you the whole arena.
+A second press of Q backs out. It answers only while you are still marking, so nothing can stop the volley once it starts. The world, the aim lock and the marks all reset through `cancel`, the same path a dead player takes. The meter does not come back. Without that cost, Q would be a free pause button that freezes the fight and shows you the whole arena.
 
 Releasing unfreezes the world and walks the marks in order at `shotInterval`, one round each, while the sepia fades out. The held revolver locks onto each target as it shoots it. A call to `HeldWeapon.lockAim` snaps the angle instead of easing toward the cursor. The same lock drives the hand offset. The gun therefore never points one way while reaching another.
 
@@ -174,7 +174,7 @@ The fade outlives the super. Ending the shots and running the overlay down are s
 
 ## SuperOrbit
 
-The hammer super. Q with the hammer equipped and a full AP meter drains the meter. It then wraps the player in a pseudo-3D cylinder of weapon copies. It is an elliptical carousel, where blades pass in front of and behind the player and scale with depth.
+The hammer super. Q with the hammer equipped and a full super meter drains the meter. It then wraps the player in a pseudo-3D cylinder of weapon copies. It is an elliptical carousel, where blades pass in front of and behind the player and scale with depth.
 
 The player levitates for the duration. That is a visual offset only, and the hitbox and shadow stay grounded. The held weapon vanishes.
 

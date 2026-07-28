@@ -13,12 +13,12 @@ typedef LevelSet =
 
 	vigorPerPoint:Float,
 	enduranceDashPerPoint:Float,
-	enduranceApPerPoint:Float,
+	enduranceSuperPerPoint:Float,
 	strengthPerPoints:Int,
 	dexterityPerPoint:Float,
 
 	enduranceDashFloor:Float,
-	enduranceApCap:Float,
+	enduranceSuperCap:Float,
 	strengthMax:Int,
 	dexterityFloor:Float
 }

@@ -84,7 +84,7 @@ class PlayState extends FlxState
 	{
 		if (!util.Detour.rolls())
 			return false;
-		if (!util.Detour.begin(director.wave, bossWave, status.health, status.itemBar, status.kills, combat.weapon))
+		if (!util.Detour.begin(director.wave, bossWave, status.health, status.superMeter, status.kills, combat.weapon))
 			return false;
 		restarting = true;
 		wipe.close(function() FlxG.switchState(new PlayState()));
@@ -436,32 +436,8 @@ class PlayState extends FlxState
 		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
 	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 	function live(n:Int):Int
 		return n < 0 ? 0 : n;
-
-
 
 	function onDeflectedShot(shot:entities.enemy.EnemyShot):Bool
 	{
@@ -651,7 +627,7 @@ class PlayState extends FlxState
 		if (FlxG.keys.justPressed.FIVE)
 		{
 			status.health = 0;
-			status.itemBar = 0;
+			status.superMeter = 0;
 		}
 
 		if (FlxG.keys.justPressed.SIX)

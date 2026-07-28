@@ -27,8 +27,8 @@ class Hud
 	static inline var RELOAD_TINT:Int = 0xFFFF7A7A;
 	static inline var AMMO_POP_TIME:Float = 0.14;
 	static inline var AMMO_POP_AMP:Float = 0.4;
-	static inline var AP_LEFT:Float = 3;
-	static inline var AP_SPAN:Float = 29;
+	static inline var SUPER_LEFT:Float = 3;
+	static inline var SUPER_SPAN:Float = 29;
 	static inline var GAUGE_LEFT:Float = 3;
 	static inline var GAUGE_SPAN:Float = 29;
 	static inline var BAR_Y:Float = 642;
@@ -58,9 +58,9 @@ class Hud
 	private var ammoText:FlxText;
 	private var ammoShown:Int = -1;
 	private var ammoPop:Float = 0;
-	private var apFill:FlxSprite;
-	private var apClip:FlxRect;
-	private var apShown:Float = -1;
+	private var superFill:FlxSprite;
+	private var superClip:FlxRect;
+	private var superShown:Float = -1;
 
 	public function new(state:FlxState, status:PlayerCombat)
 	{
@@ -74,12 +74,12 @@ class Hud
 		var barBackground = makeSprite(160, BAR_Y, "bar_red");
 		var playerIcon = makeSprite(barBackground.x - 120, barBackground.y, "mufu_icon");
 
-		apFill = makeSprite(barBackground.x, barBackground.y, "bar_ap_fill");
-		apClip = FlxRect.get(0, 0, 0, barBackground.frameHeight);
+		superFill = makeSprite(barBackground.x, barBackground.y, "bar_super_fill");
+		superClip = FlxRect.get(0, 0, 0, barBackground.frameHeight);
 
 		state.add(barBackground);
-		state.add(makeSprite(barBackground.x, barBackground.y, "bar_ap_empty"));
-		state.add(apFill);
+		state.add(makeSprite(barBackground.x, barBackground.y, "bar_super_empty"));
+		state.add(superFill);
 		state.add(makeBar(barBackground, "bar_main_empty", "bar_main_red", 'health', status.healthMax));
 		state.add(playerIcon);
 
@@ -154,7 +154,7 @@ class Hud
 	{
 		customCursor.setPosition(FlxG.mouse.screenX - 5, FlxG.mouse.screenY);
 
-		updateAp();
+		updateSuper();
 
 		if (ammoPop > 0)
 		{
@@ -240,18 +240,18 @@ class Hud
 		}
 	}
 
-	function updateAp():Void
+	function updateSuper():Void
 	{
-		var pct = status.apMax > 0 ? status.itemBar / status.apMax : 0;
+		var pct = status.superMax > 0 ? status.superMeter / status.superMax : 0;
 		if (pct < 0)
 			pct = 0;
 		if (pct > 1)
 			pct = 1;
-		if (pct == apShown)
+		if (pct == superShown)
 			return;
-		apShown = pct;
-		apClip.width = AP_LEFT + AP_SPAN * pct;
-		apFill.clipRect = apClip;
+		superShown = pct;
+		superClip.width = SUPER_LEFT + SUPER_SPAN * pct;
+		superFill.clipRect = superClip;
 	}
 
 	public function setExp(n:Int):Void

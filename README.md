@@ -21,7 +21,7 @@ Time stop is off online. Dead Eye marks without stopping the world. Death respaw
 - SPACE - dash, with a 2 second cooldown
 - W - jump in side view. Press again in the air for a double jump.
 - E - time stop, with a 30 second cooldown. The world winds down to a complete stop for 10 seconds. You keep moving and attacking at full speed.
-- Q - super, once the AP meter is full
+- Q - super, once the meter is full
 - R - reload the revolver early. It also restarts the run after death.
 - ESC - pause
 - ENTER - skip the intro
@@ -39,7 +39,7 @@ Melee attacks deflect enemy bullets back at whoever fired them. That covers the 
 
 ## Supers
 
-Q fires the super once the AP meter is full. Each weapon has its own.
+Q fires the super once the meter is full. Each weapon has its own.
 
 - Hammer - orbits blades around you. Left click launches them.
 - Revolver - Dead Eye. The world stops while you paint a target for every round left in the cylinder. The fire button then empties the cylinder into them.

@@ -82,7 +82,7 @@ class LevelUpSubState extends FlxSubState
 		accept = text(LEFT_X, TOP + PANEL_H - 58, LEFT_W, Lang.t("level.done"), 26, FlxColor.WHITE, CENTER);
 		ui(accept);
 
-		var derived = ["health", "dash", "apgain", "damage", "speed"];
+		var derived = ["health", "dash", "supergain", "damage", "speed"];
 		for (i in 0...derived.length)
 		{
 			var y = TOP + 40 + i * 52;
@@ -182,14 +182,14 @@ class LevelUpSubState extends FlxSubState
 		var now = [
 			two(base.healthMax + Levels.healthBonus()),
 			two(base.dashCooldown * Levels.dashScale()),
-			two(base.apPerKill * Levels.apGainScale()),
+			two(base.superPerKill * Levels.superGainScale()),
 			dmg(Levels.points(Levels.STRENGTH)),
 			two(Levels.actionScale())
 		];
 		var soon = [
 			two(base.healthMax + Levels.healthAt(vg)),
 			two(base.dashCooldown * Levels.dashAt(en)),
-			two(base.apPerKill * Levels.apGainAt(en)),
+			two(base.superPerKill * Levels.superGainAt(en)),
 			dmg(st),
 			two(Levels.actionAt(dx))
 		];

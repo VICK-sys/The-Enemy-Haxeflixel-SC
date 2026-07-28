@@ -11,12 +11,12 @@ import systems.world.PropBlock;
 class PlayerCombat
 {
 	public var health:Float = 0;
-	public var itemBar:Float = 0;
+	public var superMeter:Float = 0;
 	public var dead:Bool = false;
 	public var invincible:Bool = false;
 	public var kills:Int = 0;
 	public var healthMax:Float = 0;
-	public var apMax:Float = 0;
+	public var superMax:Float = 0;
 
 	private var player:Player;
 	private var fx:Fx;
@@ -34,9 +34,9 @@ class PlayerCombat
 		this.fx = fx;
 		data = PlayerDataRegistry.get();
 		healthMax = data.healthMax + util.Levels.healthBonus();
-		apMax = data.apMax;
+		superMax = data.superMax;
 		health = healthMax;
-		itemBar = apMax;
+		superMeter = superMax;
 	}
 
 	public function update(elapsed:Float):Void
@@ -150,26 +150,26 @@ class PlayerCombat
 
 	public function canSuper():Bool
 	{
-		return itemBar >= apMax;
+		return superMeter >= superMax;
 	}
 
 	public function spendSuper():Void
 	{
-		itemBar = 0;
+		superMeter = 0;
 	}
 
 	public function rewardKill():Void
 	{
 		kills++;
-		itemBar += data.apPerKill * util.Levels.apGainScale();
-		if (itemBar > apMax)
-			itemBar = apMax;
+		superMeter += data.superPerKill * util.Levels.superGainScale();
+		if (superMeter > superMax)
+			superMeter = superMax;
 	}
 
 	public function revive():Void
 	{
 		health = healthMax;
-		itemBar = apMax;
+		superMeter = superMax;
 		dead = false;
 		player.isDead = false;
 		player.blockMovement = false;

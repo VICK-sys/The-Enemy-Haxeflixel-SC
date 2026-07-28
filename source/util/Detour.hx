@@ -25,7 +25,7 @@ class Detour
 	static var wave:Int;
 	static var bossWave:Int;
 	static var health:Float;
-	static var itemBar:Float;
+	static var superMeter:Float;
 	static var kills:Int;
 	static var weapon:Int;
 	static var pending:Bool = false;
@@ -48,7 +48,7 @@ class Detour
 		return FlxG.random.int(1, ODDS) == 1;
 	}
 
-	public static function begin(atWave:Int, atBossWave:Int, hp:Float, ap:Float, killCount:Int, heldWeapon:Int):Bool
+	public static function begin(atWave:Int, atBossWave:Int, hp:Float, superAt:Float, killCount:Int, heldWeapon:Int):Bool
 	{
 		var room = MapStore.load(ROOM_SLOT);
 		if (room == null)
@@ -66,7 +66,7 @@ class Detour
 		wave = atWave;
 		bossWave = atBossWave;
 		health = hp;
-		itemBar = ap;
+		superMeter = superAt;
 		kills = killCount;
 		weapon = heldWeapon;
 
@@ -100,7 +100,7 @@ class Detour
 			return;
 		pending = false;
 		status.health = health;
-		status.itemBar = itemBar;
+		status.superMeter = superMeter;
 		status.kills = kills;
 		combat.equip(weapon);
 		director.resumeAfter(wave, bossWave);

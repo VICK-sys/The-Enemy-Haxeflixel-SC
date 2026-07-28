@@ -12,7 +12,7 @@ The client runs its own full weapon stack against *puppets*. A puppet is a real 
 
 Puppets live in a `PuppetDirector`. That `EnemyDirector` subclass swaps spawning and AI for snapshot application. It keeps the rigs, shadows, hitboxes and hit queries. Everything the client's weapons need therefore runs the same code as solo play. That covers `firstInCircle`, contact damage, and enemy shots hurting the player.
 
-A landed client attack draws its own feedback at once, then sends a damage *claim*. That feedback is sparks, sound and a hit flash. The host applies the claim and owns the result. The death comes back in the next snapshot. The client takes the kill for AP if it claimed that enemy recently.
+A landed client attack draws its own feedback at once, then sends a damage *claim*. That feedback is sparks, sound and a hit flash. The host applies the claim and owns the result. The death comes back in the next snapshot. The client takes the kill for the super meter if it claimed that enemy recently.
 
 ## What each side sees
 

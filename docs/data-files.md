@@ -64,8 +64,8 @@ Count is the expensive kind of difficulty. Every live enemy pathfinds against th
 | `rampStart`, `rampRate`, `rampReset` | run-up: starting speed, gain per second, and the value it resets to after standing still |
 | `drag` | slowdown while you hold no key |
 | `dashSpeed`, `dashTime`, `dashCooldown`, `dashIframes` | dash speed, duration, cooldown, and invincibility window |
-| `healthMax`, `apMax` | meter maximums |
-| `apPerKill` | AP refunded per kill |
+| `healthMax`, `superMax` | meter maximums |
+| `superPerKill` | super meter refunded per kill |
 | `iframeTime`, `hurtLockTime` | invincibility and movement-lock time after a hit lands |
 | `knockback` | knockback taken when hit |
 | `timestopSlow`, `timestopHold`, `timestopRecover`, `timestopCooldown` | time stop: seconds to wind down to the full stop, seconds held frozen, seconds to ramp back, and the cooldown |
@@ -217,17 +217,17 @@ The screen shows what a point buys before you spend it. The left panel holds the
 | `scrapValue`, `expPerWave` | exp for one scrap picked up, and per wave cleared. The wave award scales with the wave number |
 | `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)` |
 | `vigorPerPoint` | health added per point |
-| `enduranceDashPerPoint`, `enduranceApPerPoint` | fraction off the dash cooldown, and fraction on to AP gained per kill |
+| `enduranceDashPerPoint`, `enduranceSuperPerPoint` | fraction off the dash cooldown, and fraction on to super meter gained per kill |
 | `strengthPerPoints` | points needed for one more damage. The screen shows progress toward the next one, so a point that does not cross the line still reads as movement |
 | `dexterityPerPoint` | fraction off swing, fire and reload time |
 | `enduranceDashFloor`, `dexterityFloor` | the shortest a timer can get, as a fraction of its base |
-| `enduranceApCap`, `strengthMax` | ceilings on the AP multiplier and the damage bonus |
+| `enduranceSuperCap`, `strengthMax` | ceilings on the super gain multiplier and the damage bonus |
 
 Level is one plus every point spent, so the cost climbs whichever stat you feed.
 
 The numbers are small because the game is. Health starts at 2 and a touch costs a quarter, weapons deal 1 to 3, and a basic enemy holds 3. A point of vigor is a fifth of a heart, and five points of strength is one more damage.
 
-Two of those shapes were chosen against the game rather than against the genre. Strength adds a flat point rather than a percentage, because rounding a percentage into damage of 1 to 3 either does nothing or doubles it. Endurance raises AP gained per kill rather than the AP ceiling, because a larger ceiling means more kills for the same super, which reads as a reward and plays as a punishment.
+Two of those shapes were chosen against the game rather than against the genre. Strength adds a flat point rather than a percentage, because rounding a percentage into damage of 1 to 3 either does nothing or doubles it. Endurance raises meter gained per kill rather than the meter ceiling, because a larger ceiling means more kills for the same super, which reads as a reward and plays as a punishment.
 
 ## Editor tuning - assets/data/editor.json
 
@@ -261,7 +261,7 @@ The value persists in the save, beside the best wave and the settings. It surviv
 
 Four things must hold. The value sits in the window, a 1 in 66 roll comes up, the run is solo, and a slot 2 map is on disk. It fires at most once. The menu and the restart both clear the mark.
 
-The visit saves the run before it swaps arenas: wave, boss wave, health, AP, kills and weapon. Walking back out ends it, and `resumeAfter` puts the director where it was.
+The visit saves the run before it swaps arenas: wave, boss wave, health, super meter, kills and weapon. Walking back out ends it, and `resumeAfter` puts the director where it was.
 
 The way out is the way in. `PlayState` records the feet line you arrived on, and watches for a return to it. You spawn on that line, so the check arms only after you climb 240 px away from it. Without the arming step you would leave on the frame you arrived. Nothing else ends the visit, so the room holds you for as long as you want it.
 

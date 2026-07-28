@@ -77,15 +77,15 @@ class Levels
 	public static function healthBonus():Float
 		return healthAt(points(VIGOR));
 
-	public static function apGainAt(pts:Int):Float
+	public static function superGainAt(pts:Int):Float
 	{
 		var c = conf();
-		var v = 1 + pts * c.enduranceApPerPoint;
-		return v > c.enduranceApCap ? c.enduranceApCap : v;
+		var v = 1 + pts * c.enduranceSuperPerPoint;
+		return v > c.enduranceSuperCap ? c.enduranceSuperCap : v;
 	}
 
-	public static function apGainScale():Float
-		return apGainAt(points(ENDURANCE));
+	public static function superGainScale():Float
+		return superGainAt(points(ENDURANCE));
 
 	public static function dashAt(pts:Int):Float
 	{
