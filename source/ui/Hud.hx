@@ -382,6 +382,7 @@ class Hud
 		bossSlide = true;
 		bannerTimer = BOSS_BANNER_TIME;
 		bossHud.startFlash();
+		raiseBanner();
 	}
 
 	function updateBossBanner():Void
@@ -417,6 +418,15 @@ class Hud
 		bannerText.scale.set(3, 3);
 		bannerText.angle = -10;
 		bannerTimer = BANNER_TIME;
+		raiseBanner();
+	}
+
+	function raiseBanner():Void
+	{
+		state.remove(bannerText, true);
+		state.add(bannerText);
+		state.remove(customCursor, true);
+		state.add(customCursor);
 	}
 
 	public function setGauge(fill:Float, shown:Bool):Void
