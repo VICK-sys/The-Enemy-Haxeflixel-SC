@@ -248,7 +248,7 @@ class TileTool
 				if (doc.tiles[r * w + c] == v)
 					continue;
 				doc.tiles[r * w + c] = v;
-				layer.setTileByIndex(r * w + c, v, true);
+				layer.setTileIndex(r * w + c, v, true);
 				doc.dirty = true;
 			}
 	}

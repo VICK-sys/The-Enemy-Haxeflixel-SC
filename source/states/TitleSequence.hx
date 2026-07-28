@@ -24,11 +24,11 @@ class TitleSequence extends FlxState
         FlxG.mouse.visible = false;
         util.Lang.init();
         SaveData.applySettings();
-        FlxG.sound.volumeHandler = function(v:Float)
+        FlxG.sound.onVolumeChange.add(function(v:Float)
         {
             if (!FlxG.sound.muted)
                 SaveData.setVolume(v);
-        };
+        });
         DiscordPresence.menu();
 
         new FlxTimer().start(3, function(timer:FlxTimer) {
@@ -72,6 +72,6 @@ class TitleSequence extends FlxState
     function die(tween:FlxTween):Void {
         if (wipe == null)
             wipe = new IrisWipe(this);
-        wipe.close(function() FlxG.switchState(new MainMenuState()));
+        wipe.close(function() FlxG.switchState(() -> new MainMenuState()));
     }
 }

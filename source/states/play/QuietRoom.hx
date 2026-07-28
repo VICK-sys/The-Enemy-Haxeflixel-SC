@@ -44,7 +44,7 @@ class QuietRoom
 			return false;
 		if (!Detour.begin(director.wave, bossWave, status.health, status.superMeter, status.kills, combat.weapon))
 			return false;
-		host.leaveFor(function() FlxG.switchState(new PlayState()));
+		host.leaveFor(function() FlxG.switchState(() -> new PlayState()));
 		return true;
 	}
 
@@ -92,6 +92,6 @@ class QuietRoom
 
 		watchExit = false;
 		Detour.leave();
-		host.leaveFor(function() FlxG.switchState(new PlayState()));
+		host.leaveFor(function() FlxG.switchState(() -> new PlayState()));
 	}
 }

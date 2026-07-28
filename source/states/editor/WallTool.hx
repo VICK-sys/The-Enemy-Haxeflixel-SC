@@ -56,7 +56,7 @@ class WallTool
 	public function setCell(c:Int, r:Int, on:Bool):Void
 	{
 		if (doc.setWall(c, r, on))
-			map.setTileByIndex(r * doc.cols + c, on ? 1 : 0, true);
+			map.setTileIndex(r * doc.cols + c, on ? 1 : 0, true);
 	}
 
 	public function hideCursor():Void

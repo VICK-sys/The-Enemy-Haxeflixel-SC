@@ -296,7 +296,7 @@ class LevelUpSubState extends FlxSubState
 		}
 		applyFade();
 
-		var m = FlxG.mouse.getScreenPosition(camUI);
+		var m = FlxG.mouse.getViewPosition(camUI);
 		var over = rowAt(m.x, m.y);
 		if (over >= 0 && over != pick)
 		{

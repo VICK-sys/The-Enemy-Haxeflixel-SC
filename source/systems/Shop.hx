@@ -84,7 +84,7 @@ class Shop
 			placeWindow();
 		}
 
-		door = FlxG.sound.load(Paths.sound("garageDoor"), 0.5);
+		door = FlxG.sound.create(Paths.sound("garageDoor")).setup(0.5);
 
 		prompt = new FlxText(0, 0, PROMPT_W, "");
 		prompt.setFormat(Lang.font(), 20, FlxColor.WHITE, CENTER);

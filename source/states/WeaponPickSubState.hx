@@ -211,7 +211,7 @@ class WeaponPickSubState extends FlxSubState
 
 	function hovered():Int
 	{
-		var m = FlxG.mouse.getScreenPosition(camUI);
+		var m = FlxG.mouse.getViewPosition(camUI);
 		for (i in 0...cards.length)
 		{
 			var b = cards[i].bg;

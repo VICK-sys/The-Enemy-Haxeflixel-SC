@@ -195,10 +195,10 @@ class Arena
 			for (c in 1...cols - 1)
 			{
 				var idx = r * cols + c;
-				if (visited.exists(idx) || map.getTileByIndex(idx) <= 0)
+				if (visited.exists(idx) || map.getTileIndex(idx) <= 0)
 					continue;
 				var w = 0;
-				while (c + w < cols - 1 && !visited.exists(idx + w) && map.getTileByIndex(idx + w) > 0)
+				while (c + w < cols - 1 && !visited.exists(idx + w) && map.getTileIndex(idx + w) > 0)
 					w++;
 				var h = 1;
 				while (r + h < rows - 1 && rowSolid(c, r + h, w, cols, visited))
@@ -230,8 +230,8 @@ class Arena
 			for (c in 1...cols - 1)
 			{
 				var idx = r * cols + c;
-				if (map.getTileByIndex(idx) > 0)
-					map.setTileByIndex(idx, 0, true);
+				if (map.getTileIndex(idx) > 0)
+					map.setTileIndex(idx, 0, true);
 			}
 	}
 
@@ -248,7 +248,7 @@ class Arena
 		for (cc in 0...w)
 		{
 			var idx = r * cols + c + cc;
-			if (visited.exists(idx) || map.getTileByIndex(idx) <= 0)
+			if (visited.exists(idx) || map.getTileIndex(idx) <= 0)
 				return false;
 		}
 		return true;
@@ -256,7 +256,6 @@ class Arena
 
 	public function wallAt(px:Float, py:Float):Bool
 	{
-		var tile = map.getTileIndexByCoords(FlxPoint.weak(px, py));
-		return tile >= 0 && map.getTileByIndex(tile) > 0;
+		return map.getTileIndexAt(px, py) > 0;
 	}
 }

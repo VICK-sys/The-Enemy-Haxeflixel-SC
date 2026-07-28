@@ -247,7 +247,7 @@ class OnlineState extends FlxState
 			return;
 		leaving = true;
 		Net.stop();
-		wipe.close(function() FlxG.switchState(new MainMenuState()));
+		wipe.close(function() FlxG.switchState(() -> new MainMenuState()));
 	}
 
 
@@ -341,7 +341,7 @@ class OnlineState extends FlxState
 		wipe.close(function()
 		{
 			FlxG.mouse.visible = false;
-			FlxG.switchState(new PlayState());
+			FlxG.switchState(() -> new PlayState());
 		});
 	}
 

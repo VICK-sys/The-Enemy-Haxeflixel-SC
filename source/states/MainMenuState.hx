@@ -91,7 +91,7 @@ class MainMenuState extends FlxState
 		{
 			if (Lang.consumeChanged())
 			{
-				FlxG.switchState(new MainMenuState());
+				FlxG.switchState(() -> new MainMenuState());
 				return;
 			}
 			busy = false;
@@ -145,7 +145,7 @@ class MainMenuState extends FlxState
 		{
 			leaving = true;
 			list.enabled = false;
-			wipe.close(function() FlxG.switchState(new EditorState()));
+			wipe.close(function() FlxG.switchState(() -> new EditorState()));
 			return;
 		}
 
@@ -179,7 +179,7 @@ class MainMenuState extends FlxState
 				startGame();
 			case "online":
 				leaving = true;
-				wipe.close(function() FlxG.switchState(new OnlineState()));
+				wipe.close(function() FlxG.switchState(() -> new OnlineState()));
 			case "options":
 				FlxG.inputs.reset();
 				openSubState(new OptionsSubState());
@@ -229,7 +229,7 @@ class MainMenuState extends FlxState
 		wipe.close(function()
 		{
 			FlxG.mouse.visible = false;
-			FlxG.switchState(new PlayState());
+			FlxG.switchState(() -> new PlayState());
 		});
 	}
 

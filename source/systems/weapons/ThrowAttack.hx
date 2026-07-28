@@ -46,7 +46,7 @@ class ThrowAttack
 		this.hits = hits;
 		thrown = new ThrownWeapon();
 		trail = new GhostTrail("items/hammer", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
-		spinSound = FlxG.sound.load(Paths.sound("weapon/spin"), 0.5, true);
+		spinSound = FlxG.sound.create(Paths.sound("weapon/spin")).setup(0.5, true);
 		nav = new EnemyNav();
 		nav.map = arena.map;
 		nav.bodyRadius = 60;

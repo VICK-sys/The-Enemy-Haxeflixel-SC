@@ -337,7 +337,7 @@ class EditorState extends FlxState
 		CustomArena.fromEditor = true;
 		CustomArena.slot = slot;
 		FlxG.mouse.visible = false;
-		FlxG.switchState(new PlayState());
+		FlxG.switchState(() -> new PlayState());
 	}
 
 	function back():Void
@@ -347,7 +347,7 @@ class EditorState extends FlxState
 		leaving = true;
 		if (doc.dirty)
 			saveSlot();
-		FlxG.switchState(new MainMenuState());
+		FlxG.switchState(() -> new MainMenuState());
 	}
 
 	function syncChrome():Void

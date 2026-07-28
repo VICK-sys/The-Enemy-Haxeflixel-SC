@@ -175,8 +175,8 @@ class TilePalette extends PalettePanel
 
 	public function drag():Void
 	{
-		var dx = FlxG.mouse.deltaScreenX;
-		var dy = FlxG.mouse.deltaScreenY;
+		var dx = FlxG.mouse.deltaViewX;
+		var dy = FlxG.mouse.deltaViewY;
 		if (dx == 0 && dy == 0)
 			return;
 		viewX -= dx / scale;

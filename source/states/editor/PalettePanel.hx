@@ -81,15 +81,15 @@ class PalettePanel
 
 	public function contains():Bool
 	{
-		var m = FlxG.mouse.getScreenPosition(cam);
+		var m = FlxG.mouse.getViewPosition(cam);
 		return bg.visible && m.x >= bg.x && m.x <= bg.x + bg.width && m.y >= bg.y && m.y <= bg.y + bg.height;
 	}
 
 	public function localX():Float
-		return FlxG.mouse.getScreenPosition(cam).x - x;
+		return FlxG.mouse.getViewPosition(cam).x - x;
 
 	public function localY():Float
-		return FlxG.mouse.getScreenPosition(cam).y - y;
+		return FlxG.mouse.getViewPosition(cam).y - y;
 
 	function setWindow(view:BitmapData, scale:Float):Void
 	{

@@ -173,7 +173,7 @@ class Hud
 
 	public function update(elapsed:Float):Void
 	{
-		customCursor.setPosition(FlxG.mouse.screenX - 5, FlxG.mouse.screenY);
+		customCursor.setPosition(FlxG.mouse.viewX - 5, FlxG.mouse.viewY);
 
 		updateSuper();
 

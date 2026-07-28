@@ -53,8 +53,8 @@ class EditorView
 
 		if (grabbing() && !overPanel)
 		{
-			FlxG.camera.scroll.x -= FlxG.mouse.deltaScreenX / zoom;
-			FlxG.camera.scroll.y -= FlxG.mouse.deltaScreenY / zoom;
+			FlxG.camera.scroll.x -= FlxG.mouse.deltaViewX / zoom;
+			FlxG.camera.scroll.y -= FlxG.mouse.deltaViewY / zoom;
 		}
 
 		if (FlxG.keys.justPressed.ZERO)

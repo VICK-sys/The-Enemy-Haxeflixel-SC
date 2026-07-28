@@ -42,8 +42,8 @@ class BowAttack
 		this.hits = hits;
 		arrows = new FlxTypedGroup<Arrow>();
 		rain = new ArrowRain(fx, hits);
-		drawSound = FlxG.sound.load(Paths.sound("weapon/spin"), 0.4, true);
-		reloadSound = FlxG.sound.load(Paths.sound("weapon/crossbowReload"), 0.55);
+		drawSound = FlxG.sound.create(Paths.sound("weapon/spin")).setup(0.4, true);
+		reloadSound = FlxG.sound.create(Paths.sound("weapon/crossbowReload")).setup(0.55);
 	}
 
 	function get_charge():Float

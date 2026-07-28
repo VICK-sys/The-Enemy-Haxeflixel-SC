@@ -530,7 +530,7 @@ class LibraryPanel
 
 		if (FlxG.mouse.justPressed)
 		{
-			var m = FlxG.mouse.getScreenPosition(cam);
+			var m = FlxG.mouse.getViewPosition(cam);
 			for (i in 0...rects.length)
 			{
 				var r = rects[i];

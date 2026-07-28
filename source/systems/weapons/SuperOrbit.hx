@@ -94,7 +94,7 @@ class SuperOrbit
 		backLayer = new FlxTypedGroup<Orbiter>();
 		frontLayer = new FlxTypedGroup<Orbiter>();
 		trail = new GhostTrail("items/hammer", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
-		spinSound = FlxG.sound.load(Paths.sound("weapon/spin"), 0.35, true);
+		spinSound = FlxG.sound.create(Paths.sound("weapon/spin")).setup(0.35, true);
 	}
 
 	public function orbiterCount():Int

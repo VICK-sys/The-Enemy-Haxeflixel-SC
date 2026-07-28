@@ -186,7 +186,7 @@ class EditorChrome
 
 	public function contains():Bool
 	{
-		var m = FlxG.mouse.getScreenPosition(cam);
+		var m = FlxG.mouse.getViewPosition(cam);
 		return m.x < sidebarW || m.y < topbarH;
 	}
 
@@ -194,7 +194,7 @@ class EditorChrome
 	{
 		if (!FlxG.mouse.justPressed)
 			return;
-		var m = FlxG.mouse.getScreenPosition(cam);
+		var m = FlxG.mouse.getViewPosition(cam);
 		for (i in 0...rects.length)
 		{
 			var r = rects[i];

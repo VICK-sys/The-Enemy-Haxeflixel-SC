@@ -366,7 +366,7 @@ class PlayState extends FlxState
 				wipe.close(function()
 				{
 					FlxG.mouse.visible = true;
-					FlxG.switchState(new MainMenuState());
+					FlxG.switchState(() -> new MainMenuState());
 				});
 			});
 		}

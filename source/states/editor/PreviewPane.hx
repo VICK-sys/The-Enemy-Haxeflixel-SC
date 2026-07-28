@@ -270,7 +270,7 @@ class PreviewPane
 		if (!editable || !ok)
 			return;
 
-		var m = FlxG.mouse.getScreenPosition(cam);
+		var m = FlxG.mouse.getViewPosition(cam);
 
 		if (FlxG.mouse.justPressed)
 			beginDrag(m.x, m.y);

@@ -58,7 +58,7 @@ class DeadEye
 		this.held = held;
 
 		markers = new FlxTypedGroup<FlxSprite>();
-		heartbeat = FlxG.sound.load(Paths.sound("heartbeat"), 0.8, true);
+		heartbeat = FlxG.sound.create(Paths.sound("heartbeat")).setup(0.8, true);
 
 		overlay = new FlxSprite();
 		overlay.makeGraphic(4, 4, FlxColor.WHITE);

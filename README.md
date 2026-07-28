@@ -54,7 +54,7 @@ Q fires the super once the meter is full. Each weapon has its own.
 
 ## Building
 
-Requires [Haxe](https://haxe.org) with the `flixel` haxelib installed. The Windows target also uses `hxdiscord_rpc` for Discord Rich Presence.
+Requires [Haxe](https://haxe.org) 4.3 or newer. The library versions are pinned in `Project.xml`: flixel 6.2.0, openfl 9.5.2, lime 8.3.2. Install each with `haxelib install <name> <version>`. The Windows target also uses `hxdiscord_rpc` for Discord Rich Presence.
 
 ```
 haxelib run lime build windows
