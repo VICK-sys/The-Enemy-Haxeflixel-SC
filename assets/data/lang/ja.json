@@ -96,7 +96,7 @@
 	"level.level": "レベル",
 	"level.exp": "EXP",
 	"level.next": "必要EXP",
-	"level.keys": "W/S - 選択     ENTER - 上げる     ESC - もどる",
+	"level.keys": "W/S かマウス - 選択     ENTER かクリック - 上げる     ESC - もどる",
 	"derived.health": "体力",
 	"derived.dash": "ダッシュ待ち",
 	"derived.apgain": "AP/撃破",

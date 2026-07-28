@@ -109,7 +109,7 @@
 	"level.level": "LEVEL",
 	"level.exp": "EXP",
 	"level.next": "REQ EXP",
-	"level.keys": "W/S - SELECT     ENTER - BOOST     ESC - EXIT",
+	"level.keys": "W/S OR MOUSE - SELECT     ENTER OR CLICK - BOOST     ESC - EXIT",
 	"derived.health": "HEALTH",
 	"derived.dash": "DASH COOLDOWN",
 	"derived.apgain": "AP PER KILL",

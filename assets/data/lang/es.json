@@ -96,7 +96,7 @@
 	"level.level": "NIVEL",
 	"level.exp": "EXP",
 	"level.next": "EXP NEC.",
-	"level.keys": "W/S - ELEGIR     ENTER - MEJORAR     ESC - SALIR",
+	"level.keys": "W/S O RATÓN - ELEGIR     ENTER O CLIC - MEJORAR     ESC - SALIR",
 	"derived.health": "SALUD",
 	"derived.dash": "ESPERA DEL IMPULSO",
 	"derived.apgain": "AP POR MUERTE",

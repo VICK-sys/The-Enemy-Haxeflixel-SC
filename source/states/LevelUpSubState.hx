@@ -104,7 +104,7 @@ class LevelUpSubState extends FlxSubState
 		ui(keys);
 
 		refresh();
-		FlxG.mouse.visible = false;
+		FlxG.mouse.visible = true;
 		super.create();
 	}
 
@@ -197,9 +197,42 @@ class LevelUpSubState extends FlxSubState
 		}
 	}
 
+	override public function close():Void
+	{
+		FlxG.mouse.visible = false;
+		super.close();
+	}
+
+	function rowAt(mx:Float, my:Float):Int
+	{
+		for (i in 0...STATS.length)
+		{
+			var y = TOP + 137 + i * ROW;
+			if (mx >= LEFT_X && mx <= LEFT_X + LEFT_W && my >= y && my <= y + ROW - 6)
+				return i;
+		}
+		var ay = TOP + PANEL_H - 62;
+		if (mx >= LEFT_X && mx <= LEFT_X + LEFT_W && my >= ay && my <= ay + 40)
+			return STATS.length;
+		return -1;
+	}
+
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+
+		var m = FlxG.mouse.getScreenPosition(camUI);
+		var over = rowAt(m.x, m.y);
+		if (over >= 0 && over != pick)
+		{
+			pick = over;
+			refresh();
+		}
+		if (FlxG.mouse.justPressed && over >= 0)
+		{
+			pick = over;
+			choose();
+		}
 
 		if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP)
 		{
