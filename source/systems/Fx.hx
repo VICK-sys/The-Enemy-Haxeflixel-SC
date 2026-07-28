@@ -15,6 +15,7 @@ class Fx
 	public var dashTrail:FlxTypedGroup<FlxSprite>;
 
 	private var hitstopFrames:Int = 0;
+	private var meleeHeld:Bool = false;
 
 	public function new()
 	{
@@ -30,6 +31,8 @@ class Fx
 
 	public function update():Void
 	{
+		meleeHeld = false;
+
 		if (hitstopFrames > 0)
 		{
 			hitstopFrames--;
@@ -71,7 +74,8 @@ class Fx
 
 	public function killImpact():Void
 	{
-		hold(4, 0.05);
+		if (!meleeHeld)
+			hold(4, 0.05);
 		FlxG.camera.shake(0.004, 0.1);
 	}
 
@@ -79,6 +83,7 @@ class Fx
 	{
 		if (frames <= 0)
 			return;
+		meleeHeld = true;
 		hold(frames, scale);
 		if (shake > 0)
 			FlxG.camera.shake(shake, 0.08);

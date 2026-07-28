@@ -66,7 +66,7 @@ class SwingAttack
 				fx.meleeImpact(cfg.hitstop, cfg.hitstopScale, cfg.hitShake);
 			}
 
-			var push = elen > 0 ? elen : 1;
+			var push = (elen > 0 ? elen : 1) / cfg.knock;
 			hits.damageN(e, ex / push, ey / push, cfg.damage);
 		});
 	}

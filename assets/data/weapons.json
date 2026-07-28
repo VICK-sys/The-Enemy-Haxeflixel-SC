@@ -1,6 +1,6 @@
 {
-	"swing": { "spawnDist": 145, "meleeRange": 245, "meleeArcCos": -0.5, "damage": 2, "effectScale": 1.4, "hitstop": 20, "hitstopScale": 0.06, "hitShake": 0.007 },
-	"jab": { "spawnDist": 85, "meleeRange": 130, "meleeArcCos": -0.2, "damage": 1, "effectScale": 0.6, "hitstop": 2, "hitstopScale": 0.3, "hitShake": 0.002 },
+	"swing": { "spawnDist": 145, "meleeRange": 245, "meleeArcCos": -0.5, "damage": 2, "effectScale": 1.4, "hitstop": 20, "hitstopScale": 0.06, "hitShake": 0.007, "knock": 3.2 },
+	"jab": { "spawnDist": 85, "meleeRange": 130, "meleeArcCos": -0.2, "damage": 1, "effectScale": 0.6, "hitstop": 2, "hitstopScale": 0.3, "hitShake": 0.002, "knock": 0.5 },
 	"revolver": {
 		"cylinder": 6,
 		"damage": 2,
