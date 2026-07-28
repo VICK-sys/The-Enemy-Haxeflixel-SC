@@ -250,7 +250,7 @@ class PlayState extends FlxState
 		{
 			shift.locked = true;
 			Net.inGame = true;
-			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, hud, heldSprite);
+			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
 			netSync.onWaveEvt = onWaveStarted;
 			netSync.onBossEvt = onBossWave;

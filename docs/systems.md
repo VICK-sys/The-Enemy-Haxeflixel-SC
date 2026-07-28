@@ -108,6 +108,8 @@ Scrap pulls toward the player inside `MAGNET`, faster the closer it gets, so a k
 
 The kill counter and the AP gain still fire on the kill itself. Only the exp moved.
 
+A guest never runs `applyHit`, because its hits are claimed and sent to the host to apply. Its scrap therefore drops from `PuppetMirror`, on the same credited kill that pays the kill counter. Scrap stays on the peer that earned it and is never synced, unlike a health pickup, because exp is already counted per player.
+
 ### BossHud
 
 The boss-fight HUD pieces: the pulsing red screen flash and the boss health bar. A call to `showBar(boss)` binds a bar to the boss's HP and plays its entrance. The bar expands out from a compressed sliver as it drops in from the top. The name "Rofel" then fades in letter by letter beneath it. The bar hides itself once the boss is gone.

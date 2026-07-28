@@ -7,6 +7,7 @@ import systems.enemy.EnemyDirector;
 import systems.Fx;
 import ui.Hud;
 import systems.Pickups;
+import systems.Scraps;
 import systems.PlayerCombat;
 import systems.RenderLayers;
 
@@ -18,6 +19,7 @@ class PuppetMirror
 
 	private var director:EnemyDirector;
 	private var pickups:Pickups;
+	private var scraps:Scraps;
 	private var status:PlayerCombat;
 	private var hud:Hud;
 	private var layers:RenderLayers;
@@ -32,10 +34,11 @@ class PuppetMirror
 	private var lastBossX:Float = 0;
 	private var lastBossY:Float = 0;
 
-	public function new(director:EnemyDirector, pickups:Pickups, status:PlayerCombat, hud:Hud, layers:RenderLayers)
+	public function new(director:EnemyDirector, pickups:Pickups, scraps:Scraps, status:PlayerCombat, hud:Hud, layers:RenderLayers)
 	{
 		this.director = director;
 		this.pickups = pickups;
+		this.scraps = scraps;
 		this.status = status;
 		this.hud = hud;
 		this.layers = layers;
@@ -110,7 +113,10 @@ class PuppetMirror
 				e.velocity.set(0, 0);
 				var when = claimedAt.get(id);
 				if (when != null && clock - when < CLAIM_CREDIT)
+				{
 					status.rewardKill();
+					scraps.drop(e.x + e.width / 2, e.y + e.height / 2);
+				}
 			}
 
 			if (id == pendingBossId)

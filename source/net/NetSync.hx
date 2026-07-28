@@ -9,6 +9,7 @@ import systems.world.Arena;
 import systems.enemy.EnemyDirector;
 import ui.Hud;
 import systems.Pickups;
+import systems.Scraps;
 import systems.PlayerCombat;
 import systems.RenderLayers;
 import systems.weapons.Weapons;
@@ -34,6 +35,7 @@ class NetSync
 	private var director:EnemyDirector;
 	private var combat:Weapons;
 	private var pickups:Pickups;
+	private var scraps:Scraps;
 	private var hud:Hud;
 	private var heldSprite:FlxSprite;
 
@@ -45,7 +47,7 @@ class NetSync
 	private var droppedHandled:Bool = false;
 
 	public function new(player:Player, status:PlayerCombat, arena:Arena, layers:RenderLayers, director:EnemyDirector,
-			combat:Weapons, pickups:Pickups, hud:Hud, heldSprite:FlxSprite)
+			combat:Weapons, pickups:Pickups, scraps:Scraps, hud:Hud, heldSprite:FlxSprite)
 	{
 		this.player = player;
 		this.status = status;
@@ -54,6 +56,7 @@ class NetSync
 		this.director = director;
 		this.combat = combat;
 		this.pickups = pickups;
+		this.scraps = scraps;
 		this.hud = hud;
 		this.heldSprite = heldSprite;
 
@@ -63,7 +66,7 @@ class NetSync
 			return new Peer(av, makeFx != null ? makeFx(av) : null);
 		});
 		if (Net.isClient)
-			mirror = new PuppetMirror(director, pickups, status, hud, layers);
+			mirror = new PuppetMirror(director, pickups, scraps, status, hud, layers);
 
 		combat.onAttack = function(mode, pmx, pmy, dx, dy, aimDeg, tx, ty, power)
 			Net.send({
