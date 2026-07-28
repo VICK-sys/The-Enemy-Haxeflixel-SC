@@ -6,6 +6,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import entities.Player;
 import systems.world.Decor;
+import systems.world.PropSprite;
 import systems.RenderLayers;
 import util.Lang;
 import util.Paths;
@@ -17,13 +18,13 @@ class Shop
 	static inline var SPOT_X:Float = 1280;
 	static inline var SPOT_Y:Float = 340;
 	static inline var REACH:Float = 260;
-	static inline var SHUT_TINT:Int = 0xFF6E6E7A;
 	static inline var PROMPT_DROP:Float = 8;
 	static inline var PROMPT_W:Float = 460;
 	static inline var GLOW_RATE:Float = 3.2;
 	static inline var GLOW_AMP:Float = 0.22;
 	static inline var WIN_X:Float = 29;
-	static inline var WIN_CLOSED:Float = 31;
+	static inline var INSIDE_Y:Float = 33;
+	static inline var WIN_CLOSED:Float = 34;
 	static inline var WIN_OPEN:Float = 8;
 	static inline var WIN_SPEED:Float = 30;
 	static inline var WAIT_CAP:Float = 45;
@@ -35,6 +36,7 @@ class Shop
 	private var player:Player;
 	private var sprite:FlxSprite;
 	private var window:FlxSprite;
+	private var inside:FlxSprite;
 	private var winY:Float = WIN_CLOSED;
 	private var prompt:FlxText;
 	private var glow:Float = 0;
@@ -49,7 +51,14 @@ class Shop
 		if (sprite != null)
 		{
 			Decor.place(sprite, SPOT_X, SPOT_Y);
-			sprite.color = SHUT_TINT;
+			var back = new PropSprite();
+			back.layerMode = PropSprite.GROUND;
+			inside = back;
+			inside.loadGraphic(Paths.image("props/shop_inside"));
+			inside.antialiasing = false;
+			inside.scale.set(sprite.scale.x, sprite.scale.y);
+			inside.updateHitbox();
+			layers.entityLayer.add(inside);
 			window = new FlxSprite();
 			window.loadGraphic(Paths.image("props/shop_window"));
 			window.antialiasing = false;
@@ -108,7 +117,7 @@ class Shop
 	function shut():Void
 	{
 		if (sprite != null)
-			sprite.color = SHUT_TINT;
+			sprite.color = FlxColor.WHITE;
 		prompt.visible = false;
 	}
 
@@ -119,6 +128,8 @@ class Shop
 			sprite.visible = on;
 		if (window != null)
 			window.visible = on;
+		if (inside != null)
+			inside.visible = on;
 		if (!on)
 			prompt.visible = false;
 	}
@@ -127,6 +138,8 @@ class Shop
 	{
 		window.x = sprite.x + WIN_X * sprite.scale.x;
 		window.y = sprite.y + winY * sprite.scale.y;
+		inside.x = window.x;
+		inside.y = sprite.y + INSIDE_Y * sprite.scale.y;
 	}
 
 	public function inReach():Bool
