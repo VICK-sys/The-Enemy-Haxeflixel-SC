@@ -134,6 +134,8 @@ The repair shop stands at the top of the arena for the whole run, greyed out and
 
 Clearing a round no longer offers a level. Every tenth round does: the shop lights up, a banner announces it, and the next wave holds while it is open. Walk into range and a prompt appears; ENTER or Z opens the screen that spends scrap, which is the same screen the stats allocator always used.
 
+A shutter covers the counter while the shop is shut and rolls up when it opens. The shutter sprite draws behind the building, and the counter opening is the only transparent part of the art, so the opening is the only place it can show. Sliding it up tucks it behind the sign board, which clips it without any clipping code. It rolls back down when the shop closes, at the speed the art reads as a roller shutter.
+
 Two things end the hold. Shopping ends it when the screen closes, and a forty five second cap ends it if nobody comes, so a player who ignores the shop cannot stall their own run. `dismiss()` exists for the first case: it shuts the shop without releasing the hold, because the screen the player just opened owns the hold from that moment.
 
 The shop hides and returns with the rest of the decor, so the boss whiteout takes it away and the arena restoring brings it back. It stops answering the ENTER key while hidden, so it cannot be entered through a boss fight.

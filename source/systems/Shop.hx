@@ -8,6 +8,7 @@ import entities.Player;
 import systems.world.Decor;
 import systems.RenderLayers;
 import util.Lang;
+import util.Paths;
 
 class Shop
 {
@@ -21,6 +22,10 @@ class Shop
 	static inline var PROMPT_W:Float = 460;
 	static inline var GLOW_RATE:Float = 3.2;
 	static inline var GLOW_AMP:Float = 0.22;
+	static inline var WIN_X:Float = 29;
+	static inline var WIN_CLOSED:Float = 31;
+	static inline var WIN_OPEN:Float = 8;
+	static inline var WIN_SPEED:Float = 30;
 	static inline var WAIT_CAP:Float = 45;
 
 	public var open(default, null):Bool = false;
@@ -29,6 +34,8 @@ class Shop
 
 	private var player:Player;
 	private var sprite:FlxSprite;
+	private var window:FlxSprite;
+	private var winY:Float = WIN_CLOSED;
 	private var prompt:FlxText;
 	private var glow:Float = 0;
 	private var hidden:Bool = false;
@@ -43,7 +50,14 @@ class Shop
 		{
 			Decor.place(sprite, SPOT_X, SPOT_Y);
 			sprite.color = SHUT_TINT;
+			window = new FlxSprite();
+			window.loadGraphic(Paths.image("props/shop_window"));
+			window.antialiasing = false;
+			window.scale.set(sprite.scale.x, sprite.scale.y);
+			window.updateHitbox();
+			layers.entityLayer.add(window);
 			layers.entityLayer.add(sprite);
+			placeWindow();
 		}
 
 		prompt = new FlxText(0, 0, PROMPT_W, "");
@@ -103,8 +117,16 @@ class Shop
 		hidden = !on;
 		if (sprite != null)
 			sprite.visible = on;
+		if (window != null)
+			window.visible = on;
 		if (!on)
 			prompt.visible = false;
+	}
+
+	function placeWindow():Void
+	{
+		window.x = sprite.x + WIN_X * sprite.scale.x;
+		window.y = sprite.y + winY * sprite.scale.y;
 	}
 
 	public function inReach():Bool
@@ -120,6 +142,21 @@ class Shop
 	{
 		if (sprite == null || hidden)
 			return;
+
+		var wantY = open ? WIN_OPEN : WIN_CLOSED;
+		if (winY < wantY)
+		{
+			winY += WIN_SPEED * elapsed;
+			if (winY > wantY)
+				winY = wantY;
+		}
+		else if (winY > wantY)
+		{
+			winY -= WIN_SPEED * elapsed;
+			if (winY < wantY)
+				winY = wantY;
+		}
+		placeWindow();
 
 		if (open)
 		{
