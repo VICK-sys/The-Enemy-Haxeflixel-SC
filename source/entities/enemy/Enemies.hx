@@ -24,6 +24,8 @@ class Enemies extends FlxSprite
 	public var dropChance:Float = 0;
 	public var knockbackTaken:Float = 550;
 	public var knockbackDrag:Float = 1600;
+
+	static inline var CORPSE_KNOCK:Float = 0.85;
 	public var stunTime:Float = 0.3;
 
 	public var target:FlxSprite;
@@ -54,6 +56,7 @@ class Enemies extends FlxSprite
 	private var braceAmp:Float = 0;
 	private var braceOffX:Float = 0;
 	private var braceOffY:Float = 0;
+	private var flung:Bool = false;
 
 	public var shadowOffX:Float = 32;
 	public var shadowOffXFlip:Float = 22;
@@ -168,6 +171,7 @@ class Enemies extends FlxSprite
 		if (hp <= 0)
 		{
 			isDead = true;
+			flung = false;
 			velocity.set(0, 0);
 			drag.set(0, 0);
 			pathing.clear();
@@ -184,17 +188,40 @@ class Enemies extends FlxSprite
 		}
 	}
 
-	public function brace(frames:Int, amp:Float):Void
+	public function brace(frames:Int, amp:Float, pushX:Float, pushY:Float):Void
 	{
-		if (isDead || frames <= 1 || amp <= 0)
+		if (frames <= 1 || amp <= 0)
 			return;
-		braceVX = velocity.x;
-		braceVY = velocity.y;
+		if (isDead)
+		{
+			braceVX = pushX * knockbackTaken * CORPSE_KNOCK;
+			braceVY = pushY * knockbackTaken * CORPSE_KNOCK;
+		}
+		else
+		{
+			braceVX = velocity.x;
+			braceVY = velocity.y;
+		}
 		velocity.set(0, 0);
 		braceOffX = offset.x;
 		braceOffY = offset.y;
 		braceAmp = amp;
 		braceFrames = frames;
+	}
+
+	function tickBrace():Void
+	{
+		braceFrames--;
+		if (braceFrames > 0)
+		{
+			offset.set(braceOffX + FlxG.random.float(-braceAmp, braceAmp),
+				braceOffY + FlxG.random.float(-braceAmp, braceAmp));
+			return;
+		}
+		offset.set(braceOffX, braceOffY);
+		velocity.set(braceVX, braceVY);
+		drag.set(knockbackDrag, knockbackDrag);
+		flung = isDead;
 	}
 
     override public function update(elapsed:Float):Void
@@ -236,7 +263,10 @@ class Enemies extends FlxSprite
 
 		if (isDead)
 		{
-			velocity.set(0, 0);
+			if (braceFrames > 0)
+				tickBrace();
+			else if (!flung)
+				velocity.set(0, 0);
 			return;
 		}
 
@@ -245,15 +275,7 @@ class Enemies extends FlxSprite
 
 		if (braceFrames > 0)
 		{
-			braceFrames--;
-			if (braceFrames > 0)
-				offset.set(braceOffX + FlxG.random.float(-braceAmp, braceAmp),
-					braceOffY + FlxG.random.float(-braceAmp, braceAmp));
-			else
-			{
-				offset.set(braceOffX, braceOffY);
-				velocity.set(braceVX, braceVY);
-			}
+			tickBrace();
 			return;
 		}
 

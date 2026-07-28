@@ -82,7 +82,7 @@ It sits after `props.overlay` in the display list, above the wall redraw that bu
 
 Each melee weapon carries its own `knock`, multiplying the push the arc hands to `takeHit`. The hammer sends a struck enemy out at over three times the base, far enough that it has to walk back in; the jab moves one barely further than its own stride. A struck enemy braces before it goes. `brace` takes the launch off it, shakes its draw offset for the length of the stop, then hands the velocity back on the frame the stop ends. Both count frames rather than seconds, so they cannot drift apart however slow the world is running, and the shake moves the sprite only: the hitbox and the shadow stay where the enemy is. The jab braces for nothing, because two frames of shake is not something anyone sees.
 
-A killed enemy is not launched, because `takeHit` zeroes velocity on death to let the death animation play in place.
+A killed enemy is launched too, if whatever killed it braces. `takeHit` still parks a corpse, and the dead branch of `update` still holds it there, but a corpse that finished a brace is left alone so its drag can carry it out. It keeps its death animation and its fade the whole way, because those run on time rather than on where it is. Anything that does not brace kills the way it always did: the jab, every gun, every arrow.
 
 ### Melee hitstop
 

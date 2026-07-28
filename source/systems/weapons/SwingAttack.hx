@@ -67,8 +67,10 @@ class SwingAttack
 			}
 
 			var push = (elen > 0 ? elen : 1) / cfg.knock;
-			hits.damageN(e, ex / push, ey / push, cfg.damage);
-			e.brace(cfg.hitstop, cfg.hitBrace);
+			var vx = ex / push;
+			var vy = ey / push;
+			hits.damageN(e, vx, vy, cfg.damage);
+			e.brace(cfg.hitstop, cfg.hitBrace, vx, vy);
 		});
 	}
 
