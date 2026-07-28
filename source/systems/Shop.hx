@@ -20,8 +20,6 @@ class Shop
 	static inline var REACH:Float = 260;
 	static inline var PROMPT_DROP:Float = 8;
 	static inline var PROMPT_W:Float = 460;
-	static inline var GLOW_RATE:Float = 3.2;
-	static inline var GLOW_AMP:Float = 0.22;
 	static inline var WIN_X:Float = 29;
 	static inline var INSIDE_Y:Float = 33;
 	static inline var WIN_CLOSED:Float = 34;
@@ -39,7 +37,6 @@ class Shop
 	private var inside:FlxSprite;
 	private var winY:Float = WIN_CLOSED;
 	private var prompt:FlxText;
-	private var glow:Float = 0;
 	private var hidden:Bool = false;
 	private var clock:Float = 0;
 
@@ -93,7 +90,6 @@ class Shop
 		if (open == on)
 			return;
 		open = on;
-		glow = 0;
 		clock = 0;
 		if (!on)
 		{
@@ -109,17 +105,12 @@ class Shop
 		if (!open)
 			return;
 		open = false;
-		glow = 0;
 		clock = 0;
 		shut();
 	}
 
 	function shut():Void
-	{
-		if (sprite != null)
-			sprite.color = FlxColor.WHITE;
 		prompt.visible = false;
-	}
 
 	public function setVisible(on:Bool):Void
 	{
@@ -179,10 +170,6 @@ class Shop
 				setOpen(false);
 				return;
 			}
-			glow += GLOW_RATE * elapsed;
-			var lit = 1 - GLOW_AMP * (0.5 + 0.5 * Math.sin(glow));
-			var v = Std.int(255 * lit);
-			sprite.color = FlxColor.fromRGB(255, v, v);
 		}
 
 		var near = inReach();
