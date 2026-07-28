@@ -204,7 +204,7 @@ To add a language, copy `en.json`, translate the values, and add the code to `La
 
 ## Levelling - assets/data/levels.json
 
-Souls style stat allocation, for the length of one run. Kills and waves pay exp, and the end of a round opens the screen that spends it.
+Souls style stat allocation, for the length of one run. Scrap and waves pay exp, and the end of a round opens the screen that spends it.
 
 Nothing carries. A run starts at zero exp and zero points every time, from the menu and from a restart. `Levels` therefore holds no save at all, which is why the stats cannot drift out of step with a save written by an older build. What a run earns, that run spends.
 
@@ -214,7 +214,7 @@ The screen shows what a point buys before you spend it. The left panel holds the
 
 | Field | Meaning |
 |---|---|
-| `expPerKill`, `expPerWave` | exp for a kill, and per wave cleared. The wave award scales with the wave number |
+| `scrapValue`, `expPerWave` | exp for one scrap picked up, and per wave cleared. The wave award scales with the wave number |
 | `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)` |
 | `vigorPerPoint` | health added per point |
 | `enduranceDashPerPoint`, `enduranceApPerPoint` | fraction off the dash cooldown, and fraction on to AP gained per kill |

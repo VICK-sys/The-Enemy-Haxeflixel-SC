@@ -65,8 +65,8 @@ class Levels
 			exp += n;
 	}
 
-	public static function killExp():Int
-		return conf().expPerKill;
+	public static function scrapValue():Int
+		return conf().scrapValue;
 
 	public static function waveExp():Int
 		return conf().expPerWave;

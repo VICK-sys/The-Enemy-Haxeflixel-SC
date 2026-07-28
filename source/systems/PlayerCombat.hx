@@ -161,7 +161,6 @@ class PlayerCombat
 	public function rewardKill():Void
 	{
 		kills++;
-		util.Levels.award(util.Levels.killExp());
 		itemBar += data.apPerKill * util.Levels.apGainScale();
 		if (itemBar > apMax)
 			itemBar = apMax;

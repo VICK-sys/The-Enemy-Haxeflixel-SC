@@ -4,7 +4,7 @@ import util.Paths;
 
 typedef LevelSet =
 {
-	expPerKill:Int,
+	scrapValue:Int,
 	expPerWave:Int,
 
 	baseCost:Int,

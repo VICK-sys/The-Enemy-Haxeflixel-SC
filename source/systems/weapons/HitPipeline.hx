@@ -6,6 +6,7 @@ import systems.enemy.EnemyDirector;
 import systems.PlayerCombat;
 import systems.Fx;
 import systems.Pickups;
+import systems.Scraps;
 import util.Paths;
 import systems.world.PropBlock;
 
@@ -19,13 +20,15 @@ class HitPipeline
 	private var status:PlayerCombat;
 	private var fx:Fx;
 	private var pickups:Pickups;
+	private var scraps:Scraps;
 	private var director:EnemyDirector;
 
-	public function new(status:PlayerCombat, fx:Fx, pickups:Pickups, director:EnemyDirector)
+	public function new(status:PlayerCombat, fx:Fx, pickups:Pickups, scraps:Scraps, director:EnemyDirector)
 	{
 		this.status = status;
 		this.fx = fx;
 		this.pickups = pickups;
+		this.scraps = scraps;
 		this.director = director;
 	}
 
@@ -60,7 +63,10 @@ class HitPipeline
 		{
 			fx.killImpact();
 			if (rewardable)
+			{
 				status.rewardKill();
+				scraps.drop(e.x + e.width / 2, e.y + e.height / 2);
+			}
 			if (FlxG.random.float() < e.dropChance)
 				pickups.drop(e.x + e.width / 2, e.y + e.height / 2);
 		}

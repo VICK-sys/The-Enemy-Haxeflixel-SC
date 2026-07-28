@@ -16,6 +16,7 @@ import systems.TimeStop;
 import systems.perspective.PerspectiveShift;
 import systems.weapons.Weapons;
 import systems.Pickups;
+import systems.Scraps;
 import ui.Hud;
 import util.Paths;
 import util.SaveData;
@@ -48,6 +49,7 @@ class PlayState extends FlxState
 	private var layers:RenderLayers;
 	private var status:PlayerCombat;
 	private var pickups:Pickups;
+	private var scraps:Scraps;
 	private var director:EnemyDirector;
 	private var combat:Weapons;
 	private var hud:Hud;
@@ -185,12 +187,14 @@ class PlayState extends FlxState
 		timeStop = new TimeStop(_player, layers.playerShadow, status);
 		pickups = new Pickups(_player, status);
 		insert(members.indexOf(layers.entityLayer), pickups.group);
+		scraps = new Scraps(_player, status);
+		insert(members.indexOf(layers.entityLayer), scraps.group);
 		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
 		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status) : new EnemyDirector(_player, arena, layers, status);
 		director.solids = props.solids;
-		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups);
+		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups, scraps);
 
 		add(combat.swing.slashes);
 		add(combat.jab.slashes);
@@ -369,6 +373,7 @@ class PlayState extends FlxState
 
 		director.update(frozen ? 0 : elapsed * timeStop.factor);
 		pickups.update();
+		scraps.update(elapsed);
 		layers.update();
 		props.update();
 		bushes.update(elapsed);

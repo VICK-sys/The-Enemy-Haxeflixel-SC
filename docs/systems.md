@@ -96,9 +96,17 @@ The shared menu widget used by the main menu and options. It is a centred column
 
 ### Hud
 
-The UI camera, health and AP bars, wave counter and banner. Both bars sit in the one widget in the bottom left, where the narrow strip above the health bar reads AP. That strip used to be decoration, and AP used to sit in the opposite corner, which put the two numbers you watch most at opposite ends of the screen. The red BOSS APPROACHING banner shares the same text and slides down from the top. It also owns the revolver ammo readout and the crossbow's blue gauge. It holds the time-stop status label and its fading countdown. It also holds the death text with the best wave, and the custom cursor. It owns a `BossHud`, and hands the boss bar and screen flash to it.
+The UI camera, health and AP bars, wave counter and banner. Both bars sit in the one widget in the bottom left, where the narrow strip above the health bar reads AP. That strip used to be decoration, and AP used to sit in the opposite corner, which put the two numbers you watch most at opposite ends of the screen. The red BOSS APPROACHING banner shares the same text and slides down from the top. It also owns the revolver ammo readout and the crossbow's blue gauge, which sits below the health bar. All three bars therefore stack in the one corner, AP over health over the gauge. It holds the time-stop status label and its fading countdown. It also holds the death text with the best wave, and the custom cursor. It owns a `BossHud`, and hands the boss bar and screen flash to it.
 
 The health bar is an `FlxBar` bound by reflection to `status.health`. The AP strip cannot be, because both bars live in one piece of art. `bar_red` draws the whole widget, so an `FlxBar` over the strip would clip against the full widget width and read full at two thirds. The strip therefore takes a plain sprite with a `clipRect` measured against the strip's own span, and `bar_ap_empty` covers the background's red so the strip can read empty. `bar_main_red` is the health fill with the strip cut out of it, without which the health bar repaints the strip red over the top.
+
+### Scraps
+
+Enemies pay in scrap rather than in exp. A rewardable kill drops one `ScrapPickup` where the enemy fell, and picking it up awards `scrapValue`. A kill you do not walk over is therefore worth nothing.
+
+Scrap pulls toward the player inside `MAGNET`, faster the closer it gets, so a kill at your feet collects itself and a kill across the room asks you to go and get it. It expires after fourteen seconds and blinks for the last three, which keeps a cleared arena from filling with debris.
+
+The kill counter and the AP gain still fire on the kill itself. Only the exp moved.
 
 ### BossHud
 

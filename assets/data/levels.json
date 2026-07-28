@@ -1,5 +1,5 @@
 {
-	"expPerKill": 6,
+	"scrapValue": 6,
 	"expPerWave": 20,
 	"baseCost": 55,
 	"costGrowth": 1.09,

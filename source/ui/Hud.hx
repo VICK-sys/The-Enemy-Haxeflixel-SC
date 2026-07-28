@@ -29,6 +29,10 @@ class Hud
 	static inline var AMMO_POP_AMP:Float = 0.4;
 	static inline var AP_LEFT:Float = 3;
 	static inline var AP_SPAN:Float = 29;
+	static inline var GAUGE_LEFT:Float = 3;
+	static inline var GAUGE_SPAN:Float = 29;
+	static inline var BAR_Y:Float = 642;
+	static inline var UI_SCALE:Float = 4;
 
 	public var camUI:FlxCamera;
 
@@ -47,7 +51,10 @@ class Hud
 	private var timeText:FlxText;
 	private var stopTimerText:FlxText;
 	private var stopTimerTarget:Float = 0;
-	private var gaugeBar:FlxBar;
+	private var gaugeBack:FlxSprite;
+	private var gaugeFill:FlxSprite;
+	private var gaugeClip:FlxRect;
+	private var gaugeShown:Float = -1;
 	private var ammoText:FlxText;
 	private var ammoShown:Int = -1;
 	private var ammoPop:Float = 0;
@@ -64,7 +71,7 @@ class Hud
 		FlxG.cameras.add(camUI, false);
 		camUI.bgColor.alpha = 0;
 
-		var barBackground = makeSprite(160, 670, "bar_red");
+		var barBackground = makeSprite(160, BAR_Y, "bar_red");
 		var playerIcon = makeSprite(barBackground.x - 120, barBackground.y, "mufu_icon");
 
 		apFill = makeSprite(barBackground.x, barBackground.y, "bar_ap_fill");
@@ -76,14 +83,17 @@ class Hud
 		state.add(makeBar(barBackground, "bar_main_empty", "bar_main_red", 'health', status.healthMax));
 		state.add(playerIcon);
 
-		var gaugeAnchor = makeSprite(1060, 578, "active_blue");
-		gaugeBar = new FlxBar(gaugeAnchor.x, gaugeAnchor.y, LEFT_TO_RIGHT, Std.int(gaugeAnchor.width), Std.int(gaugeAnchor.height), null, "", 0, 1);
-		gaugeBar.createImageBar(Paths.image("ui/active_empty"), Paths.image("ui/active_blue"), FlxColor.TRANSPARENT, FlxColor.TRANSPARENT);
-		gaugeBar.antialiasing = false;
-		gaugeBar.scale.set(4, 4);
-		gaugeBar.cameras = [camUI];
-		gaugeBar.visible = false;
-		state.add(gaugeBar);
+		gaugeBack = makeSprite(barBackground.x, 0, "bar_gauge_back");
+		gaugeFill = makeSprite(barBackground.x, 0, "bar_gauge_fill");
+		var gaugeY = barBackground.y + (UI_SCALE + 1) * 0.5 * barBackground.frameHeight
+			- (UI_SCALE - 1) * 0.5 * gaugeBack.frameHeight;
+		gaugeBack.y = gaugeY;
+		gaugeFill.y = gaugeY;
+		gaugeClip = FlxRect.get(0, 0, 0, gaugeBack.frameHeight);
+		gaugeBack.visible = false;
+		gaugeFill.visible = false;
+		state.add(gaugeBack);
+		state.add(gaugeFill);
 
 		ammoText = new FlxText(1000, 576, 240, "");
 		ammoText.setFormat(Lang.font(), 30, FlxColor.WHITE, CENTER);
@@ -92,7 +102,7 @@ class Hud
 		ammoText.visible = false;
 		state.add(ammoText);
 
-		timeText = new FlxText(92, 616, 0, "");
+		timeText = new FlxText(92, 588, 0, "");
 		timeText.setFormat(Lang.font(), 14, FlxColor.WHITE, LEFT);
 		timeText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		timeText.cameras = [camUI];
@@ -305,9 +315,13 @@ class Hud
 
 	public function setGauge(fill:Float, shown:Bool):Void
 	{
-		gaugeBar.visible = shown;
-		if (shown)
-			gaugeBar.percent = fill * 100;
+		gaugeBack.visible = shown;
+		gaugeFill.visible = shown;
+		if (!shown || fill == gaugeShown)
+			return;
+		gaugeShown = fill;
+		gaugeClip.width = GAUGE_LEFT + GAUGE_SPAN * fill;
+		gaugeFill.clipRect = gaugeClip;
 	}
 
 	public function setAmmo(cur:Int, max:Int, reloading:Bool, shown:Bool):Void
@@ -345,7 +359,7 @@ class Hud
 	{
 		var s = new FlxSprite(x, y, Paths.image("ui/" + name));
 		s.antialiasing = false;
-		s.scale.set(4, 4);
+		s.scale.set(UI_SCALE, UI_SCALE);
 		s.cameras = [camUI];
 		return s;
 	}

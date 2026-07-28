@@ -38,11 +38,11 @@ class Weapons
 	private var wasHookBusy:Bool = false;
 	private var wasArms:Bool = false;
 
-	public function new(player:Player, heldSprite:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, pickups:Pickups)
+	public function new(player:Player, heldSprite:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, pickups:Pickups, scraps:systems.Scraps)
 	{
 		this.player = player;
 		this.status = status;
-		hits = new HitPipeline(status, fx, pickups, director);
+		hits = new HitPipeline(status, fx, pickups, scraps, director);
 		hits.owner = player;
 		held = new HeldWeapon(player, heldSprite);
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
