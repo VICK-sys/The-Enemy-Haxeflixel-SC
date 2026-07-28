@@ -82,27 +82,6 @@ class SaveData
 		save.flush();
 	}
 
-	public static function exp():Int
-	{
-		ensure();
-		return save.data.exp != null ? save.data.exp : 0;
-	}
-
-	public static function statPoints():Array<Int>
-	{
-		ensure();
-		var raw:Array<Int> = save.data.statPoints;
-		return raw == null ? [] : raw.copy();
-	}
-
-	public static function setStats(exp:Int, points:Array<Int>):Void
-	{
-		ensure();
-		save.data.exp = exp;
-		save.data.statPoints = points.copy();
-		save.flush();
-	}
-
 	public static function language():String
 	{
 		ensure();

@@ -131,6 +131,7 @@ class PlayState extends FlxState
 			return;
 		restarting = true;
 		util.Detour.reset();
+		util.Levels.startRun();
 		wipe.close(function() FlxG.resetState());
 	}
 

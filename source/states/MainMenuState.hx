@@ -225,6 +225,7 @@ class MainMenuState extends FlxState
 	{
 		leaving = true;
 		list.enabled = false;
+		util.Levels.startRun();
 		loadPick();
 		wipe.close(function()
 		{

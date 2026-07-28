@@ -204,7 +204,9 @@ To add a language, copy `en.json`, translate the values, and add the code to `La
 
 ## Levelling - assets/data/levels.json
 
-Souls style stat allocation. Kills and waves pay exp, and the end of a round opens the screen that spends it. Level and points live in the save, so a bad run still leaves you stronger.
+Souls style stat allocation, for the length of one run. Kills and waves pay exp, and the end of a round opens the screen that spends it.
+
+Nothing carries. A run starts at zero exp and zero points every time, from the menu and from a restart. `Levels` therefore holds no save at all, which is why the stats cannot drift out of step with a save written by an older build. What a run earns, that run spends.
 
 A round is a wave, not a run. `EnemyDirector` calls `onWaveCleared` when the last enemy of a wave dies and the breather starts. The screen opens only when you can afford a level, so a round you cannot spend on never interrupts you. Nothing happens on death.
 
