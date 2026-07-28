@@ -55,7 +55,7 @@ A guest's hook grab crosses the wire as a seize message. The host marks the enem
 
 Fanning the hammer sends each pellet as its own event. The burst therefore draws every bullet on the other machines instead of only the muzzle flash.
 
-The ready gate runs the same quorum shape as the shop hold. The host arms every machine when a wave clears, each player's ready crosses the wire so every machine can raise that player's bubble, and the host counts them against the roster it snapshotted at arming time. A guest who drops is removed from the count rather than waited on.
+The ready gate is a co-op only system, since a solo player has nobody to wait for. It runs the same quorum shape as the shop hold. The host arms every machine when a wave clears, each player's ready crosses the wire so every machine can raise that player's bubble, and the host counts them against the roster it snapshotted at arming time. A guest who drops is removed from the count rather than waited on.
 
 ## Supers
 

@@ -240,7 +240,7 @@ class PlayState extends FlxState
 				intro.openTutorialIfNew();
 			else
 				intro.openWeaponPick();
-			if (!Net.active || Net.isHost)
+			if (Net.isHost)
 				gate.arm();
 		}
 
@@ -372,7 +372,7 @@ class PlayState extends FlxState
 	function onWaveCleared():Void
 	{
 		round.onWaveCleared();
-		if (!Net.active || Net.isHost)
+		if (Net.isHost)
 			gate.arm();
 	}
 
