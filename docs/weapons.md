@@ -70,7 +70,9 @@ It counts from what was left rather than from zero. Reloading early with three s
 
 `ReloadBar` puts a second readout in the world, above the player's head. A bracketed track holds a single line that crosses it from left to right over the reload. The screen corner holds the count, and the track holds the time.
 
-It draws from `reloadProgress`, which is the fraction of `reloadTotal` already served. `PlayState` shows it only while the revolver is held, live and reloading, and it follows the player every frame. Because the reload runs to a flat time, the line always crosses at one speed. It reads as a clock rather than as a count.
+It draws from `reloadProgress`, which is the fraction of `reloadTotal` already served.
+
+The travel is measured off the art rather than written down. `traceTrack` reads the widest run of pure white across the middle row of `reload_bar`, which is the channel between the two end caps, and the line sweeps that run. Hard coded numbers had already gone stale once when the bar was redrawn wider, leaving the line stopping short of the right cap. `PlayState` shows it only while the revolver is held, live and reloading, and it follows the player every frame. Because the reload runs to a flat time, the line always crosses at one speed. It reads as a clock rather than as a count.
 
 It sits after `props.overlay` in the display list, above the wall redraw that buries the player behind a prop. A timer you cannot see is worth nothing, so it stays readable even from behind the scenery.
 
