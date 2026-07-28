@@ -74,6 +74,7 @@ class Hud
 	private var superClip:FlxRect;
 	private var superShown:Float = -1;
 	private var healthBar:FlxBar;
+	private var cursorPoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 
 	public function new(state:FlxState, status:PlayerCombat)
 	{
@@ -173,7 +174,8 @@ class Hud
 
 	public function update(elapsed:Float):Void
 	{
-		customCursor.setPosition(FlxG.mouse.viewX - customCursor.frameWidth * 0.5, FlxG.mouse.viewY - customCursor.frameHeight * 0.5);
+		FlxG.mouse.getViewPosition(camUI, cursorPoint);
+		customCursor.setPosition(cursorPoint.x - customCursor.frameWidth * 0.5, cursorPoint.y - customCursor.frameHeight * 0.5);
 
 		updateSuper();
 
