@@ -6,6 +6,7 @@ import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.text.FlxText;
 import flixel.ui.FlxBar;
+import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import entities.enemy.Enemies;
 import util.Paths;
@@ -26,6 +27,8 @@ class Hud
 	static inline var RELOAD_TINT:Int = 0xFFFF7A7A;
 	static inline var AMMO_POP_TIME:Float = 0.14;
 	static inline var AMMO_POP_AMP:Float = 0.4;
+	static inline var AP_LEFT:Float = 3;
+	static inline var AP_SPAN:Float = 29;
 
 	public var camUI:FlxCamera;
 
@@ -48,6 +51,9 @@ class Hud
 	private var ammoText:FlxText;
 	private var ammoShown:Int = -1;
 	private var ammoPop:Float = 0;
+	private var apFill:FlxSprite;
+	private var apClip:FlxRect;
+	private var apShown:Float = -1;
 
 	public function new(state:FlxState, status:PlayerCombat)
 	{
@@ -59,14 +65,15 @@ class Hud
 		camUI.bgColor.alpha = 0;
 
 		var barBackground = makeSprite(160, 670, "bar_red");
-		var activeRed = makeSprite(1060, 670, "active_red");
-		var passiveRed = makeSprite(1150, 670, "pasive_red");
 		var playerIcon = makeSprite(barBackground.x - 120, barBackground.y, "mufu_icon");
 
+		apFill = makeSprite(barBackground.x, barBackground.y, "bar_ap_fill");
+		apClip = FlxRect.get(0, 0, 0, barBackground.frameHeight);
+
 		state.add(barBackground);
-		state.add(makeBar(barBackground, "bar_main_empty", "bar_red", 'health', status.healthMax));
-		state.add(makeBar(activeRed, "active_empty", "active_red", 'itemBar', status.apMax));
-		state.add(passiveRed);
+		state.add(makeSprite(barBackground.x, barBackground.y, "bar_ap_empty"));
+		state.add(apFill);
+		state.add(makeBar(barBackground, "bar_main_empty", "bar_main_red", 'health', status.healthMax));
 		state.add(playerIcon);
 
 		var gaugeAnchor = makeSprite(1060, 578, "active_blue");
@@ -136,6 +143,8 @@ class Hud
 	public function update(elapsed:Float):Void
 	{
 		customCursor.setPosition(FlxG.mouse.screenX - 5, FlxG.mouse.screenY);
+
+		updateAp();
 
 		if (ammoPop > 0)
 		{
@@ -219,6 +228,20 @@ class Hud
 				}
 			}
 		}
+	}
+
+	function updateAp():Void
+	{
+		var pct = status.apMax > 0 ? status.itemBar / status.apMax : 0;
+		if (pct < 0)
+			pct = 0;
+		if (pct > 1)
+			pct = 1;
+		if (pct == apShown)
+			return;
+		apShown = pct;
+		apClip.width = AP_LEFT + AP_SPAN * pct;
+		apFill.clipRect = apClip;
 	}
 
 	public function setExp(n:Int):Void
