@@ -204,6 +204,8 @@ To add a language, copy `en.json`, translate the values, and add the code to `La
 
 Souls style stat allocation, for the length of one run. Scrap and waves pay exp, and the repair shop spends it. The shop opens every tenth round, so the screen appears far less often than it once did and each visit carries more scrap.
 
+Spending tells the HUD directly through `onSpent`. The game does not tick under a substate in single player, so the counter in the corner would otherwise hold its old value for the whole visit while the screen beside it counted down, which reads as scrap that never gets spent.
+
 Nothing carries. A run starts at zero exp and zero points every time, from the menu and from a restart. `Levels` therefore holds no save at all, which is why the stats cannot drift out of step with a save written by an older build. What a run earns, that run spends.
 
 A round is a wave, not a run. `EnemyDirector` calls `onWaveCleared` when the last enemy of a wave dies and the breather starts. The screen opens only when you can afford a level, so a round you cannot spend on never interrupts you. Nothing happens on death.

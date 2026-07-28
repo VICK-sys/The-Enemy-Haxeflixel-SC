@@ -29,6 +29,8 @@ class LevelUpSubState extends FlxSubState
 	static var STATS:Array<String> = ["vigor", "endurance", "strength", "dexterity"];
 
 	private var camUI:FlxCamera;
+	public var onSpent:Void->Void;
+
 	private var pick:Int = 0;
 	private var rows:Array<FlxText> = [];
 	private var vals:Array<FlxText> = [];
@@ -257,6 +259,7 @@ class LevelUpSubState extends FlxSubState
 			close();
 	}
 
+
 	function choose():Void
 	{
 		if (pick >= STATS.length)
@@ -265,7 +268,11 @@ class LevelUpSubState extends FlxSubState
 			return;
 		}
 		if (Levels.spend(pick))
+		{
 			FlxG.sound.play(util.Paths.sound("heal"), 0.6);
+			if (onSpent != null)
+				onSpent();
+		}
 		refresh();
 	}
 }

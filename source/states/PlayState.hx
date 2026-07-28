@@ -127,6 +127,7 @@ class PlayState extends FlxState
 	function showDecor(on:Bool):Void
 	{
 		props.setDecorVisible(on);
+		shop.setVisible(on);
 		if (floor != null)
 			floor.visible = on;
 	}
@@ -462,6 +463,9 @@ class PlayState extends FlxState
 			shop.dismiss();
 	}
 
+	function syncScrap():Void
+		hud.setExp(util.Levels.exp);
+
 	function releaseShopHold():Void
 	{
 		if (!Net.active || Net.isHost)
@@ -484,6 +488,7 @@ class PlayState extends FlxState
 
 		FlxG.inputs.reset();
 		var screen = new LevelUpSubState(hud.camUI);
+		screen.onSpent = syncScrap;
 		screen.closeCallback = releaseShopHold;
 		openSubState(screen);
 		return true;
@@ -510,6 +515,7 @@ class PlayState extends FlxState
 
 		FlxG.inputs.reset();
 		var screen = new LevelUpSubState(hud.camUI);
+		screen.onSpent = syncScrap;
 		screen.closeCallback = finishLevelUp;
 		openSubState(screen);
 	}

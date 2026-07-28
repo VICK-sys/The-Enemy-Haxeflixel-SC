@@ -134,6 +134,8 @@ Clearing a round no longer offers a level. Every tenth round does: the shop ligh
 
 Two things end the hold. Shopping ends it when the screen closes, and a forty five second cap ends it if nobody comes, so a player who ignores the shop cannot stall their own run. `dismiss()` exists for the first case: it shuts the shop without releasing the hold, because the screen the player just opened owns the hold from that moment.
 
+The shop hides and returns with the rest of the decor, so the boss whiteout takes it away and the arena restoring brings it back. It stops answering the ENTER key while hidden, so it cannot be entered through a boss fight.
+
 In co-op the shop is shared. One player reaching it opens the screen for everyone through the existing level handshake, which already holds the wave until every peer is done.
 
 ### BossHud

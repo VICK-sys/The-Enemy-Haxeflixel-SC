@@ -31,6 +31,7 @@ class Shop
 	private var sprite:FlxSprite;
 	private var prompt:FlxText;
 	private var glow:Float = 0;
+	private var hidden:Bool = false;
 	private var clock:Float = 0;
 
 	public function new(player:Player, layers:RenderLayers)
@@ -97,6 +98,15 @@ class Shop
 		prompt.visible = false;
 	}
 
+	public function setVisible(on:Bool):Void
+	{
+		hidden = !on;
+		if (sprite != null)
+			sprite.visible = on;
+		if (!on)
+			prompt.visible = false;
+	}
+
 	public function inReach():Bool
 	{
 		if (!open || sprite == null)
@@ -108,7 +118,7 @@ class Shop
 
 	public function update(elapsed:Float):Void
 	{
-		if (sprite == null)
+		if (sprite == null || hidden)
 			return;
 
 		if (open)
