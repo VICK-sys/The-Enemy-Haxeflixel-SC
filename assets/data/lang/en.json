@@ -43,6 +43,8 @@
 	"weaponPick.title": "CHOOSE YOUR WEAPON",
 	"weaponPick.sub": "ONE FOR THE WHOLE RUN - THERE IS NO SWAPPING LATER",
 	"weaponPick.hint": "1-4 OR A/D OR THE ARROWS TO CHOOSE        ENTER OR CLICK TO LOCK IT IN",
+	"ready.prompt": "PRESS ENTER WHEN READY",
+	"ready.waiting": "WAITING FOR PLAYERS  {0} / {1}",
 	"shop.open": "SHOP OPEN",
 	"shop.enter": "ENTER - REPAIR SHOP",
 	"hud.wave": "WAVE {0}",

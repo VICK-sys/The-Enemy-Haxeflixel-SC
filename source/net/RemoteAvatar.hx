@@ -20,6 +20,7 @@ class RemoteAvatar
 	public var shadow:FlxSprite;
 	public var tag:FlxText;
 	public var note:FlxText;
+	public var bubble:FlxSprite;
 
 	private var targetX:Float = 0;
 	private var targetY:Float = 0;
@@ -76,7 +77,18 @@ class RemoteAvatar
 		note.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		note.visible = false;
 		layers.tagLayer.add(note);
+
+		bubble = new FlxSprite();
+		bubble.loadGraphic(Paths.image("ui/speech_ready"));
+		bubble.antialiasing = false;
+		bubble.scale.set(4, 4);
+		bubble.updateHitbox();
+		bubble.visible = false;
+		layers.tagLayer.add(bubble);
 	}
+
+	public function setReady(on:Bool):Void
+		bubble.visible = on;
 
 	public function setLeveling(on:Bool):Void
 	{
@@ -166,5 +178,11 @@ class RemoteAvatar
 		note.visible = sprite.visible && leveling;
 		note.x = tag.x;
 		note.y = sprite.y - NOTE_UP;
+
+		if (bubble.visible)
+		{
+			bubble.x = sprite.x + sprite.width * 0.5 - bubble.width * 0.5;
+			bubble.y = sprite.y - bubble.height - 18;
+		}
 	}
 }

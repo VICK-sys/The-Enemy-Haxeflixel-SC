@@ -18,6 +18,7 @@ class ShopRound
 	static inline var WAIT_CAP:Float = 60;
 
 	public var shop(default, null):Shop;
+	public var onLostPeer:Int->Void;
 
 	private var host:PlayState;
 	private var status:PlayerCombat;
@@ -57,7 +58,12 @@ class ShopRound
 		sync.onLevelIn = onPeerEntered;
 		sync.onLevelAck = noteAck;
 		sync.onLevelGo = release;
-		sync.onPeerLost = onPeerLost;
+		sync.onPeerLost = function(id)
+		{
+			onPeerLost(id);
+			if (onLostPeer != null)
+				onLostPeer(id);
+		};
 	}
 
 	public function updateShop(elapsed:Float):Void

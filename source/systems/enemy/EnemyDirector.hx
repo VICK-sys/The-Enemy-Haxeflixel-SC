@@ -25,6 +25,7 @@ class EnemyDirector
 	private var queued:Array<String> = [];
 	private var dripTimer:Float = 0;
 	public var holdWave:Bool = false;
+	public var holdReady:Bool = false;
 	public var shots(get, never):FlxTypedGroup<EnemyShot>;
 	public var onWave:Int->Void;
 	public var onBoss:Void->Void;
@@ -175,7 +176,7 @@ class EnemyDirector
 	{
 		if (betweenWaves > 0)
 		{
-			if (!holdWave)
+			if (!holdWave && !holdReady)
 				betweenWaves -= elapsed;
 			waveClock = 0;
 			if (betweenWaves <= 0)

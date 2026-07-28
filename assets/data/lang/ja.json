@@ -43,6 +43,8 @@
 	"weaponPick.title": "武器をえらべ",
 	"weaponPick.sub": "1回のランで1つだけ - あとから変更はできない",
 	"weaponPick.hint": "1-4 か A/D か 矢印キーでえらぶ        ENTER かクリックで決定",
+	"ready.prompt": "準備ができたらENTER",
+	"ready.waiting": "プレイヤーを待っています  {0} / {1}",
 	"shop.open": "ショップ開店",
 	"shop.enter": "ENTER - 修理屋",
 	"hud.wave": "ウェーブ {0}",

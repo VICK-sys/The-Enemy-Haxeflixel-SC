@@ -49,6 +49,7 @@ class PlayState extends FlxState
 	private var hud:Hud;
 	private var reloadBar:ui.ReloadBar;
 	private var round:states.play.ShopRound;
+	private var gate:states.play.ReadyGate;
 	private var quiet:states.play.QuietRoom;
 	private var boss:states.play.BossShow;
 	private var intro:states.play.RunIntro;
@@ -127,6 +128,7 @@ class PlayState extends FlxState
 		add(props.solids);
 
 		round = new states.play.ShopRound(this, _player, layers);
+		gate = new states.play.ReadyGate(this, _player, layers);
 		quiet = new states.play.QuietRoom(this, _player);
 		for (s in round.solids())
 			props.solids.add(s);
@@ -190,11 +192,13 @@ class PlayState extends FlxState
 
 		hud = new Hud(this, status);
 		round.wire(status, director, hud);
+		gate.wire(status, director, hud);
+		gate.blocked = round.shop.inReach;
 		boss = new states.play.BossShow(arena, hud, props, round, scraps, pickups, floor);
 		intro = new states.play.RunIntro(this, combat, hud);
 		add(intro.flyIn.sprite);
 		director.onWave = onWaveStarted;
-		director.onWaveCleared = round.onWaveCleared;
+		director.onWaveCleared = onWaveCleared;
 		director.onBoss = boss.begin;
 		director.onBossSpawn = hud.showBossBar;
 		director.onBossDefeated = boss.defeated;
@@ -210,6 +214,8 @@ class PlayState extends FlxState
 			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
 			round.useNet(netSync);
+			round.onLostPeer = gate.peerLost;
+			gate.useNet(netSync);
 			netSync.onWaveEvt = onWaveStarted;
 			netSync.onBossEvt = boss.begin;
 			netSync.onBossDefeatedEvt = boss.defeated;
@@ -226,12 +232,17 @@ class PlayState extends FlxState
 
 		if (util.CustomArena.quiet)
 			quiet.enter(combat, director, heldSprite, hud);
-		else if (resumed)
-			hud.showWave(director.wave);
-		else if (Net.active)
-			intro.openTutorialIfNew();
 		else
-			intro.openWeaponPick();
+		{
+			if (resumed)
+				hud.showWave(director.wave);
+			else if (Net.active)
+				intro.openTutorialIfNew();
+			else
+				intro.openWeaponPick();
+			if (!Net.active || Net.isHost)
+				gate.arm();
+		}
 
 		Music.play(states.play.QuietRoom.track(), 0.3);
 
@@ -321,6 +332,7 @@ class PlayState extends FlxState
 		}
 
 		round.updateHold(elapsed);
+		gate.update(elapsed);
 		quiet.update(elapsed);
 		debugKeys();
 
@@ -355,6 +367,13 @@ class PlayState extends FlxState
 		if (n > 1)
 			util.Levels.award(util.Levels.waveExp() * (n - 1));
 		hud.showWave(n);
+	}
+
+	function onWaveCleared():Void
+	{
+		round.onWaveCleared();
+		if (!Net.active || Net.isHost)
+			gate.arm();
 	}
 
 	function onNetDropped():Void

@@ -43,6 +43,8 @@
 	"weaponPick.title": "ELIGE TU ARMA",
 	"weaponPick.sub": "UNA PARA TODA LA PARTIDA - NO SE PUEDE CAMBIAR",
 	"weaponPick.hint": "1-4 O A/D O LAS FLECHAS PARA ELEGIR        ENTER O CLIC PARA CONFIRMAR",
+	"ready.prompt": "PULSA ENTER CUANDO ESTÉS LISTO",
+	"ready.waiting": "ESPERANDO JUGADORES  {0} / {1}",
 	"shop.open": "TIENDA ABIERTA",
 	"shop.enter": "ENTER - TALLER",
 	"hud.wave": "OLEADA {0}",

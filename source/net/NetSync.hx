@@ -51,6 +51,9 @@ class NetSync
 	public var onLevelIn:Int->Void;
 	public var onLevelAck:Int->Void;
 	public var onLevelGo:Void->Void;
+	public var onReady:Int->Void;
+	public var onReadyGo:Void->Void;
+	public var onReadyArm:Void->Void;
 
 	public var onPeerLost:Int->Void;
 
@@ -201,6 +204,16 @@ class NetSync
 	public function setAllLeveling(on:Bool):Void
 		roster.eachAvatar(function(a) a.setLeveling(on));
 
+	public function setReady(id:Int, on:Bool):Void
+	{
+		var p = roster.get(id);
+		if (p != null)
+			p.avatar.setReady(on);
+	}
+
+	public function setAllReady(on:Bool):Void
+		roster.eachAvatar(function(a) a.setReady(on));
+
 	static inline function r1(v:Float):Float
 		return Math.round(v * 10) / 10;
 
@@ -281,6 +294,18 @@ class NetSync
 			case "lvlgo" if (Net.isClient):
 				if (onLevelGo != null)
 					onLevelGo();
+
+			case "rdy":
+				if (onReady != null)
+					onReady(msg.f);
+
+			case "rdyarm" if (Net.isClient):
+				if (onReadyArm != null)
+					onReadyArm();
+
+			case "rdygo" if (Net.isClient):
+				if (onReadyGo != null)
+					onReadyGo();
 
 			case "join":
 				announceName();

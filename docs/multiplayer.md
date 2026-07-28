@@ -55,6 +55,8 @@ A guest's hook grab crosses the wire as a seize message. The host marks the enem
 
 Fanning the hammer sends each pellet as its own event. The burst therefore draws every bullet on the other machines instead of only the muzzle flash.
 
+The ready gate runs the same quorum shape as the shop hold. The host arms every machine when a wave clears, each player's ready crosses the wire so every machine can raise that player's bubble, and the host counts them against the roster it snapshotted at arming time. A guest who drops is removed from the count rather than waited on.
+
 ## Supers
 
 Dead Eye replicates as its shots and nothing else. `superActivate` ignores it. Each round it fires emits an ordinary `Shoot`, so the remote draws the bullet. Online it gives up the part that cannot survive co-op.
