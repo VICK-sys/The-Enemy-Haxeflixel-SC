@@ -193,7 +193,7 @@ class PlayState extends FlxState
 		timeStop = new TimeStop(_player, layers.playerShadow, status);
 		pickups = new Pickups(_player, status);
 		insert(members.indexOf(layers.entityLayer), pickups.group);
-		scraps = new Scraps(_player, status);
+		scraps = new Scraps(_player, status, layers.shadowLayer);
 		insert(members.indexOf(layers.entityLayer), scraps.group);
 		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);

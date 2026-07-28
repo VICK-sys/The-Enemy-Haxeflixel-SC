@@ -1,5 +1,6 @@
 package entities;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import util.Paths;
 import util.WorldClock;
@@ -13,6 +14,11 @@ class ScrapPickup extends FlxSprite
 	static inline var SPREAD:Float = 26;
 	static inline var BOB_RATE:Float = 4.5;
 	static inline var BOB_AMP:Float = 3;
+	static inline var VARIANTS:Int = 5;
+	static inline var SHADOW_LIFT:Float = 2;
+
+	public var shadow(default, null):FlxSprite;
+	public var mounted:Bool = false;
 
 	private var life:Float = 0;
 	private var bob:Float = 0;
@@ -21,7 +27,20 @@ class ScrapPickup extends FlxSprite
 	public function new()
 	{
 		super();
-		loadGraphic(Paths.image("items/scrap"));
+		wear(1);
+
+		shadow = new FlxSprite();
+		shadow.loadGraphic(Paths.image("items/shadow_small"));
+		shadow.antialiasing = false;
+		shadow.scale.set(SCALE, SCALE);
+		shadow.updateHitbox();
+		shadow.moves = false;
+		shadow.visible = false;
+	}
+
+	function wear(n:Int):Void
+	{
+		loadGraphic(Paths.image("items/scrap" + n));
 		antialiasing = false;
 		scale.set(SCALE, SCALE);
 		updateHitbox();
@@ -30,14 +49,16 @@ class ScrapPickup extends FlxSprite
 	public function drop(cx:Float, cy:Float):Void
 	{
 		revive();
+		wear(FlxG.random.int(1, VARIANTS));
 		velocity.set(0, 0);
-		var ox = flixel.FlxG.random.float(-SPREAD, SPREAD);
-		var oy = flixel.FlxG.random.float(-SPREAD, SPREAD);
+		var ox = FlxG.random.float(-SPREAD, SPREAD);
+		var oy = FlxG.random.float(-SPREAD, SPREAD);
 		setPosition(cx + ox - width / 2, cy + oy - height / 2);
 		restY = y;
-		bob = flixel.FlxG.random.float(0, Math.PI * 2);
+		bob = FlxG.random.float(0, Math.PI * 2);
 		alpha = 1;
 		life = LIFETIME;
+		placeShadow();
 	}
 
 	public function pullTo(px:Float, py:Float, speed:Float, elapsed:Float):Void
@@ -55,6 +76,22 @@ class ScrapPickup extends FlxSprite
 		y = restY + Math.sin(bob) * BOB_AMP;
 	}
 
+	function placeShadow():Void
+	{
+		shadow.visible = exists && alive;
+		if (!shadow.visible)
+			return;
+		shadow.x = x + width * 0.5 - shadow.width * 0.5;
+		shadow.y = restY + height - shadow.height + SHADOW_LIFT;
+		shadow.alpha = alpha * 0.85;
+	}
+
+	override public function kill():Void
+	{
+		shadow.visible = false;
+		super.kill();
+	}
+
 	override public function update(elapsed:Float):Void
 	{
 		elapsed *= WorldClock.scale;
@@ -69,5 +106,6 @@ class ScrapPickup extends FlxSprite
 			return;
 		}
 		alpha = life < BLINK_AT ? (Std.int(life * 8) % 2 == 0 ? 1 : 0.3) : 1;
+		placeShadow();
 	}
 }

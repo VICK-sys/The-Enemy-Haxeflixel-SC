@@ -18,18 +18,25 @@ class Scraps
 
 	private var player:Player;
 	private var status:PlayerCombat;
+	private var shadowLayer:FlxTypedGroup<flixel.FlxSprite>;
 	private var pickTimer:Float = 0;
 
-	public function new(player:Player, status:PlayerCombat)
+	public function new(player:Player, status:PlayerCombat, shadowLayer:FlxTypedGroup<flixel.FlxSprite>)
 	{
 		this.player = player;
 		this.status = status;
+		this.shadowLayer = shadowLayer;
 		group = new FlxTypedGroup<ScrapPickup>();
 	}
 
 	public function drop(cx:Float, cy:Float):Void
 	{
 		var s = group.recycle(ScrapPickup);
+		if (!s.mounted)
+		{
+			s.mounted = true;
+			shadowLayer.add(s.shadow);
+		}
 		s.drop(cx, cy);
 	}
 
