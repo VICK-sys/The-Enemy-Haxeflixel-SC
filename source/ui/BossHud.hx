@@ -31,6 +31,16 @@ class BossHud
 	private var letters:Array<FlxText> = [];
 	private var barTimer:Float = 0;
 	private var barActive:Bool = false;
+	private var shown:Bool = true;
+
+	public function setShown(on:Bool):Void
+	{
+		shown = on;
+		if (bar != null)
+			bar.visible = on && barActive;
+		for (t in letters)
+			t.visible = on;
+	}
 
 	public function new(state:FlxState, camUI:FlxCamera)
 	{
@@ -75,6 +85,7 @@ class BossHud
 		bar.antialiasing = false;
 		bar.origin.set(BAR_W / 2, BAR_H / 2);
 		bar.cameras = [camUI];
+		bar.visible = shown;
 		state.add(bar);
 
 		var word = "Rofel";
@@ -87,6 +98,7 @@ class BossHud
 			t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 			t.cameras = [camUI];
 			t.alpha = 0;
+			t.visible = shown;
 			state.add(t);
 			built.push(t);
 			total += t.width + NAME_SPACING;

@@ -1,4 +1,4 @@
-package systems.weapons;
+﻿package systems.weapons;
 
 import flixel.FlxG;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -151,7 +151,7 @@ class RevolverAttack
 
 		fanning = true;
 		fanTimer = 0;
-		FlxG.camera.shake(0.004, 0.25);
+		systems.Fx.shake(0.004, 0.25);
 	}
 
 	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Int, key:String):Bullet

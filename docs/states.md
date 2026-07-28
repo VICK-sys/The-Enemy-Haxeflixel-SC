@@ -22,7 +22,11 @@ Windows will not shrink a window past about 36 px. That is why the end of the va
 
 ## OptionsSubState
 
-The options panel over the menu. It holds master volume, a fullscreen toggle, an FPS counter toggle, and a reset-best-wave action. Adjust volume with A/D or the arrows, or click to step it. Reset-best-wave asks for a second press within a few seconds to confirm. Every setting applies at once and persists in the save file. ESC or BACK closes the panel.
+The options panel over the menu. It holds master volume, the display mode, V-Sync, the framerate, the aspect ratio, the screenshake and freeze-frame sliders, the HUD toggle, the 3D sound toggle, an FPS counter toggle, the language, and a reset-best-wave action. Adjust a row with A/D or the arrows, or click to step it. Reset-best-wave asks for a second press within a few seconds to confirm. Every setting applies at once and persists in the save file. ESC or BACK closes the panel.
+
+The display mode picks windowed, borderless, or exclusive fullscreen. V-Sync cannot change on a live window, so the toggle instead caps the framerate to the display's refresh rate, which gives the same pacing. With V-Sync off, the framerate row picks the cap directly, and it drives the update rate too. The aspect ratio row crops the view to 4:3, 16:9, 16:10 or 21:9 by drawing bars over the margins, above the world and below nothing, on the plain stage. The bars fill with `assets/images/ui/side_art.png` when that file exists, and a flat dark panel when it does not. AUTO draws no bars.
+
+The screenshake slider scales every camera shake in the game, and the freeze-frame slider scales every hitstop, both from zero to full. The HUD toggle hides the whole screen HUD except the crosshair. The 3D sound toggle pans and fades world sounds by where they happen relative to the view: hits, enemy shots, charge roars, the boss blast and the shop door. Off plays everything flat and centred.
 
 ## PlayState
 

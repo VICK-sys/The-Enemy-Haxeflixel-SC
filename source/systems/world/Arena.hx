@@ -1,4 +1,4 @@
-package systems.world;
+﻿package systems.world;
 
 import flixel.FlxG;
 import flixel.FlxState;
@@ -91,7 +91,7 @@ class Arena
 			return;
 		introPhase = 1;
 		introTimer = SHAKE_TIME;
-		FlxG.camera.shake(0.012, SHAKE_TIME);
+		systems.Fx.shake(0.012, SHAKE_TIME);
 	}
 
 	public function endBossTransition():Void
@@ -100,7 +100,7 @@ class Arena
 			return;
 		introPhase = 4;
 		introTimer = REV_IN;
-		FlxG.camera.shake(0.008, REV_IN);
+		systems.Fx.shake(0.008, REV_IN);
 	}
 
 	public function update(elapsed:Float):Void

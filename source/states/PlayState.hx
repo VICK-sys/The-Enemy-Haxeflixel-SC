@@ -301,6 +301,7 @@ class PlayState extends FlxState
 			: combat.weapon == 2 ? combat.bow.recoverProgress
 			: combat.swing.recoverProgress;
 		reloadBar.update(recharging && !combat.disabled && !status.dead, rechargeAt);
+		hud.setShown(SaveData.showHud());
 		hud.setExp(util.Levels.exp);
 		hud.setTimeStop(Net.active ? Lang.t("timestop.off") : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());

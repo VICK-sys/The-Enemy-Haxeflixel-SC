@@ -1,4 +1,4 @@
-package systems.weapons;
+﻿package systems.weapons;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -236,7 +236,7 @@ class DeadEye
 			revolver.fireAt(bx, by, t, cfg.damage);
 			if (onShot != null)
 				onShot(bx, by, tx, ty, Math.atan2(ty - by, tx - bx) * 180 / Math.PI);
-			FlxG.camera.shake(0.004, 0.14);
+			systems.Fx.shake(0.004, 0.14);
 			return;
 		}
 

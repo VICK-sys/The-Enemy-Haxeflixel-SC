@@ -302,7 +302,7 @@ A GLSL fragment shader that distorts a sprite's texture coordinates with time-dr
 
 ### SaveData
 
-The persistent save: best wave reached, the settings, the last joined IP, and the online player name. The settings are master volume, fullscreen, and FPS counter visibility. A call to `applySettings()` pushes them into the engine. It runs at boot and whenever an option changes.
+The persistent save: best wave reached, the settings, the last joined IP, and the online player name. The settings are master volume, display mode, V-Sync, framerate, aspect ratio, screenshake and freeze-frame amounts, HUD visibility, 3D sound, FPS counter visibility, and language. A call to `applySettings()` pushes them into the engine. It runs at boot and whenever an option changes.
 
 ### CustomArena
 

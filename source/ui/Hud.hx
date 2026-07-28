@@ -75,6 +75,8 @@ class Hud
 	private var superShown:Float = -1;
 	private var healthBar:FlxBar;
 	private var cursorPoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
+	private var pieces:Array<flixel.FlxBasic> = [];
+	private var hudOn:Bool = true;
 
 	public function new(state:FlxState, status:PlayerCombat)
 	{
@@ -87,16 +89,18 @@ class Hud
 
 		var barBackground = makeSprite(160, BAR_Y, "bar_red");
 		var playerIcon = makeSprite(barBackground.x - 120, barBackground.y, "mufu_icon");
+		var superEmpty = makeSprite(barBackground.x, barBackground.y, "bar_super_empty");
 
 		superFill = makeSprite(barBackground.x, barBackground.y, "bar_super_fill");
 		superClip = FlxRect.get(0, 0, 0, barBackground.frameHeight);
 
-		state.add(barBackground);
-		state.add(makeSprite(barBackground.x, barBackground.y, "bar_super_empty"));
-		state.add(superFill);
+		state.add(piece(barBackground));
+		state.add(piece(superEmpty));
+		state.add(piece(superFill));
 		healthBar = makeBar(barBackground, "bar_main_empty", "bar_main_red", 'health', status.healthMax);
 		state.add(healthBar);
-		state.add(playerIcon);
+		pieces.push(healthBar);
+		state.add(piece(playerIcon));
 
 		gaugeBack = makeSprite(barBackground.x, 0, "bar_gauge_back");
 		gaugeFill = makeSprite(barBackground.x, 0, "bar_gauge_fill");
@@ -107,21 +111,21 @@ class Hud
 		gaugeClip = FlxRect.get(0, 0, 0, gaugeBack.frameHeight);
 		gaugeBack.visible = false;
 		gaugeFill.visible = false;
-		state.add(gaugeBack);
-		state.add(gaugeFill);
+		state.add(piece(gaugeBack));
+		state.add(piece(gaugeFill));
 
 		ammoText = new FlxText(1000, 576, 240, "");
 		ammoText.setFormat(Lang.font(), 30, FlxColor.WHITE, CENTER);
 		ammoText.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
 		ammoText.cameras = [camUI];
 		ammoText.visible = false;
-		state.add(ammoText);
+		state.add(piece(ammoText));
 
 		timeText = new FlxText(92, 588, 0, "");
 		timeText.setFormat(Lang.font(), 14, FlxColor.WHITE, LEFT);
 		timeText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		timeText.cameras = [camUI];
-		state.add(timeText);
+		state.add(piece(timeText));
 
 		stopTimerText = makeText(120, 32);
 		stopTimerText.font = Paths.font("digital-7");
@@ -134,10 +138,10 @@ class Hud
 		scrapIcon = makeScrapIcon(false);
 		expShade = makeScrapText(true);
 		expText = makeScrapText(false);
-		state.add(scrapIconShade);
-		state.add(expShade);
-		state.add(scrapIcon);
-		state.add(expText);
+		state.add(piece(scrapIconShade));
+		state.add(piece(expShade));
+		state.add(piece(scrapIcon));
+		state.add(piece(expText));
 		setExp(0);
 		bannerText = makeText(250, 48);
 		deadText = makeText(380, 24);
@@ -149,6 +153,31 @@ class Hud
 		state.add(customCursor);
 
 		FlxG.mouse.visible = false;
+	}
+
+	function piece<T:flixel.FlxBasic>(o:T):T
+	{
+		pieces.push(o);
+		return o;
+	}
+
+	public function setShown(on:Bool):Void
+	{
+		if (hudOn == on)
+			return;
+		hudOn = on;
+		for (p in pieces)
+			p.visible = on;
+		bossHud.setShown(on);
+		if (on)
+		{
+			gaugeBack.visible = false;
+			gaugeFill.visible = false;
+			ammoText.visible = false;
+			stopTimerText.visible = false;
+			bannerText.visible = bannerTimer > 0 || bannerFading;
+			deadText.visible = false;
+		}
 	}
 
 	public function setHealthRange(max:Float):Void
@@ -195,7 +224,7 @@ class Hud
 			else
 				a = Math.max(stopTimerTarget, a - STOP_TIMER_FADE * elapsed);
 			stopTimerText.alpha = a;
-			stopTimerText.visible = a > 0;
+			stopTimerText.visible = a > 0 && hudOn;
 		}
 
 		bossHud.update(elapsed);
@@ -337,7 +366,7 @@ class Hud
 	{
 		bannerText.color = 0xFFE0132D;
 		bannerText.text = Lang.t("hud.bossApproaching");
-		bannerText.visible = true;
+		bannerText.visible = hudOn;
 		bannerText.alpha = 0;
 		bannerText.scale.set(1, 1);
 		bannerText.angle = 0;
@@ -375,7 +404,7 @@ class Hud
 		bossSlide = false;
 		bannerText.y = 48;
 		bannerText.text = text;
-		bannerText.visible = true;
+		bannerText.visible = hudOn;
 		bannerText.alpha = 0;
 		bannerText.scale.set(3, 3);
 		bannerText.angle = -10;
@@ -384,8 +413,8 @@ class Hud
 
 	public function setGauge(fill:Float, shown:Bool):Void
 	{
-		gaugeBack.visible = shown;
-		gaugeFill.visible = shown;
+		gaugeBack.visible = shown && hudOn;
+		gaugeFill.visible = shown && hudOn;
 		if (!shown || fill == gaugeShown)
 			return;
 		gaugeShown = fill;
@@ -395,7 +424,7 @@ class Hud
 
 	public function setAmmo(cur:Int, max:Int, reloading:Bool, shown:Bool):Void
 	{
-		ammoText.visible = shown;
+		ammoText.visible = shown && hudOn;
 		if (!shown)
 			return;
 		if (cur != ammoShown)
@@ -410,13 +439,13 @@ class Hud
 	public function showDeath(wave:Int, best:Int):Void
 	{
 		deadText.text = Lang.t("hud.death", [wave, best]);
-		deadText.visible = true;
+		deadText.visible = hudOn;
 	}
 
 	public function showRespawn():Void
 	{
 		deadText.text = Lang.t("hud.respawning");
-		deadText.visible = true;
+		deadText.visible = hudOn;
 	}
 
 	public function hideDeath():Void
@@ -447,7 +476,7 @@ class Hud
 		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		t.cameras = [camUI];
-		state.add(t);
+		state.add(piece(t));
 		return t;
 	}
 

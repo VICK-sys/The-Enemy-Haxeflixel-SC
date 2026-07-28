@@ -45,7 +45,7 @@ class EnemyShots
 				onShot(sx, sy, spec.dirX, spec.dirY, spec.damage, spec.speed, spec.range, spec.sprite);
 			if (spec.sound != null && spec.sound != lastSound)
 			{
-				FlxG.sound.play(Paths.sound(spec.sound), 0.5);
+				util.Sfx.at(spec.sound, sx, sy, 0.5);
 				lastSound = spec.sound;
 			}
 		}

@@ -27,7 +27,7 @@ class ChargeAttack implements AttackBehavior
 			if (dirX > 0) { e.flipX = false; }
 			else if (dirX < 0) { e.flipX = true; }
 			e.animation.play("idle");
-			FlxG.sound.play(Paths.sound("enemies/charge"), 0.5);
+			util.Sfx.at("enemies/charge", e.x + e.width / 2, e.y + e.height / 2, 0.5);
 		}
 		timer -= elapsed;
 		switch (phase)

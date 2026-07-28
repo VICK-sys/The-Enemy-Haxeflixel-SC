@@ -1,4 +1,4 @@
-package systems.weapons;
+﻿package systems.weapons;
 
 import flixel.FlxG;
 import flixel.sound.FlxSound;
@@ -138,7 +138,7 @@ class BowAttack
 		{
 			arrow.piercing = true;
 			fx.sparksAt(bx + dx * 30, by + dy * 30);
-			FlxG.camera.shake(0.004, 0.18);
+			systems.Fx.shake(0.004, 0.18);
 		}
 		cooldownTotal = cfg.shotCooldown * util.Levels.actionScale();
 		cooldown = cooldownTotal;

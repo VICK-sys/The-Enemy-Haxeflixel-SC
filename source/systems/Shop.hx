@@ -197,7 +197,7 @@ class Shop
 		if (moving && !rolling)
 		{
 			door.play(true);
-			door.volume = 0.5;
+			util.Sfx.tune(door, window.x + window.width * 0.5, window.y, 0.5);
 		}
 		else if (!moving && rolling)
 			door.fadeOut(DOOR_FADE, 0, function(_) door.stop());

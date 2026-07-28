@@ -11,11 +11,25 @@ class Fx
 {
 	static inline var DASH_LINE_FADE:Float = 3;
 
+	public static var shakeScale:Float = 1;
+	public static var freezeScale:Float = 1;
+
 	public var sparks:FlxEmitter;
 	public var dashTrail:FlxTypedGroup<FlxSprite>;
 
 	private var hitstopFrames:Int = 0;
 	private var meleeHeld:Bool = false;
+
+	public static function shake(intensity:Float, duration:Float):Void
+	{
+		var v = intensity * shakeScale;
+		if (v <= 0)
+			return;
+		FlxG.camera.shake(v, duration);
+	}
+
+	public static function frames(n:Int):Int
+		return Math.round(n * freezeScale * FlxG.updateFramerate / 60);
 
 	public function new()
 	{
@@ -75,24 +89,26 @@ class Fx
 	public function killImpact():Void
 	{
 		if (!meleeHeld)
-			hold(4, 0.05);
-		FlxG.camera.shake(0.004, 0.1);
+			hold(frames(4), 0.05);
+		shake(0.004, 0.1);
 	}
 
-	public function meleeImpact(frames:Int, scale:Float, shake:Float):Void
+	public function meleeImpact(stopFrames:Int, scale:Float, shakeAmp:Float):Void
 	{
-		if (frames <= 0)
+		if (stopFrames <= 0)
 			return;
 		meleeHeld = true;
-		hold(frames, scale);
-		if (shake > 0)
-			FlxG.camera.shake(shake, 0.08);
+		hold(frames(stopFrames), scale);
+		if (shakeAmp > 0)
+			shake(shakeAmp, 0.08);
 	}
 
-	function hold(frames:Int, scale:Float):Void
+	function hold(stopFrames:Int, scale:Float):Void
 	{
-		if (frames > hitstopFrames)
-			hitstopFrames = frames;
+		if (stopFrames <= 0)
+			return;
+		if (stopFrames > hitstopFrames)
+			hitstopFrames = stopFrames;
 		if (scale < FlxG.timeScale)
 			FlxG.timeScale = scale;
 	}
@@ -105,7 +121,7 @@ class Fx
 
 	public function hurtShake():Void
 	{
-		FlxG.camera.shake(0.012, 0.2);
+		shake(0.012, 0.2);
 	}
 
 	public static function bossBlast(cx:Float, cy:Float):FlxSprite
@@ -119,8 +135,8 @@ class Fx
 		boom.x = cx - boom.width / 2;
 		boom.y = cy - boom.height / 2;
 		boom.animation.play("boom");
-		FlxG.sound.play(Paths.sound("rofel_explode"), 0.9);
-		FlxG.camera.shake(0.02, 0.5);
+		util.Sfx.at("rofel_explode", cx, cy, 0.9);
+		shake(0.02, 0.5);
 		return boom;
 	}
 }

@@ -54,7 +54,7 @@ class HitPipeline
 	{
 		e.takeHit(pushX, pushY, damage);
 
-		FlxG.sound.play(Paths.sound("enemies/hit"), 0.6);
+		util.Sfx.at("enemies/hit", e.x + e.width / 2, e.y + e.height / 2, 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
 		if (rewardable && onImpact != null)
 			onImpact(e.x + e.width / 2, e.y + e.height / 2);
@@ -74,7 +74,7 @@ class HitPipeline
 
 	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Int, stunTime:Float):Void
 	{
-		FlxG.sound.play(Paths.sound("enemies/hit"), 0.6);
+		util.Sfx.at("enemies/hit", e.x + e.width / 2, e.y + e.height / 2, 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
 		e.flashTimer = 0.08;
 		e.setColorTransform(1, 1, 1, 1, 255, 255, 255, 0);

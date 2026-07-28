@@ -52,7 +52,7 @@ class MenuSlash
 	function shatter(_:FlxTween):Void
 	{
 		FlxG.sound.play(Paths.sound("weapon/slice"), 0.7);
-		FlxG.camera.shake(0.013, 0.3);
+		systems.Fx.shake(0.013, 0.3);
 
 		spawnLetters();
 		row.visible = false;

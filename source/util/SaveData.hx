@@ -56,17 +56,119 @@ class SaveData
 		save.flush();
 	}
 
-	public static function fullscreen():Bool
+	public static function displayMode():String
 	{
 		ensure();
-		return save.data.fullscreen != null ? save.data.fullscreen : false;
+		if (save.data.display != null)
+			return save.data.display;
+		return save.data.fullscreen == true ? "fullscreen" : "windowed";
 	}
 
-	public static function setFullscreen(b:Bool):Void
+	public static function setDisplayMode(m:String):Void
 	{
 		ensure();
-		save.data.fullscreen = b;
+		save.data.display = m;
 		save.flush();
+	}
+
+	public static function vsync():Bool
+	{
+		ensure();
+		return save.data.vsync != null ? save.data.vsync : false;
+	}
+
+	public static function setVsync(b:Bool):Void
+	{
+		ensure();
+		save.data.vsync = b;
+		save.flush();
+	}
+
+	public static function framerate():Int
+	{
+		ensure();
+		return save.data.framerate != null ? save.data.framerate : 120;
+	}
+
+	public static function setFramerate(f:Int):Void
+	{
+		ensure();
+		save.data.framerate = f;
+		save.flush();
+	}
+
+	public static function aspect():String
+	{
+		ensure();
+		return save.data.aspect != null ? save.data.aspect : "auto";
+	}
+
+	public static function setAspect(a:String):Void
+	{
+		ensure();
+		save.data.aspect = a;
+		save.flush();
+	}
+
+	public static function shakeAmount():Float
+	{
+		ensure();
+		return save.data.shakeAmount != null ? save.data.shakeAmount : 1.0;
+	}
+
+	public static function setShakeAmount(v:Float):Void
+	{
+		ensure();
+		save.data.shakeAmount = clampTenth(v);
+		save.flush();
+	}
+
+	public static function freezeAmount():Float
+	{
+		ensure();
+		return save.data.freezeAmount != null ? save.data.freezeAmount : 1.0;
+	}
+
+	public static function setFreezeAmount(v:Float):Void
+	{
+		ensure();
+		save.data.freezeAmount = clampTenth(v);
+		save.flush();
+	}
+
+	public static function showHud():Bool
+	{
+		ensure();
+		return save.data.showHud != null ? save.data.showHud : true;
+	}
+
+	public static function setShowHud(b:Bool):Void
+	{
+		ensure();
+		save.data.showHud = b;
+		save.flush();
+	}
+
+	public static function sound3d():Bool
+	{
+		ensure();
+		return save.data.sound3d != null ? save.data.sound3d : true;
+	}
+
+	public static function setSound3d(b:Bool):Void
+	{
+		ensure();
+		save.data.sound3d = b;
+		save.flush();
+	}
+
+	static function clampTenth(v:Float):Float
+	{
+		if (v < 0)
+			v = 0;
+		if (v > 1)
+			v = 1;
+		return Math.round(v * 10) / 10;
 	}
 
 	public static function showFps():Bool
@@ -137,8 +239,73 @@ class SaveData
 	public static function applySettings():Void
 	{
 		FlxG.sound.volume = volume();
-		FlxG.fullscreen = fullscreen();
+		applyDisplay();
+		applyFramerate();
+		systems.Fx.shakeScale = shakeAmount();
+		systems.Fx.freezeScale = freezeAmount();
+		Sfx.positional = sound3d();
+		AspectBars.apply();
 		if (Main.counter != null)
 			Main.counter.visible = showFps();
+	}
+
+	static function applyDisplay():Void
+	{
+		#if desktop
+		var win = lime.app.Application.current.window;
+		switch (displayMode())
+		{
+			case "fullscreen":
+				win.fullscreen = true;
+			case "borderless":
+				win.fullscreen = false;
+				win.borderless = true;
+				var d = win.display;
+				if (d != null)
+				{
+					win.resize(Std.int(d.bounds.width), Std.int(d.bounds.height));
+					win.move(Std.int(d.bounds.x), Std.int(d.bounds.y));
+				}
+			default:
+				win.fullscreen = false;
+				win.borderless = false;
+				var d = win.display;
+				if (d != null && (win.width != 1280 || win.height != 720))
+				{
+					win.resize(1280, 720);
+					win.move(Std.int(d.bounds.x + (d.bounds.width - 1280) / 2), Std.int(d.bounds.y + (d.bounds.height - 720) / 2));
+				}
+		}
+		#else
+		FlxG.fullscreen = displayMode() == "fullscreen";
+		#end
+	}
+
+	static function applyFramerate():Void
+	{
+		var fps = framerate();
+		if (vsync())
+			fps = displayHz();
+		if (fps > FlxG.updateFramerate)
+		{
+			FlxG.updateFramerate = fps;
+			FlxG.drawFramerate = fps;
+		}
+		else
+		{
+			FlxG.drawFramerate = fps;
+			FlxG.updateFramerate = fps;
+		}
+	}
+
+	public static function displayHz():Int
+	{
+		#if desktop
+		var win = lime.app.Application.current.window;
+		var d = win.display;
+		if (d != null && d.currentMode != null && d.currentMode.refreshRate > 0)
+			return d.currentMode.refreshRate;
+		#end
+		return 60;
 	}
 }

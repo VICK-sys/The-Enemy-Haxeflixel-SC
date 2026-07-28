@@ -16,6 +16,7 @@ class Main extends Sprite
 		super();
 		DiscordPresence.init();
 		addChild(new FlxGame(0, 0, TitleSequence));
+		util.AspectBars.init(this);
 		counter = new FPS(10, 3, 0xFFFFFF);
 		addChild(counter);
 		addEventListener(Event.ENTER_FRAME, onFrame);
