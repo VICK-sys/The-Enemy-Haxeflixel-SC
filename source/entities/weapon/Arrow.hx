@@ -42,7 +42,7 @@ class Arrow extends FlxSprite
 		dirY = dy;
 		var speed = SPEED * speedMult;
 		velocity.set(dx * speed, dy * speed);
-		angle = angleDeg + 90;
+		angle = angleDeg;
 		life = RANGE / speed;
 	}
 

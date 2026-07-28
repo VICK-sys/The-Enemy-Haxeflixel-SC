@@ -35,9 +35,9 @@ class ArrowStorm
 		this.player = player;
 		this.bow = bow;
 		this.rain = rain;
-		trail = new GhostTrail("items/arrow", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
+		trail = new GhostTrail("bullets/arrow", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
 		superArrow = new FlxSprite();
-		superArrow.loadGraphic(Paths.image("items/arrow"));
+		superArrow.loadGraphic(Paths.image("bullets/arrow"));
 		superArrow.antialiasing = false;
 		superArrow.scale.set(ARROW_SCALE, ARROW_SCALE);
 		superArrow.color = CHARGE_TINT;
@@ -56,7 +56,7 @@ class ArrowStorm
 		superArrow.revive();
 		superArrow.color = CHARGE_TINT;
 		superArrow.scale.set(ARROW_SCALE, ARROW_SCALE);
-		superArrow.angle = 0;
+		superArrow.angle = -90;
 		superArrow.alpha = 1;
 		superArrow.velocity.set(0, -LAUNCH_SPEED);
 		superArrow.setPosition(bow.x + bow.origin.x - superArrow.width / 2, bow.y + bow.origin.y - superArrow.height / 2);

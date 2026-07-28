@@ -19,7 +19,7 @@ class RainArrow extends FlxSprite
 	public function new()
 	{
 		super();
-		loadGraphic(Paths.image("items/arrow"));
+		loadGraphic(Paths.image("bullets/arrow"));
 		antialiasing = false;
 		scale.set(4, 4);
 	}
@@ -31,7 +31,7 @@ class RainArrow extends FlxSprite
 		ascending = true;
 		marker = null;
 		alpha = 1;
-		angle = angleDeg + 90;
+		angle = angleDeg;
 		var rad = angleDeg * Math.PI / 180;
 		velocity.set(Math.cos(rad) * speed, Math.sin(rad) * speed);
 		fadeTimer = ASCEND_FADE;
@@ -45,7 +45,7 @@ class RainArrow extends FlxSprite
 		impactY = iy;
 		setPosition(ix - width / 2, iy - dropHeight - height / 2);
 		velocity.set(0, fallSpeed);
-		angle = 180;
+		angle = 90;
 		fadeFromY = y;
 		fadeSpan = dropHeight * DROP_FADE_PART;
 	}
