@@ -2,6 +2,7 @@ package systems;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import entities.Player;
@@ -24,11 +25,12 @@ class Shop
 	static inline var INSIDE_Y:Float = 33;
 	static inline var WIN_CLOSED:Float = 34;
 	static inline var WIN_OPEN:Float = 8;
-	static inline var WIN_SPEED:Float = 30;
+	static inline var WIN_SPEED:Float = 18;
+	static inline var DOOR_FADE:Float = 0.35;
 	static inline var KEEP_X:Float = 45;
 	static inline var KEEP_DOWN:Float = 51;
 	static inline var KEEP_UP:Float = 30;
-	static inline var KEEP_SPEED:Float = 26;
+	static inline var KEEP_SPEED:Float = 16;
 	static inline var KEEP_FRAME:Int = 24;
 
 	// the interior stack is pinned rather than y sorted, so it cannot reshuffle
@@ -47,6 +49,8 @@ class Shop
 	private var inside:FlxSprite;
 	private var keeper:FlxSprite;
 	private var keepY:Float = KEEP_DOWN;
+	private var door:FlxSound;
+	private var rolling:Bool = false;
 	private var winY:Float = WIN_CLOSED;
 	private var prompt:FlxText;
 	private var hidden:Bool = false;
@@ -80,6 +84,8 @@ class Shop
 			layers.entityLayer.add(sprite);
 			placeWindow();
 		}
+
+		door = FlxG.sound.load(Paths.sound("garageDoor"), 0.5);
 
 		prompt = new FlxText(0, 0, PROMPT_W, "");
 		prompt.setFormat(Lang.font(), 20, FlxColor.WHITE, CENTER);
@@ -130,6 +136,11 @@ class Shop
 	public function setVisible(on:Bool):Void
 	{
 		hidden = !on;
+		if (!on && door != null && door.playing)
+		{
+			door.stop();
+			rolling = false;
+		}
 		if (sprite != null)
 			sprite.visible = on;
 		if (window != null)
@@ -183,6 +194,17 @@ class Shop
 			return;
 
 		var wantY = open ? WIN_OPEN : WIN_CLOSED;
+		var moving = winY != wantY;
+
+		if (moving && !rolling)
+		{
+			door.play(true);
+			door.volume = 0.5;
+		}
+		else if (!moving && rolling)
+			door.fadeOut(DOOR_FADE, 0, function(_) door.stop());
+		rolling = moving;
+
 		if (winY < wantY)
 		{
 			winY += WIN_SPEED * elapsed;

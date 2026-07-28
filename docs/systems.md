@@ -138,6 +138,8 @@ Clearing a round no longer offers a level. Every tenth round does: the shop ligh
 
 The keeper waits below the counter and rises into the window as the shutter goes up, on a four frame idle. She drops back out of sight when the shop shuts, and hides herself at the bottom of the travel so nothing hangs below the building.
 
+The shutter runs a garage door sound while it moves, and fades it out when the shutter lands rather than letting a four second clip keep rolling over a settled door. The shutter itself was slowed to a second and a half so it reads as something heavy rather than a flick.
+
 A shutter covers the counter while the shop is shut and rolls up when it opens. Behind it, a dark interior backdrop fills the opening, pinned to the ground layer so the shutter always slides over it. All three draw behind the building, and the counter opening is the only transparent part of the art, so the opening is the only place any of them can show. Their order is pinned with explicit sort keys rather than left to the feet sort, which would reshuffle the interior mid slide. Sliding the shutter up tucks it behind the sign board, which clips it without any clipping code. It rolls back down when the shop closes. The building itself keeps its full colour whether open or shut, and nothing pulses when it opens. The shutter position and the banner are the whole signal.
 
 Two things end the hold. Shopping ends it when the screen closes, and a forty five second cap ends it if nobody comes, so a player who ignores the shop cannot stall their own run. `dismiss()` exists for the first case: it shuts the shop without releasing the hold, because the screen the player just opened owns the hold from that moment.

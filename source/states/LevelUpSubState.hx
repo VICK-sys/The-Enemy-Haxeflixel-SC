@@ -25,6 +25,7 @@ class LevelUpSubState extends FlxSubState
 	static inline var RIGHT_W:Float = 564;
 	static inline var PANEL_H:Float = 430;
 	static inline var ROW:Float = 40;
+	static inline var FADE_TIME:Float = 0.18;
 	static inline var ARROW_W:Float = 30;
 	static inline var ARROW_PAD:Float = 9;
 	static inline var LESS_X:Float = LEFT_X + LEFT_W - 198;
@@ -36,6 +37,9 @@ class LevelUpSubState extends FlxSubState
 	public var onSpent:Void->Void;
 
 	private var pick:Int = 0;
+	private var pieces:Array<FlxSprite> = [];
+	private var fade:Float = 0;
+	private var leaving:Bool = false;
 	private var rows:Array<FlxText> = [];
 	private var vals:Array<FlxText> = [];
 	private var marker:FlxSprite;
@@ -153,8 +157,16 @@ class LevelUpSubState extends FlxSubState
 	{
 		o.cameras = [camUI];
 		o.scrollFactor.set();
+		o.alpha = 0;
+		pieces.push(o);
 		add(o);
 		return o;
+	}
+
+	function applyFade():Void
+	{
+		for (o in pieces)
+			o.alpha = o.visible ? fade : 0;
 	}
 
 	function two(v:Float):String
@@ -222,6 +234,10 @@ class LevelUpSubState extends FlxSubState
 		}
 	}
 
+	/** Start the fade out. The real close happens once it lands. */
+	function leave():Void
+		leaving = true;
+
 	override public function close():Void
 	{
 		FlxG.mouse.visible = false;
@@ -261,6 +277,29 @@ class LevelUpSubState extends FlxSubState
 	{
 		super.update(elapsed);
 
+		var step = elapsed / FADE_TIME;
+		if (leaving)
+		{
+			fade -= step;
+			if (fade <= 0)
+			{
+				fade = 0;
+				applyFade();
+				close();
+				return;
+			}
+			applyFade();
+			return;
+		}
+
+		if (fade < 1)
+		{
+			fade += step;
+			if (fade > 1)
+				fade = 1;
+		}
+		applyFade();
+
 		var m = FlxG.mouse.getScreenPosition(camUI);
 		var over = rowAt(m.x, m.y);
 		if (over >= 0 && over != pick)
@@ -283,7 +322,7 @@ class LevelUpSubState extends FlxSubState
 				pick = over;
 				if (pick >= STATS.length)
 				{
-					close();
+					leave();
 					return;
 				}
 				refresh();
@@ -307,7 +346,7 @@ class LevelUpSubState extends FlxSubState
 		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.Z)
 			choose();
 		if (FlxG.keys.justPressed.ESCAPE)
-			close();
+			leave();
 	}
 
 
@@ -315,7 +354,7 @@ class LevelUpSubState extends FlxSubState
 	{
 		if (pick >= STATS.length)
 		{
-			close();
+			leave();
 			return;
 		}
 		buy();

@@ -213,6 +213,8 @@ A round is a wave, not a run. `EnemyDirector` calls `onWaveCleared` when the las
 
 Points can be taken back. A refund returns what the level being dropped costs now, not what that point cost when it was bought, because it is a level that is being undone rather than a purchase. Any point can go back, including one bought on an earlier visit, so a build is never locked in by a shop closing.
 
+The screen fades in and out rather than cutting. Everything on it goes through one `ui` helper, so the fade drives a single list and nothing can be left behind at full alpha. Leaving is a request rather than a close: the screen fades first and closes itself at the end, so `closeCallback` still fires exactly once and the shop's wave hold releases at the right moment.
+
 The screen shows what a point buys before you spend it. The left panel holds the level, the exp and the cost of the next one, then the four stats. The right panel holds what those stats drive, each as the value now and the value after. Only a row the highlighted stat would move lights up.
 
 | Field | Meaning |
