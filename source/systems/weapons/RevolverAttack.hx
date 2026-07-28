@@ -60,11 +60,20 @@ class RevolverAttack
 		return n > cfg.cylinder ? cfg.cylinder : n;
 	}
 
+	public var reloadProgress(get, never):Float;
+
+	function get_reloadProgress():Float
+	{
+		if (reloading <= 0 || reloadTotal <= 0)
+			return 0;
+		return 1 - reloading / reloadTotal;
+	}
+
 	function beginReloadFrom(n:Int):Void
 	{
 		reloadFrom = n;
 		chambered = n;
-		reloadTotal = cfg.reloadTime * util.Levels.actionScale() * (cfg.cylinder - n) / cfg.cylinder;
+		reloadTotal = cfg.reloadTime * util.Levels.actionScale();
 		reloading = reloadTotal;
 	}
 

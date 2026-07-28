@@ -62,9 +62,17 @@ The HUD prints `displayRounds` against `capacity`. That is `rounds` at rest. Dur
 
 Each climb pops the readout and plays `bulletLoad`, one round at a time. The cylinder snaps shut on the last one. An early reload with three in hand therefore clicks three times, not six. The counter jumps to whatever the tally reached, rather than stepping one at a time. A frame long enough to skip a number therefore costs a click, instead of stacking several at once.
 
-It counts from what was left rather than from zero. Reloading early with three still in hand therefore reads three to six. A whole cylinder costs `reloadTime`, and a partial reload pays only for the rounds it puts in. A round therefore takes the same moment to chamber whether you ran dry or topped up. Otherwise a one-round top-up cost as long as a full reload. R was then a punishment unless you were nearly empty.
+It counts from what was left rather than from zero. Reloading early with three still in hand therefore reads three to six. Every reload costs the same `reloadTime`, whether it chambers one round or six. You can therefore read the wait off the bar alone and never off the count.
 
 `rounds` itself does not move until the reload finishes, so nothing can fire off a half-full display. The blue bar stays with the crossbow's arrow rain, which is a continuous charge with no count to show.
+
+### The reload bar
+
+`ReloadBar` puts a second readout in the world, above the player's head. A bracketed track holds a single line that crosses it from left to right over the reload. The screen corner holds the count, and the track holds the time.
+
+It draws from `reloadProgress`, which is the fraction of `reloadTotal` already served. `PlayState` shows it only while the revolver is held, live and reloading, and it follows the player every frame. Because the reload runs to a flat time, the line always crosses at one speed. It reads as a clock rather than as a count.
+
+It sits after `props.overlay` in the display list, above the wall redraw that buries the player behind a prop. A timer you cannot see is worth nothing, so it stays readable even from behind the scenery.
 
 ## BowAttack
 

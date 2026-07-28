@@ -51,6 +51,7 @@ class PlayState extends FlxState
 	private var director:EnemyDirector;
 	private var combat:Weapons;
 	private var hud:Hud;
+	private var reloadBar:ui.ReloadBar;
 	private var perf:PerfLog;
 	private var bossAlarm:FlxSound;
 	private var bossFight:Bool = false;
@@ -214,6 +215,9 @@ class PlayState extends FlxState
 		add(director.shots);
 
 		add(props.overlay);
+
+		reloadBar = new ui.ReloadBar(_player);
+		add(reloadBar.group);
 
 		if (petals != null)
 			add(petals.group);
@@ -380,6 +384,7 @@ class PlayState extends FlxState
 			netSync.update(elapsed);
 		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
 		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
+		reloadBar.update(combat.weapon == 1 && !combat.disabled && !status.dead && combat.revolver.isReloading, combat.revolver.reloadProgress);
 		hud.setExp(util.Levels.exp);
 		hud.setTimeStop(Net.active ? Lang.t("timestop.off") : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());

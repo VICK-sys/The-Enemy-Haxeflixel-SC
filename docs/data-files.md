@@ -79,7 +79,7 @@ Combat balance for every weapon system, one object per system. Field names match
 |---|---|
 | `swing` | melee range and arc, slash spawn distance |
 | `jab` | hook jab spawn distance, reach, arc, damage, slash size |
-| `revolver` | cylinder size and damage. Reload time for a full cylinder, where a partial reload takes its share. Fan interval and jitter. Bullet speed, range, hit radius and knockback |
+| `revolver` | cylinder size and damage. Reload time, which is flat and does not follow the number of rounds missing. Fan interval and jitter. Bullet speed, range, hit radius and knockback |
 | `shockwave` | wave radius, expansion time, and how long it stuns |
 | `thrown` | throw distance, return speed |
 | `bowCharge` | charged shot. A press below `minTime` is a plain tap shot. `fullTime` is the time to full charge, and `maxDamage` is the damage there. The `speedBonus`/`sizeBonus`/`knockBonus` multipliers scale across the charge range |
