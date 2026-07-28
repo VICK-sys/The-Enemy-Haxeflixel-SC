@@ -9,7 +9,6 @@ class Detour
 	public static inline var EVENT:String = "treeRoom";
 	public static inline var ROOM_SLOT:Int = 2;
 	public static inline var ODDS:Int = 66;
-	public static inline var STAY:Float = 20;
 
 	public static var inRoom(default, null):Bool = false;
 	public static var used(default, null):Bool = false;

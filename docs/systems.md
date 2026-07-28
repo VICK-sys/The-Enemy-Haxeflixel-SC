@@ -205,7 +205,7 @@ The count is a static. Once he has said his piece, he stays gone for the rest of
 
 `DialogueBox` is the box itself: a white border, a black fill, and a silent typewriter. It draws on the HUD camera, so the quiet room's zoom does not touch it. A press finishes the line early rather than skipping it, then the next press turns the page. The player cannot move while it is open.
 
-The detour timer holds while a box is open. The room should never drop you part way through a sentence.
+The exit check pauses while a box is open. Walking out is what ends a visit, and the check should not fire on a player who cannot move.
 
 ### Lang
 

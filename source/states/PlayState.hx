@@ -35,6 +35,8 @@ class PlayState extends FlxState
 	static inline var CURSOR_LEAN:Float = 1.0;
 	static inline var QUIET_PLAYER_SCALE:Float = 1.5;
 	static inline var QUIET_ZOOM:Float = 0.7;
+	static inline var EXIT_ARM_UP:Float = 240;
+	static inline var EXIT_BACK:Float = 40;
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
 	static inline var DEFLECT_PUSH:Float = 1.2;
@@ -63,7 +65,9 @@ class PlayState extends FlxState
 	private var flyPick:Int = -1;
 	private var flyX:Float = 0;
 	private var flyY:Float = 0;
-	private var detourLeft:Float = 0;
+	private var exitFrom:Float = 0;
+	private var exitArmed:Bool = false;
+	private var watchExit:Bool = false;
 	private var treeMan:systems.TreeMan;
 	private var bushes:systems.BushDrift;
 	private var petals:systems.PetalFall;
@@ -84,14 +88,18 @@ class PlayState extends FlxState
 		if (treeMan != null)
 			treeMan.update(elapsed);
 
-		if (detourLeft <= 0)
+		if (!watchExit || restarting)
 			return;
 		if (treeMan != null && treeMan.talking)
 			return;
-		detourLeft -= elapsed;
-		if (detourLeft > 0)
+
+		var up = exitFrom - _player.feetY;
+		if (up > EXIT_ARM_UP)
+			exitArmed = true;
+		if (!exitArmed || up > EXIT_BACK)
 			return;
-		detourLeft = 0;
+
+		watchExit = false;
 		util.Detour.leave();
 		restarting = true;
 		wipe.close(function() FlxG.switchState(new PlayState()));
@@ -257,7 +265,11 @@ class PlayState extends FlxState
 			FlxG.camera.zoom = QUIET_ZOOM;
 			addTreeMan();
 			if (util.Detour.inRoom)
-				detourLeft = util.Detour.STAY;
+			{
+				watchExit = true;
+				exitArmed = false;
+				exitFrom = _player.feetY;
+			}
 		}
 		else if (resumed)
 			hud.showWave(director.wave);

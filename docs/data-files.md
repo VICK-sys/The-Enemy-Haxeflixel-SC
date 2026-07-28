@@ -234,7 +234,9 @@ The value persists in the save, beside the best wave and the settings. It surviv
 
 Four things must hold. The value sits in the window, a 1 in 66 roll comes up, the run is solo, and a slot 2 map is on disk. It fires at most once. The menu and the restart both clear the mark.
 
-The visit saves the run before it swaps arenas: wave, boss wave, health, AP, kills and weapon. A timer sends you back after 20 seconds, and `resumeAfter` puts the director where it was.
+The visit saves the run before it swaps arenas: wave, boss wave, health, AP, kills and weapon. Walking back out ends it, and `resumeAfter` puts the director where it was.
+
+The way out is the way in. `PlayState` records the feet line you arrived on, and watches for a return to it. You spawn on that line, so the check arms only after you climb 240 px away from it. Without the arming step you would leave on the frame you arrived. Nothing else ends the visit, so the room holds you for as long as you want it.
 
 That boss wave is spent. The run picks up on the wave after it, and the next boss arrives on its usual schedule.
 
