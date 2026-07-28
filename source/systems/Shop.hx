@@ -25,6 +25,16 @@ class Shop
 	static inline var WIN_CLOSED:Float = 34;
 	static inline var WIN_OPEN:Float = 8;
 	static inline var WIN_SPEED:Float = 30;
+	static inline var KEEP_X:Float = 45;
+	static inline var KEEP_DOWN:Float = 51;
+	static inline var KEEP_UP:Float = 30;
+	static inline var KEEP_SPEED:Float = 26;
+	static inline var KEEP_FRAME:Int = 24;
+
+	// the interior stack is pinned rather than y sorted, so it cannot reshuffle
+	static inline var SORT_INSIDE:Float = -900002;
+	static inline var SORT_KEEP:Float = -900001;
+	static inline var SORT_WINDOW:Float = -900000;
 	static inline var WAIT_CAP:Float = 45;
 
 	public var open(default, null):Bool = false;
@@ -35,6 +45,8 @@ class Shop
 	private var sprite:FlxSprite;
 	private var window:FlxSprite;
 	private var inside:FlxSprite;
+	private var keeper:FlxSprite;
+	private var keepY:Float = KEEP_DOWN;
 	private var winY:Float = WIN_CLOSED;
 	private var prompt:FlxText;
 	private var hidden:Bool = false;
@@ -48,19 +60,22 @@ class Shop
 		if (sprite != null)
 		{
 			Decor.place(sprite, SPOT_X, SPOT_Y);
-			var back = new PropSprite();
-			back.layerMode = PropSprite.GROUND;
-			inside = back;
+			inside = pinned(SORT_INSIDE);
 			inside.loadGraphic(Paths.image("props/shop_inside"));
-			inside.antialiasing = false;
-			inside.scale.set(sprite.scale.x, sprite.scale.y);
-			inside.updateHitbox();
-			layers.entityLayer.add(inside);
-			window = new FlxSprite();
+			dress(inside);
+
+			keeper = pinned(SORT_KEEP);
+			keeper.loadGraphic(Paths.image("props/sheun"), true, KEEP_FRAME, KEEP_FRAME);
+			keeper.animation.add("idle", [0, 1, 2, 3], 6, true);
+			keeper.animation.play("idle");
+			dress(keeper);
+
+			window = pinned(SORT_WINDOW);
 			window.loadGraphic(Paths.image("props/shop_window"));
-			window.antialiasing = false;
-			window.scale.set(sprite.scale.x, sprite.scale.y);
-			window.updateHitbox();
+			dress(window);
+
+			layers.entityLayer.add(inside);
+			layers.entityLayer.add(keeper);
 			layers.entityLayer.add(window);
 			layers.entityLayer.add(sprite);
 			placeWindow();
@@ -121,8 +136,25 @@ class Shop
 			window.visible = on;
 		if (inside != null)
 			inside.visible = on;
+		if (keeper != null)
+			keeper.visible = on && keepY < KEEP_DOWN;
 		if (!on)
 			prompt.visible = false;
+	}
+
+	function pinned(order:Float):PropSprite
+	{
+		var s = new PropSprite();
+		s.layerMode = PropSprite.SORTED;
+		s.sortY = order;
+		return s;
+	}
+
+	function dress(s:FlxSprite):Void
+	{
+		s.antialiasing = false;
+		s.scale.set(sprite.scale.x, sprite.scale.y);
+		s.updateHitbox();
 	}
 
 	function placeWindow():Void
@@ -131,6 +163,9 @@ class Shop
 		window.y = sprite.y + winY * sprite.scale.y;
 		inside.x = window.x;
 		inside.y = sprite.y + INSIDE_Y * sprite.scale.y;
+		keeper.x = sprite.x + KEEP_X * sprite.scale.x;
+		keeper.y = sprite.y + keepY * sprite.scale.y;
+		keeper.visible = !hidden && keepY < KEEP_DOWN;
 	}
 
 	public function inReach():Bool
@@ -160,6 +195,21 @@ class Shop
 			if (winY < wantY)
 				winY = wantY;
 		}
+
+		var keepWant = open ? KEEP_UP : KEEP_DOWN;
+		if (keepY > keepWant)
+		{
+			keepY -= KEEP_SPEED * elapsed;
+			if (keepY < keepWant)
+				keepY = keepWant;
+		}
+		else if (keepY < keepWant)
+		{
+			keepY += KEEP_SPEED * elapsed;
+			if (keepY > keepWant)
+				keepY = keepWant;
+		}
+
 		placeWindow();
 
 		if (open)
