@@ -15,11 +15,10 @@ class EnemySpawner
 	static inline var STUCK_TIME:Float = 2.5;
 	static inline var STUCK_EPS:Float = 24;
 	static inline var STUCK_DRIVE:Float = 20;
-	static inline var STUCK_ENGAGE:Float = 300;
 	static inline var ENTER_CAP:Float = 6;
 	static inline var CAMP_TIME:Float = 8;
-	static inline var CAMP_EPS:Float = 48;
-	static inline var CAMP_ENGAGE:Float = 700;
+	static inline var CAMP_EPS:Float = 64;
+	static inline var CAMP_SAMPLE:Float = 2;
 	static inline var RESCUE_MIN:Float = 380;
 	static inline var RESCUE_MAX:Float = 620;
 	static inline var LOCAL_MIN:Float = 70;
@@ -98,7 +97,14 @@ class EnemySpawner
 			}
 		}
 		else
+		{
 			rig.enterTimer = 0;
+			if (!inPlay(e))
+			{
+				rescue(rig);
+				return;
+			}
+		}
 
 		var targetSq = Math.POSITIVE_INFINITY;
 		if (e.target != null)
@@ -107,12 +113,13 @@ class EnemySpawner
 			var ty = e.target.y + e.target.height * 0.5 - (e.y + e.height * 0.5);
 			targetSq = tx * tx + ty * ty;
 		}
+		var engaged = e.pathing.losClear && targetSq < e.attackRange * e.attackRange;
 
 		var dx = e.x - rig.lastX;
 		var dy = e.y - rig.lastY;
 		var driven = e.velocity.x * e.velocity.x + e.velocity.y * e.velocity.y > STUCK_DRIVE * STUCK_DRIVE;
 
-		if (!driven || crowded || targetSq < STUCK_ENGAGE * STUCK_ENGAGE || dx * dx + dy * dy > STUCK_EPS * STUCK_EPS)
+		if (!driven || crowded || engaged || dx * dx + dy * dy > STUCK_EPS * STUCK_EPS)
 		{
 			rig.lastX = e.x;
 			rig.lastY = e.y;
@@ -128,24 +135,33 @@ class EnemySpawner
 			}
 		}
 
-		var fx = e.x - rig.farX;
-		var fy = e.y - rig.farY;
-		if (fx * fx + fy * fy > CAMP_EPS * CAMP_EPS)
+		if (engaged)
 		{
 			rig.farX = e.x;
 			rig.farY = e.y;
+			rig.farClock = 0;
 			rig.farTimer = 0;
 			return;
 		}
 
-		if (targetSq < CAMP_ENGAGE * CAMP_ENGAGE)
+		rig.farClock += elapsed;
+		if (rig.farClock < CAMP_SAMPLE)
+			return;
+
+		var fx = e.x - rig.farX;
+		var fy = e.y - rig.farY;
+		rig.farX = e.x;
+		rig.farY = e.y;
+		rig.farClock = 0;
+
+		if (fx * fx + fy * fy > CAMP_EPS * CAMP_EPS)
 		{
 			rig.farTimer = 0;
 			return;
 		}
 
-		rig.farTimer += elapsed;
-		if (rig.farTimer > CAMP_TIME)
+		rig.farTimer += CAMP_SAMPLE;
+		if (rig.farTimer >= CAMP_TIME)
 			rescue(rig);
 	}
 
@@ -200,6 +216,12 @@ class EnemySpawner
 			&& y + e.height <= arena.height - SPAWN_PAD;
 	}
 
+	function inPlay(e:Enemies):Bool
+	{
+		return e.x + e.width > 0 && e.y + e.height > 0
+			&& e.x < arena.width && e.feetY < arena.height;
+	}
+
 	function land(rig:EnemyRig, x:Float, y:Float):Void
 	{
 		var e = rig.enemy;
@@ -216,5 +238,6 @@ class EnemySpawner
 		rig.farX = x;
 		rig.farY = y;
 		rig.farTimer = 0;
+		rig.farClock = 0;
 	}
 }

@@ -14,6 +14,8 @@ class EnemyBrain
 {
 	static inline var IDLE_DURATION:Float = 3.0;
 	static inline var WANDER_DURATION:Float = 2.0;
+	static inline var WALK_IN_LEAN:Float = 0.45;
+	static inline var WALK_IN_SLACK:Float = 60;
 
 	public var wanderSpeed:Float = 100;
 
@@ -33,6 +35,12 @@ class EnemyBrain
 
 	public function update(e:Enemies, elapsed:Float):Void
 	{
+		if (e.entering)
+		{
+			walkIn(e);
+			return;
+		}
+
 		if (e.target == null && state != Wandering)
 		{
 			state = Wandering;
@@ -150,6 +158,26 @@ class EnemyBrain
 			e.velocity.set(e.pathing.moveX * e.speed, e.pathing.moveY * e.speed);
 			e.animation.play("walk");
 		}
+	}
+
+	function walkIn(e:Enemies):Void
+	{
+		var lean:Float = 0;
+		if (e.target != null)
+		{
+			var tdx = e.target.x + e.target.width * 0.5 - (e.x + e.width * 0.5);
+			if (tdx > WALK_IN_SLACK)
+				lean = WALK_IN_LEAN;
+			else if (tdx < -WALK_IN_SLACK)
+				lean = -WALK_IN_LEAN;
+		}
+		e.velocity.set(lean * e.speed, -e.speed);
+		if (lean > 0)
+			e.flipX = false;
+		else if (lean < 0)
+			e.flipX = true;
+		e.animation.play("walk");
+		state = Following;
 	}
 
 	function beginWander(e:Enemies):Void

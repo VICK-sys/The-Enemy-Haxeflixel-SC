@@ -16,6 +16,7 @@ class EnemyRig
 	public var farX:Float;
 	public var farY:Float;
 	public var farTimer:Float = 0;
+	public var farClock:Float = 0;
 
 	public function new(enemy:Enemies, shadow:FlxSprite, hitbox:FlxObject)
 	{
