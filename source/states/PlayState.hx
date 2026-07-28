@@ -501,7 +501,7 @@ class PlayState extends FlxState
 					bossAlarm = null;
 				}
 			});
-		Music.play("biggestBandit", 0.5);
+		Music.play("batallon_de_las_velas", 0.5);
 		FlxTween.tween(FlxG.camera, {zoom: 0.8}, 1.2);
 	}
 
