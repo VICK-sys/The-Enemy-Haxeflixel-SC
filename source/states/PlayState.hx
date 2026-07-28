@@ -32,11 +32,6 @@ import util.Lang;
 class PlayState extends FlxState
 {
 	static inline var CURSOR_LEAN:Float = 1.0;
-	static inline var QUIET_PLAYER_SCALE:Float = 1.5;
-	static inline var QUIET_ZOOM:Float = 0.7;
-	static inline var EXIT_ARM_UP:Float = 240;
-	static inline var EXIT_BACK:Float = 40;
-	static inline var LEVEL_WAIT_CAP:Float = 60;
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
 	static inline var DEFLECT_PUSH:Float = 1.2;
@@ -53,91 +48,37 @@ class PlayState extends FlxState
 	private var combat:Weapons;
 	private var hud:Hud;
 	private var reloadBar:ui.ReloadBar;
-	private var shop:systems.Shop;
-	private var levelHold:Bool = false;
-	private var levelDone:Bool = false;
-	private var levelClock:Float = 0;
-	private var levelAcks:Map<Int, Bool>;
-	private var levelNeed:Int = 0;
+	private var round:states.play.ShopRound;
+	private var quiet:states.play.QuietRoom;
+	private var boss:states.play.BossShow;
+	private var intro:states.play.RunIntro;
 	private var perf:PerfLog;
-	private var bossAlarm:FlxSound;
-	private var bossFight:Bool = false;
 	private var timeStop:TimeStop;
 	private var wipe:IrisWipe;
-	private var restarting:Bool = false;
+	public var restarting(default, null):Bool = false;
+
+	function setRestarting():Void
+		restarting = true;
+
+	/** Leave for another state, once, through the iris. */
+	public function leaveFor(go:Void->Void):Void
+	{
+		if (restarting)
+			return;
+		setRestarting();
+		wipe.close(go);
+	}
 	private var netSync:NetSync;
 	private var props:systems.world.PropWorld;
 	private var floor:flixel.tile.FlxTilemap;
-	private var flyIn:ui.WeaponFlyIn;
-	private var flyPick:Int = -1;
-	private var flyX:Float = 0;
-	private var flyY:Float = 0;
-	private var exitFrom:Float = 0;
-	private var exitArmed:Bool = false;
-	private var watchExit:Bool = false;
-	private var treeMan:systems.TreeMan;
 	private var bushes:systems.BushDrift;
 	private var petals:systems.PetalFall;
-
-	function tryDetour(bossWave:Int):Bool
-	{
-		if (!util.Detour.rolls())
-			return false;
-		if (!util.Detour.begin(director.wave, bossWave, status.health, status.superMeter, status.kills, combat.weapon))
-			return false;
-		restarting = true;
-		wipe.close(function() FlxG.switchState(new PlayState()));
-		return true;
-	}
-
-	function updateDetour(elapsed:Float):Void
-	{
-		if (treeMan != null)
-			treeMan.update(elapsed);
-
-		if (!watchExit || restarting)
-			return;
-		if (treeMan != null && treeMan.talking)
-			return;
-
-		var up = exitFrom - _player.feetY;
-		if (up > EXIT_ARM_UP)
-			exitArmed = true;
-		if (!exitArmed || up > EXIT_BACK)
-			return;
-
-		watchExit = false;
-		util.Detour.leave();
-		restarting = true;
-		wipe.close(function() FlxG.switchState(new PlayState()));
-	}
-
-	function addTreeMan():Void
-	{
-		for (p in util.CustomArena.props)
-			if (p.n == "tree")
-			{
-				treeMan = new systems.TreeMan(this, hud.camUI, _player, p.x, p.y);
-				return;
-			}
-	}
-
-	function stageTrack():String
-		return util.CustomArena.quiet ? "stage/Man_music" : "stage/gloomDoomWoods";
-
-	function showDecor(on:Bool):Void
-	{
-		props.setDecorVisible(on);
-		shop.setVisible(on);
-		if (floor != null)
-			floor.visible = on;
-	}
 
 	function beginRestart():Void
 	{
 		if (restarting)
 			return;
-		restarting = true;
+		setRestarting();
 		util.Detour.reset();
 		util.Levels.startRun();
 		wipe.close(function() FlxG.resetState());
@@ -175,8 +116,9 @@ class PlayState extends FlxState
 		props = new systems.world.PropWorld(_player, layers);
 		add(props.solids);
 
-		shop = new systems.Shop(_player, layers);
-		for (s in shop.solid())
+		round = new states.play.ShopRound(this, _player, layers);
+		quiet = new states.play.QuietRoom(this, _player);
+		for (s in round.solids())
 			props.solids.add(s);
 
 		bushes = new systems.BushDrift();
@@ -239,20 +181,18 @@ class PlayState extends FlxState
 		add(combat.deadEye.markers);
 
 		hud = new Hud(this, status);
-		shop.addTo(this);
-		shop.onEnter = enterShop;
-		shop.onClose = onShopClosed;
-		flyIn = new ui.WeaponFlyIn(hud.camUI, combat.held);
-		add(flyIn.sprite);
+		round.wire(status, director, hud);
+		boss = new states.play.BossShow(arena, hud, props, round, scraps, pickups, floor);
+		intro = new states.play.RunIntro(this, combat, hud);
+		add(intro.flyIn.sprite);
 		director.onWave = onWaveStarted;
-		director.onWaveCleared = onRoundCleared;
-		director.onBoss = onBossWave;
+		director.onWaveCleared = round.onWaveCleared;
+		director.onBoss = boss.begin;
 		director.onBossSpawn = hud.showBossBar;
-		director.onBossDefeated = onBossDefeated;
-		director.onBossDrops = dropBossLoot;
+		director.onBossDefeated = boss.defeated;
+		director.onBossDrops = boss.dropLoot;
 		director.onFriendlyShot = onDeflectedShot;
-		director.bossVeto = tryDetour;
-		arena.onNormal = onArenaNormal;
+		director.bossVeto = function(w) return quiet.tryDetour(w, director, status, combat);
 		perf = new PerfLog();
 
 		if (Net.active)
@@ -260,13 +200,10 @@ class PlayState extends FlxState
 			Net.inGame = true;
 			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
-			netSync.onLevelOpen = openShopRound;
-			netSync.onLevelIn = onPeerEnteredShop;
-			netSync.onLevelAck = noteLevelAck;
-			netSync.onLevelGo = releaseLevelUp;
+			round.useNet(netSync);
 			netSync.onWaveEvt = onWaveStarted;
-			netSync.onBossEvt = onBossWave;
-			netSync.onBossDefeatedEvt = onBossDefeated;
+			netSync.onBossEvt = boss.begin;
+			netSync.onBossDefeatedEvt = boss.defeated;
 			netSync.onDropped = onNetDropped;
 		netSync.onRestart = beginRestart;
 		}
@@ -279,69 +216,20 @@ class PlayState extends FlxState
 			util.Detour.restore(status, combat, director);
 
 		if (util.CustomArena.quiet)
-		{
-			combat.disabled = true;
-			director.spawning = false;
-			heldSprite.visible = false;
-			_player.setSizeScale(QUIET_PLAYER_SCALE);
-			FlxG.camera.zoom = QUIET_ZOOM;
-			addTreeMan();
-			if (util.Detour.inRoom)
-			{
-				watchExit = true;
-				exitArmed = false;
-				exitFrom = _player.feetY;
-			}
-		}
+			quiet.enter(combat, director, heldSprite, hud);
 		else if (resumed)
 			hud.showWave(director.wave);
 		else if (Net.active)
-			openTutorialIfNew();
+			intro.openTutorialIfNew();
 		else
-			openWeaponPick();
+			intro.openWeaponPick();
 
-		Music.play(stageTrack(), 0.3);
+		Music.play(states.play.QuietRoom.track(), 0.3);
 
 		wipe = new IrisWipe(this);
 		wipe.open();
 
 		super.create();
-	}
-
-	function openWeaponPick():Void
-	{
-		var picker = new WeaponPickSubState(hud.camUI);
-		picker.onPicked = function(i)
-		{
-			combat.equip(i);
-			flyPick = i;
-			flyX = picker.pickedX;
-			flyY = picker.pickedY;
-		};
-		picker.closeCallback = openTutorialIfNew;
-		openSubState(picker);
-	}
-
-	function openTutorialIfNew():Void
-	{
-		if (TutorialSubState.shown || Net.active)
-		{
-			startFlyIn();
-			return;
-		}
-		TutorialSubState.shown = true;
-		var tutorial = new TutorialSubState(hud.camUI);
-		tutorial.closeCallback = startFlyIn;
-		openSubState(tutorial);
-		DiscordPresence.tutorial();
-	}
-
-	function startFlyIn():Void
-	{
-		if (flyPick < 0)
-			return;
-		flyIn.begin(WeaponPickSubState.artOf(flyPick), flyX, flyY);
-		flyPick = -1;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -369,7 +257,7 @@ class PlayState extends FlxState
 		if (status.consumeJustDied())
 		{
 			layers.playerShadow.visible = false;
-			flyIn.drop();
+			intro.drop();
 			heldSprite.visible = false;
 			if (!Net.active)
 			{
@@ -384,7 +272,7 @@ class PlayState extends FlxState
 		layers.update();
 		props.update();
 		bushes.update(elapsed);
-		shop.update(elapsed);
+		round.updateShop(elapsed);
 		if (petals != null)
 			petals.update(elapsed);
 		heldSprite.alpha = props.buried ? 0 : 1;
@@ -404,10 +292,10 @@ class PlayState extends FlxState
 		hud.setTimeStop(Net.active ? Lang.t("timestop.off") : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
-		flyIn.update(elapsed);
+		intro.update(elapsed);
 
 		if (subState == null && !status.dead)
-			DiscordPresence.playing(director.wave, bossFight, combat.weapon, status.kills);
+			DiscordPresence.playing(director.wave, boss.fighting, combat.weapon, status.kills);
 
 		if (FlxG.keys.justPressed.ESCAPE && !status.dead && subState == null)
 		{
@@ -421,8 +309,8 @@ class PlayState extends FlxState
 			openSubState(pause);
 		}
 
-		updateLevelPause(elapsed);
-		updateDetour(elapsed);
+		round.updateHold(elapsed);
+		quiet.update(elapsed);
 		debugKeys();
 
 		var projectiles = live(director.shots.countLiving()) + live(combat.revolver.bullets.countLiving())
@@ -450,173 +338,12 @@ class PlayState extends FlxState
 		return true;
 	}
 
-	function onRoundCleared():Void
-	{
-		if (director.wave <= 0 || director.wave % systems.Shop.EVERY != 0)
-			return;
-		openShopRound();
-		if (Net.isHost)
-			Net.send({t: "lvl"});
-	}
-
-	function openShopRound():Void
-	{
-		shop.setOpen(true);
-		hud.showBanner(Lang.t("shop.open"));
-		if (!Net.active || Net.isHost)
-			director.holdWave = true;
-		if (Net.active)
-		{
-			levelHold = true;
-			levelDone = false;
-			levelClock = 0;
-			if (Net.isHost)
-			{
-				levelAcks = new Map();
-				levelNeed = Net.guestCount + 1;
-			}
-		}
-	}
-
-	function enterShop():Void
-	{
-		if (!shop.open || status.dead || restarting || subState != null)
-			return;
-		FlxG.inputs.reset();
-		var screen = new LevelUpSubState(hud.camUI);
-		screen.onSpent = syncScrap;
-		screen.closeCallback = finishShopping;
-		openSubState(screen);
-		shop.dismiss();
-		if (Net.active)
-			Net.send({t: "lvlin"});
-	}
-
-	function syncScrap():Void
-		hud.setExp(util.Levels.exp);
-
-	function finishShopping():Void
-	{
-		if (!Net.active)
-		{
-			director.holdWave = false;
-			return;
-		}
-		sendShopDone();
-	}
-
-	function onShopClosed():Void
-	{
-		if (!Net.active)
-		{
-			director.holdWave = false;
-			return;
-		}
-		sendShopDone();
-	}
-
-	function sendShopDone():Void
-	{
-		if (!levelHold || levelDone)
-			return;
-		levelDone = true;
-		Net.send({t: "lvldone"});
-		if (Net.isHost)
-			noteLevelAck(Net.selfId);
-	}
-
-	function onPeerEnteredShop(id:Int):Void
-	{
-		if (netSync != null)
-			netSync.setLeveling(id, true);
-	}
-
-	function noteLevelAck(id:Int):Void
-	{
-		if (netSync != null)
-			netSync.setLeveling(id, false);
-		if (!Net.isHost || !levelHold || levelAcks == null)
-			return;
-		levelAcks.set(id, true);
-		var got = 0;
-		for (v in levelAcks)
-			got++;
-		if (got >= levelNeed)
-			releaseLevelUp();
-	}
-
-	function releaseLevelUp():Void
-	{
-		if (!levelHold)
-			return;
-		if (Net.isHost)
-			Net.send({t: "lvlgo"});
-		levelHold = false;
-		levelAcks = null;
-		shop.setOpen(false);
-		director.holdWave = false;
-		if (netSync != null)
-			netSync.setAllLeveling(false);
-	}
-
-	function updateLevelPause(elapsed:Float):Void
-	{
-		if (!levelHold)
-			return;
-		levelClock += elapsed;
-		if (Net.isHost && (levelClock > LEVEL_WAIT_CAP || Net.dropped))
-			releaseLevelUp();
-	}
-
 	function onWaveStarted(n:Int):Void
 	{
 		SaveData.submitWave(n);
 		if (n > 1)
 			util.Levels.award(util.Levels.waveExp() * (n - 1));
 		hud.showWave(n);
-	}
-
-	function onBossWave():Void
-	{
-		bossFight = true;
-		arena.beginBossTransition();
-		arena.onWhiteout = onBossWhiteout;
-		hud.showBoss();
-		if (FlxG.sound.music != null)
-			FlxG.sound.music.fadeOut(2.4, 0);
-		bossAlarm = FlxG.sound.play(Paths.sound("boss_alarm"), 0.7);
-	}
-
-	function onBossWhiteout():Void
-	{
-		showDecor(false);
-		hud.fadeBanner();
-		if (bossAlarm != null)
-			bossAlarm.fadeOut(0.8, 0, function(_)
-			{
-				if (bossAlarm != null)
-				{
-					bossAlarm.stop();
-					bossAlarm = null;
-				}
-			});
-		Music.play("batallon_de_las_velas", 0.5);
-		FlxTween.tween(FlxG.camera, {zoom: 0.8}, 1.2);
-	}
-
-	function dropBossLoot(cx:Float, cy:Float):Void
-	{
-		for (i in 0...systems.Scraps.BOSS_SCRAP)
-			scraps.drop(cx, cy);
-		pickups.drop(cx, cy);
-	}
-
-	function onBossDefeated():Void
-	{
-		bossFight = false;
-		arena.endBossTransition();
-		if (FlxG.sound.music != null)
-			FlxG.sound.music.fadeOut(0.6, 0);
 	}
 
 	function onNetDropped():Void
@@ -634,13 +361,6 @@ class PlayState extends FlxState
 				});
 			});
 		}
-	}
-
-	function onArenaNormal():Void
-	{
-		showDecor(true);
-		Music.play(stageTrack(), 0.3);
-		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.8);
 	}
 
 	function debugKeys():Void

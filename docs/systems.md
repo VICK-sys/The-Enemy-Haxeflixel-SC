@@ -130,6 +130,21 @@ Each peer reports `lvldone` when its screen closes. The host counts one per gues
 
 While a player is still spending, their avatar carries a gold `LEVELING UP` note above their name. It goes up for everyone when the screen opens and comes down per player as each `lvldone` arrives, so the note always matches who you are actually waiting on.
 
+### PlayState and states/play/
+
+`PlayState` builds the run and orders the frame. It owns the subsystem construction, the update sequence, and the wiring that binds one system's event to another's handler. What it no longer owns is the behaviour behind those handlers.
+
+Four pieces live in `states/play/` and are reached by call rather than by reading `PlayState`'s fields:
+
+| Piece | Holds |
+|---|---|
+| `ShopRound` | which waves open the shop, who has finished spending, and how long the next wave waits |
+| `QuietRoom` | the detour roll, the tree room's stripped down rules, and the walk back out |
+| `BossShow` | alarm, whiteout, boss music, loot and the return to normal |
+| `RunIntro` | weapon pick, the one time tutorial, and the weapon thrown into your hand |
+
+Each takes the collaborators it needs and nothing else, so the wiring in `create` reads as a list of what answers what. `leaveFor` is the one thing they share back: a single guarded exit through the iris, so two pieces cannot both start a state switch.
+
 ### Shop
 
 The repair shop stands at the top of the arena for the whole run, greyed out and solid. Its counter blocks movement, so you walk up to it rather than through it.
