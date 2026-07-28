@@ -76,6 +76,7 @@ class Hud
 	private var hpClip:FlxRect;
 	private var hpShown:Float = -1;
 	private var bulletPips:Array<FlxSprite> = [];
+	private var bulletPlates:Array<FlxSprite> = [];
 	private var bulletsShown:Int = -1;
 	private var arrowPip:FlxSprite;
 	private var arrowShown:Bool = true;
@@ -173,6 +174,8 @@ class Hud
 			gaugeFill.visible = false;
 			arrowPip.visible = false;
 			for (p in bulletPips)
+				p.visible = false;
+			for (p in bulletPlates)
 				p.visible = false;
 			bulletsShown = -1;
 			stopTimerText.visible = false;
@@ -431,19 +434,28 @@ class Hud
 	{
 		while (bulletPips.length < max)
 		{
+			var plate = makeUiSprite(0, 0, "ammo_indicator");
 			var p = makeUiSprite(0, 0, "ammo_bullet");
-			var rowLeft = AMMO_RIGHT - max * p.width - (max - 1) * PIP_GAP;
-			p.setPosition(rowLeft + bulletPips.length * (p.width + PIP_GAP), AMMO_BOTTOM - p.height);
+			var rowLeft = AMMO_RIGHT - max * plate.width - (max - 1) * PIP_GAP;
+			var px = rowLeft + bulletPips.length * (plate.width + PIP_GAP);
+			plate.setPosition(px, AMMO_BOTTOM - plate.height);
+			p.setPosition(px + (plate.width - p.width) * 0.5, AMMO_BOTTOM - p.height);
+			plate.visible = false;
 			p.visible = false;
+			state.add(piece(plate));
 			state.add(piece(p));
+			bulletPlates.push(plate);
 			bulletPips.push(p);
 		}
 
 		if (!shown || !hudOn)
 		{
 			if (bulletsShown != -1)
-				for (p in bulletPips)
-					p.visible = false;
+				for (i in 0...bulletPips.length)
+				{
+					bulletPips[i].visible = false;
+					bulletPlates[i].visible = false;
+				}
 			bulletsShown = -1;
 			return;
 		}
@@ -455,6 +467,7 @@ class Hud
 		{
 			bulletPips[i].loadGraphic(Paths.image("ui/" + (i < cur ? "ammo_bullet" : "ammo_bullet_empty")));
 			bulletPips[i].visible = true;
+			bulletPlates[i].visible = true;
 		}
 	}
 
