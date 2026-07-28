@@ -13,6 +13,7 @@ class HealthPickup extends FlxSprite
 	static inline var SHADOW_DROP:Float = 6;
 
 	public var netId:Int = -1;
+	public var puppet:Bool = false;
 	public var shadow(default, null):FlxSprite;
 	public var mounted:Bool = false;
 
@@ -65,13 +66,16 @@ class HealthPickup extends FlxSprite
 		elapsed *= WorldClock.scale;
 		velocity.y = 0;
 		super.update(elapsed);
-		life -= elapsed;
-		if (life <= 0)
+		if (!puppet)
 		{
-			kill();
-			return;
+			life -= elapsed;
+			if (life <= 0)
+			{
+				kill();
+				return;
+			}
+			alpha = life < 2 ? (Std.int(life * 8) % 2 == 0 ? 1 : 0.3) : 1;
 		}
-		alpha = life < 2 ? (Std.int(life * 8) % 2 == 0 ? 1 : 0.3) : 1;
 		placeShadow();
 	}
 }

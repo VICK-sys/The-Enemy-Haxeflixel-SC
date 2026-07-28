@@ -57,6 +57,7 @@ class ShopRound
 		sync.onLevelIn = onPeerEntered;
 		sync.onLevelAck = noteAck;
 		sync.onLevelGo = release;
+		sync.onPeerLost = onPeerLost;
 	}
 
 	public function updateShop(elapsed:Float):Void
@@ -153,6 +154,20 @@ class ShopRound
 		if (!Net.isHost || !holding || acks == null)
 			return;
 		acks.set(id, true);
+		checkAcks();
+	}
+
+	function onPeerLost(id:Int):Void
+	{
+		if (!Net.isHost || !holding || acks == null)
+			return;
+		acks.remove(id);
+		need = Net.guestCount + 1;
+		checkAcks();
+	}
+
+	function checkAcks():Void
+	{
 		var got = 0;
 		for (v in acks)
 			got++;

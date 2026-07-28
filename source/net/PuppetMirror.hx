@@ -89,6 +89,8 @@ class PuppetMirror
 			var e = puppets.get(id);
 			if (e == null)
 			{
+				if (!data.EnemyData.EnemyDataRegistry.has(row[1]))
+					continue;
 				e = new Enemies(row[1], row[2], row[3]);
 				e.netId = id;
 				cast(director, PuppetDirector).addPuppet(e);
@@ -158,6 +160,7 @@ class PuppetMirror
 				pickups.mount(p);
 				p.drop(row[1] + p.width / 2, row[2] + p.height / 2);
 				p.netId = id;
+				p.puppet = true;
 				puppetPickups.set(id, p);
 			}
 			p.setPosition(row[1], row[2]);
@@ -167,7 +170,7 @@ class PuppetMirror
 			if (!pkSeen.exists(id))
 			{
 				var p = puppetPickups.get(id);
-				if (p != null && p.exists)
+				if (p != null && p.exists && p.netId == id)
 					p.kill();
 				puppetPickups.remove(id);
 			}

@@ -38,6 +38,7 @@ class Pickups
 		mount(p);
 		p.drop(cx, cy);
 		p.netId = nextId++;
+		p.puppet = false;
 		return p;
 	}
 

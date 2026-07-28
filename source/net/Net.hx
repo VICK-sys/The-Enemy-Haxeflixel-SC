@@ -20,6 +20,7 @@ class Net
 	public static inline var PORT_TRIES:Int = 10;
 	public static inline var MAX_GUESTS:Int = 7;
 	public static inline var HOST_ID:Int = 0;
+	static inline var MAX_BUFFER:Int = 262144;
 
 	static var PRIVATE_TO_HOST:Array<String> = ["hit", "took"];
 
@@ -169,7 +170,7 @@ class Net
 		if (mode == HostMode)
 		{
 			msg.f = HOST_ID;
-			write(Json.stringify(msg) + "\n", -1);
+			write(Json.stringify(msg) + "\n", null);
 		}
 		else
 		{
@@ -258,6 +259,8 @@ class Net
 				if (n <= 0)
 					break;
 				buffers[i] += bytes.getString(0, n);
+				if (buffers[i].length > MAX_BUFFER)
+					return false;
 				if (n < bytes.length)
 					break;
 			}
@@ -275,12 +278,19 @@ class Net
 
 	static function harvest(i:Int, out:Array<Dynamic>):Void
 	{
+		var from = ids[i];
+		var sock = peers[i];
+		var lines:Array<String> = [];
 		var idx = buffers[i].indexOf("\n");
 		while (idx >= 0)
 		{
-			var line = buffers[i].substr(0, idx);
+			lines.push(buffers[i].substr(0, idx));
 			buffers[i] = buffers[i].substr(idx + 1);
 			idx = buffers[i].indexOf("\n");
+		}
+
+		for (line in lines)
+		{
 			if (line.length == 0)
 				continue;
 
@@ -291,9 +301,9 @@ class Net
 
 			if (mode == HostMode)
 			{
-				msg.f = ids[i];
+				msg.f = from;
 				if (PRIVATE_TO_HOST.indexOf(msg.t) < 0)
-					write(Json.stringify(msg) + "\n", i);
+					write(Json.stringify(msg) + "\n", sock);
 			}
 			else if (msg.t == "hello")
 				selfId = msg.id;
@@ -302,12 +312,12 @@ class Net
 		}
 	}
 
-	static function write(line:String, exceptIdx:Int):Void
+	static function write(line:String, except:Socket):Void
 	{
 		var i = peers.length;
 		while (i-- > 0)
 		{
-			if (i == exceptIdx)
+			if (peers[i] == except)
 				continue;
 			try
 			{

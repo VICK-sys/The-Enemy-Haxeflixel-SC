@@ -88,4 +88,11 @@ class EnemyDataRegistry
 		}
 		return data;
 	}
+
+	public static function has(kind:String):Bool
+	{
+		if (kind == null)
+			return false;
+		return cache.exists(kind) || openfl.utils.Assets.exists(Paths.json("enemies/" + kind));
+	}
 }

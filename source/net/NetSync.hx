@@ -19,6 +19,10 @@ class NetSync
 {
 	static inline var SNAP_FRAMES:Int = 4;
 	static inline var RESPAWN_TIME:Float = 5;
+	static inline var STUN_CAP:Float = 3;
+	static inline var SHOT_DAMAGE_CAP:Float = 4;
+	static inline var SHOT_SPEED_CAP:Float = 4000;
+	static inline var SHOT_RANGE_CAP:Float = 4000;
 
 	public var onWaveEvt:Int->Void;
 	public var onBossEvt:Void->Void;
@@ -48,8 +52,12 @@ class NetSync
 	public var onLevelAck:Int->Void;
 	public var onLevelGo:Void->Void;
 
+	public var onPeerLost:Int->Void;
+
 	private var respawnTimer:Float = -1;
 	private var droppedHandled:Bool = false;
+	private var bossDown:Bool = false;
+	private var hitCap:Int = 0;
 
 	public function new(player:Player, status:PlayerCombat, arena:Arena, layers:RenderLayers, director:EnemyDirector,
 			combat:Weapons, pickups:Pickups, scraps:Scraps, hud:Hud, heldSprite:FlxSprite)
@@ -275,6 +283,8 @@ class NetSync
 
 			case "bye":
 				roster.drop(msg.id);
+				if (onPeerLost != null)
+					onPeerLost(msg.id);
 
 			case "rst":
 				if (onRestart != null)
@@ -289,9 +299,10 @@ class NetSync
 				var e = findEnemy(msg.id);
 				if (e != null && !e.isDead)
 				{
-					combat.hits.applyHit(e, msg.px, msg.py, msg.d, false);
-					if (msg.s > 0)
-						e.stun = msg.s;
+					combat.hits.applyHit(e, msg.px, msg.py, clampHit(msg.d), false);
+					var stun:Float = msg.s;
+					if (stun > 0)
+						e.stun = stun < STUN_CAP ? stun : STUN_CAP;
 				}
 
 			case "took" if (Net.isHost):
@@ -303,29 +314,72 @@ class NetSync
 				mirror.apply(msg);
 
 			case "shot" if (Net.isClient):
-				director.shots.recycle(EnemyShot).fire(msg.x, msg.y, msg.dx, msg.dy, msg.dm, msg.sp, msg.rg, msg.im);
+				spawnShot(msg);
 
 			case "wave" if (Net.isClient):
 				if (onWaveEvt != null)
 					onWaveEvt(msg.n);
 
 			case "boss" if (Net.isClient):
+				bossDown = false;
 				if (onBossEvt != null)
 					onBossEvt();
 
 			case "bossSpawn" if (Net.isClient):
+				bossDown = false;
 				mirror.expectBoss(msg.id);
 
 			case "bossDead" if (Net.isClient):
-				mirror.blastLastBoss();
-				new FlxTimer().start(0.9, function(_)
+				if (!bossDown)
 				{
-					if (onBossDefeatedEvt != null)
-						onBossDefeatedEvt();
-				});
+					bossDown = true;
+					mirror.blastLastBoss();
+					new FlxTimer().start(0.9, function(_)
+					{
+						if (onBossDefeatedEvt != null)
+							onBossDefeatedEvt();
+					});
+				}
 
 			default:
 		}
+	}
+
+	function clampHit(d:Int):Int
+	{
+		if (hitCap == 0)
+		{
+			var w = data.WeaponData.WeaponDataRegistry.get();
+			var top = w.swing.damage;
+			for (v in [w.jab.damage, w.revolver.damage, w.bowCharge.maxDamage, w.deadEye.damage, w.hook.snagDamage, w.hookArms.damage])
+				if (v > top)
+					top = v;
+			hitCap = top + util.Levels.damageAt(9999);
+		}
+		return d < 0 ? 0 : (d > hitCap ? hitCap : d);
+	}
+
+	function spawnShot(msg:Dynamic):Void
+	{
+		var image:String = msg.im;
+		if (image != null && !openfl.utils.Assets.exists(util.Paths.image(image)))
+			return;
+		var dm:Float = msg.dm;
+		var sp:Float = msg.sp;
+		var rg:Float = msg.rg;
+		if (dm < 0)
+			dm = 0;
+		if (dm > SHOT_DAMAGE_CAP)
+			dm = SHOT_DAMAGE_CAP;
+		if (sp < 1)
+			sp = 1;
+		if (sp > SHOT_SPEED_CAP)
+			sp = SHOT_SPEED_CAP;
+		if (rg < 0)
+			rg = 0;
+		if (rg > SHOT_RANGE_CAP)
+			rg = SHOT_RANGE_CAP;
+		director.shots.recycle(EnemyShot).fire(msg.x, msg.y, msg.dx, msg.dy, dm, sp, rg, image);
 	}
 
 	function findEnemy(id:Int):Enemies
