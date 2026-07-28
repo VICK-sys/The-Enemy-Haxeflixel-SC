@@ -15,6 +15,9 @@ class TreeMan
 
 	public static var told:Int = 0;
 
+	public static function reset():Void
+		told = 0;
+
 	public var talking(get, never):Bool;
 
 	function get_talking():Bool

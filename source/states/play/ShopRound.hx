@@ -113,7 +113,11 @@ class ShopRound
 	}
 
 	function syncScrap():Void
+	{
+		status.refreshMax();
+		hud.setHealthRange(status.healthMax);
 		hud.setExp(Levels.exp);
+	}
 
 	function onScreenClosed():Void
 		reportDone();

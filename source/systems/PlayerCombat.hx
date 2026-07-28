@@ -139,6 +139,16 @@ class PlayerCombat
 		return true;
 	}
 
+	public function refreshMax():Void
+	{
+		var was = healthMax;
+		healthMax = data.healthMax + util.Levels.healthBonus();
+		if (healthMax > was)
+			health += healthMax - was;
+		if (health > healthMax)
+			health = healthMax;
+	}
+
 	public function heal(amount:Float):Void
 	{
 		if (dead)

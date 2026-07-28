@@ -85,13 +85,17 @@ class PlayState extends FlxState
 		if (restarting)
 			return;
 		setRestarting();
-		util.Detour.reset();
-		util.Levels.startRun();
+		util.Detour.abandon();
 		wipe.close(function() FlxG.resetState());
 	}
 
 	override public function create()
 	{
+		if (!util.Detour.resuming() && !util.Detour.inRoom)
+		{
+			util.Levels.startRun();
+			systems.TreeMan.reset();
+		}
 		WorldClock.reset();
 		persistentUpdate = Net.active;
 		fx = new Fx();
@@ -252,7 +256,8 @@ class PlayState extends FlxState
 		super.update(elapsed);
 
 		fx.update();
-		arena.update(elapsed * timeStop.factor);
+		var step = elapsed * WorldClock.scale;
+		arena.update(step);
 
 		FlxG.collide(_player, arena.map);
 		props.collidePlayer();
@@ -272,15 +277,15 @@ class PlayState extends FlxState
 			}
 		}
 
-		director.update(elapsed * timeStop.factor);
+		director.update(step);
 		pickups.update();
 		scraps.update(elapsed);
 		layers.update();
 		props.update();
-		bushes.update(elapsed);
+		bushes.update(step);
 		round.updateShop(elapsed);
 		if (petals != null)
-			petals.update(elapsed);
+			petals.update(step);
 		heldSprite.alpha = props.buried ? 0 : 1;
 		combat.swing.slashes.visible = !props.buried;
 		combat.jab.slashes.visible = !props.buried;

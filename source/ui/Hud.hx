@@ -73,6 +73,7 @@ class Hud
 	private var superFill:FlxSprite;
 	private var superClip:FlxRect;
 	private var superShown:Float = -1;
+	private var healthBar:FlxBar;
 
 	public function new(state:FlxState, status:PlayerCombat)
 	{
@@ -92,7 +93,8 @@ class Hud
 		state.add(barBackground);
 		state.add(makeSprite(barBackground.x, barBackground.y, "bar_super_empty"));
 		state.add(superFill);
-		state.add(makeBar(barBackground, "bar_main_empty", "bar_main_red", 'health', status.healthMax));
+		healthBar = makeBar(barBackground, "bar_main_empty", "bar_main_red", 'health', status.healthMax);
+		state.add(healthBar);
 		state.add(playerIcon);
 
 		gaugeBack = makeSprite(barBackground.x, 0, "bar_gauge_back");
@@ -147,6 +149,9 @@ class Hud
 
 		FlxG.mouse.visible = false;
 	}
+
+	public function setHealthRange(max:Float):Void
+		healthBar.setRange(0, max);
 
 	public function setTimeStop(label:String):Void
 	{

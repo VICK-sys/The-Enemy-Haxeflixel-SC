@@ -80,7 +80,18 @@ class Detour
 	{
 		inRoom = false;
 		pending = true;
+		restoreArena();
+	}
 
+	public static function abandon():Void
+	{
+		if (inRoom)
+			restoreArena();
+		reset();
+	}
+
+	static function restoreArena():Void
+	{
 		CustomArena.csv = csv;
 		CustomArena.spawnX = spawnX;
 		CustomArena.spawnY = spawnY;
