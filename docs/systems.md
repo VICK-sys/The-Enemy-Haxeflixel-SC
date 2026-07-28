@@ -108,7 +108,9 @@ Scrap pulls toward the player inside `MAGNET`, faster the closer it gets, so a k
 
 A dropped piece wears one of five sprites, picked at random, and carries a small ground shadow that stays at the piece's rest height while the piece bobs above it. The sprite is cosmetic only. Every piece pays `scrapValue`, so the counter cannot tell them apart.
 
-Scrap is collected one piece at a time, about a tenth of a second apart, and the nearest piece goes first. The magnet still drags the whole pile in at once, so without the gap a heap landed on the same frame: one muddy sound made of several copies of itself, and a counter that jumped in a single step. The gap costs half a second on a pile of six and gives every piece its own tick.
+Scrap is collected one piece at a time, a fifth of a second apart, and the nearest piece goes first. Without the gap a heap landed on the same frame: one muddy sound made of several copies of itself, and a counter that jumped in a single step. The gap has to be long enough to see. A tenth of a second was still read as picking up three or five at once.
+
+The magnet stops pulling at `HOLD`, a little short of the player, rather than dragging every piece onto the same point. A queue waiting its turn therefore sits spread around the player instead of stacking into what looks like a single piece. `HOLD` is set inside the overlap the collection test needs, so a waiting piece still counts as touching even at the bottom of its bob.
 
 The kill counter and the super gain still fire on the kill itself. Only the exp moved.
 

@@ -12,7 +12,8 @@ class Scraps
 	static inline var MAGNET:Float = 170;
 	static inline var PULL_MIN:Float = 90;
 	static inline var PULL_MAX:Float = 620;
-	static inline var PICK_GAP:Float = 0.09;
+	static inline var PICK_GAP:Float = 0.22;
+	static inline var HOLD:Float = 46;
 
 	public var group:FlxTypedGroup<ScrapPickup>;
 
@@ -71,7 +72,7 @@ class Scraps
 			var dy = py - (s.y + s.height / 2);
 			var len = Math.sqrt(dx * dx + dy * dy);
 
-			if (len < MAGNET)
+			if (len < MAGNET && len > HOLD)
 			{
 				var near = 1 - len / MAGNET;
 				s.pullTo(px, py, PULL_MIN + (PULL_MAX - PULL_MIN) * near * near, step);
