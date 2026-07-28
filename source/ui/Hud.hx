@@ -36,7 +36,7 @@ class Hud
 	static inline var UI_SCALE:Float = 4;
 	static inline var FRAME_X:Float = 16;
 	static inline var FRAME_Y:Float = 600;
-	static inline var HP_X:Float = 22;
+	static inline var HP_X:Float = 28;
 	static inline var HP_Y:Float = 8;
 	static inline var SUPER_X:Float = 27;
 	static inline var SUPER_Y:Float = 17;
