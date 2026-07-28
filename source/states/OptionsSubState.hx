@@ -35,7 +35,7 @@ class OptionsSubState extends FlxSubState
 	override public function create():Void
 	{
 		var shade = new FlxSprite();
-		shade.makeGraphic(FlxG.width, FlxG.height, 0xC8000000);
+		shade.makeGraphic(FlxG.width, FlxG.height, 0xF6000000);
 		add(shade);
 
 		title = new FlxText(0, 40, FlxG.width, Lang.t("options.title"));
@@ -46,6 +46,8 @@ class OptionsSubState extends FlxSubState
 		list = new MenuList([for (i in 0...ROWS) ""], 122, 42, 22);
 		list.onChoose = choose;
 		list.onAdjust = adjust;
+		list.marker.scale.set(1.6, 1.6);
+		list.marker.updateHitbox();
 		add(list);
 
 		if (cam != null)
