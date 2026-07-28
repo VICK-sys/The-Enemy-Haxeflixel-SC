@@ -16,14 +16,16 @@ class SwingAttack
 	private var cfg:SwingConfig;
 	private var director:EnemyDirector;
 	private var hits:HitPipeline;
+	private var fx:systems.Fx;
 	private var guardTimer:Float = 0;
 	private var guardX:Float = 1;
 	private var guardY:Float = 0;
 
-	public function new(director:EnemyDirector, hits:HitPipeline, cfg:SwingConfig)
+	public function new(director:EnemyDirector, hits:HitPipeline, fx:systems.Fx, cfg:SwingConfig)
 	{
 		this.director = director;
 		this.hits = hits;
+		this.fx = fx;
 		this.cfg = cfg;
 		slashes = new FlxTypedGroup<SlashEffect>();
 	}
@@ -49,6 +51,7 @@ class SwingAttack
 
 	function strike(pmx:Float, pmy:Float, aimX:Float, aimY:Float):Void
 	{
+		var connected = false;
 		director.eachInCircle(pmx, pmy, cfg.meleeRange, function(e)
 		{
 			var ex = e.x + e.width / 2 - pmx;
@@ -56,6 +59,13 @@ class SwingAttack
 			var elen = Math.sqrt(ex * ex + ey * ey);
 			if (elen > 0 && (ex * aimX + ey * aimY) / elen < cfg.meleeArcCos)
 				return;
+
+			// before the damage, so a killing blow's heavier stop wins
+			if (!connected)
+			{
+				connected = true;
+				fx.meleeImpact(cfg.hitstop, cfg.hitstopScale, cfg.hitShake);
+			}
 
 			var push = elen > 0 ? elen : 1;
 			hits.damageN(e, ex / push, ey / push, cfg.damage);

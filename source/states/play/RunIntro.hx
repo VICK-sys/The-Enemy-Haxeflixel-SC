@@ -37,7 +37,7 @@ class RunIntro
 			fromY = picker.pickedY;
 		};
 		picker.closeCallback = openTutorialIfNew;
-		host.openSubState(picker);
+		host.openPanel(picker);
 	}
 
 	public function openTutorialIfNew():Void
@@ -50,7 +50,7 @@ class RunIntro
 		TutorialSubState.shown = true;
 		var tutorial = new TutorialSubState(hud.camUI);
 		tutorial.closeCallback = throwIn;
-		host.openSubState(tutorial);
+		host.openPanel(tutorial);
 		DiscordPresence.tutorial();
 	}
 

@@ -79,6 +79,7 @@ Combat balance for every weapon system, one object per system. Field names match
 |---|---|
 | `swing` | melee range and arc, slash spawn distance |
 | `jab` | hook jab spawn distance, reach, arc, damage, slash size |
+| `hitstop`, `hitstopScale`, `hitShake` | how hard a connecting melee blow bites: frames held, the speed held at, and the shake. Set per weapon, so the hammer can land heavier than the jab |
 | `revolver` | cylinder size and damage. Reload time, which is flat and does not follow the number of rounds missing. Fan interval and jitter. Bullet speed, range, hit radius and knockback |
 | `shockwave` | wave radius, expansion time, and how long it stuns |
 | `thrown` | throw distance, return speed |

@@ -46,8 +46,8 @@ class Weapons
 		hits.owner = player;
 		held = new HeldWeapon(player, heldSprite);
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
-		swing = new SwingAttack(director, hits, weaponCfg.swing);
-		jab = new SwingAttack(director, hits, weaponCfg.jab);
+		swing = new SwingAttack(director, hits, fx, weaponCfg.swing);
+		jab = new SwingAttack(director, hits, fx, weaponCfg.jab);
 		shock = new Shockwave(director, hits);
 		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);

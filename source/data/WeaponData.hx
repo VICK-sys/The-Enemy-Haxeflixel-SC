@@ -7,7 +7,10 @@ typedef SwingConfig = {
 	meleeRange:Float,
 	meleeArcCos:Float,
 	damage:Int,
-	effectScale:Float
+	effectScale:Float,
+	hitstop:Int,
+	hitstopScale:Float,
+	hitShake:Float
 }
 
 typedef RevolverConfig = {

@@ -76,6 +76,24 @@ class Fx
 		FlxG.camera.shake(0.004, 0.1);
 	}
 
+	/** A connecting blow. Lighter than a kill, and weighted per weapon. */
+	public function meleeImpact(frames:Int, scale:Float, shake:Float):Void
+	{
+		if (frames <= 0)
+			return;
+		hitstopFrames = frames;
+		FlxG.timeScale = scale;
+		if (shake > 0)
+			FlxG.camera.shake(shake, 0.08);
+	}
+
+	/** Nothing restores timeScale while a panel is up, so panels clear it on the way in. */
+	public function clearHitstop():Void
+	{
+		hitstopFrames = 0;
+		FlxG.timeScale = 1;
+	}
+
 	public function hurtShake():Void
 	{
 		FlxG.camera.shake(0.012, 0.2);

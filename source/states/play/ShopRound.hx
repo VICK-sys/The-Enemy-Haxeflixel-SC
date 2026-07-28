@@ -109,11 +109,10 @@ class ShopRound
 	{
 		if (!shop.open || status.dead || host.restarting || host.subState != null)
 			return;
-		FlxG.inputs.reset();
 		var screen = new LevelUpSubState(hud.camUI);
 		screen.onSpent = syncScrap;
 		screen.closeCallback = onScreenClosed;
-		host.openSubState(screen);
+		host.openPanel(screen);
 		shop.dismiss();
 		if (Net.active)
 			Net.send({t: "lvlin"});

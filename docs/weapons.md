@@ -78,6 +78,14 @@ The travel is measured off the art rather than written down. `traceTrack` reads 
 
 It sits after `props.overlay` in the display list, above the wall redraw that buries the player behind a prop. A timer you cannot see is worth nothing, so it stays readable even from behind the scenery.
 
+### Melee hitstop
+
+A connecting swing freezes the world for a moment, weighted per weapon out of `weapons.json`. The hammer holds five frames at six percent speed with a real shake; the hook's jab holds two at thirty percent and barely shakes. The hammer lands like a hammer and the jab stays quick.
+
+The hitch fires once per swing, on the first enemy the arc catches, and before the damage is dealt. A killing blow's heavier stop therefore lands after it and wins, instead of a lighter hitch overwriting it.
+
+`Fx.update` is the only thing that restores `timeScale`, and it does not run while a panel is up. Every panel now opens through `PlayState.openPanel`, which clears the hitstop first, so a swing landed on the frame a wave clears cannot leave the shop screen running at six percent speed.
+
 ## BowAttack
 
 The bow shot and the arrow rain trigger. It owns ArrowRain.
