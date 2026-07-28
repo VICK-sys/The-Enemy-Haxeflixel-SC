@@ -98,7 +98,7 @@
 	"level.level": "レベル",
 	"level.exp": "スクラップ",
 	"level.next": "必要スクラップ",
-	"level.keys": "W/S かマウス - 選択     ENTER かクリック - 上げる     ESC - もどる",
+	"level.keys": "W/S - 選択    A/D - 上げる 下げる    ENTER - 決定",
 	"derived.health": "体力",
 	"derived.dash": "ダッシュ待ち",
 	"derived.supergain": "スーパー/撃破",

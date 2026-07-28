@@ -111,7 +111,7 @@
 	"level.level": "LEVEL",
 	"level.exp": "SCRAP",
 	"level.next": "REQ SCRAP",
-	"level.keys": "W/S OR MOUSE - SELECT     ENTER OR CLICK - BOOST     ESC - EXIT",
+	"level.keys": "W/S - PICK    A/D - SPEND OR REFUND    ENTER - DONE",
 	"derived.health": "HEALTH",
 	"derived.dash": "DASH COOLDOWN",
 	"derived.supergain": "SUPER PER KILL",

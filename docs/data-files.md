@@ -187,7 +187,7 @@ Each map holds its placements as `{n, x, y, f}`. That is the prop name, the poin
 
 The feet anchor is deliberate. That same point is the depth-sort key. A prop further down the screen therefore draws in front. Props go into the entity layer, which sorts by feet. You walk behind a house, and in front of one below you. The boss fight strips the arena to a bare void, so it hides them, then restores them afterwards.
 
-A prop is solid only if it has a hitbox. The file `library/library.json` holds those boxes and the layer overrides, keyed by prop name. A built-in prop can therefore gain one without a write to a baked asset. See [the editor doc](editor.md#collision-and-cover) for how a box works as collision and as cover. A prop with no hitbox is purely visual, and nothing collides against it.
+A prop is solid only if it has a hitbox. Shipped props carry their box in props.json. The file `library/library.json` overrides those boxes for a machine, and holds them for imported art and the layer overrides, keyed by prop name. A built-in prop can therefore gain one without a write to a baked asset. See [the editor doc](editor.md#collision-and-cover) for how a box works as collision and as cover. A prop with no hitbox is purely visual, and nothing collides against it.
 
 Painted walls under or around a prop still work, and they put the collision in the tilemap instead.
 
@@ -216,6 +216,7 @@ The screen shows what a point buys before you spend it. The left panel holds the
 | Field | Meaning |
 |---|---|
 | `scrapValue`, `expPerWave` | exp for one scrap picked up, and per wave cleared. The wave award scales with the wave number |
+| `hitbox` | `[x, y, w, h]` in art pixels, the band a prop blocks. A prop without one is walked straight through, which is what trees want and what buildings do not |
 | `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)`. With growth at 1.0 that is a flat start plus `costFlat` per level: 20, 25, 30, and so on |
 | `vigorPerPoint` | health added per point |
 | `enduranceDashPerPoint`, `enduranceSuperPerPoint` | fraction off the dash cooldown, and fraction on to super meter gained per kill |

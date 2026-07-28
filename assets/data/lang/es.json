@@ -98,7 +98,7 @@
 	"level.level": "NIVEL",
 	"level.exp": "CHATARRA",
 	"level.next": "CHATARRA NEC.",
-	"level.keys": "W/S O RATÓN - ELEGIR     ENTER O CLIC - MEJORAR     ESC - SALIR",
+	"level.keys": "W/S - ELEGIR    A/D - GASTAR O DEVOLVER    ENTER - LISTO",
 	"derived.health": "SALUD",
 	"derived.dash": "ESPERA DEL IMPULSO",
 	"derived.supergain": "SÚPER POR MUERTE",

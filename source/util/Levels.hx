@@ -40,11 +40,28 @@ class Levels
 		return n;
 	}
 
-	public static function costNext():Int
+	public static function costAt(lv:Int):Int
 	{
 		var c = conf();
-		var lv = level();
+		if (lv < 1)
+			lv = 1;
 		return Std.int(c.baseCost * Math.pow(c.costGrowth, lv - 1)) + c.costFlat * (lv - 1);
+	}
+
+	public static function costNext():Int
+		return costAt(level());
+
+	public static function canRefund(stat:Int):Bool
+		return stat >= 0 && stat < COUNT && spent[stat] > 0;
+
+	/** Undo a point, returning exactly what the level it bought had cost. */
+	public static function refund(stat:Int):Bool
+	{
+		if (!canRefund(stat))
+			return false;
+		exp += costAt(level() - 1);
+		spent[stat]--;
+		return true;
 	}
 
 	public static function canSpend():Bool

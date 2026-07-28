@@ -5,25 +5,28 @@
 			"sheet": "props/repairShop",
 			"rect": [],
 			"scale": 4,
-			"hitbox": [9, 53, 98, 22]
+			"hitbox": [9, 30, 98, 45]
 		},
 		{
 			"name": "shop",
 			"sheet": "props/shop",
 			"rect": [],
-			"scale": 2
+			"scale": 2,
+			"hitbox": [53, 84, 289, 65]
 		},
 		{
 			"name": "building",
 			"sheet": "props/building",
 			"rect": [],
-			"scale": 2
+			"scale": 2,
+			"hitbox": [3, 88, 288, 64]
 		},
 		{
 			"name": "rofelfanHouse",
 			"sheet": "props/rofelfanHouse",
 			"rect": [],
-			"scale": 2
+			"scale": 2,
+			"hitbox": [14, 104, 124, 28]
 		},
 		{
 			"name": "tree",

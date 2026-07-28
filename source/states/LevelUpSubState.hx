@@ -41,6 +41,8 @@ class LevelUpSubState extends FlxSubState
 	private var outNow:Array<FlxText> = [];
 	private var outNext:Array<FlxText> = [];
 	private var arrows:Array<FlxText> = [];
+	private var less:FlxText;
+	private var more:FlxText;
 
 	public function new(camUI:FlxCamera)
 	{
@@ -74,12 +76,17 @@ class LevelUpSubState extends FlxSubState
 		{
 			var y = TOP + 140 + i * ROW;
 			var n = text(LEFT_X + 28, y, 260, Lang.t("stat." + STATS[i]), 24, FlxColor.WHITE, LEFT);
-			var v = text(LEFT_X + LEFT_W - 130, y, 100, "", 24, FlxColor.WHITE, RIGHT);
+			var v = text(LEFT_X + LEFT_W - 160, y, 100, "", 24, FlxColor.WHITE, RIGHT);
 			ui(n);
 			ui(v);
 			rows.push(n);
 			vals.push(v);
 		}
+
+		less = text(LEFT_X + LEFT_W - 198, 0, 30, "<", 24, GOLD, CENTER);
+		more = text(LEFT_X + LEFT_W - 54, 0, 30, ">", 24, GOLD, CENTER);
+		ui(less);
+		ui(more);
 
 		accept = text(LEFT_X, TOP + PANEL_H - 58, LEFT_W, Lang.t("level.done"), 26, FlxColor.WHITE, CENTER);
 		ui(accept);
@@ -165,6 +172,11 @@ class LevelUpSubState extends FlxSubState
 
 		marker.y = TOP + 137 + pick * ROW;
 		marker.visible = pick < STATS.length;
+
+		var onStat = pick < STATS.length;
+		less.y = more.y = TOP + 140 + pick * ROW;
+		less.visible = onStat && Levels.canRefund(pick);
+		more.visible = onStat && Levels.canSpend();
 		accept.color = pick == STATS.length ? GOLD : FlxColor.WHITE;
 
 		for (i in 0...STATS.length)
@@ -240,7 +252,12 @@ class LevelUpSubState extends FlxSubState
 		if (FlxG.mouse.justPressed && over >= 0)
 		{
 			pick = over;
-			choose();
+			if (pick >= STATS.length)
+			{
+				close();
+				return;
+			}
+			refresh();
 		}
 
 		if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP)
@@ -253,6 +270,10 @@ class LevelUpSubState extends FlxSubState
 			pick = (pick + 1) % (STATS.length + 1);
 			refresh();
 		}
+		if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT)
+			buy();
+		if (FlxG.keys.justPressed.A || FlxG.keys.justPressed.LEFT)
+			sell();
 		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.Z)
 			choose();
 		if (FlxG.keys.justPressed.ESCAPE)
@@ -267,9 +288,29 @@ class LevelUpSubState extends FlxSubState
 			close();
 			return;
 		}
+		buy();
+	}
+
+	function buy():Void
+	{
+		if (pick >= STATS.length)
+			return;
 		if (Levels.spend(pick))
 		{
 			FlxG.sound.play(util.Paths.sound("heal"), 0.6);
+			if (onSpent != null)
+				onSpent();
+		}
+		refresh();
+	}
+
+	function sell():Void
+	{
+		if (pick >= STATS.length)
+			return;
+		if (Levels.refund(pick))
+		{
+			FlxG.sound.play(util.Paths.sound("bulletLoad"), 0.5);
 			if (onSpent != null)
 				onSpent();
 		}
