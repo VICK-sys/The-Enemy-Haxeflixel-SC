@@ -1,5 +1,7 @@
 package util;
 
+import flixel.FlxG;
+import flixel.system.scaleModes.BaseScaleMode;
 import openfl.Lib;
 import openfl.display.BitmapData;
 import openfl.display.DisplayObjectContainer;
@@ -11,6 +13,7 @@ import openfl.utils.Assets;
 class AspectBars
 {
 	public static var bars(default, null):Int = 0;
+	public static var mode(default, null):BoxedScaleMode;
 
 	static inline var FILL:Int = 0x0A0A0C;
 	static inline var EDGE:Int = 0x2A2A30;
@@ -21,6 +24,7 @@ class AspectBars
 
 	public static function init(parent:DisplayObjectContainer):Void
 	{
+		mode = new BoxedScaleMode();
 		holder = new Sprite();
 		holder.mouseEnabled = false;
 		holder.mouseChildren = false;
@@ -28,7 +32,6 @@ class AspectBars
 		if (Assets.exists(ART))
 			art = Assets.getBitmapData(ART);
 		Lib.current.stage.addEventListener(Event.RESIZE, function(_) apply());
-		apply();
 	}
 
 	public static function ratioOf(name:String):Float
@@ -45,47 +48,41 @@ class AspectBars
 
 	public static function apply():Void
 	{
-		if (holder == null)
+		if (holder == null || FlxG.game == null || FlxG.stage == null)
 			return;
+
+		mode.ratio = ratioOf(SaveData.aspect());
+		FlxG.scaleMode = mode;
+
 		holder.graphics.clear();
 		bars = 0;
 
-		var r = ratioOf(SaveData.aspect());
-		if (r <= 0)
-			return;
-
-		var gm = flixel.FlxG.scaleMode;
-		var gx = gm.offset.x;
-		var gy = gm.offset.y;
-		var gw = gm.gameSize.x;
-		var gh = gm.gameSize.y;
+		var stage = Lib.current.stage;
+		var sw:Float = stage.stageWidth;
+		var sh:Float = stage.stageHeight;
+		var gx = mode.offset.x;
+		var gy = mode.offset.y;
+		var gw = mode.gameSize.x;
+		var gh = mode.gameSize.y;
 		if (gw <= 0 || gh <= 0)
 			return;
 
-		var cw = gw;
-		var ch = gh;
-		if (gw / gh > r)
-			cw = gh * r;
-		else
-			ch = gw / r;
-
-		var barW = (gw - cw) / 2;
-		var barH = (gh - ch) / 2;
-
-		if (barW >= 1)
+		if (gx >= 1)
 		{
-			paint(gx, gy, barW, gh, false);
-			paint(gx + gw - barW, gy, barW, gh, true);
+			paint(0, 0, gx, sh, false);
+			paint(gx + gw, 0, sw - gx - gw, sh, true);
 		}
-		if (barH >= 1)
+		if (gy >= 1)
 		{
-			paint(gx, gy, gw, barH, false);
-			paint(gx, gy + gh - barH, gw, barH, true);
+			paint(gx, 0, gw, gy, false);
+			paint(gx, gy + gh, gw, sh - gy - gh, true);
 		}
 	}
 
 	static function paint(x:Float, y:Float, w:Float, h:Float, far:Bool):Void
 	{
+		if (w < 1 || h < 1)
+			return;
 		var g = holder.graphics;
 		if (art != null)
 		{
@@ -110,5 +107,32 @@ class AspectBars
 		g.endFill();
 
 		bars++;
+	}
+}
+
+class BoxedScaleMode extends BaseScaleMode
+{
+	public var ratio:Float = 0;
+
+	override function updateGameSize(width:Int, height:Int):Void
+	{
+		var w:Float = width;
+		var h:Float = height;
+
+		if (ratio > 0)
+		{
+			if (w / h > ratio)
+				w = h * ratio;
+			else
+				h = w / ratio;
+		}
+
+		var game:Float = FlxG.initialWidth / FlxG.initialHeight;
+		if (w / h > game)
+			w = h * game;
+		else
+			h = w / game;
+
+		gameSize.set(Math.floor(w), Math.floor(h));
 	}
 }
