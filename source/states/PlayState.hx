@@ -248,9 +248,6 @@ class PlayState extends FlxState
 
 		updateCameraLean();
 
-		if (!Net.active)
-			timeStop.update(elapsed);
-
 		super.update(elapsed);
 
 		fx.update();
@@ -304,8 +301,6 @@ class PlayState extends FlxState
 		reloadBar.update(recharging && !combat.disabled && !status.dead, rechargeAt);
 		hud.setShown(SaveData.showHud());
 		hud.setExp(util.Levels.exp);
-		hud.setTimeStop(Net.active ? Lang.t("timestop.off") : timeStop.hudLabel());
-		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
 		intro.update(elapsed);
 

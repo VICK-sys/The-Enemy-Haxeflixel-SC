@@ -34,8 +34,8 @@ class Hud
 	static inline var GAUGE_LEFT:Float = 3;
 	static inline var GAUGE_SPAN:Float = 29;
 	static inline var UI_SCALE:Float = 4;
-	static inline var FRAME_X:Float = 85;
-	static inline var FRAME_Y:Float = 580;
+	static inline var FRAME_X:Float = 16;
+	static inline var FRAME_Y:Float = 600;
 	static inline var HP_X:Float = 22;
 	static inline var HP_Y:Float = 8;
 	static inline var SUPER_X:Float = 27;
@@ -93,7 +93,6 @@ class Hud
 		camUI.bgColor.alpha = 0;
 
 		var frame = makeUiSprite(FRAME_X, FRAME_Y, "hp_thing");
-		var playerIcon = makeSprite(40, 642, "mufu_icon");
 
 		hpFill = makeUiSprite(FRAME_X + HP_X * UI_SCALE, FRAME_Y + HP_Y * UI_SCALE, "hp_bar");
 		hpClip = FlxRect.get(0, 0, 0, hpFill.frameHeight);
@@ -104,11 +103,11 @@ class Hud
 		state.add(piece(frame));
 		state.add(piece(hpFill));
 		state.add(piece(superFill));
-		state.add(piece(playerIcon));
 
-		var gaugeY = FRAME_Y + frame.height + PIP_GAP;
-		gaugeBack = makeUiSprite(hpFill.x, gaugeY, "bar_gauge_back");
-		gaugeFill = makeUiSprite(hpFill.x, gaugeY, "bar_gauge_fill");
+		var gaugeY = FRAME_Y - PIP_GAP;
+		gaugeBack = makeUiSprite(hpFill.x, 0, "bar_gauge_back");
+		gaugeBack.y = gaugeY - gaugeBack.height;
+		gaugeFill = makeUiSprite(hpFill.x, gaugeBack.y, "bar_gauge_fill");
 		gaugeClip = FlxRect.get(0, 0, 0, gaugeBack.frameHeight);
 		gaugeBack.visible = false;
 		gaugeFill.visible = false;

@@ -23,7 +23,7 @@ class Arrow extends FlxSprite
 	public function new()
 	{
 		super();
-		loadGraphic(Paths.image("items/arrow"));
+		loadGraphic(Paths.image("bullets/arrow"));
 		antialiasing = false;
 		scale.set(4, 4);
 	}
