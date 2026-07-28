@@ -34,7 +34,7 @@
 	"weaponPick.hint": "1-4 か A/D か 矢印キーでえらぶ        ENTER かクリックで決定",
 	"hud.wave": "ウェーブ {0}",
 	"hud.bossApproaching": "ボスが近づいている",
-	"hud.death": "ウェーブ {0}  -  最高 {1}\nENTER - レベルアップ        R - もう一度",
+	"hud.death": "ウェーブ {0}  -  最高 {1}\nRキーでリスタート",
 	"hud.respawning": "復活中...",
 	"hud.connectionLost": "接続が切れた",
 	"timestop.stopped": "時間停止中",
@@ -91,5 +91,15 @@
 	"stat.vigor.note": "最大体力が上がる",
 	"stat.endurance.note": "ダッシュの待ち時間が減り APが早くたまる",
 	"stat.strength.note": "すべての武器のダメージが上がる",
-	"stat.dexterity.note": "攻撃と装填が速くなる"
+	"stat.dexterity.note": "攻撃と装填が速くなる",
+	"level.sub": "上げる能力を選べ",
+	"level.level": "レベル",
+	"level.exp": "EXP",
+	"level.next": "必要EXP",
+	"level.keys": "W/S - 選択     ENTER - 上げる     ESC - もどる",
+	"derived.health": "体力",
+	"derived.dash": "ダッシュ待ち",
+	"derived.apgain": "AP/撃破",
+	"derived.damage": "武器ダメージ",
+	"derived.speed": "行動時間"
 }

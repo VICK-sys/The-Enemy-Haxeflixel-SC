@@ -34,7 +34,7 @@
 	"weaponPick.hint": "1-4 O A/D O LAS FLECHAS PARA ELEGIR        ENTER O CLIC PARA CONFIRMAR",
 	"hud.wave": "OLEADA {0}",
 	"hud.bossApproaching": "EL JEFE SE ACERCA",
-	"hud.death": "OLEADA {0}  -  RÉCORD {1}\nENTER - SUBIR DE NIVEL        R - OTRA VEZ",
+	"hud.death": "OLEADA {0}  -  RÉCORD {1}\nPULSA R PARA REINTENTAR",
 	"hud.respawning": "REAPARECIENDO...",
 	"hud.connectionLost": "CONEXIÓN PERDIDA",
 	"timestop.stopped": "TIEMPO DETENIDO",
@@ -91,5 +91,15 @@
 	"stat.vigor.note": "AUMENTA TU SALUD MÁXIMA",
 	"stat.endurance.note": "ACORTA LA ESPERA DEL IMPULSO Y LLENA EL AP ANTES",
 	"stat.strength.note": "AÑADE DAÑO A TODAS LAS ARMAS",
-	"stat.dexterity.note": "ACELERA GOLPEAR, DISPARAR Y RECARGAR"
+	"stat.dexterity.note": "ACELERA GOLPEAR, DISPARAR Y RECARGAR",
+	"level.sub": "ELIGE UN ATRIBUTO PARA MEJORAR",
+	"level.level": "NIVEL",
+	"level.exp": "EXP",
+	"level.next": "EXP NEC.",
+	"level.keys": "W/S - ELEGIR     ENTER - MEJORAR     ESC - SALIR",
+	"derived.health": "SALUD",
+	"derived.dash": "ESPERA DEL IMPULSO",
+	"derived.apgain": "AP POR MUERTE",
+	"derived.damage": "DAÑO DE ARMA",
+	"derived.speed": "TIEMPO DE ACCIÓN"
 }

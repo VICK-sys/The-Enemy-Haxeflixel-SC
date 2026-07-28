@@ -228,6 +228,7 @@ class PlayState extends FlxState
 		shift.disabled = true;
 		director.onProbe = shift.onProbe;
 		director.onWave = onWaveStarted;
+		director.onWaveCleared = offerLevelUp;
 		director.onBoss = onBossWave;
 		director.onBossSpawn = hud.showBossBar;
 		director.onBossDefeated = onBossDefeated;
@@ -451,6 +452,17 @@ class PlayState extends FlxState
 		return true;
 	}
 
+	function offerLevelUp():Bool
+	{
+		if (Net.active || status.dead || restarting || subState != null)
+			return false;
+		if (!util.Levels.canSpend())
+			return false;
+		FlxG.inputs.reset();
+		openSubState(new LevelUpSubState(hud.camUI));
+		return true;
+	}
+
 	function onWaveStarted(n:Int):Void
 	{
 		SaveData.submitWave(n);
@@ -550,12 +562,6 @@ class PlayState extends FlxState
 			layers.playerShadow.visible = true;
 			heldSprite.visible = true;
 			hud.hideDeath();
-		}
-
-		if (FlxG.keys.justPressed.ENTER && status.dead && !restarting && subState == null && !Net.active)
-		{
-			FlxG.inputs.reset();
-			openSubState(new LevelUpSubState(hud.camUI));
 		}
 
 		if (FlxG.keys.justPressed.R && status.dead && !restarting && (!Net.active || (netSync != null && netSync.runFailed)))

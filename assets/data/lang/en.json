@@ -34,7 +34,7 @@
 	"weaponPick.hint": "1-4 OR A/D OR THE ARROWS TO CHOOSE        ENTER OR CLICK TO LOCK IT IN",
 	"hud.wave": "WAVE {0}",
 	"hud.bossApproaching": "BOSS APPROACHING",
-	"hud.death": "WAVE {0}  -  BEST {1}\nENTER - LEVEL UP        R - RUN AGAIN",
+	"hud.death": "WAVE {0}  -  BEST {1}\nPRESS R TO RESTART",
 	"hud.respawning": "RESPAWNING...",
 	"hud.connectionLost": "CONNECTION LOST",
 	"timestop.stopped": "TIME STOPPED",
@@ -104,5 +104,15 @@
 	"onlineHelp.p2.title": "SETTING IT UP",
 	"onlineHelp.p2.body": "HOST - pick HOST GAME, then send your friends\nyour IP address. Over the internet you must\nforward TCP port {0} on your router first.\n\nJOIN - pick JOIN GAME, type the host's IP,\nthen press ENTER.\n\nIf the host reports a different port because\n{0} was busy, join with   IP:PORT\n\nOn the same house network, use the host's\nlocal IP and skip the port forwarding.",
 	"onlineHelp.p3.title": "WHAT CHANGES",
-	"onlineHelp.p3.body": "Dying does not end the run. You drop out for\na few seconds, then respawn with half health.\nThe enemies turn on whoever is still standing,\nso the run only ends if EVERYONE is down.\n\nTIME STOP and the TOTEM are switched off\nonline - both rewrite the whole world, which\nonly works when one player owns it.\n\nYou will see everything your friend throws\nout - bullets, arrows, slashes, the hook,\nthe thrown hammer and every SUPER."
+	"onlineHelp.p3.body": "Dying does not end the run. You drop out for\na few seconds, then respawn with half health.\nThe enemies turn on whoever is still standing,\nso the run only ends if EVERYONE is down.\n\nTIME STOP and the TOTEM are switched off\nonline - both rewrite the whole world, which\nonly works when one player owns it.\n\nYou will see everything your friend throws\nout - bullets, arrows, slashes, the hook,\nthe thrown hammer and every SUPER.",
+	"level.sub": "SELECT A PARAMETER TO BOOST",
+	"level.level": "LEVEL",
+	"level.exp": "EXP",
+	"level.next": "REQ EXP",
+	"level.keys": "W/S - SELECT     ENTER - BOOST     ESC - EXIT",
+	"derived.health": "HEALTH",
+	"derived.dash": "DASH COOLDOWN",
+	"derived.apgain": "AP PER KILL",
+	"derived.damage": "WEAPON DAMAGE",
+	"derived.speed": "ACTION TIME"
 }

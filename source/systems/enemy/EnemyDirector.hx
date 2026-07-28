@@ -25,6 +25,7 @@ class EnemyDirector
 	public var shots(get, never):FlxTypedGroup<EnemyShot>;
 	public var onWave:Int->Void;
 	public var onBoss:Void->Void;
+	public var onWaveCleared:Void->Void;
 	public var bossVeto:Int->Bool;
 	public var onBossSpawn:Enemies->Void;
 	public var onProbe:(Float, Float, Float) -> Void;
@@ -170,6 +171,8 @@ class EnemyDirector
 		if (waveCleared())
 		{
 			betweenWaves = breatherTime();
+			if (wave > 0 && onWaveCleared != null)
+				onWaveCleared();
 			return;
 		}
 

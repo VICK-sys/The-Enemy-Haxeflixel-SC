@@ -99,34 +99,49 @@ class Levels
 		SaveData.setStats(0, spent);
 	}
 
-	public static function healthBonus():Float
-		return points(VIGOR) * conf().vigorPerPoint;
+	public static function healthAt(pts:Int):Float
+		return pts * conf().vigorPerPoint;
 
-	public static function apGainScale():Float
+	public static function healthBonus():Float
+		return healthAt(points(VIGOR));
+
+	public static function apGainAt(pts:Int):Float
 	{
 		var c = conf();
-		var v = 1 + points(ENDURANCE) * c.enduranceApPerPoint;
+		var v = 1 + pts * c.enduranceApPerPoint;
 		return v > c.enduranceApCap ? c.enduranceApCap : v;
 	}
 
-	public static function dashScale():Float
+	public static function apGainScale():Float
+		return apGainAt(points(ENDURANCE));
+
+	public static function dashAt(pts:Int):Float
 	{
 		var c = conf();
-		var v = 1 - points(ENDURANCE) * c.enduranceDashPerPoint;
+		var v = 1 - pts * c.enduranceDashPerPoint;
 		return v < c.enduranceDashFloor ? c.enduranceDashFloor : v;
 	}
 
-	public static function damageBonus():Int
+	public static function dashScale():Float
+		return dashAt(points(ENDURANCE));
+
+	public static function damageAt(pts:Int):Int
 	{
 		var c = conf();
-		var n = Std.int(points(STRENGTH) / c.strengthPerPoints);
+		var n = Std.int(pts / c.strengthPerPoints);
 		return n > c.strengthMax ? c.strengthMax : n;
 	}
 
-	public static function actionScale():Float
+	public static function damageBonus():Int
+		return damageAt(points(STRENGTH));
+
+	public static function actionAt(pts:Int):Float
 	{
 		var c = conf();
-		var v = 1 - points(DEXTERITY) * c.dexterityPerPoint;
+		var v = 1 - pts * c.dexterityPerPoint;
 		return v < c.dexterityFloor ? c.dexterityFloor : v;
 	}
+
+	public static function actionScale():Float
+		return actionAt(points(DEXTERITY));
 }
