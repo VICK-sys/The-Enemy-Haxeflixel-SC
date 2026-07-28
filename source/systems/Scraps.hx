@@ -12,11 +12,13 @@ class Scraps
 	static inline var MAGNET:Float = 170;
 	static inline var PULL_MIN:Float = 90;
 	static inline var PULL_MAX:Float = 620;
+	static inline var PICK_GAP:Float = 0.09;
 
 	public var group:FlxTypedGroup<ScrapPickup>;
 
 	private var player:Player;
 	private var status:PlayerCombat;
+	private var pickTimer:Float = 0;
 
 	public function new(player:Player, status:PlayerCombat)
 	{
@@ -47,6 +49,12 @@ class Scraps
 		var py = player.feetY - player.height / 2;
 		var step = elapsed * WorldClock.scale;
 
+		if (pickTimer > 0)
+			pickTimer -= step;
+
+		var take:ScrapPickup = null;
+		var takeLen:Float = 0;
+
 		for (s in group.members)
 		{
 			if (s == null || !s.exists)
@@ -66,9 +74,19 @@ class Scraps
 				|| s.y + s.height <= player.y || player.y + player.height <= s.y)
 				continue;
 
-			util.Levels.award(util.Levels.scrapValue());
-			FlxG.sound.play(Paths.sound("bulletLoad"), 0.5);
-			s.kill();
+			if (take == null || len < takeLen)
+			{
+				take = s;
+				takeLen = len;
+			}
 		}
+
+		if (take == null || pickTimer > 0)
+			return;
+
+		pickTimer = PICK_GAP;
+		util.Levels.award(util.Levels.scrapValue());
+		FlxG.sound.play(Paths.sound("bulletLoad"), 0.5);
+		take.kill();
 	}
 }

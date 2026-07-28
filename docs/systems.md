@@ -106,6 +106,8 @@ Enemies pay in scrap rather than in exp. A rewardable kill drops one `ScrapPicku
 
 Scrap pulls toward the player inside `MAGNET`, faster the closer it gets, so a kill at your feet collects itself and a kill across the room asks you to go and get it. It expires after fourteen seconds and blinks for the last three, which keeps a cleared arena from filling with debris.
 
+Scrap is collected one piece at a time, about a tenth of a second apart, and the nearest piece goes first. The magnet still drags the whole pile in at once, so without the gap a heap landed on the same frame: one muddy sound made of several copies of itself, and a counter that jumped in a single step. The gap costs half a second on a pile of six and gives every piece its own tick.
+
 The kill counter and the super gain still fire on the kill itself. Only the exp moved.
 
 A guest never runs `applyHit`, because its hits are claimed and sent to the host to apply. Its scrap therefore drops from `PuppetMirror`, on the same credited kill that pays the kill counter. Scrap stays on the peer that earned it and is never synced, unlike a health pickup, because exp is already counted per player.
