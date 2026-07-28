@@ -80,9 +80,11 @@ It sits after `props.overlay` in the display list, above the wall redraw that bu
 
 ### Melee hitstop
 
-A connecting swing freezes the world for a moment, weighted per weapon out of `weapons.json`. The hammer holds ten frames at six percent speed with a real shake; the hook's jab holds two at thirty percent and barely shakes. That is a sixth of a second against a thirtieth. The hammer lands like a hammer and the jab stays quick.
+A connecting swing freezes the world for a moment, weighted per weapon out of `weapons.json`. The hammer holds for many frames at six percent speed with a real shake; the hook's jab holds for two at thirty percent and barely shakes. The numbers live in the data, so the weight of each weapon is a tuning question rather than a code one. The hammer lands like a hammer and the jab stays quick.
 
-The hitch fires once per swing, on the first enemy the arc catches, and before the damage is dealt. A killing blow's heavier stop therefore lands after it and wins, instead of a lighter hitch overwriting it.
+The hitch fires once per swing, on the first enemy the arc catches, and before the damage is dealt.
+
+Stops only ever deepen. A swing that kills raises two of them on the same frame, and the kill's is the shorter of the pair, so last writer wins let a kill cut a hammer swing's hold down to its own four frames. The same swing then bit differently depending on whether it happened to finish something off, which is what spamming made obvious. Frames take the longer of the two and speed takes the slower, so a kill can only ever add weight.
 
 `Fx.update` is the only thing that restores `timeScale`, and it does not run while a panel is up. Every panel now opens through `PlayState.openPanel`, which clears the hitstop first, so a swing landed on the frame a wave clears cannot leave the shop screen running at six percent speed.
 

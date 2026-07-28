@@ -71,8 +71,7 @@ class Fx
 
 	public function killImpact():Void
 	{
-		hitstopFrames = 4;
-		FlxG.timeScale = 0.05;
+		hold(4, 0.05);
 		FlxG.camera.shake(0.004, 0.1);
 	}
 
@@ -80,10 +79,17 @@ class Fx
 	{
 		if (frames <= 0)
 			return;
-		hitstopFrames = frames;
-		FlxG.timeScale = scale;
+		hold(frames, scale);
 		if (shake > 0)
 			FlxG.camera.shake(shake, 0.08);
+	}
+
+	function hold(frames:Int, scale:Float):Void
+	{
+		if (frames > hitstopFrames)
+			hitstopFrames = frames;
+		if (scale < FlxG.timeScale)
+			FlxG.timeScale = scale;
 	}
 
 	public function clearHitstop():Void
