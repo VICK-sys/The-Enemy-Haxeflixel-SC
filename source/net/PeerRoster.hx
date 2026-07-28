@@ -60,6 +60,13 @@ class PeerRoster
 				out.push(p.avatar.sprite);
 	}
 
+	public function eachAvatar(f:RemoteAvatar->Void):Void
+	{
+		for (p in peers)
+			if (p != null && p.avatar != null)
+				f(p.avatar);
+	}
+
 	public function count():Int
 	{
 		var n = 0;

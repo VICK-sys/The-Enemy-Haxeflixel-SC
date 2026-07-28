@@ -110,6 +110,18 @@ The kill counter and the AP gain still fire on the kill itself. Only the exp mov
 
 A guest never runs `applyHit`, because its hits are claimed and sent to the host to apply. Its scrap therefore drops from `PuppetMirror`, on the same credited kill that pays the kill counter. Scrap stays on the peer that earned it and is never synced, unlike a health pickup, because exp is already counted per player.
 
+### Levelling in co-op
+
+The screen opens for everyone at once, and nobody waits on a menu they cannot see.
+
+The host owns the moment. Its own wave clear broadcasts `lvl`, and every peer opens its own screen off that one message. A peer that cannot afford a level skips the screen and reports done at once, so it costs nothing to be broke.
+
+Closing the screen puts you straight back in the arena. You can walk, shoot and collect scrap in the breather while somebody else is still spending. What holds is the next wave, not the world. `EnemyDirector.holdWave` stops the breather counting down, so the wave resumes from where it paused rather than from the start.
+
+Each peer reports `lvldone` when its screen closes. The host counts one per guest plus itself, then broadcasts `lvlgo` to release. The guests need that message: their own hold flag guards the screen from opening twice, and without a release they would never see the screen again. A sixty second cap releases the hold anyway, so one player who walks away cannot stall the run, and a dropped peer releases it at once.
+
+While a player is still spending, their avatar carries a gold `LEVELING UP` note above their name. It goes up for everyone when the screen opens and comes down per player as each `lvldone` arrives, so the note always matches who you are actually waiting on.
+
 ### BossHud
 
 The boss-fight HUD pieces: the pulsing red screen flash and the boss health bar. A call to `showBar(boss)` binds a bar to the boss's HP and plays its entrance. The bar expands out from a compressed sliver as it drops in from the top. The name "Rofel" then fades in letter by letter beneath it. The bar hides itself once the boss is gone.

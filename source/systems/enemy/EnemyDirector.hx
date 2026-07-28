@@ -22,6 +22,7 @@ class EnemyDirector
 
 	public var wave:Int = 0;
 	public var spawning:Bool = true;
+	public var holdWave:Bool = false;
 	public var shots(get, never):FlxTypedGroup<EnemyShot>;
 	public var onWave:Int->Void;
 	public var onBoss:Void->Void;
@@ -161,7 +162,8 @@ class EnemyDirector
 	{
 		if (betweenWaves > 0)
 		{
-			betweenWaves -= elapsed;
+			if (!holdWave)
+				betweenWaves -= elapsed;
 			waveClock = 0;
 			if (betweenWaves <= 0)
 				startWave();

@@ -38,6 +38,7 @@ class PlayState extends FlxState
 	static inline var QUIET_ZOOM:Float = 0.7;
 	static inline var EXIT_ARM_UP:Float = 240;
 	static inline var EXIT_BACK:Float = 40;
+	static inline var LEVEL_WAIT_CAP:Float = 60;
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
 	static inline var DEFLECT_PUSH:Float = 1.2;
@@ -54,6 +55,10 @@ class PlayState extends FlxState
 	private var combat:Weapons;
 	private var hud:Hud;
 	private var reloadBar:ui.ReloadBar;
+	private var levelHold:Bool = false;
+	private var levelDone:Bool = false;
+	private var levelClock:Float = 0;
+	private var levelAcks:Map<Int, Bool>;
 	private var perf:PerfLog;
 	private var bossAlarm:FlxSound;
 	private var bossFight:Bool = false;
@@ -252,6 +257,9 @@ class PlayState extends FlxState
 			Net.inGame = true;
 			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
+			netSync.onLevelOpen = beginLevelUp;
+			netSync.onLevelAck = noteLevelAck;
+			netSync.onLevelGo = releaseLevelUp;
 			netSync.onWaveEvt = onWaveStarted;
 			netSync.onBossEvt = onBossWave;
 			netSync.onBossDefeatedEvt = onBossDefeated;
@@ -411,6 +419,7 @@ class PlayState extends FlxState
 			openSubState(pause);
 		}
 
+		updateLevelPause(elapsed);
 		updateDetour(elapsed);
 		debugKeys();
 
@@ -465,13 +474,94 @@ class PlayState extends FlxState
 
 	function offerLevelUp():Bool
 	{
-		if (Net.active || status.dead || restarting || subState != null)
+		if (status.dead || restarting || subState != null || levelHold)
 			return false;
+
+		if (Net.active)
+		{
+			if (!Net.isHost)
+				return false;
+			Net.send({t: "lvl"});
+			beginLevelUp();
+			return true;
+		}
+
 		if (!util.Levels.canSpend())
 			return false;
 		FlxG.inputs.reset();
 		openSubState(new LevelUpSubState(hud.camUI));
 		return true;
+	}
+
+	function beginLevelUp():Void
+	{
+		if (levelHold)
+			return;
+		levelHold = true;
+		levelDone = false;
+		levelClock = 0;
+		levelAcks = new Map();
+		if (Net.isHost)
+			director.holdWave = true;
+		if (netSync != null)
+			netSync.setAllLeveling(true);
+
+		if (status.dead || restarting || subState != null || !util.Levels.canSpend())
+		{
+			finishLevelUp();
+			return;
+		}
+
+		FlxG.inputs.reset();
+		var screen = new LevelUpSubState(hud.camUI);
+		screen.closeCallback = finishLevelUp;
+		openSubState(screen);
+	}
+
+	function finishLevelUp():Void
+	{
+		if (!levelHold || levelDone)
+			return;
+		levelDone = true;
+		Net.send({t: "lvldone"});
+		if (Net.isHost)
+			noteLevelAck(Net.selfId);
+	}
+
+	function noteLevelAck(id:Int):Void
+	{
+		if (netSync != null)
+			netSync.setLeveling(id, false);
+		if (!Net.isHost || !levelHold || levelAcks == null)
+			return;
+		levelAcks.set(id, true);
+		var got = 0;
+		for (v in levelAcks)
+			got++;
+		if (got >= Net.guestCount + 1)
+			releaseLevelUp();
+	}
+
+	function releaseLevelUp():Void
+	{
+		if (!levelHold)
+			return;
+		if (Net.isHost)
+			Net.send({t: "lvlgo"});
+		levelHold = false;
+		levelAcks = null;
+		director.holdWave = false;
+		if (netSync != null)
+			netSync.setAllLeveling(false);
+	}
+
+	function updateLevelPause(elapsed:Float):Void
+	{
+		if (!levelHold)
+			return;
+		levelClock += elapsed;
+		if (Net.isHost && (levelClock > LEVEL_WAIT_CAP || Net.dropped))
+			releaseLevelUp();
 	}
 
 	function onWaveStarted(n:Int):Void

@@ -72,6 +72,7 @@
 	"online.connecting": "CONNECTING...",
 	"online.connected": "CONNECTED - WAITING FOR HOST TO START",
 	"online.failed": "COULD NOT CONNECT TO {0}",
+	"hud.leveling": "LEVELING UP",
 	"hud.exp": "SCRAP {0}",
 	"level.title": "LEVEL UP",
 	"level.header": "LEVEL {0}        SCRAP {1}        NEXT {2}",

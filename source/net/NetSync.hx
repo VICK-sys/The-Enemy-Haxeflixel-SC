@@ -43,6 +43,10 @@ class NetSync
 	private var mirror:PuppetMirror;
 	private var frame:Int = 0;
 	private var nextEnemyId:Int = 1;
+	public var onLevelOpen:Void->Void;
+	public var onLevelAck:Int->Void;
+	public var onLevelGo:Void->Void;
+
 	private var respawnTimer:Float = -1;
 	private var droppedHandled:Bool = false;
 
@@ -169,6 +173,16 @@ class NetSync
 		};
 	}
 
+	public function setLeveling(id:Int, on:Bool):Void
+	{
+		var p = roster.get(id);
+		if (p != null)
+			p.avatar.setLeveling(on);
+	}
+
+	public function setAllLeveling(on:Bool):Void
+		roster.eachAvatar(function(a) a.setLeveling(on));
+
 	static inline function r1(v:Float):Float
 		return Math.round(v * 10) / 10;
 
@@ -238,6 +252,18 @@ class NetSync
 				var p = roster.get(msg.f);
 				if (p != null)
 					p.avatar.setName(msg.n);
+
+			case "lvl" if (Net.isClient):
+				if (onLevelOpen != null)
+					onLevelOpen();
+
+			case "lvldone":
+				if (onLevelAck != null)
+					onLevelAck(msg.f);
+
+			case "lvlgo" if (Net.isClient):
+				if (onLevelGo != null)
+					onLevelGo();
 
 			case "join":
 				announceName();

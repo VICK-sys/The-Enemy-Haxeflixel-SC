@@ -20,6 +20,7 @@ class RemoteAvatar
 	public var held:FlxSprite;
 	public var shadow:FlxSprite;
 	public var tag:FlxText;
+	public var note:FlxText;
 
 	private var targetX:Float = 0;
 	private var targetY:Float = 0;
@@ -27,12 +28,15 @@ class RemoteAvatar
 	private var weaponIdx:Int = -1;
 	private var heldOX:Float = 30;
 	private var heldOY:Float = 65;
+	private var leveling:Bool = false;
 
 	static inline var REVOLVER_INDEX:Int = 1;
 	static inline var BOW_INDEX:Int = 2;
 	static inline var OFFSET_Y:Float = -17;
 	static inline var TAG_UP:Float = 46;
 	static inline var TAG_WIDTH:Float = 320;
+	static inline var NOTE_UP:Float = 70;
+	static inline var NOTE_COLOR:Int = 0xFFE8C860;
 
 	public function new(layers:RenderLayers)
 	{
@@ -67,6 +71,19 @@ class RemoteAvatar
 		tag.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		tag.visible = false;
 		layers.tagLayer.add(tag);
+
+		note = new FlxText(0, 0, TAG_WIDTH, "");
+		note.setFormat(Lang.font(), 16, NOTE_COLOR, CENTER);
+		note.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		note.visible = false;
+		layers.tagLayer.add(note);
+	}
+
+	public function setLeveling(on:Bool):Void
+	{
+		leveling = on;
+		if (on)
+			note.text = Lang.t("hud.leveling");
 	}
 
 	public function setName(name:String):Void
@@ -143,5 +160,9 @@ class RemoteAvatar
 		tag.visible = sprite.visible;
 		tag.x = sprite.x + sprite.width * 0.5 - TAG_WIDTH * 0.5;
 		tag.y = sprite.y - TAG_UP;
+
+		note.visible = sprite.visible && leveling;
+		note.x = tag.x;
+		note.y = sprite.y - NOTE_UP;
 	}
 }
