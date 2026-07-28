@@ -2,7 +2,6 @@ package systems.enemy;
 
 import flixel.FlxSprite;
 import entities.enemy.Enemies;
-import util.SideView;
 import systems.world.Arena;
 import systems.world.PropBlock;
 import systems.world.FootCollide;
@@ -54,29 +53,21 @@ class EnemySpawner
 		var mw = arena.width;
 		var mh = arena.height;
 
-		if (SideView.active)
+		var a = anchor();
+		switch (Std.random(4))
 		{
-			e.x = Std.random(2) == 0 ? -e.width - SPAWN_OUT : mw + SPAWN_OUT;
-			e.y = SideView.groundY - e.height;
-		}
-		else
-		{
-			var a = anchor();
-			switch (Std.random(4))
-			{
-				case 0:
-					e.x = -e.width - SPAWN_OUT;
-					e.y = edgeCoord(a.y, mh);
-				case 1:
-					e.x = mw + SPAWN_OUT;
-					e.y = edgeCoord(a.y, mh);
-				case 2:
-					e.x = edgeCoord(a.x, mw);
-					e.y = -e.height - SPAWN_OUT;
-				default:
-					e.x = edgeCoord(a.x, mw);
-					e.y = mh + SPAWN_OUT;
-			}
+			case 0:
+				e.x = -e.width - SPAWN_OUT;
+				e.y = edgeCoord(a.y, mh);
+			case 1:
+				e.x = mw + SPAWN_OUT;
+				e.y = edgeCoord(a.y, mh);
+			case 2:
+				e.x = edgeCoord(a.x, mw);
+				e.y = -e.height - SPAWN_OUT;
+			default:
+				e.x = edgeCoord(a.x, mw);
+				e.y = mh + SPAWN_OUT;
 		}
 
 		e.entering = true;

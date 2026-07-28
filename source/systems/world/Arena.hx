@@ -4,17 +4,12 @@ import flixel.FlxG;
 import flixel.FlxState;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
-import flixel.math.FlxRect;
 import flixel.tile.FlxTilemap;
 import flixel.group.FlxGroup.FlxTypedGroup;
-import flixel.util.FlxGradient;
 import util.CustomArena;
 import util.Paths;
 import util.WarpShader;
-import util.SideView;
 import data.ArenaData.ArenaDataRegistry;
-import data.SideViewData.SideViewData;
-import data.SideViewData.SideViewDataRegistry;
 
 class Arena
 {
@@ -27,8 +22,6 @@ class Arena
 	public var map:FlxTilemap;
 	public var spawnX:Float;
 	public var spawnY:Float;
-	public var totemWaveMin:Int;
-	public var totemWaveRange:Int;
 	public var width(get, never):Float;
 	public var height(get, never):Float;
 	public var onWhiteout:Void->Void;
@@ -46,24 +39,16 @@ class Arena
 	private var introTimer:Float = 0;
 	private var gridActive:Bool = false;
 	private var state:FlxState;
-	private var baseRects:Array<FlxRect> = [];
-	private var platRects:Array<FlxRect> = [];
-	private var sky:FlxSprite;
-	private var groundSlab:FlxSprite;
-	private var sv:SideViewData;
 	private var cell:Int;
 	private var skin:WallSkin;
 
 	public function new(state:FlxState)
 	{
 		this.state = state;
-		sv = SideViewDataRegistry.get();
 		var data = ArenaDataRegistry.get();
 		cell = data.tileSize;
 		spawnX = data.spawnX;
 		spawnY = data.spawnY;
-		totemWaveMin = data.totemWaveMin;
-		totemWaveRange = data.totemWaveRange;
 
 		bgPath = data.background;
 		mapCsv = Paths.file(data.map);
@@ -98,52 +83,6 @@ class Arena
 		warp = new WarpShader();
 
 		FlxG.worldBounds.set(0, 0, map.width, map.height);
-		SideView.groundY = map.height - sv.groundOffset;
-	}
-
-	public function buildSideAssets():Void
-	{
-		if (sky != null)
-			return;
-
-		sky = FlxGradient.createGradientFlxSprite(Std.int(map.width), Std.int(map.height), [0xFF0C0818, 0xFF221533, 0xFF3A2237]);
-		sky.antialiasing = false;
-		sky.y = -map.height;
-		state.insert(state.members.indexOf(bg) + 1, sky);
-
-		groundSlab = new FlxSprite(0, SideView.groundY - 6);
-		skin.paint(groundSlab, 0, SideView.groundY - 6, Std.int(map.width), Std.int(map.height - SideView.groundY) + 6);
-		groundSlab.alpha = 0;
-		state.insert(state.members.indexOf(sky) + 1, groundSlab);
-	}
-
-	public function sidePlatforms():Array<FlxRect>
-	{
-		return platRects;
-	}
-
-	public function applySideMorph(t:Float):Void
-	{
-		bg.y = t * map.height * 0.25;
-		bg.alpha = 1 - 0.55 * t;
-		if (sky != null)
-			sky.y = -map.height + t * map.height;
-		if (groundSlab != null)
-			groundSlab.alpha = t;
-
-		for (i in 0...pillars.length)
-		{
-			var s = pillars[i];
-			var a = baseRects[i];
-			var b = platRects[i];
-			var cx = a.x + a.width / 2 + (b.x + b.width / 2 - a.x - a.width / 2) * t;
-			var cy = a.y + a.height / 2 + (b.y + b.height / 2 - a.y - a.height / 2) * t;
-			var w = a.width + (b.width - a.width) * t;
-			var h = a.height + (b.height - a.height) * t;
-			s.scale.set(w / a.width, h / a.height);
-			s.x = cx - a.width / 2;
-			s.y = cy - a.height / 2;
-		}
 	}
 
 	public function beginBossTransition():Void
@@ -248,8 +187,6 @@ class Arena
 	public function addPillars(layer:FlxTypedGroup<FlxSprite>):Void
 	{
 		pillarLayer = layer;
-		baseRects = [];
-		platRects = [];
 		var cols = map.widthInTiles;
 		var rows = map.heightInTiles;
 		var visited = new Map<Int, Bool>();
@@ -273,29 +210,8 @@ class Arena
 				skin.paint(pillar, c * cell, r * cell, w * cell, h * cell);
 				layer.add(pillar);
 				pillars.push(pillar);
-				baseRects.push(new FlxRect(pillar.x, pillar.y, w * cell, h * cell));
-				platRects.push(platformFor(pillar.x + w * cell / 2, pillar.y + h * cell / 2, w * cell));
 			}
 		}
-	}
-
-	function platformFor(cx:Float, cy:Float, w:Float):FlxRect
-	{
-		var platW = Math.max(w * sv.platformWidthMult, sv.platformWidthMin);
-		var top = 120.0;
-		var bottom = map.height - 120.0;
-		var yNorm = (cy - top) / (bottom - top);
-		if (yNorm < 0)
-			yNorm = 0;
-		if (yNorm > 1)
-			yNorm = 1;
-		var platTop = sv.platformHigh + (SideView.groundY - sv.platformLowGap - sv.platformHigh) * yNorm;
-		var platCx = cx;
-		if (platCx < 80 + platW / 2)
-			platCx = 80 + platW / 2;
-		if (platCx > map.width - 80 - platW / 2)
-			platCx = map.width - 80 - platW / 2;
-		return new FlxRect(platCx - platW / 2, platTop, platW, sv.platformHeight);
 	}
 
 	public function clearObstacles():Void
@@ -340,8 +256,6 @@ class Arena
 
 	public function wallAt(px:Float, py:Float):Bool
 	{
-		if (SideView.active)
-			return false;
 		var tile = map.getTileIndexByCoords(FlxPoint.weak(px, py));
 		return tile >= 0 && map.getTileByIndex(tile) > 0;
 	}

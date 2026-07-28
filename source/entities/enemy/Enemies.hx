@@ -5,7 +5,6 @@ import flixel.tweens.FlxTween;
 import flixel.FlxG;
 import util.Paths;
 import util.WorldClock;
-import util.SideView;
 import data.EnemyData.EnemyDataRegistry;
 
 class Enemies extends FlxSprite
@@ -75,8 +74,6 @@ class Enemies extends FlxSprite
 
 	private var brain:EnemyBrain = new EnemyBrain();
 
-	private var sideStepper:EnemySideStep = new EnemySideStep();
-	private var prevBottom:Float = 0;
 
     public function new(kind:String, x:Float=0, y:Float=0)
     {
@@ -184,7 +181,6 @@ class Enemies extends FlxSprite
 	{
 		if (puppet)
 		{
-			prevBottom = y + height;
 			super.update(elapsed);
 			if (flashTimer > 0)
 			{
@@ -206,10 +202,6 @@ class Enemies extends FlxSprite
 		if (!seized)
 			elapsed *= WorldClock.scale;
 
-		if (SideView.morphing)
-			return;
-
-		prevBottom = y + height;
 		super.update(elapsed);
 
 		if (throwGrace > 0)
@@ -225,8 +217,6 @@ class Enemies extends FlxSprite
 		if (isDead)
 		{
 			velocity.set(0, 0);
-			if (SideView.active)
-				SideView.settle(this, prevBottom, elapsed);
 			return;
 		}
 
@@ -241,8 +231,6 @@ class Enemies extends FlxSprite
 				drag.set(0, 0);
 				velocity.set(0, 0);
 			}
-			if (SideView.active)
-				SideView.settle(this, prevBottom, elapsed);
 			return;
 		}
 
@@ -257,13 +245,6 @@ class Enemies extends FlxSprite
 			var ex:Float = target.x + target.width * 0.5 - (x + width * 0.5);
 			flipX = ex < 0;
 			this.animation.play("walk");
-
-			if (SideView.active)
-			{
-				velocity.x = ex < 0 ? -speed : speed;
-				SideView.settle(this, prevBottom, elapsed);
-				return;
-			}
 
 			var ey:Float = target.y + target.height * 0.5 - (y + height * 0.5);
 			var el:Float = Math.sqrt(ex * ex + ey * ey);
@@ -286,12 +267,6 @@ class Enemies extends FlxSprite
 			{
 				velocity.set(0, 0);
 			}
-			return;
-		}
-
-		if (SideView.active)
-		{
-			sideStepper.update(this, elapsed, prevBottom);
 			return;
 		}
 

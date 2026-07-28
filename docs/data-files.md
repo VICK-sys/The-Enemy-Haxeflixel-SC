@@ -69,7 +69,6 @@ Count is the expensive kind of difficulty. Every live enemy pathfinds against th
 | `iframeTime`, `hurtLockTime` | invincibility and movement-lock time after a hit lands |
 | `knockback` | knockback taken when hit |
 | `timestopSlow`, `timestopHold`, `timestopRecover`, `timestopCooldown` | time stop: seconds to wind down to the full stop, seconds held frozen, seconds to ramp back, and the cooldown |
-| `sideSkin` | the side-view sprite. The `sheet` field is a grid image under `assets/images/`. Cell size comes from `frameW`/`frameH`, and draw alignment from `offsetX`/`offsetY`. A `shadowScaleX` value widens the ground shadow, which side view draws wider than the top-down default of 4. The `idle`/`walk`/`jump`/`fall`/`hurt`/`death` lists hold frame indices, with a frame rate per animation. Only this skin has `jump` and `fall`, and vertical velocity picks between them while airborne |
 
 ## Weapons - assets/data/weapons.json
 
@@ -107,7 +106,6 @@ Presentation constants stay in the owning source files. That covers trail settin
 | `background` | stage image name under `assets/images/` |
 | `map`, `tiles` | collision CSV and tileset file names under `assets/` |
 | `spawnX`, `spawnY` | player start position |
-| `totemWaveMin`, `totemWaveRange` | the totem crashes down on a wave rolled once at startup, from `totemWaveMin` to `totemWaveMin + totemWaveRange` |
 
 The map CSV holds `0` (open) and `1` (solid) tiles, 16 px each. Flixel auto-tiling loads it. The outer ring is the arena wall.
 
@@ -115,7 +113,7 @@ Solid interior tiles become pillars. They block movement and projectiles, and th
 
 Editor maps ride the same format. `MapStore` keeps five slots. On desktop they are plain JSON files (`sx`, `sy`, `csv`) in a `maps/` folder next to the executable. That folder anchors to the executable's own path, not the working directory, so shortcuts cannot scatter them. Copy a file to share it. On html5 the slots live in the browser save.
 
-Playing one sets `CustomArena`, a static the Arena constructor checks. When set, the raw CSV and spawn replace the stock ones, and the tilemap loader accepts them directly. Everything downstream works unchanged, because it all reads the tilemap generically. That covers pillars, pathfinding, boss obstacle clearing and the side-view morph.
+Playing one sets `CustomArena`, a static the Arena constructor checks. When set, the raw CSV and spawn replace the stock ones, and the tilemap loader accepts them directly. Everything downstream works unchanged, because it all reads the tilemap generically. That covers pillars, pathfinding and boss obstacle clearing.
 
 The main menu clears `CustomArena` on entry, so a normal PLAY is always the stock arena. Online runs start only from the menu, so custom maps cannot desync a co-op session.
 
@@ -300,22 +298,5 @@ Only player maps read the theme. `WallSkin` gives up early unless `CustomArena` 
 ```
 
 The first theme applies to editor maps only. The stock arena keeps its arena.json look.
-
-## Side view - assets/data/sideview.json
-
-| Field | Meaning |
-|---|---|
-| `gravity`, `maxFall` | side-view gravity and terminal fall speed |
-| `playerJump`, `enemyJump` | jump velocities. The player gets one air jump |
-| `groundOffset` | the ground line sits this far above the arena's bottom edge |
-| `platformHigh`, `platformLowGap` | the platform height band: the northmost pillar maps to `platformHigh`, and the southmost to `groundY - platformLowGap` |
-| `platformHeight`, `platformWidthMult`, `platformWidthMin` | platform slab thickness and width. Width is pillar width times the multiplier, at least the minimum |
-| `enemyHighFeet` | morph mapping. The morph lifts the northmost enemies to this height, then they fall |
-| `morphTime`, `revertTime` | seconds for the morph to side view and back |
-| `telegraphTime`, `fallTime`, `fallHeight` | meteor arrival: warning decal duration, drop duration, drop start height |
-| `impactRadius`, `impactDamage` | the landing shockwave against enemies |
-| `landMin`, `landMax` | the meteor lands this far from the player |
-
----
 
 Back to the [documentation index](../DOCS.md).

@@ -35,14 +35,10 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `systems/BossDeath.hx` | boss death shake duration and amplitude |
 | `systems/Fx.hx` | hitstop length, shake strengths, spark settings, dash line fade |
 | `systems/TimeStop.hx` | trail tint, alpha, fade, cadence, and minimum speed. Overlay tint strength. Minimum music pitch |
-| `systems/perspective/Totem.hx` | totem draw size, glow padding, hit flash time |
-| `systems/perspective/MeteorArrival.hx` | ember cadence, arena edge padding for landing spots |
-| `systems/perspective/PerspectiveShift.hx` | totem hit cooldown |
 | `states/MainMenuState.hx` | splash text and its angle, throb depth and speed. Quit-collapse flatten, pinch and fade durations, and minimum window size |
 | `util/IrisWipe.hx` | open and close durations, mask resolution, fully open scale |
 | `util/MenuSlash.hx` | wind-up, cut and follow-through timings, shard linger, shard gravity |
 | `util/JaggedBand.hx` | (all shape and speed values are constructor arguments, set in `MainMenuState.addBands`) |
-| `util/SideView.hx` | shadow projection reach, shrink, and fade |
 
 ---
 

@@ -13,7 +13,6 @@ import systems.RenderLayers;
 import systems.PlayerCombat;
 import systems.enemy.EnemyDirector;
 import systems.TimeStop;
-import systems.perspective.PerspectiveShift;
 import systems.weapons.Weapons;
 import systems.Pickups;
 import systems.Scraps;
@@ -22,7 +21,6 @@ import util.Paths;
 import util.SaveData;
 import util.PerfLog;
 import util.Music;
-import util.SideView;
 import util.IrisWipe;
 import util.WorldClock;
 import util.DiscordPresence;
@@ -63,7 +61,6 @@ class PlayState extends FlxState
 	private var bossAlarm:FlxSound;
 	private var bossFight:Bool = false;
 	private var timeStop:TimeStop;
-	private var shift:PerspectiveShift;
 	private var wipe:IrisWipe;
 	private var restarting:Bool = false;
 	private var netSync:NetSync;
@@ -145,7 +142,6 @@ class PlayState extends FlxState
 
 	override public function create()
 	{
-		SideView.reset();
 		WorldClock.reset();
 		persistentUpdate = Net.active;
 		fx = new Fx();
@@ -238,9 +234,6 @@ class PlayState extends FlxState
 		hud = new Hud(this, status);
 		flyIn = new ui.WeaponFlyIn(hud.camUI, combat.held);
 		add(flyIn.sprite);
-		shift = new PerspectiveShift(arena, _player, director, combat, layers);
-		shift.disabled = true;
-		director.onProbe = shift.onProbe;
 		director.onWave = onWaveStarted;
 		director.onWaveCleared = offerLevelUp;
 		director.onBoss = onBossWave;
@@ -253,7 +246,6 @@ class PlayState extends FlxState
 
 		if (Net.active)
 		{
-			shift.locked = true;
 			Net.inGame = true;
 			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
@@ -344,25 +336,20 @@ class PlayState extends FlxState
 	{
 		EnemyNav.resetBudget();
 
-		var frozen = SideView.morphing;
 		var inputLocked = Net.active && subState != null;
 
 		updateCameraLean();
 
-		if (!frozen && !Net.active)
+		if (!Net.active)
 			timeStop.update(elapsed);
 
 		super.update(elapsed);
 
 		fx.update();
 		arena.update(elapsed * timeStop.factor);
-		shift.update(elapsed);
 
-		if (!SideView.active && !frozen)
-		{
-			FlxG.collide(_player, arena.map);
-			props.collidePlayer();
-		}
+		FlxG.collide(_player, arena.map);
+		props.collidePlayer();
 		director.collide();
 
 		status.update(elapsed);
@@ -379,7 +366,7 @@ class PlayState extends FlxState
 			}
 		}
 
-		director.update(frozen ? 0 : elapsed * timeStop.factor);
+		director.update(elapsed * timeStop.factor);
 		pickups.update();
 		scraps.update(elapsed);
 		layers.update();
@@ -390,7 +377,7 @@ class PlayState extends FlxState
 		heldSprite.alpha = props.buried ? 0 : 1;
 		combat.swing.slashes.visible = !props.buried;
 		combat.jab.slashes.visible = !props.buried;
-		if (!frozen && !inputLocked)
+		if (!inputLocked)
 			combat.update(elapsed);
 		director.updateShots();
 		if (netSync != null)
@@ -546,15 +533,11 @@ class PlayState extends FlxState
 		if (n > 1)
 			util.Levels.award(util.Levels.waveExp() * (n - 1));
 		hud.showWave(n);
-		shift.onWave(n);
 	}
 
 	function onBossWave():Void
 	{
 		bossFight = true;
-		shift.locked = true;
-		shift.forceRevert();
-		shift.cancelArrival();
 		arena.beginBossTransition();
 		arena.onWhiteout = onBossWhiteout;
 		hud.showBoss();
@@ -566,7 +549,6 @@ class PlayState extends FlxState
 	function onBossWhiteout():Void
 	{
 		showDecor(false);
-		shift.clearTotem();
 		hud.fadeBanner();
 		if (bossAlarm != null)
 			bossAlarm.fadeOut(0.8, 0, function(_)
@@ -609,9 +591,6 @@ class PlayState extends FlxState
 	function onArenaNormal():Void
 	{
 		showDecor(true);
-		if (!Net.active)
-			shift.locked = false;
-		shift.restoreTotem();
 		Music.play(stageTrack(), 0.3);
 		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.8);
 	}

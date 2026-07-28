@@ -2,27 +2,6 @@ package data;
 
 import util.Paths;
 
-typedef SideSkinData = {
-	sheet:String,
-	frameW:Int,
-	frameH:Int,
-	offsetX:Float,
-	offsetY:Float,
-	shadowScaleX:Float,
-	idle:Array<Int>,
-	walk:Array<Int>,
-	jump:Array<Int>,
-	fall:Array<Int>,
-	hurt:Array<Int>,
-	death:Array<Int>,
-	idleFps:Int,
-	walkFps:Int,
-	jumpFps:Int,
-	fallFps:Int,
-	hurtFps:Int,
-	deathFps:Int
-}
-
 typedef PlayerData = {
 	moveSpeed:Float,
 	rampStart:Float,
@@ -42,8 +21,7 @@ typedef PlayerData = {
 	timestopSlow:Float,
 	timestopHold:Float,
 	timestopRecover:Float,
-	timestopCooldown:Float,
-	sideSkin:SideSkinData
+	timestopCooldown:Float
 }
 
 class PlayerDataRegistry

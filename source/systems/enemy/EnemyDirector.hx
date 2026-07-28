@@ -10,7 +10,6 @@ import entities.enemy.EnemyShot;
 import data.WaveData;
 import data.WaveData.WaveDataRegistry;
 import util.WorldClock;
-import util.SideView;
 import systems.world.Arena;
 import systems.world.FootCollide;
 
@@ -108,14 +107,10 @@ class EnemyDirector
 
 	public function collide():Void
 	{
-		if (!SideView.active && !SideView.morphing)
-		{
-			FlxG.collide(bodies, arena.map);
-			if (solids != null)
-				bodies.forEachAlive(function(e:Enemies) FootCollide.against(e, e.feetY, solids));
-		}
-		if (!SideView.morphing)
-			FlxG.overlap(bodies, bodies, null, separateLive);
+		FlxG.collide(bodies, arena.map);
+		if (solids != null)
+			bodies.forEachAlive(function(e:Enemies) FootCollide.against(e, e.feetY, solids));
+		FlxG.overlap(bodies, bodies, null, separateLive);
 	}
 
 	function separateLive(a:Enemies, b:Enemies):Bool
@@ -287,7 +282,8 @@ class EnemyDirector
 
 			rig.shadow.visible = alive;
 			rig.shadow.x = e.x + (e.flipX ? e.shadowOffXFlip : e.shadowOffX);
-			SideView.placeShadow(rig.shadow, e.x, e.width, e.y + e.height, e.feetY, e.shadowScaleX, 4);
+			rig.shadow.y = e.feetY;
+			rig.shadow.scale.set(e.shadowScaleX, 4);
 
 			if (!alive)
 			{
@@ -300,7 +296,7 @@ class EnemyDirector
 
 			rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 			rig.hitbox.y = e.y + e.hitOffY;
-			if (!e.seized && e.throwGrace <= 0 && WorldClock.scale > 0.05 && !SideView.morphing)
+			if (!e.seized && e.throwGrace <= 0 && WorldClock.scale > 0.05)
 				status.hurtPlayer(rig.hitbox, e.contactDamage, e.feetY);
 
 			gunfire.emit(e);

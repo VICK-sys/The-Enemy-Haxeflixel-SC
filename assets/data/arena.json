@@ -8,8 +8,5 @@
 	"tiles": "auto_tiles.png",
 
 	"spawnX": 1200,
-	"spawnY": 800,
-
-	"totemWaveMin": 2,
-	"totemWaveRange": 3
+	"spawnY": 800
 }

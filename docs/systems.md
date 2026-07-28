@@ -8,9 +8,7 @@ PlayState builds each system once and updates it once per frame. The exception i
 
 ### Arena
 
-Loads the background and collision tilemap, sets world and camera bounds, and generates pillar sprites from the map data. It answers `wallAt(x, y)`, which is always false while side view is active.
-
-It also owns the side-view landscape. The sky gradient and ground slab come from `buildSideAssets()`. A call to `applySideMorph(t)` interpolates the whole landscape between perspectives. The floor art sinks and dims, and the sky curtain descends. The ground slab fades in, and every pillar stretches into its floating platform. The platform rectangles come from `sidePlatforms()`.
+Loads the background and collision tilemap, sets world and camera bounds, and generates pillar sprites from the map data. It answers `wallAt(x, y)`.
 
 Platform targets come out of the same pass as the pillars. Each keeps the pillar's x and takes a width of at least 150 px. Its height maps from how far north the pillar stands. North becomes high.
 
@@ -126,19 +124,13 @@ While a player is still spending, their avatar carries a gold `LEVELING UP` note
 
 The boss-fight HUD pieces: the pulsing red screen flash and the boss health bar. A call to `showBar(boss)` binds a bar to the boss's HP and plays its entrance. The bar expands out from a compressed sliver as it drops in from the top. The name "Rofel" then fades in letter by letter beneath it. The bar hides itself once the boss is gone.
 
-### PerspectiveShift
-
-The perspective totem and the top-down / side-view switch, in `systems/perspective/`. It splits across `Totem`, `MeteorArrival` and `PerspectiveShift` itself. See [perspective.md](perspective.md).
-
 ## Entities (source/entities/)
 
 ### Player
 
-WASD movement with an acceleration ramp, a dash, and the walk sound loop. It carries two skins: the top-down sparrow atlas, and a side-view grid sheet described by `sideSkin` in player.json.
+WASD movement with an acceleration ramp, a dash, and the walk sound loop.
 
-`applySkin(side)` swaps the graphic and rebuilds the four animations under the same names. Every caller therefore works against either skin, including hurt, death and the ghost trails. The hitbox stays 75x95 in both, so all movement and feet maths stay perspective-independent. Only the draw offset differs.
-
-The skin changes in `setSideMode`, which the shift calls once the morph finishes. The player therefore keeps its top-down look while the stage folds over. It turns 2D on the frame the new world settles.
+`applySkin()` loads the sparrow atlas and builds the four animations. The hitbox stays 75x95, so all movement and feet maths read the same numbers whatever the animation is doing.
 
 The field `baseOffsetY` is public here for the supers. They ride the player's draw offset for hover and somersault lift. They must follow a skin change, rather than a value cached at startup.
 
@@ -166,7 +158,7 @@ The one enemy class. It loads its definition from JSON by kind: `"enemy"`, `"woo
 
 The sprite keeps only what every enemy has, whatever it does. That is stats, damage and death, the seized, stunned and frozen states, and the walk-on entry. It hands the actual thinking to two behaviours it owns, in the same shape as the `AttackBehavior` it already carried.
 
-`EnemyBrain` is the top-down three-state FSM: Wandering, Following and Attacking. It holds the wander timers and the pathing steer. Once the world flips to side view, `EnemySideStep` takes over. It walks and hops along the ground instead.
+`EnemyBrain` is the three-state FSM: Wandering, Following and Attacking. It holds the wander timers and the pathing steer.
 
 Split like that, neither one has to test which mode the world is in. The sprite picks one and calls it.
 
@@ -300,12 +292,6 @@ Four oversized black bars track the mask's edges, so the screen stays covered ho
 ### Music
 
 The single owner of music playback. `play(name, volume, loop)` switches tracks only when the requested track differs from the current one. Asking for the playing track instead applies the volume, restores pitch, and resumes it if paused. That is what keeps the stage theme unbroken across the menu, the game, pause-quit and restarts.
-
-### SideView
-
-Global side-view state, following the WorldClock pattern. It holds `active`, `morphing`, `groundY`, the platform rectangles, and the shared helpers the player, enemies and pickups use. Those helpers are gravity, one-way platform landing, `settle` and `placeShadow`. `settle` is the snap-or-fall resolve every side-mode body runs each frame. Physics values load from sideview.json in `reset()`.
-
-Shadows anchor to each entity's existing feet offset, so a grounded character looks identical to top-down. In side view an airborne one drops its shadow onto the surface below, ground or platform. That shadow shrinks and fades with height. PlayState resets it on every run.
 
 ### DiscordPresence
 

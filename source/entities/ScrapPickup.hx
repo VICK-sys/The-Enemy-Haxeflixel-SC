@@ -3,7 +3,6 @@ package entities;
 import flixel.FlxSprite;
 import util.Paths;
 import util.WorldClock;
-import util.SideView;
 
 class ScrapPickup extends FlxSprite
 {
@@ -18,7 +17,6 @@ class ScrapPickup extends FlxSprite
 	private var life:Float = 0;
 	private var bob:Float = 0;
 	private var restY:Float = 0;
-	private var prevBottom:Float = 0;
 
 	public function new()
 	{
@@ -60,15 +58,9 @@ class ScrapPickup extends FlxSprite
 	override public function update(elapsed:Float):Void
 	{
 		elapsed *= WorldClock.scale;
-		if (SideView.active && !SideView.morphing)
-			SideView.settle(this, prevBottom, elapsed);
-		else
-		{
-			velocity.y = 0;
-			bob += BOB_RATE * elapsed;
-			y = restY + Math.sin(bob) * BOB_AMP;
-		}
-		prevBottom = y + height;
+		velocity.y = 0;
+		bob += BOB_RATE * elapsed;
+		y = restY + Math.sin(bob) * BOB_AMP;
 		super.update(elapsed);
 		life -= elapsed;
 		if (life <= 0)

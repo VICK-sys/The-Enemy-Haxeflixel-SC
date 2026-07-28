@@ -7,7 +7,6 @@ import entities.weapon.RainArrow;
 import systems.Fx;
 import data.WeaponData.WeaponDataRegistry;
 import util.Paths;
-import util.SideView;
 
 class ArrowRain
 {
@@ -48,8 +47,6 @@ class ArrowRain
 
 	public function rainAt(ix:Float, iy:Float):Void
 	{
-		if (SideView.active)
-			iy = SideView.surfaceBelow(ix - 1, 2, iy);
 
 		var m = markers.recycle(FlxSprite);
 		if (m.width != 28)

@@ -94,7 +94,7 @@ Bounce Strike's ground slam, owned by `Weapons` directly. It reads its own stun 
 
 The slam hits the ground at the aim point. It spawns a temporary cracked-ground decal and an expanding ring. The ring stuns every enemy it passes, with a staggered no-damage hit plus a long stun. The wave ignores walls.
 
-The ring is an ellipse squashed to 0.7, so it reads as a circle drawn on the top-down floor. In side view the impact drops to the surface beneath it, platform top or ground. A slam thrown in mid-air therefore lands below you. The ring then flattens to 0.18, so it spreads along that surface instead of ballooning through the air.
+The ring is an ellipse squashed to 0.7, so it reads as a circle drawn on the floor.
 
 Grounding the centre also fixes the knockback for free. The push direction comes from that centre, and now points outward and slightly up. Bounce Strike's slams route through `blast()`.
 
@@ -104,7 +104,7 @@ The bow's secondary. The bow rises above the player's head and points skyward. F
 
 Each impact point shows a ground marker during the descent. The falling arrow fades in over the first part of its drop rather than popping into view. That fade keys to distance fallen, so it stays proportional if the drop height or fall speed change. A landing arrow damages enemies in a radius with outward knockback. The rain ignores walls.
 
-Impact points are floor coordinates, which in side view would be heights. Each one therefore snaps down onto the surface beneath it, through `rainAt`. The marker, the arrow's descent and the blast all follow. Arrow Storm passes a point above the arena, so its drops land on the first surface from above. That lets platforms shelter what is underneath them.
+Impact points are floor coordinates. The marker, the arrow's descent and the blast all read the same point through `rainAt`.
 
 ## HookAttack
 

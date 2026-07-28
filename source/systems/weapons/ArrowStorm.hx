@@ -5,7 +5,6 @@ import flixel.FlxSprite;
 import data.WeaponData.WeaponDataRegistry;
 import util.GhostTrail;
 import util.Paths;
-import util.SideView;
 
 class ArrowStorm
 {
@@ -126,7 +125,7 @@ class ArrowStorm
 			for (i in 0...cfg.dropsPer)
 			{
 				var vx = FlxG.camera.scroll.x + FlxG.random.float() * vw;
-				var vy = SideView.active ? 0 : FlxG.camera.scroll.y + FlxG.random.float() * vh;
+				var vy = FlxG.camera.scroll.y + FlxG.random.float() * vh;
 				rain.rainAt(vx, vy);
 			}
 		}

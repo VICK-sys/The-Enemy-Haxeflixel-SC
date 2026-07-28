@@ -53,7 +53,7 @@ The thrown hammer spins and trails locally. The hook uses a plain position lerp.
 
 Dead Eye replicates as its shots and nothing else. `superActivate` ignores it. Each round it fires emits an ordinary `Shoot`, so the remote draws the bullet. Online it gives up the part that cannot survive co-op.
 
-It does not stop the clock, and it does not root the player. The world is only one machine's to stop. Time stop and the totem are off online for that same reason. Dead Eye instead keeps everything except that one behaviour.
+It does not stop the clock, and it does not root the player. The world is only one machine's to stop. Time stop is off online for that same reason. Dead Eye instead keeps everything except that one behaviour.
 
 What a remote machine can reproduce decides how each other super replicates.
 
@@ -104,7 +104,6 @@ Enemies go idle only when every player is down. That is also the loss condition.
 Three features stay off online, because they fight the authority model.
 
 1. Time stop. It freezes the whole world for one player.
-2. The perspective totem. Its morph relocates every entity globally.
 3. R-restart. Respawns replace it.
 
 ---
