@@ -10,4 +10,5 @@ enum WeaponMode
 	Rain;
 	Hook;
 	Jab;
+	Pellet;
 }

@@ -206,6 +206,7 @@ class PlayState extends FlxState
 		if (Net.active)
 		{
 			Net.inGame = true;
+			_player.color = SaveData.playerColor();
 			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
 			round.useNet(netSync);

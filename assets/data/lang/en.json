@@ -1,4 +1,4 @@
-{
+﻿{
 	"lang.name": "ENGLISH",
 	"common.on": "ON",
 	"common.off": "OFF",
@@ -71,6 +71,7 @@
 	"online.host": "HOST GAME",
 	"online.join": "JOIN GAME",
 	"online.weapon": "WEAPON",
+	"online.color": "COLOR", 
 	"online.setName": "SET NAME",
 	"online.hint": "H - HOW TO PLAY ONLINE        TAB - CHANGE WEAPON",
 	"online.hosting": "HOSTING ON PORT {0} - WAITING FOR FRIENDS...\n(friends join with your IP. Forward TCP {0} on your router)",

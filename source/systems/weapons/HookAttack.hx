@@ -34,6 +34,7 @@ class HookAttack
 	public var rope:FlxTypedGroup<FlxSprite>;
 	public var busy(get, never):Bool;
 	public var holding(get, never):Bool;
+	public var onGrab:(Enemies, Bool) -> Void;
 
 	private var cfg = WeaponDataRegistry.get().hook;
 	private var player:Player;
@@ -67,6 +68,11 @@ class HookAttack
 		rope = new FlxTypedGroup<FlxSprite>();
 
 		flight = new HookFlight(arena, director, hits);
+		flight.onRelease = function(e)
+		{
+			if (onGrab != null)
+				onGrab(e, false);
+		};
 	}
 
 	function get_busy():Bool
@@ -175,6 +181,8 @@ class HookAttack
 		hook.velocity.set(0, 0);
 		pullTimer = cfg.pullTimeout;
 		phase = Pulling;
+		if (onGrab != null)
+			onGrab(victim, true);
 	}
 
 	function updatePulling(elapsed:Float):Void
@@ -314,7 +322,11 @@ class HookAttack
 	function detachVictim():Void
 	{
 		if (victim != null)
+		{
 			victim.unseize(cfg.releaseStun);
+			if (onGrab != null)
+				onGrab(victim, false);
+		}
 		victim = null;
 	}
 

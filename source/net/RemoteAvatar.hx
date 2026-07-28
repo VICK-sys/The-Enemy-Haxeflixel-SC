@@ -101,6 +101,8 @@ class RemoteAvatar
 
 		sprite.visible = true;
 		sprite.flipX = m.fx;
+		if (m.cl != null)
+			sprite.color = m.cl;
 		if (m.an != null && sprite.animation.name != m.an && sprite.animation.getByName(m.an) != null)
 			sprite.animation.play(m.an);
 

@@ -174,6 +174,16 @@ class NetSync
 			Net.send({t: "hit", id: e.netId, px: r2(px), py: r2(py), d: d, s: s});
 		};
 
+		combat.hookAttack.onGrab = function(e, on)
+		{
+			if (e.netId < 0)
+				return;
+			if (on)
+				Net.send({t: "grab", id: e.netId, on: 1});
+			else
+				Net.send({t: "grab", id: e.netId, on: 0, x: r1(e.x), y: r1(e.y)});
+		};
+
 		pickups.onCollect = function(p)
 		{
 			if (p.netId >= 0)
@@ -304,6 +314,25 @@ class NetSync
 				if (p != null)
 					p.kill();
 
+			case "grab" if (Net.isHost):
+				var e = findEnemy(msg.id);
+				if (e != null && !e.isDead && e.grabbable)
+				{
+					if (msg.on == 1)
+					{
+						e.seized = true;
+						e.velocity.set(0, 0);
+					}
+					else
+					{
+						var gx:Float = msg.x;
+						var gy:Float = msg.y;
+						if (gx >= 0 && gy >= 0 && gx + e.width <= arena.width && gy + e.height <= arena.height)
+							e.setPosition(gx, gy);
+						e.unseize(0.35);
+					}
+				}
+
 			case "snap" if (Net.isClient):
 				mirror.apply(msg);
 
@@ -431,6 +460,7 @@ class NetSync
 			t: "av",
 			x: r1(player.x),
 			y: r1(player.y),
+			cl: SaveData.playerColor(),
 			fx: player.flipX,
 			an: player.animation.name,
 			wi: combat.weapon,

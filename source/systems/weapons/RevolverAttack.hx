@@ -18,6 +18,7 @@ class RevolverAttack
 	public var rounds:Int;
 	public var capacity(get, never):Int;
 	public var isReloading(get, never):Bool;
+	public var onPellet:(Float, Float, Float) -> Void;
 
 	private var cfg = WeaponDataRegistry.get().revolver;
 	private var arena:Arena;
@@ -199,6 +200,8 @@ class RevolverAttack
 		spawn(bx, by, jx, jy, deg, cfg.damage, Bullet.ROUND);
 		fx.sparksAt(bx + jx * MUZZLE, by + jy * MUZZLE);
 		FlxG.sound.play(Paths.sound("revolver"), 0.55);
+		if (onPellet != null)
+			onPellet(bx, by, deg);
 		rounds--;
 		if (rounds <= 0)
 		{

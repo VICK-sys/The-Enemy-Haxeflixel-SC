@@ -71,6 +71,7 @@
 	"online.host": "CREAR PARTIDA",
 	"online.join": "UNIRSE A PARTIDA",
 	"online.weapon": "ARMA",
+	"online.color": "COLOR",
 	"online.setName": "PONER NOMBRE",
 	"online.hint": "H - CÓMO JUGAR EN LÍNEA        TAB - CAMBIAR ARMA",
 	"online.hosting": "CREANDO EN EL PUERTO {0} - ESPERANDO A TUS AMIGOS...\n(se unen con tu IP. Abre el puerto TCP {0} en tu router)",

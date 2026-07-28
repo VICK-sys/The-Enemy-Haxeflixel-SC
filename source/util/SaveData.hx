@@ -197,6 +197,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function playerColor():Int
+	{
+		ensure();
+		return save.data.playerColor != null ? save.data.playerColor : 0xFFFFFFFF;
+	}
+
+	public static function setPlayerColor(c:Int):Void
+	{
+		ensure();
+		save.data.playerColor = c;
+		save.flush();
+	}
+
 	public static function playerName():String
 	{
 		ensure();

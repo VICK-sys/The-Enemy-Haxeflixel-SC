@@ -57,6 +57,8 @@ class Weapons
 		deadEye = new DeadEye(player, director, revolver, held);
 		deadEye.onShot = function(bx, by, tx, ty, deg)
 			emitAttack(Shoot, bx, by, Math.cos(deg * Math.PI / 180), Math.sin(deg * Math.PI / 180), deg);
+		revolver.onPellet = function(bx, by, deg)
+			emitAttack(Pellet, bx, by, Math.cos(deg * Math.PI / 180), Math.sin(deg * Math.PI / 180), deg);
 	}
 
 	public var superBusy(get, never):Bool;

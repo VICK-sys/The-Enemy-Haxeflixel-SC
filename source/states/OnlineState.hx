@@ -44,9 +44,11 @@ class OnlineState extends FlxState
 		title.setBorderStyle(OUTLINE, ACCENT, 4);
 		add(title);
 
-		list = new MenuList([Lang.t("online.host"), Lang.t("online.join"), Lang.t("online.weapon"), Lang.t("online.setName"), Lang.t("common.back")], 236, 58, 32);
+		list = new MenuList([Lang.t("online.host"), Lang.t("online.join"), Lang.t("online.weapon"), Lang.t("online.setName"), Lang.t("online.color"), Lang.t("common.back")], 236, 58, 32);
 		list.onChoose = choose;
+		list.onAdjust = adjust;
 		add(list);
+		refreshColor();
 
 		weaponText = new FlxText(0, 514, FlxG.width, "");
 		weaponText.setFormat(Lang.font(), 22, FlxColor.WHITE, CENTER);
@@ -128,10 +130,37 @@ class OnlineState extends FlxState
 				openWeaponPick();
 			case 3:
 				beginNaming();
+			case 4:
+				cycleColor(1);
+				releaseMenu();
 			default:
 				back();
 		}
 	}
+
+	function adjust(i:Int, dir:Int):Void
+	{
+		if (leaving || waiting || busy || typing || i != 4)
+			return;
+		cycleColor(dir);
+	}
+
+	static var COLORS:Array<Int> = [
+		0xFFFFFFFF, 0xFFFF7373, 0xFFFFB973, 0xFFFFFF73, 0xFFB9FF73, 0xFF73FF73, 0xFF73FFB9,
+		0xFF73FFFF, 0xFF73B9FF, 0xFF7373FF, 0xFFB973FF, 0xFFFF73FF, 0xFFFF73B9
+	];
+
+	function cycleColor(dir:Int):Void
+	{
+		var idx = COLORS.indexOf(SaveData.playerColor());
+		if (idx < 0)
+			idx = 0;
+		SaveData.setPlayerColor(COLORS[(idx + dir + COLORS.length) % COLORS.length]);
+		refreshColor();
+	}
+
+	function refreshColor():Void
+		list.rowAt(4).color = SaveData.playerColor();
 
 	function releaseMenu():Void
 	{

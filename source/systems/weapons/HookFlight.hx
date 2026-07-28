@@ -11,6 +11,7 @@ class HookFlight
 	static inline var WALL_PROBE:Float = 50;
 
 	public var active(get, never):Bool;
+	public var onRelease:Enemies->Void;
 
 	private var cfg = WeaponDataRegistry.get().hook;
 	private var arena:Arena;
@@ -92,6 +93,8 @@ class HookFlight
 		victim = null;
 		hitList = [];
 		v.unseize(cfg.releaseStun);
+		if (onRelease != null)
+			onRelease(v);
 		if (hitWall)
 			hits.damage(v, -dirX * 0.4, -dirY * 0.4);
 	}
@@ -99,7 +102,11 @@ class HookFlight
 	public function stop():Void
 	{
 		if (victim != null)
+		{
 			victim.unseize(cfg.releaseStun);
+			if (onRelease != null)
+				onRelease(victim);
+		}
 		victim = null;
 		hitList = [];
 	}

@@ -58,7 +58,7 @@ class PuppetMirror
 		for (id in puppets.keys())
 		{
 			var e = puppets.get(id);
-			if (e == null || !e.exists)
+			if (e == null || !e.exists || e.seized)
 				continue;
 			var tx = targetsX.get(id);
 			var ty = targetsY.get(id);

@@ -51,6 +51,10 @@ The hook, its rope and the thrown hammer stream as state on the avatar packet. T
 
 The thrown hammer spins and trails locally. The hook uses a plain position lerp. Both rope ends interpolate, so the rope does not jitter. A hook stuck in a victim keeps a stale velocity, so it cannot dead-reckon. Host hits also emit an impact event so the client sees sparks. The client draws its own hits already, so only the host's need sending.
 
+A guest's hook grab crosses the wire as a seize message. The host marks the enemy seized and holds it still, the guest's mirror leaves a seized puppet alone so the drag belongs to the grabber, and the release hands the host the enemy's final spot. Everyone else sees the enemy freeze for the grab and snap onward after the throw.
+
+Fanning the hammer sends each pellet as its own event. The burst therefore draws every bullet on the other machines instead of only the muzzle flash.
+
 ## Supers
 
 Dead Eye replicates as its shots and nothing else. `superActivate` ignores it. Each round it fires emits an ordinary `Shoot`, so the remote draws the bullet. Online it gives up the part that cannot survive co-op.
@@ -63,7 +67,7 @@ The blade ring and the arrow storm replay from their activation alone. A call to
 
 The hook arms stream their claws, because they grab enemies. Which enemy is nearest can differ between machines. The grabbed enemy is host-authoritative already, so it gets dragged around correctly on its own. Rope curves rebuild locally from the streamed control points. They anchor to the interpolated body, so they stay attached while it moves.
 
-Supers also lift, spin and squash the player's body. Those three ride along in the avatar packet, and no machine recomputes them. That is what keeps the decoration copies out of the body entirely.
+Supers also lift, spin and squash the player's body. Those three ride along in the avatar packet, and no machine recomputes them. That is what keeps the decoration copies out of the body entirely. The packet also carries the player colour picked in the lobby, and every machine tints that body with it.
 
 ## Transport shape
 

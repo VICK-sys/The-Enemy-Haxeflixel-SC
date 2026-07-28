@@ -71,6 +71,7 @@
 	"online.host": "ホストする",
 	"online.join": "参加する",
 	"online.weapon": "武器",
+	"online.color": "色",
 	"online.setName": "名前を決める",
 	"online.hint": "H - オンラインの遊びかた        TAB - 武器を変更",
 	"online.hosting": "ポート {0} でホスト中 - 友達を待っている...\n(友達はあなたのIPで参加。ルーターでTCP {0} を開放)",

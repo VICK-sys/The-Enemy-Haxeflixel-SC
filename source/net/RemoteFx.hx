@@ -146,6 +146,11 @@ class RemoteFx
 				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
 				FlxG.sound.play(Paths.sound("enemies/shoot"), 0.5);
 
+			case Pellet:
+				var pc = cfg.revolver;
+				bullets.recycle(Bullet).fire(pmx + dx * 24, pmy + dy * 24, dx, dy, aimDeg, pc.damage, pc.speed, pc.range, pc.knock);
+				FlxG.sound.play(Paths.sound("revolver"), 0.45);
+
 			case Bow:
 				var bc = cfg.bowCharge;
 				arrows.recycle(Arrow).fire(pmx + dx * 10, pmy + dy * 10, dx, dy, aimDeg, 1, 1 + power * bc.speedBonus,
