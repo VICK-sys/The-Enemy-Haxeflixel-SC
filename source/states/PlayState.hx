@@ -294,6 +294,7 @@ class PlayState extends FlxState
 			netSync.update(elapsed);
 		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
 		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
+		hud.setBowLoaded(!combat.bow.recovering, combat.weapon == 2);
 		var recharging = combat.weapon == 1 ? combat.revolver.isReloading
 			: combat.weapon == 2 ? combat.bow.recovering
 			: combat.weapon == 0 && combat.swing.recovering;

@@ -5,7 +5,6 @@ import flixel.FlxState;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.text.FlxText;
-import flixel.ui.FlxBar;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import entities.enemy.Enemies;
@@ -24,9 +23,6 @@ class Hud
 	static inline var BOSS_BANNER_TOP:Float = -70;
 	static inline var BOSS_BANNER_REST:Float = 250;
 	static inline var STOP_TIMER_FADE:Float = 4;
-	static inline var RELOAD_TINT:Int = 0xFFFF7A7A;
-	static inline var AMMO_POP_TIME:Float = 0.14;
-	static inline var AMMO_POP_AMP:Float = 0.4;
 	static inline var SCRAP_RIGHT:Float = 18;
 	static inline var SCRAP_TOP:Float = 12;
 	static inline var SCRAP_GAP:Float = 10;
@@ -35,12 +31,18 @@ class Hud
 	static inline var SCRAP_ICON_SCALE:Float = 3;
 	static inline var SCRAP_SHADE:Float = 0.45;
 
-	static inline var SUPER_LEFT:Float = 3;
-	static inline var SUPER_SPAN:Float = 29;
 	static inline var GAUGE_LEFT:Float = 3;
 	static inline var GAUGE_SPAN:Float = 29;
-	static inline var BAR_Y:Float = 642;
 	static inline var UI_SCALE:Float = 4;
+	static inline var FRAME_X:Float = 85;
+	static inline var FRAME_Y:Float = 580;
+	static inline var HP_X:Float = 22;
+	static inline var HP_Y:Float = 8;
+	static inline var SUPER_X:Float = 27;
+	static inline var SUPER_Y:Float = 17;
+	static inline var AMMO_X:Float = 1000;
+	static inline var AMMO_Y:Float = 592;
+	static inline var PIP_GAP:Float = 8;
 
 	public var camUI:FlxCamera;
 
@@ -67,13 +69,16 @@ class Hud
 	private var gaugeFill:FlxSprite;
 	private var gaugeClip:FlxRect;
 	private var gaugeShown:Float = -1;
-	private var ammoText:FlxText;
-	private var ammoShown:Int = -1;
-	private var ammoPop:Float = 0;
 	private var superFill:FlxSprite;
 	private var superClip:FlxRect;
 	private var superShown:Float = -1;
-	private var healthBar:FlxBar;
+	private var hpFill:FlxSprite;
+	private var hpClip:FlxRect;
+	private var hpShown:Float = -1;
+	private var bulletPips:Array<FlxSprite> = [];
+	private var bulletsShown:Int = -1;
+	private var arrowPip:FlxSprite;
+	private var arrowShown:Bool = true;
 	private var cursorPoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 	private var pieces:Array<flixel.FlxBasic> = [];
 	private var hudOn:Bool = true;
@@ -87,39 +92,32 @@ class Hud
 		FlxG.cameras.add(camUI, false);
 		camUI.bgColor.alpha = 0;
 
-		var barBackground = makeSprite(160, BAR_Y, "bar_red");
-		var playerIcon = makeSprite(barBackground.x - 120, barBackground.y, "mufu_icon");
-		var superEmpty = makeSprite(barBackground.x, barBackground.y, "bar_super_empty");
+		var frame = makeUiSprite(FRAME_X, FRAME_Y, "hp_thing");
+		var playerIcon = makeSprite(40, 642, "mufu_icon");
 
-		superFill = makeSprite(barBackground.x, barBackground.y, "bar_super_fill");
-		superClip = FlxRect.get(0, 0, 0, barBackground.frameHeight);
+		hpFill = makeUiSprite(FRAME_X + HP_X * UI_SCALE, FRAME_Y + HP_Y * UI_SCALE, "hp_bar");
+		hpClip = FlxRect.get(0, 0, 0, hpFill.frameHeight);
 
-		state.add(piece(barBackground));
-		state.add(piece(superEmpty));
+		superFill = makeUiSprite(FRAME_X + SUPER_X * UI_SCALE, FRAME_Y + SUPER_Y * UI_SCALE, "super_bar");
+		superClip = FlxRect.get(0, 0, 0, superFill.frameHeight);
+
+		state.add(piece(frame));
+		state.add(piece(hpFill));
 		state.add(piece(superFill));
-		healthBar = makeBar(barBackground, "bar_main_empty", "bar_main_red", 'health', status.healthMax);
-		state.add(healthBar);
-		pieces.push(healthBar);
 		state.add(piece(playerIcon));
 
-		gaugeBack = makeSprite(barBackground.x, 0, "bar_gauge_back");
-		gaugeFill = makeSprite(barBackground.x, 0, "bar_gauge_fill");
-		var gaugeY = barBackground.y + (UI_SCALE + 1) * 0.5 * barBackground.frameHeight
-			- (UI_SCALE - 1) * 0.5 * gaugeBack.frameHeight;
-		gaugeBack.y = gaugeY;
-		gaugeFill.y = gaugeY;
+		var gaugeY = FRAME_Y + frame.height + PIP_GAP;
+		gaugeBack = makeUiSprite(hpFill.x, gaugeY, "bar_gauge_back");
+		gaugeFill = makeUiSprite(hpFill.x, gaugeY, "bar_gauge_fill");
 		gaugeClip = FlxRect.get(0, 0, 0, gaugeBack.frameHeight);
 		gaugeBack.visible = false;
 		gaugeFill.visible = false;
 		state.add(piece(gaugeBack));
 		state.add(piece(gaugeFill));
 
-		ammoText = new FlxText(1000, 576, 240, "");
-		ammoText.setFormat(Lang.font(), 30, FlxColor.WHITE, CENTER);
-		ammoText.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
-		ammoText.cameras = [camUI];
-		ammoText.visible = false;
-		state.add(piece(ammoText));
+		arrowPip = makeUiSprite(AMMO_X, AMMO_Y, "ammo_arrow");
+		arrowPip.visible = false;
+		state.add(piece(arrowPip));
 
 		timeText = new FlxText(92, 588, 0, "");
 		timeText.setFormat(Lang.font(), 14, FlxColor.WHITE, LEFT);
@@ -173,15 +171,15 @@ class Hud
 		{
 			gaugeBack.visible = false;
 			gaugeFill.visible = false;
-			ammoText.visible = false;
+			arrowPip.visible = false;
+			for (p in bulletPips)
+				p.visible = false;
+			bulletsShown = -1;
 			stopTimerText.visible = false;
 			bannerText.visible = bannerTimer > 0 || bannerFading;
 			deadText.visible = false;
 		}
 	}
-
-	public function setHealthRange(max:Float):Void
-		healthBar.setRange(0, max);
 
 	public function setTimeStop(label:String):Void
 	{
@@ -206,15 +204,8 @@ class Hud
 		FlxG.mouse.getViewPosition(camUI, cursorPoint);
 		customCursor.setPosition(cursorPoint.x - customCursor.frameWidth * 0.5, cursorPoint.y - customCursor.frameHeight * 0.5);
 
+		updateHealth();
 		updateSuper();
-
-		if (ammoPop > 0)
-		{
-			ammoPop -= elapsed;
-			var t = ammoPop > 0 ? ammoPop / AMMO_POP_TIME : 0;
-			var s = 1 + AMMO_POP_AMP * t;
-			ammoText.scale.set(s, s);
-		}
 
 		if (stopTimerText.alpha != stopTimerTarget)
 		{
@@ -292,6 +283,20 @@ class Hud
 		}
 	}
 
+	function updateHealth():Void
+	{
+		var pct = status.healthMax > 0 ? status.health / status.healthMax : 0;
+		if (pct < 0)
+			pct = 0;
+		if (pct > 1)
+			pct = 1;
+		if (pct == hpShown)
+			return;
+		hpShown = pct;
+		hpClip.width = hpFill.frameWidth * pct;
+		hpFill.clipRect = hpClip;
+	}
+
 	function updateSuper():Void
 	{
 		var pct = status.superMax > 0 ? status.superMeter / status.superMax : 0;
@@ -302,7 +307,7 @@ class Hud
 		if (pct == superShown)
 			return;
 		superShown = pct;
-		superClip.width = SUPER_LEFT + SUPER_SPAN * pct;
+		superClip.width = superFill.frameWidth * pct;
 		superFill.clipRect = superClip;
 	}
 
@@ -424,16 +429,40 @@ class Hud
 
 	public function setAmmo(cur:Int, max:Int, reloading:Bool, shown:Bool):Void
 	{
-		ammoText.visible = shown && hudOn;
-		if (!shown)
-			return;
-		if (cur != ammoShown)
+		while (bulletPips.length < max)
 		{
-			ammoShown = cur;
-			ammoText.text = cur + " / " + max;
-			ammoPop = AMMO_POP_TIME;
+			var p = makeUiSprite(AMMO_X + bulletPips.length * (32 + PIP_GAP), AMMO_Y, "ammo_bullet");
+			p.visible = false;
+			state.add(piece(p));
+			bulletPips.push(p);
 		}
-		ammoText.color = reloading ? RELOAD_TINT : FlxColor.WHITE;
+
+		if (!shown || !hudOn)
+		{
+			if (bulletsShown != -1)
+				for (p in bulletPips)
+					p.visible = false;
+			bulletsShown = -1;
+			return;
+		}
+
+		if (cur == bulletsShown)
+			return;
+		bulletsShown = cur;
+		for (i in 0...bulletPips.length)
+		{
+			bulletPips[i].loadGraphic(Paths.image("ui/" + (i < cur ? "ammo_bullet" : "ammo_bullet_empty")));
+			bulletPips[i].visible = true;
+		}
+	}
+
+	public function setBowLoaded(loaded:Bool, shown:Bool):Void
+	{
+		arrowPip.visible = shown && hudOn;
+		if (!shown || loaded == arrowShown)
+			return;
+		arrowShown = loaded;
+		arrowPip.loadGraphic(Paths.image("ui/" + (loaded ? "ammo_arrow" : "ammo_arrow_empty")));
 	}
 
 	public function showDeath(wave:Int, best:Int):Void
@@ -462,9 +491,17 @@ class Hud
 		return s;
 	}
 
+	function makeUiSprite(x:Float, y:Float, name:String):FlxSprite
+	{
+		var s = makeSprite(x, y, name);
+		s.updateHitbox();
+		s.setPosition(x, y);
+		return s;
+	}
+
 	public function applyLanguage(wave:Int):Void
 	{
-		for (t in [waveText, expText, expShade, bannerText, deadText, ammoText, timeText])
+		for (t in [waveText, expText, expShade, bannerText, deadText, timeText])
 			t.font = Lang.font();
 		layoutScrap();
 		waveText.text = Lang.t("hud.wave", [wave]);
@@ -480,14 +517,4 @@ class Hud
 		return t;
 	}
 
-	function makeBar(anchor:FlxSprite, emptyName:String, fillName:String, valueField:String, max:Float):FlxBar
-	{
-		var b = new FlxBar(anchor.x, anchor.y, LEFT_TO_RIGHT, Std.int(anchor.width), Std.int(anchor.height), status, valueField, 0, max);
-		b.createImageBar(Paths.image("ui/" + emptyName), Paths.image("ui/" + fillName), FlxColor.TRANSPARENT, FlxColor.TRANSPARENT);
-		b.updateBar();
-		b.antialiasing = false;
-		b.scale.set(4, 4);
-		b.cameras = [camUI];
-		return b;
-	}
 }
