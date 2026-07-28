@@ -107,6 +107,17 @@ class Levels
 	public static function damageBonus():Int
 		return damageAt(points(STRENGTH));
 
+	public static function damageStep():Int
+		return conf().strengthPerPoints;
+
+	public static function damageProgress(pts:Int):Int
+	{
+		var c = conf();
+		if (damageAt(pts) >= c.strengthMax)
+			return -1;
+		return pts % c.strengthPerPoints;
+	}
+
 	public static function actionAt(pts:Int):Float
 	{
 		var c = conf();

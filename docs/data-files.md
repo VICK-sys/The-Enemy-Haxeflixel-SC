@@ -218,7 +218,7 @@ The screen shows what a point buys before you spend it. The left panel holds the
 | `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)` |
 | `vigorPerPoint` | health added per point |
 | `enduranceDashPerPoint`, `enduranceApPerPoint` | fraction off the dash cooldown, and fraction on to AP gained per kill |
-| `strengthPerPoints` | points needed for one more damage |
+| `strengthPerPoints` | points needed for one more damage. The screen shows progress toward the next one, so a point that does not cross the line still reads as movement |
 | `dexterityPerPoint` | fraction off swing, fire and reload time |
 | `enduranceDashFloor`, `dexterityFloor` | the shortest a timer can get, as a fraction of its base |
 | `enduranceApCap`, `strengthMax` | ceilings on the AP multiplier and the damage bonus |

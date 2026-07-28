@@ -86,10 +86,10 @@ class LevelUpSubState extends FlxSubState
 		for (i in 0...derived.length)
 		{
 			var y = TOP + 40 + i * 52;
-			var n = text(RIGHT_X + 28, y, 300, Lang.t("derived." + derived[i]), 22, DIM, LEFT);
-			var a = text(RIGHT_X + 300, y, 110, "", 22, FlxColor.WHITE, RIGHT);
-			var g = text(RIGHT_X + 414, y, 30, ">", 22, DIM, CENTER);
-			var b = text(RIGHT_X + 444, y, 100, "", 22, FlxColor.WHITE, RIGHT);
+			var n = text(RIGHT_X + 24, y, 250, Lang.t("derived." + derived[i]), 22, DIM, LEFT);
+			var a = text(RIGHT_X + 232, y, 156, "", 22, FlxColor.WHITE, RIGHT);
+			var g = text(RIGHT_X + 394, y, 30, ">", 22, DIM, CENTER);
+			var b = text(RIGHT_X + 426, y, 134, "", 22, FlxColor.WHITE, RIGHT);
 			ui(n);
 			ui(a);
 			ui(g);
@@ -147,6 +147,13 @@ class LevelUpSubState extends FlxSubState
 	function two(v:Float):String
 		return Std.string(Math.round(v * 100) / 100);
 
+	function dmg(pts:Int):String
+	{
+		var out = "+" + Levels.damageAt(pts);
+		var p = Levels.damageProgress(pts);
+		return p < 0 ? out : out + "  (" + p + "/" + Levels.damageStep() + ")";
+	}
+
 	function refresh():Void
 	{
 		head[0].text = Lang.t("level.level") + "   " + Levels.level();
@@ -176,14 +183,14 @@ class LevelUpSubState extends FlxSubState
 			two(base.healthMax + Levels.healthBonus()),
 			two(base.dashCooldown * Levels.dashScale()),
 			two(base.apPerKill * Levels.apGainScale()),
-			"+" + Levels.damageBonus(),
+			dmg(Levels.points(Levels.STRENGTH)),
 			two(Levels.actionScale())
 		];
 		var soon = [
 			two(base.healthMax + Levels.healthAt(vg)),
 			two(base.dashCooldown * Levels.dashAt(en)),
 			two(base.apPerKill * Levels.apGainAt(en)),
-			"+" + Levels.damageAt(st),
+			dmg(st),
 			two(Levels.actionAt(dx))
 		];
 
