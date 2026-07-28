@@ -1,4 +1,4 @@
-﻿package systems.world;
+package systems.world;
 
 import flixel.FlxG;
 import flixel.FlxState;

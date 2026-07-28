@@ -1,4 +1,4 @@
-﻿package systems.weapons;
+package systems.weapons;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
