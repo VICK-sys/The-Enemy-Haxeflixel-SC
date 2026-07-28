@@ -121,13 +121,13 @@ Playing one sets `CustomArena`, a static the Arena constructor checks. When set,
 
 The main menu clears `CustomArena` on entry, so a normal PLAY is always the stock arena. Online runs start only from the menu, so custom maps cannot desync a co-op session.
 
-`CustomArena` also records which slot a map came from, and slot 2 is the quiet room. It runs no waves and hands you no weapon.
+`CustomArena` also records which slot a map came from. The quiet room is not a user slot. It ships as a built-in map, `assets/data/maps/treeRoom.json`, and `MapStore.builtin("treeRoom")` loads it on both targets. `Detour` marks it with the reserved slot -2, and that slot value is what makes a run quiet. A quiet run has no waves and hands you no weapon.
 
 A false `EnemyDirector.spawning` stops wave pacing and the boss intro. The per-enemy tick still runs, so anything already placed still behaves. A true `Weapons.disabled` drops every attack input and hides the held sprite. The weapon card and the tutorial both stay shut.
 
 The quiet room also takes its own music. `stageTrack()` answers `stage/Man_music` there and `stage/gloomDoomWoods` everywhere else. Both stage music calls read it, so the track holds even on the path back from a boss.
 
-The slot number carries this rather than a field in the map file. A field would not survive the next save, because the editor writes the map from its own document.
+The slot number carries this rather than a field in the map file. A field would not survive the next save, because the editor writes the map from its own document. The reserved slot keeps that rule intact: the editor never writes slot -2, and the built-in file never changes, so the marker cannot be lost.
 
 ## Paintable tilesets - assets/data/tilesets.json
 
@@ -268,7 +268,7 @@ The value persists in the save, beside the best wave and the settings. It surviv
 
 `treeRoom` is the first event to read it. On a save that rolled 66, one boss wave turns into a visit to the quiet room. `Detour` holds that logic.
 
-Four things must hold. The value sits in the window, a 1 in 66 roll comes up, the run is solo, and a slot 2 map is on disk. It fires at most once. The menu and the restart both clear the mark.
+Three things must hold. The value sits in the window, a 1 in 66 roll comes up, and the run is solo. The room itself ships with the game, so no map file can be missing. It fires at most once. The menu and the restart both clear the mark.
 
 The visit saves the run before it swaps arenas: wave, boss wave, health, super meter, kills and weapon. Walking back out ends it, and `resumeAfter` puts the director where it was.
 

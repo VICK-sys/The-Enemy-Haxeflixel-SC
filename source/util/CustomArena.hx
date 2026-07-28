@@ -2,7 +2,7 @@ package util;
 
 class CustomArena
 {
-	public static inline var QUIET_SLOT:Int = 2;
+	public static inline var QUIET_SLOT:Int = -2;
 
 	public static var csv:String = null;
 	public static var spawnX:Float = 0;

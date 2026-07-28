@@ -7,7 +7,7 @@ import net.Net;
 class Detour
 {
 	public static inline var EVENT:String = "treeRoom";
-	public static inline var ROOM_SLOT:Int = 2;
+	public static inline var ROOM:String = "treeRoom";
 	public static inline var ODDS:Int = 66;
 
 	public static var inRoom(default, null):Bool = false;
@@ -43,14 +43,14 @@ class Detour
 			return false;
 		if (!Run.allows(EVENT))
 			return false;
-		if (MapStore.load(ROOM_SLOT) == null)
+		if (MapStore.builtin(ROOM) == null)
 			return false;
 		return FlxG.random.int(1, ODDS) == 1;
 	}
 
 	public static function begin(atWave:Int, atBossWave:Int, hp:Float, superAt:Float, killCount:Int, heldWeapon:Int):Bool
 	{
-		var room = MapStore.load(ROOM_SLOT);
+		var room = MapStore.builtin(ROOM);
 		if (room == null)
 			return false;
 
@@ -72,7 +72,7 @@ class Detour
 
 		used = true;
 		inRoom = true;
-		CustomArena.fromStored(room, ROOM_SLOT);
+		CustomArena.fromStored(room, CustomArena.QUIET_SLOT);
 		return true;
 	}
 
