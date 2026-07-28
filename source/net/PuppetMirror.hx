@@ -175,6 +175,8 @@ class PuppetMirror
 
 	public function blastLastBoss():Void
 	{
+		for (i in 0...Scraps.BOSS_SCRAP)
+			scraps.drop(lastBossX, lastBossY);
 		var boom = Fx.bossBlast(lastBossX, lastBossY);
 		layers.entityLayer.add(boom);
 		new FlxTimer().start(1.2, function(_)

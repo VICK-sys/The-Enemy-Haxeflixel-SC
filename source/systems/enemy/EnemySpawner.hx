@@ -54,21 +54,8 @@ class EnemySpawner
 		var mh = arena.height;
 
 		var a = anchor();
-		switch (Std.random(4))
-		{
-			case 0:
-				e.x = -e.width - SPAWN_OUT;
-				e.y = edgeCoord(a.y, mh);
-			case 1:
-				e.x = mw + SPAWN_OUT;
-				e.y = edgeCoord(a.y, mh);
-			case 2:
-				e.x = edgeCoord(a.x, mw);
-				e.y = -e.height - SPAWN_OUT;
-			default:
-				e.x = edgeCoord(a.x, mw);
-				e.y = mh + SPAWN_OUT;
-		}
+		e.x = edgeCoord(a.x, mw);
+		e.y = mh + SPAWN_OUT;
 
 		e.entering = true;
 		e.allowCollisions = NONE;

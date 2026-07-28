@@ -36,6 +36,7 @@ To add an enemy type, do three things. Put an atlas under `assets/images/enemies
 | `breather` | seconds between waves, before `scaling` shortens it |
 | `baseCount`, `countPerWave` | enemy count = baseCount + wave x countPerWave |
 | `maxCount` | count cap, or 0 for no cap |
+| `spawnBatch`, `spawnEvery` | a wave arrives in pulses of `spawnBatch` enemies, `spawnEvery` seconds apart, instead of all at once. A batch of 0 restores the single burst |
 | `bossWaveMin`, `bossWaveRange` | the first boss wave is `bossWaveMin + random(0..bossWaveRange)`, rolled once per run |
 | `bossRepeat` | waves between bosses after the first. 0 means the boss happens once and never again |
 | `waves` | array of `{types}` spawn pools. The first entry is wave 1, and the last entry repeats for every later wave. Repeat a type inside a pool to weight it |
@@ -215,7 +216,7 @@ The screen shows what a point buys before you spend it. The left panel holds the
 | Field | Meaning |
 |---|---|
 | `scrapValue`, `expPerWave` | exp for one scrap picked up, and per wave cleared. The wave award scales with the wave number |
-| `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)` |
+| `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)`. With growth at 1.0 that is a flat start plus `costFlat` per level: 20, 25, 30, and so on |
 | `vigorPerPoint` | health added per point |
 | `enduranceDashPerPoint`, `enduranceSuperPerPoint` | fraction off the dash cooldown, and fraction on to super meter gained per kill |
 | `strengthPerPoints` | points needed for one more damage. The screen shows progress toward the next one, so a point that does not cross the line still reads as movement |

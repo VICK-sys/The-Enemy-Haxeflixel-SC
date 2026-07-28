@@ -23,6 +23,8 @@ typedef WaveData = {
 	baseCount:Int,
 	countPerWave:Int,
 	maxCount:Int,
+	spawnBatch:Int,
+	spawnEvery:Float,
 	bossWaveMin:Int,
 	bossWaveRange:Int,
 	bossRepeat:Int,

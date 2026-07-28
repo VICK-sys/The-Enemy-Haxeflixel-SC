@@ -9,6 +9,8 @@ import util.WorldClock;
 
 class Scraps
 {
+	public static inline var BOSS_SCRAP:Int = 5;
+
 	static inline var MAGNET:Float = 170;
 	static inline var PULL_MIN:Float = 90;
 	static inline var PULL_MAX:Float = 620;

@@ -48,7 +48,7 @@ It re-asserts death every frame, rather than only on the transition. Several wea
 
 Wave pacing and the per-enemy tick. It owns the rigs: enemy, shadow and contact hitbox. It walks them each frame for targeting, entry, shadows, contact damage and cleanup. It also answers the circle queries every weapon aims with.
 
-Three collaborators hold what it used to. Where an enemy goes belongs to `EnemySpawner`: edge placement, the stuck watchdog, and the rescue that frees a wedged enemy. All three ask the same thing, which is where clear ground lies.
+Three collaborators hold what it used to. Where an enemy goes belongs to `EnemySpawner`: placement along the bottom edge, the stuck watchdog, and the rescue that frees a wedged enemy. Every spawn walks in from below, so the fight has a front rather than a surround, and the shop at the top of the arena stays behind you. All three ask the same thing, which is where clear ground lies.
 
 A spot counts as clear only if the foot box that actually collides with props is clear. The check samples the enemy's full width at its feet, not its body centre. The two disagree. An enemy can go solid because its centre is clear. It then wedges on the prop its feet already sit inside.
 

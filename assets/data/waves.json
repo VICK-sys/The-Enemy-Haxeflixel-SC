@@ -4,6 +4,8 @@
 	"baseCount": 2,
 	"countPerWave": 1,
 	"maxCount": 0,
+	"spawnBatch": 3,
+	"spawnEvery": 2,
 	"bossWaveMin": 4,
 	"bossWaveRange": 4,
 	"bossRepeat": 6,

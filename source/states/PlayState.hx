@@ -248,6 +248,7 @@ class PlayState extends FlxState
 		director.onBoss = onBossWave;
 		director.onBossSpawn = hud.showBossBar;
 		director.onBossDefeated = onBossDefeated;
+		director.onBossDrops = dropBossLoot;
 		director.onFriendlyShot = onDeflectedShot;
 		director.bossVeto = tryDetour;
 		arena.onNormal = onArenaNormal;
@@ -600,6 +601,13 @@ class PlayState extends FlxState
 			});
 		Music.play("batallon_de_las_velas", 0.5);
 		FlxTween.tween(FlxG.camera, {zoom: 0.8}, 1.2);
+	}
+
+	function dropBossLoot(cx:Float, cy:Float):Void
+	{
+		for (i in 0...systems.Scraps.BOSS_SCRAP)
+			scraps.drop(cx, cy);
+		pickups.drop(cx, cy);
 	}
 
 	function onBossDefeated():Void

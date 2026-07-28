@@ -21,6 +21,9 @@ class EnemyDirector
 
 	public var wave:Int = 0;
 	public var spawning:Bool = true;
+
+	private var queued:Array<String> = [];
+	private var dripTimer:Float = 0;
 	public var holdWave:Bool = false;
 	public var shots(get, never):FlxTypedGroup<EnemyShot>;
 	public var onWave:Int->Void;
@@ -91,6 +94,17 @@ class EnemyDirector
 	function set_onFriendlyShot(f:EnemyShot->Bool)
 	{
 		gunfire.onFriendly = f;
+		return f;
+	}
+
+	public var onBossDrops(get, set):(Float, Float) -> Void;
+
+	function get_onBossDrops()
+		return bossDeath.onDrops;
+
+	function set_onBossDrops(f:(Float, Float) -> Void)
+	{
+		bossDeath.onDrops = f;
 		return f;
 	}
 
@@ -165,7 +179,14 @@ class EnemyDirector
 			return;
 		}
 
-		if (waveCleared())
+		if (queued.length > 0)
+		{
+			dripTimer -= elapsed;
+			if (dripTimer <= 0)
+				dripSpawn();
+		}
+
+		if (queued.length == 0 && waveCleared())
 		{
 			betweenWaves = breatherTime();
 			if (wave > 0 && onWaveCleared != null)
@@ -243,13 +264,22 @@ class EnemyDirector
 			poolIndex = waveData.waves.length - 1;
 
 		var pool = waveData.waves[poolIndex].types;
-		for (i in 0...count)
+		queued = [for (i in 0...count) pool[Std.random(pool.length)]];
+		dripTimer = 0;
+		dripSpawn();
+	}
+
+	function dripSpawn():Void
+	{
+		var n = waveData.spawnBatch > 0 ? waveData.spawnBatch : queued.length;
+		while (n-- > 0 && queued.length > 0)
 		{
-			var e = new Enemies(pool[Std.random(pool.length)]);
+			var e = new Enemies(queued.shift());
 			applyWaveScale(e);
 			spawner.placeAtEdge(e);
 			register(e);
 		}
+		dripTimer = waveData.spawnEvery;
 	}
 
 	function updateRigs(elapsed:Float):Void

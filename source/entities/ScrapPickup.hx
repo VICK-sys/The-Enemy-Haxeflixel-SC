@@ -15,7 +15,7 @@ class ScrapPickup extends FlxSprite
 	static inline var BOB_RATE:Float = 4.5;
 	static inline var BOB_AMP:Float = 3;
 	static inline var VARIANTS:Int = 5;
-	static inline var SHADOW_LIFT:Float = 2;
+	static inline var SHADOW_LIFT:Float = 6;
 
 	public var shadow(default, null):FlxSprite;
 	public var mounted:Bool = false;

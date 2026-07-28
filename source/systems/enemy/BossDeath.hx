@@ -9,6 +9,7 @@ class BossDeath
 	static inline var SHAKE_AMP:Float = 12;
 
 	public var onDefeated:Void->Void;
+	public var onDrops:(Float, Float) -> Void;
 
 	private var layers:RenderLayers;
 	private var boss:Enemies;
@@ -83,6 +84,8 @@ class BossDeath
 		layers.entityLayer.remove(explosion, true);
 		explosion.destroy();
 		explosion = null;
+		if (onDrops != null)
+			onDrops(boss.x + boss.width / 2, boss.y + boss.height / 2);
 		boss.kill();
 		boss = null;
 		dying = false;
