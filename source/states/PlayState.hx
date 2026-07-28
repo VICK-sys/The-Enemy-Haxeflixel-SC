@@ -165,9 +165,10 @@ class PlayState extends FlxState
 		for (s in props.named("treeBush2"))
 			bushes.add(s, true);
 
-		for (s in props.named("tree"))
+		for (s in props.named("treeBush2"))
 		{
-			petals = new systems.PetalFall(layers.entityLayer, s.x + s.width * 0.5, s.y + s.height, s.width, s.height);
+			petals = new systems.PetalFall(s, "props/treeBush2");
+			add(petals.group);
 			break;
 		}
 

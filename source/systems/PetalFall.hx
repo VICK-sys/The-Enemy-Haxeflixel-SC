@@ -8,8 +8,8 @@ import util.Paths;
 class PetalFall
 {
 	static inline var SCALE:Int = 7;
-	static inline var POOL:Int = 24;
-	static inline var EVERY:Float = 0.34;
+	static inline var POOL:Int = 12;
+	static inline var EVERY:Float = 1.15;
 
 	static inline var LIFE_MIN:Float = 2.6;
 	static inline var LIFE_MAX:Float = 4.2;
@@ -21,11 +21,11 @@ class PetalFall
 	static inline var SWAY_RATE:Float = 2.1;
 	static inline var HOLD:Float = 0.45;
 
-	// the band they break off from, as fractions of the tree's drawn box
-	static inline var X0:Float = 0.02;
-	static inline var X1:Float = 0.46;
-	static inline var Y0:Float = 0.58;
-	static inline var Y1:Float = 0.76;
+	// only the right of the bush sheds, and only from the underside of the art
+	static inline var RIGHT_FROM:Float = 0.5;
+	static inline var ALPHA_FLOOR:Int = 20;
+
+	public var group(default, null):FlxTypedGroup<FlxSprite>;
 
 	private var petals:Array<FlxSprite> = [];
 	private var life:Array<Float> = [];
@@ -35,18 +35,17 @@ class PetalFall
 	private var wobble:Array<Float> = [];
 	private var driftX:Array<Float> = [];
 
-	private var left:Float;
-	private var top:Float;
-	private var wide:Float;
-	private var tall:Float;
+	private var bush:FlxSprite;
+	private var edgeX:Array<Int> = [];
+	private var edgeY:Array<Int> = [];
 	private var timer:Float = 0;
 
-	public function new(into:FlxTypedGroup<FlxSprite>, treeX:Float, treeFeetY:Float, treeW:Float, treeH:Float)
+	public function new(bush:FlxSprite, sheet:String)
 	{
-		left = treeX + treeW * X0;
-		wide = treeW * (X1 - X0);
-		top = treeFeetY - treeH + treeH * Y0;
-		tall = treeH * (Y1 - Y0);
+		this.bush = bush;
+		group = new FlxTypedGroup<FlxSprite>();
+
+		traceUnderside(sheet);
 
 		for (i in 0...POOL)
 		{
@@ -62,7 +61,28 @@ class PetalFall
 			vy.push(0);
 			wobble.push(0);
 			driftX.push(0);
-			into.add(s);
+			group.add(s);
+		}
+	}
+
+	function traceUnderside(sheet:String):Void
+	{
+		var g = FlxG.bitmap.add(Paths.image(sheet));
+		if (g == null)
+			return;
+		var bmp = g.bitmap;
+		var from = Std.int(bmp.width * RIGHT_FROM);
+		for (px in from...bmp.width)
+		{
+			var lowest = -1;
+			for (py in 0...bmp.height)
+				if ((bmp.getPixel32(px, py) >>> 24) > ALPHA_FLOOR)
+					lowest = py;
+			if (lowest >= 0)
+			{
+				edgeX.push(px);
+				edgeY.push(lowest);
+			}
 		}
 	}
 
@@ -100,17 +120,25 @@ class PetalFall
 
 	function release():Void
 	{
+		if (edgeX.length == 0)
+			return;
+
 		for (i in 0...petals.length)
 		{
 			var s = petals[i];
 			if (s.exists)
 				continue;
 
+			// the bush drifts, so read where it is right now
+			var pick = FlxG.random.int(0, edgeX.length - 1);
+			var x = bush.x + edgeX[pick] * bush.scale.x;
+			var y = bush.y + edgeY[pick] * bush.scale.y;
+
 			s.exists = true;
 			s.alpha = 1;
-			driftX[i] = left + FlxG.random.float(0, wide);
+			driftX[i] = x - s.width * 0.5;
 			s.x = driftX[i];
-			s.y = top + FlxG.random.float(0, tall);
+			s.y = y - s.height * 0.5;
 			vx[i] = FlxG.random.float(VX_MIN, VX_MAX);
 			vy[i] = FlxG.random.float(VY_MIN, VY_MAX);
 			wobble[i] = FlxG.random.float(0, Math.PI * 2);

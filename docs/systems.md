@@ -183,11 +183,13 @@ It moves `x` and `y`, not the draw offset. A `PropSprite` caches its sort key in
 
 ### PetalFall
 
-Petals breaking off the canopy. They start in a band on the right of the tree, under the second bush layer, and drift south east while they fade. Each one takes a random speed, a random life and a random start, so no two fall alike. A slow sine on the horizontal makes them flutter rather than slide.
+Petals breaking off the canopy. They drift south east while they fade, one every second or so. Each takes a random speed, a random life and a random start, so no two fall alike. A slow sine on the horizontal makes them flutter rather than slide.
 
-The band is a fraction of the tree's drawn box rather than a fixed rectangle, so it follows the prop if the tree moves or changes scale.
+They leave from the underside of the art, not from a guessed rectangle. The class reads `treeBush2` once and records the lowest opaque pixel in each column of its right half. A spawn picks one of those columns and starts there. A rectangle put petals in the transparent space under the sheet, because the art stops well short of the bottom of its canvas.
 
-They go in the entity layer as plain sprites, which sorts them by their own foot line. A petal therefore starts behind the canopy and passes in front of it on the way down. The pool holds twenty four and recycles the dead, so nothing is built while the room runs.
+The reading is in source pixels, and the spawn converts through the sprite's live position and scale. The bush drifts, so the petals leave from where it is at that moment.
+
+They draw in their own group above the entity layer, so a petal passes over the walls rather than behind them. The pool holds twelve and recycles the dead, so nothing is built while the room runs.
 
 ### TreeMan and DialogueBox
 
