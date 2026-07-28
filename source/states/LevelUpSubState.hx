@@ -13,7 +13,7 @@ import util.Levels;
 class LevelUpSubState extends FlxSubState
 {
 	static inline var GOLD:Int = 0xFFE8C860;
-	static inline var LIT:Int = 0xFF7FC8FF;
+	static inline var LIT:Int = 0xFF8CE07F;
 	static inline var DIM:Int = 0xFF9A9A9A;
 	static inline var EDGE:Int = 0xFF6A5A32;
 	static inline var FILL:Int = 0xF2100E0C;

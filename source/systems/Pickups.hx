@@ -14,17 +14,28 @@ class Pickups
 	private var player:Player;
 	private var status:PlayerCombat;
 	private var nextId:Int = 1;
+	private var shadowLayer:FlxTypedGroup<flixel.FlxSprite>;
 
-	public function new(player:Player, status:PlayerCombat)
+	public function new(player:Player, status:PlayerCombat, shadowLayer:FlxTypedGroup<flixel.FlxSprite>)
 	{
 		this.player = player;
 		this.status = status;
+		this.shadowLayer = shadowLayer;
 		group = new FlxTypedGroup<HealthPickup>();
+	}
+
+	public function mount(p:HealthPickup):Void
+	{
+		if (p.mounted)
+			return;
+		p.mounted = true;
+		shadowLayer.add(p.shadow);
 	}
 
 	public function drop(cx:Float, cy:Float):HealthPickup
 	{
 		var p = group.recycle(HealthPickup);
+		mount(p);
 		p.drop(cx, cy);
 		p.netId = nextId++;
 		return p;

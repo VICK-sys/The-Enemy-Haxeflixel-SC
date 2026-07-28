@@ -112,6 +112,8 @@ Scrap is collected one piece at a time, a fifth of a second apart, and the neare
 
 The magnet stops pulling at `HOLD`, a little short of the player, rather than dragging every piece onto the same point. A queue waiting its turn therefore sits spread around the player instead of stacking into what looks like a single piece. `HOLD` is set inside the overlap the collection test needs, so a waiting piece still counts as touching even at the bottom of its bob.
 
+Health drops are batteries now, and carry the same small ground shadow scrap does. The shadow mounts once per pickup, the first time it leaves the pool, on both the local drop path and the mirrored one a guest builds from a host snapshot.
+
 The kill counter and the super gain still fire on the kill itself. Only the exp moved.
 
 A guest never runs `applyHit`, because its hits are claimed and sent to the host to apply. Its scrap therefore drops from `PuppetMirror`, on the same credited kill that pays the kill counter. Scrap stays on the peer that earned it and is never synced, unlike a health pickup, because exp is already counted per player.

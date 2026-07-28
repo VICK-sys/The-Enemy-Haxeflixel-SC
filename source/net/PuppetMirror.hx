@@ -155,6 +155,7 @@ class PuppetMirror
 			if (p == null)
 			{
 				p = pickups.group.recycle(HealthPickup);
+				pickups.mount(p);
 				p.drop(row[1] + p.width / 2, row[2] + p.height / 2);
 				p.netId = id;
 				puppetPickups.set(id, p);
