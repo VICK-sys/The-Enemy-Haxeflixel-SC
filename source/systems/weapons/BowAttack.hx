@@ -123,7 +123,7 @@ class BowAttack
 			FlxG.camera.shake(0.004, 0.18);
 		}
 		else
-			cooldown = cfg.shotCooldown;
+			cooldown = cfg.shotCooldown * util.Levels.actionScale();
 	}
 
 	public function rainFire(tx:Float, ty:Float, bx:Float, by:Float):Void

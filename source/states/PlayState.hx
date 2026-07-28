@@ -378,6 +378,7 @@ class PlayState extends FlxState
 			netSync.update(elapsed);
 		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
 		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
+		hud.setExp(util.Levels.exp);
 		hud.setTimeStop(Net.active ? Lang.t("timestop.off") : timeStop.hudLabel());
 		hud.setStopTimer(Net.active ? "" : timeStop.timerLabel());
 		hud.update(elapsed);
@@ -453,6 +454,8 @@ class PlayState extends FlxState
 	function onWaveStarted(n:Int):Void
 	{
 		SaveData.submitWave(n);
+		if (n > 1)
+			util.Levels.award(util.Levels.waveExp() * (n - 1));
 		hud.showWave(n);
 		shift.onWave(n);
 	}
@@ -547,6 +550,12 @@ class PlayState extends FlxState
 			layers.playerShadow.visible = true;
 			heldSprite.visible = true;
 			hud.hideDeath();
+		}
+
+		if (FlxG.keys.justPressed.ENTER && status.dead && !restarting && subState == null && !Net.active)
+		{
+			FlxG.inputs.reset();
+			openSubState(new LevelUpSubState(hud.camUI));
 		}
 
 		if (FlxG.keys.justPressed.R && status.dead && !restarting && (!Net.active || (netSync != null && netSync.runFailed)))

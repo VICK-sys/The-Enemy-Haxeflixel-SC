@@ -33,6 +33,7 @@ class Hud
 	private var status:PlayerCombat;
 	private var customCursor:FlxSprite;
 	private var waveText:FlxText;
+	private var expText:FlxText;
 	private var bannerText:FlxText;
 	private var deadText:FlxText;
 	private var bossHud:BossHud;
@@ -97,6 +98,11 @@ class Hud
 		stopTimerText.visible = false;
 
 		waveText = makeText(8, 16);
+		expText = new FlxText(0, 14, FlxG.width - 18, "");
+		expText.setFormat(Lang.font(), 22, 0xFFE8C860, RIGHT);
+		expText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		expText.cameras = [camUI];
+		state.add(expText);
 		bannerText = makeText(250, 48);
 		deadText = makeText(380, 24);
 		deadText.visible = false;
@@ -215,6 +221,9 @@ class Hud
 		}
 	}
 
+	public function setExp(n:Int):Void
+		expText.text = Lang.t("hud.exp", [n]);
+
 	public function showWave(n:Int):Void
 	{
 		waveText.text = Lang.t("hud.wave", [n]);
@@ -320,7 +329,7 @@ class Hud
 
 	public function applyLanguage(wave:Int):Void
 	{
-		for (t in [waveText, bannerText, deadText, ammoText, timeText])
+		for (t in [waveText, expText, bannerText, deadText, ammoText, timeText])
 			t.font = Lang.font();
 		waveText.text = Lang.t("hud.wave", [wave]);
 	}

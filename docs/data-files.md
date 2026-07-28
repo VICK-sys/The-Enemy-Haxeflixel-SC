@@ -202,6 +202,27 @@ Japanese has no spaces, so the text field cannot wrap it at all. Write the break
 
 To add a language, copy `en.json`, translate the values, and add the code to `Lang.codes`. Check that the face in `Lang.font()` covers the script.
 
+## Levelling - assets/data/levels.json
+
+Souls style stat allocation. Kills and waves pay exp, and death opens the screen that spends it. Level and points live in the save, so a bad run still leaves you stronger.
+
+| Field | Meaning |
+|---|---|
+| `expPerKill`, `expPerWave` | exp for a kill, and per wave cleared. The wave award scales with the wave number |
+| `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)` |
+| `vigorPerPoint` | health added per point |
+| `enduranceDashPerPoint`, `enduranceApPerPoint` | fraction off the dash cooldown, and fraction on to AP gained per kill |
+| `strengthPerPoints` | points needed for one more damage |
+| `dexterityPerPoint` | fraction off swing, fire and reload time |
+| `enduranceDashFloor`, `dexterityFloor` | the shortest a timer can get, as a fraction of its base |
+| `enduranceApCap`, `strengthMax` | ceilings on the AP multiplier and the damage bonus |
+
+Level is one plus every point spent, so the cost climbs whichever stat you feed.
+
+The numbers are small because the game is. Health starts at 2 and a touch costs a quarter, weapons deal 1 to 3, and a basic enemy holds 3. A point of vigor is a fifth of a heart, and five points of strength is one more damage.
+
+Two of those shapes were chosen against the game rather than against the genre. Strength adds a flat point rather than a percentage, because rounding a percentage into damage of 1 to 3 either does nothing or doubles it. Endurance raises AP gained per kill rather than the AP ceiling, because a larger ceiling means more kills for the same super, which reads as a reward and plays as a punishment.
+
 ## Editor tuning - assets/data/editor.json
 
 Four groups hold the numbers. The `view` group covers start, min and max zoom, zoom step, and pan speed. The `palette` group covers panel width and height, padding, prop cell size, and max zoom. The `brush` group covers max size and undo depth. A `flashTime` value sits beside them.

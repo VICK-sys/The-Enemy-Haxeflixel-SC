@@ -1,10 +1,8 @@
 {
 	"lang.name": "日本語",
-
 	"common.on": "オン",
 	"common.off": "オフ",
 	"common.back": "もどる",
-
 	"menu.splash": "開発中",
 	"menu.play": "プレイ",
 	"menu.playSlot": "プレイ: スロット {0}",
@@ -12,12 +10,10 @@
 	"menu.options": "設定",
 	"menu.quit": "終了",
 	"menu.best": "最高記録: ウェーブ {0}",
-
 	"pause.title": "一時停止",
 	"pause.resume": "再開",
 	"pause.options": "設定",
 	"pause.quit": "メニューにもどる",
-
 	"options.title": "設定",
 	"options.volume": "音量  < {0}% >",
 	"options.fullscreen": "フルスクリーン  {0}",
@@ -25,7 +21,6 @@
 	"options.language": "言語  < {0} >",
 	"options.resetBest": "最高記録をリセット",
 	"options.resetBestConfirm": "最高記録をリセット?  もう一度押す",
-
 	"weapon.hammer": "ハンマー",
 	"weapon.revolver": "リボルバー",
 	"weapon.crossbow": "クロスボウ",
@@ -34,22 +29,18 @@
 	"weapon.revolver.blurb": "うつ  /  ファニング",
 	"weapon.crossbow.blurb": "ためうち  /  アローレイン",
 	"weapon.hook.blurb": "つく  /  つかむ",
-
 	"weaponPick.title": "武器をえらべ",
 	"weaponPick.sub": "1回のランで1つだけ - あとから変更はできない",
 	"weaponPick.hint": "1-4 か A/D か 矢印キーでえらぶ        ENTER かクリックで決定",
-
 	"hud.wave": "ウェーブ {0}",
 	"hud.bossApproaching": "ボスが近づいている",
-	"hud.death": "ウェーブ {0}  -  最高 {1}\nRキーでリスタート",
+	"hud.death": "ウェーブ {0}  -  最高 {1}\nENTER - レベルアップ        R - もう一度",
 	"hud.respawning": "復活中...",
 	"hud.connectionLost": "接続が切れた",
-
 	"timestop.stopped": "時間停止中",
 	"timestop.cooldown": "時間 {0}",
 	"timestop.ready": "時間停止 可",
 	"timestop.off": "オフ",
-
 	"tutorial.nav": "A/← <   {0} / {1}   > D/→        ENTER - プレイ",
 	"tutorial.move.title": "移動",
 	"tutorial.move.desc": "WASD - 移動        SPACE - ダッシュ (クールダウン2秒)",
@@ -63,7 +54,6 @@
 	"tutorial.abilities.desc": "E - 時間停止: アリーナが10秒とまる (クールダウン30秒)\n自分は動いて攻撃できる - もう一度Eで早めに解除",
 	"tutorial.health.title": "体力",
 	"tutorial.health.desc": "敵はハートを落とす - ふれると回復する",
-
 	"online.title": "オンライン",
 	"online.host": "ホストする",
 	"online.join": "参加する",
@@ -82,12 +72,24 @@
 	"online.connecting": "接続中...",
 	"online.connected": "接続完了 - ホストの開始を待っている",
 	"online.failed": "{0} に接続できなかった",
-
 	"onlineHelp.nav": "A/← <   {0} / {1}   > D/→        ENTER - とじる",
 	"onlineHelp.p1.title": "オンライン協力プレイ",
 	"onlineHelp.p1.body": "みんなでウェーブと戦う - 最大 {0} 人。\n\nだれか1人が「ホスト」になり\nゲームを進行する。\nほかの全員は「参加」して一緒に戦う。\n\nウェーブ数とボスは共有だが\n体力とAPはそれぞれ別々。\n\n開始後でも友達は途中参加できる。",
 	"onlineHelp.p2.title": "せっていのしかた",
 	"onlineHelp.p2.body": "ホスト - 「ホストする」を選び、自分のIPを\n友達に伝える。インターネット経由なら\nルーターでTCPポート {0} を開放すること。\n\n参加 - 「参加する」を選び、ホストのIPを\n入力して ENTER。\n\n{0} が使用中でホストが別のポートを\n表示した場合は   IP:ポート   で参加。\n\n同じ家のネットワークならホストの\nローカルIPでよく、ポート開放は不要。",
 	"onlineHelp.p3.title": "変わること",
-	"onlineHelp.p3.body": "死んでもランは終わらない。数秒だけ\n離脱し、体力半分で復活する。\n敵は立っている者をねらうので\n全員が倒れたときだけランが終わる。\n\n時間停止とトーテムはオンラインでは\n無効。どちらも世界全体を書きかえるため\n1人が世界を所有するときしか動かない。\n\n友達が放つものはすべて見える。\n弾、矢、斬撃、フック、\n投げたハンマー、そしてすべてのスーパー。"
+	"onlineHelp.p3.body": "死んでもランは終わらない。数秒だけ\n離脱し、体力半分で復活する。\n敵は立っている者をねらうので\n全員が倒れたときだけランが終わる。\n\n時間停止とトーテムはオンラインでは\n無効。どちらも世界全体を書きかえるため\n1人が世界を所有するときしか動かない。\n\n友達が放つものはすべて見える。\n弾、矢、斬撃、フック、\n投げたハンマー、そしてすべてのスーパー。",
+	"hud.exp": "EXP {0}",
+	"level.title": "レベルアップ",
+	"level.header": "レベル {0}        EXP {1}        次 {2}",
+	"level.row": "{0}   {1}",
+	"level.done": "決定",
+	"stat.vigor": "生命力",
+	"stat.endurance": "持久力",
+	"stat.strength": "筋力",
+	"stat.dexterity": "技量",
+	"stat.vigor.note": "最大体力が上がる",
+	"stat.endurance.note": "ダッシュの待ち時間が減り APが早くたまる",
+	"stat.strength.note": "すべての武器のダメージが上がる",
+	"stat.dexterity.note": "攻撃と装填が速くなる"
 }

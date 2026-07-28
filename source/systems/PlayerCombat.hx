@@ -33,7 +33,7 @@ class PlayerCombat
 		this.player = player;
 		this.fx = fx;
 		data = PlayerDataRegistry.get();
-		healthMax = data.healthMax;
+		healthMax = data.healthMax + util.Levels.healthBonus();
 		apMax = data.apMax;
 		health = healthMax;
 		itemBar = apMax;
@@ -65,7 +65,7 @@ class PlayerCombat
 
 		if (FlxG.keys.justPressed.SPACE && !dead && !player.blockMovement && dashCooldownTimer <= 0 && player.dashTimer <= 0)
 		{
-			dashCooldownTimer = data.dashCooldown;
+			dashCooldownTimer = data.dashCooldown * util.Levels.dashScale();
 			player.dash();
 			iframeTimer = data.dashIframes;
 			blink = false;
@@ -161,7 +161,8 @@ class PlayerCombat
 	public function rewardKill():Void
 	{
 		kills++;
-		itemBar += data.apPerKill;
+		util.Levels.award(util.Levels.killExp());
+		itemBar += data.apPerKill * util.Levels.apGainScale();
 		if (itemBar > apMax)
 			itemBar = apMax;
 	}

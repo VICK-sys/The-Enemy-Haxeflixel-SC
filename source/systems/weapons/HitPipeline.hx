@@ -36,6 +36,7 @@ class HitPipeline
 
 	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Int):Void
 	{
+		damage += util.Levels.damageBonus();
 		if (owner != null && PropBlock.between(owner.x + owner.width / 2, owner.feetY, e.x + e.width / 2, e.feetY))
 			return;
 		if (remote)

@@ -109,6 +109,7 @@ class HeldWeapon
 			case Jab: JAB_TIME;
 			default: SWING_TIME;
 		};
+		activeSwingTime *= util.Levels.actionScale();
 		swingTimer = activeSwingTime;
 	}
 

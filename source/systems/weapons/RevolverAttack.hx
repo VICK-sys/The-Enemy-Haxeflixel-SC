@@ -64,7 +64,7 @@ class RevolverAttack
 	{
 		reloadFrom = n;
 		chambered = n;
-		reloadTotal = cfg.reloadTime * (cfg.cylinder - n) / cfg.cylinder;
+		reloadTotal = cfg.reloadTime * util.Levels.actionScale() * (cfg.cylinder - n) / cfg.cylinder;
 		reloading = reloadTotal;
 	}
 
