@@ -21,7 +21,7 @@
 		"speedBonus": 0.8,
 		"sizeBonus": 0.7,
 		"knockBonus": 1.5,
-		"shotCooldown": 0.35
+		"shotCooldown": 1.0
 	},
 	"arrowRain": {
 		"volley": 8,

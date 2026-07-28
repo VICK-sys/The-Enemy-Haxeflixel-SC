@@ -145,14 +145,11 @@ class BowAttack
 			fx.sparksAt(bx + dx * 30, by + dy * 30);
 			FlxG.camera.shake(0.004, 0.18);
 		}
-		else
-		{
-			cooldownTotal = cfg.shotCooldown * util.Levels.actionScale();
-			cooldown = cooldownTotal;
-			if (reloadSound.playing)
-				reloadSound.stop();
-			reloadSound.play(true);
-		}
+		cooldownTotal = cfg.shotCooldown * util.Levels.actionScale();
+		cooldown = cooldownTotal;
+		if (reloadSound.playing)
+			reloadSound.stop();
+		reloadSound.play(true);
 	}
 
 	public function rainFire(tx:Float, ty:Float, bx:Float, by:Float):Void
