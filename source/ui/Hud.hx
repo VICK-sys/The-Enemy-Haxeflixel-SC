@@ -40,8 +40,8 @@ class Hud
 	static inline var HP_Y:Float = 8;
 	static inline var SUPER_X:Float = 27;
 	static inline var SUPER_Y:Float = 17;
-	static inline var AMMO_X:Float = 1000;
-	static inline var AMMO_Y:Float = 592;
+	static inline var AMMO_RIGHT:Float = 1264;
+	static inline var AMMO_BOTTOM:Float = 704;
 	static inline var PIP_GAP:Float = 8;
 
 	public var camUI:FlxCamera;
@@ -114,7 +114,8 @@ class Hud
 		state.add(piece(gaugeBack));
 		state.add(piece(gaugeFill));
 
-		arrowPip = makeUiSprite(AMMO_X, AMMO_Y, "ammo_arrow");
+		arrowPip = makeUiSprite(0, 0, "ammo_arrow");
+		arrowPip.setPosition(AMMO_RIGHT - arrowPip.width, AMMO_BOTTOM - arrowPip.height);
 		arrowPip.visible = false;
 		state.add(piece(arrowPip));
 
@@ -430,7 +431,9 @@ class Hud
 	{
 		while (bulletPips.length < max)
 		{
-			var p = makeUiSprite(AMMO_X + bulletPips.length * (32 + PIP_GAP), AMMO_Y, "ammo_bullet");
+			var p = makeUiSprite(0, 0, "ammo_bullet");
+			var rowLeft = AMMO_RIGHT - max * p.width - (max - 1) * PIP_GAP;
+			p.setPosition(rowLeft + bulletPips.length * (p.width + PIP_GAP), AMMO_BOTTOM - p.height);
 			p.visible = false;
 			state.add(piece(p));
 			bulletPips.push(p);
