@@ -181,6 +181,14 @@ The canopy never sits still. `BushDrift` walks a prop round a tiny square, three
 
 It moves `x` and `y`, not the draw offset. A `PropSprite` caches its sort key in `sortY` when the map places it, so a moving prop keeps its place in the depth order. Without that cache, three pixels would flip the two bushes past the trunk and past each other on every lap.
 
+### PetalFall
+
+Petals breaking off the canopy. They start in a band on the right of the tree, under the second bush layer, and drift south east while they fade. Each one takes a random speed, a random life and a random start, so no two fall alike. A slow sine on the horizontal makes them flutter rather than slide.
+
+The band is a fraction of the tree's drawn box rather than a fixed rectangle, so it follows the prop if the tree moves or changes scale.
+
+They go in the entity layer as plain sprites, which sorts them by their own foot line. A petal therefore starts behind the canopy and passes in front of it on the way down. The pool holds twenty four and recycles the dead, so nothing is built while the room runs.
+
 ### TreeMan and DialogueBox
 
 The man behind the tree. `TreeMan` runs only in the quiet room. It finds its spot from the `tree` prop rather than from a fixed coordinate, so moving the prop moves the man with it. He sits a little behind the trunk, so you have to walk round the tree to reach him. Nothing on screen says so.

@@ -66,6 +66,7 @@ class PlayState extends FlxState
 	private var detourLeft:Float = 0;
 	private var treeMan:systems.TreeMan;
 	private var bushes:systems.BushDrift;
+	private var petals:systems.PetalFall;
 
 	function tryDetour(bossWave:Int):Bool
 	{
@@ -163,6 +164,12 @@ class PlayState extends FlxState
 			bushes.add(s, false);
 		for (s in props.named("treeBush2"))
 			bushes.add(s, true);
+
+		for (s in props.named("tree"))
+		{
+			petals = new systems.PetalFall(layers.entityLayer, s.x + s.width * 0.5, s.y + s.height, s.width, s.height);
+			break;
+		}
 
 		status = new PlayerCombat(_player, fx);
 		timeStop = new TimeStop(_player, layers.playerShadow, status);
@@ -344,6 +351,8 @@ class PlayState extends FlxState
 		layers.update();
 		props.update();
 		bushes.update(elapsed);
+		if (petals != null)
+			petals.update(elapsed);
 		heldSprite.alpha = props.buried ? 0 : 1;
 		combat.swing.slashes.visible = !props.buried;
 		combat.jab.slashes.visible = !props.buried;
