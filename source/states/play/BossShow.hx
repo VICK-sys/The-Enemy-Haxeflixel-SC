@@ -94,6 +94,7 @@ class BossShow
 	function showDecor(on:Bool):Void
 	{
 		props.setDecorVisible(on);
+		props.setSolid(on);
 		round.shop.setVisible(on);
 		if (floor != null)
 			floor.visible = on;

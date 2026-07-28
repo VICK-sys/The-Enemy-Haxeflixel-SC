@@ -47,6 +47,13 @@ class PropWorld
 			s.visible = on;
 	}
 
+	public function setSolid(on:Bool):Void
+	{
+		for (s in solids.members)
+			if (s != null)
+				s.exists = on;
+	}
+
 	public function update():Void
 	{
 		overlay.clear();

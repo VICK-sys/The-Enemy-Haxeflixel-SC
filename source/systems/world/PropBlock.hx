@@ -12,7 +12,7 @@ class PropBlock
 		if (solids == null)
 			return false;
 		for (s in solids.members)
-			if (s != null && x >= s.x && x <= s.x + s.width && y >= s.y && y <= s.y + s.height)
+			if (s != null && s.exists && x >= s.x && x <= s.x + s.width && y >= s.y && y <= s.y + s.height)
 				return true;
 		return false;
 	}
@@ -25,7 +25,7 @@ class PropBlock
 			return false;
 		for (s in solids.members)
 		{
-			if (s == null || s.width <= INSET * 2 || s.height <= INSET * 2)
+			if (s == null || !s.exists || s.width <= INSET * 2 || s.height <= INSET * 2)
 				continue;
 			if (crosses(x0, y0, x1, y1, s.x + INSET, s.y + INSET, s.width - INSET * 2, s.height - INSET * 2))
 				return true;
