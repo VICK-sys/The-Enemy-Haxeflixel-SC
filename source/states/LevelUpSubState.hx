@@ -234,7 +234,6 @@ class LevelUpSubState extends FlxSubState
 		}
 	}
 
-	/** Start the fade out. The real close happens once it lands. */
 	function leave():Void
 		leaving = true;
 
@@ -244,7 +243,6 @@ class LevelUpSubState extends FlxSubState
 		super.close();
 	}
 
-	/** -1 the refund arrow, 1 the buy arrow, 0 neither. Only answers for arrows actually on screen. */
 	function arrowAt(mx:Float, my:Float):Int
 	{
 		if (pick >= STATS.length)

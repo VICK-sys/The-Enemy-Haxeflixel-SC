@@ -12,7 +12,6 @@ import ui.Hud;
 import util.Music;
 import util.Paths;
 
-/** The boss arrival and departure: alarm, whiteout, music, loot, and the way back. */
 class BossShow
 {
 	static inline var BOSS_ZOOM:Float = 0.8;
@@ -70,7 +69,6 @@ class BossShow
 		FlxTween.tween(FlxG.camera, {zoom: BOSS_ZOOM}, 1.2);
 	}
 
-	/** The boss always pays, in scrap and one battery, where it fell. */
 	public function dropLoot(cx:Float, cy:Float):Void
 	{
 		for (i in 0...Scraps.BOSS_SCRAP)
@@ -93,7 +91,6 @@ class BossShow
 		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.8);
 	}
 
-	/** The whiteout takes the scenery with it, shop included. */
 	function showDecor(on:Bool):Void
 	{
 		props.setDecorVisible(on);

@@ -60,7 +60,6 @@ class PlayState extends FlxState
 	function setRestarting():Void
 		restarting = true;
 
-	/** The one way a panel opens. Clears any hitstop, so none is left frozen behind it. */
 	public function openPanel(sub:flixel.FlxSubState):Void
 	{
 		fx.clearHitstop();
@@ -68,7 +67,6 @@ class PlayState extends FlxState
 		openSubState(sub);
 	}
 
-	/** Leave for another state, once, through the iris. */
 	public function leaveFor(go:Void->Void):Void
 	{
 		if (restarting)

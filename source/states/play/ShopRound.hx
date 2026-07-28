@@ -13,10 +13,6 @@ import ui.Hud;
 import util.Lang;
 import util.Levels;
 
-/**
- * The shop round: which waves open the shop, who has finished spending,
- * and how long the next wave waits for them.
- */
 class ShopRound
 {
 	static inline var WAIT_CAP:Float = 60;
@@ -41,7 +37,6 @@ class ShopRound
 		shop = new Shop(player, layers);
 	}
 
-	/** Blockers the shop counter contributes to the world. */
 	public function solids():Array<FlxSprite>
 		return shop.solid();
 
@@ -76,7 +71,6 @@ class ShopRound
 			release();
 	}
 
-	/** A wave cleared. Only every Shop.EVERY of them opens the shop. */
 	public function onWaveCleared():Void
 	{
 		if (director.wave <= 0 || director.wave % Shop.EVERY != 0)
@@ -118,7 +112,6 @@ class ShopRound
 			Net.send({t: "lvlin"});
 	}
 
-	/** The game does not tick under a substate, so the counter is pushed by hand. */
 	function syncScrap():Void
 		hud.setExp(Levels.exp);
 

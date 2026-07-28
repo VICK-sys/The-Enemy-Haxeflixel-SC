@@ -54,7 +54,6 @@ class Levels
 	public static function canRefund(stat:Int):Bool
 		return stat >= 0 && stat < COUNT && spent[stat] > 0;
 
-	/** Undo a point, returning exactly what the level it bought had cost. */
 	public static function refund(stat:Int):Bool
 	{
 		if (!canRefund(stat))

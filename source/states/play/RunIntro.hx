@@ -6,7 +6,6 @@ import ui.Hud;
 import ui.WeaponFlyIn;
 import util.DiscordPresence;
 
-/** Pick a weapon, read the controls once, then throw the weapon into your hand. */
 class RunIntro
 {
 	public var flyIn(default, null):WeaponFlyIn;

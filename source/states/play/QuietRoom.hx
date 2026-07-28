@@ -10,10 +10,6 @@ import ui.Hud;
 import util.CustomArena;
 import util.Detour;
 
-/**
- * The tree room the RUN 66 detour drops you into, and the walk back out of it.
- * `util.Detour` owns what carries across the state switch; this owns the visit.
- */
 class QuietRoom
 {
 	static inline var PLAYER_SCALE:Float = 1.5;
@@ -39,11 +35,9 @@ class QuietRoom
 		this.player = player;
 	}
 
-	/** Which stage track plays here. The boss return path reads this too. */
 	public static function track():String
 		return CustomArena.quiet ? "stage/Man_music" : "stage/gloomDoomWoods";
 
-	/** Roll for the detour in place of a boss. True means the run is leaving. */
 	public function tryDetour(bossWave:Int, director:EnemyDirector, status:PlayerCombat, combat:Weapons):Bool
 	{
 		if (!Detour.rolls())
@@ -54,7 +48,6 @@ class QuietRoom
 		return true;
 	}
 
-	/** Strip the run down to a quiet room: no weapon, no waves, bigger view. */
 	public function enter(combat:Weapons, director:EnemyDirector, heldSprite:flixel.FlxSprite, hud:Hud):Void
 	{
 		combat.disabled = true;
@@ -91,7 +84,6 @@ class QuietRoom
 		if (man != null && man.talking)
 			return;
 
-		// walk far enough north to arm the exit, then come back down through it
 		var up = from - player.feetY;
 		if (up > ARM_UP)
 			armed = true;

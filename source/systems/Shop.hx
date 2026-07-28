@@ -33,7 +33,6 @@ class Shop
 	static inline var KEEP_SPEED:Float = 16;
 	static inline var KEEP_FRAME:Int = 24;
 
-	// the interior stack is pinned rather than y sorted, so it cannot reshuffle
 	static inline var SORT_INSIDE:Float = -900002;
 	static inline var SORT_KEEP:Float = -900001;
 	static inline var SORT_WINDOW:Float = -900000;
@@ -120,7 +119,6 @@ class Shop
 		}
 	}
 
-	/** Close without releasing the hold: the screen the player just opened owns it now. */
 	public function dismiss():Void
 	{
 		if (!open)

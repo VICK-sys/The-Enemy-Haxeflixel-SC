@@ -80,7 +80,7 @@ It sits after `props.overlay` in the display list, above the wall redraw that bu
 
 ### Melee hitstop
 
-A connecting swing freezes the world for a moment, weighted per weapon out of `weapons.json`. The hammer holds five frames at six percent speed with a real shake; the hook's jab holds two at thirty percent and barely shakes. The hammer lands like a hammer and the jab stays quick.
+A connecting swing freezes the world for a moment, weighted per weapon out of `weapons.json`. The hammer holds ten frames at six percent speed with a real shake; the hook's jab holds two at thirty percent and barely shakes. That is a sixth of a second against a thirtieth. The hammer lands like a hammer and the jab stays quick.
 
 The hitch fires once per swing, on the first enemy the arc catches, and before the damage is dealt. A killing blow's heavier stop therefore lands after it and wins, instead of a lighter hitch overwriting it.
 

@@ -60,7 +60,6 @@ class SwingAttack
 			if (elen > 0 && (ex * aimX + ey * aimY) / elen < cfg.meleeArcCos)
 				return;
 
-			// before the damage, so a killing blow's heavier stop wins
 			if (!connected)
 			{
 				connected = true;
