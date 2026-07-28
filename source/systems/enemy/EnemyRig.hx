@@ -12,6 +12,10 @@ class EnemyRig
 	public var lastX:Float;
 	public var lastY:Float;
 	public var stuckTimer:Float = 0;
+	public var enterTimer:Float = 0;
+	public var farX:Float;
+	public var farY:Float;
+	public var farTimer:Float = 0;
 
 	public function new(enemy:Enemies, shadow:FlxSprite, hitbox:FlxObject)
 	{
@@ -20,5 +24,7 @@ class EnemyRig
 		this.hitbox = hitbox;
 		lastX = enemy.x;
 		lastY = enemy.y;
+		farX = enemy.x;
+		farY = enemy.y;
 	}
 }

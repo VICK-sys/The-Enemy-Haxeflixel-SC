@@ -52,7 +52,7 @@ Three collaborators hold what it used to. Where an enemy goes belongs to `EnemyS
 
 A spot counts as clear only if the foot box that actually collides with props is clear. The check samples the enemy's full width at its feet, not its body centre. The two disagree. An enemy can go solid because its centre is clear. It then wedges on the prop its feet already sit inside.
 
-The watchdog treats an enemy as stuck when something drives it but it does not move. It does not simply look for an enemy standing still far away. One wedged next to the player is therefore caught too. The rescue then looks for clear ground in rings around where the enemy stands. It falls back to relocating near the player only when nothing close is free.
+Three watchdogs feed the rescue. The first treats an enemy as stuck when something drives it but it does not move for 2.5 seconds. Touching another enemy pauses that clock, and so does standing close to the target, so a crowd pressed around a player never trips it. The second caps the walk-in: an enemy still entering after 6 seconds relocates instead of circling outside forever. The third catches the quiet failures. An enemy that makes no progress for 8 seconds while its target is far away relocates whatever its velocity says, which covers a dead brain as well as a wedge. A live enemy therefore cannot sit unseen behind scenery and hold the wave open. The rescue itself looks for clear ground in rings around where the enemy stands. It falls back to relocating near the player only when nothing close is free.
 
 `EnemyShots` owns the projectile group. It emits what an enemy queued, and kills shots on walls, props or the player. The shake-then-explode sequence lives in `BossDeath`. That has its own lifetime and touches nothing else. `EnemyRig` moved to its own file so the spawner can take one. The director forwards a callback that moved with a collaborator as a property. The network layer wraps them rather than simply setting them.
 
@@ -66,7 +66,7 @@ The director is also the single home of enemy hit queries. `firstInCircle` and `
 
 A wave ends only once every enemy is dead. One enemy that could never reach the player would therefore hang the run forever. Two guards prevent that.
 
-Spawned enemies pass through walls while entering. They turn solid only once they are inside the arena and clear of any pillar. They therefore cannot turn solid inside one. Beyond that the watchdog relocates a stuck enemy. As a backstop, a wave running longer than 75 seconds relocates everything still alive. The boss is exempt, since its movement is its own choreography.
+Spawned enemies pass through walls and prop footprints while entering. They turn solid only once they are inside the arena and clear of any pillar or prop. They therefore cannot turn solid inside one. Beyond that the watchdogs relocate a stuck enemy. As a backstop, a wave running longer than 75 seconds relocates everything still alive. The boss is exempt, since its movement is its own choreography.
 
 ### Pickups
 

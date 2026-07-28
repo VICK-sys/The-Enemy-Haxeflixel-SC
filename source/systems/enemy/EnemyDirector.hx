@@ -123,7 +123,11 @@ class EnemyDirector
 	{
 		FlxG.collide(bodies, arena.map);
 		if (solids != null)
-			bodies.forEachAlive(function(e:Enemies) FootCollide.against(e, e.feetY, solids));
+			bodies.forEachAlive(function(e:Enemies)
+			{
+				if (!e.entering)
+					FootCollide.against(e, e.feetY, solids);
+			});
 		FlxG.overlap(bodies, bodies, null, separateLive);
 	}
 
@@ -322,7 +326,7 @@ class EnemyDirector
 			}
 
 			if (!e.seized && !e.selfDriven && !e.puppet && !status.dead)
-				spawner.checkStuck(rig, elapsed);
+				spawner.checkStuck(rig, elapsed, touchingOther(e));
 
 			rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 			rig.hitbox.y = e.y + e.hitOffY;
@@ -331,6 +335,20 @@ class EnemyDirector
 
 			gunfire.emit(e);
 		}
+	}
+
+	function touchingOther(e:Enemies):Bool
+	{
+		for (rig in rigs)
+		{
+			var o = rig.enemy;
+			if (o == e || !o.exists || o.isDead)
+				continue;
+			if (e.x < o.x + o.width + 8 && o.x < e.x + e.width + 8
+				&& e.y < o.y + o.height + 8 && o.y < e.y + e.height + 8)
+				return true;
+		}
+		return false;
 	}
 
 	function retire(rig:EnemyRig, i:Int):Void

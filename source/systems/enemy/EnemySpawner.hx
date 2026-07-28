@@ -13,8 +13,13 @@ class EnemySpawner
 	static inline var SPAWN_TRIM:Float = 240;
 	static inline var SPAWN_SPREAD:Float = 700;
 	static inline var STUCK_TIME:Float = 2.5;
-	static inline var STUCK_EPS:Float = 6;
+	static inline var STUCK_EPS:Float = 24;
 	static inline var STUCK_DRIVE:Float = 20;
+	static inline var STUCK_ENGAGE:Float = 300;
+	static inline var ENTER_CAP:Float = 6;
+	static inline var CAMP_TIME:Float = 8;
+	static inline var CAMP_EPS:Float = 48;
+	static inline var CAMP_ENGAGE:Float = 700;
 	static inline var RESCUE_MIN:Float = 380;
 	static inline var RESCUE_MAX:Float = 620;
 	static inline var LOCAL_MIN:Float = 70;
@@ -79,23 +84,68 @@ class EnemySpawner
 		return v;
 	}
 
-	public function checkStuck(rig:EnemyRig, elapsed:Float):Void
+	public function checkStuck(rig:EnemyRig, elapsed:Float, crowded:Bool):Void
 	{
 		var e = rig.enemy;
+
+		if (e.entering)
+		{
+			rig.enterTimer += elapsed;
+			if (rig.enterTimer > ENTER_CAP)
+			{
+				rescue(rig);
+				return;
+			}
+		}
+		else
+			rig.enterTimer = 0;
+
+		var targetSq = Math.POSITIVE_INFINITY;
+		if (e.target != null)
+		{
+			var tx = e.target.x + e.target.width * 0.5 - (e.x + e.width * 0.5);
+			var ty = e.target.y + e.target.height * 0.5 - (e.y + e.height * 0.5);
+			targetSq = tx * tx + ty * ty;
+		}
+
 		var dx = e.x - rig.lastX;
 		var dy = e.y - rig.lastY;
 		var driven = e.velocity.x * e.velocity.x + e.velocity.y * e.velocity.y > STUCK_DRIVE * STUCK_DRIVE;
 
-		if (!driven || dx * dx + dy * dy > STUCK_EPS * STUCK_EPS)
+		if (!driven || crowded || targetSq < STUCK_ENGAGE * STUCK_ENGAGE || dx * dx + dy * dy > STUCK_EPS * STUCK_EPS)
 		{
 			rig.lastX = e.x;
 			rig.lastY = e.y;
 			rig.stuckTimer = 0;
+		}
+		else
+		{
+			rig.stuckTimer += elapsed;
+			if (rig.stuckTimer > STUCK_TIME)
+			{
+				rescue(rig);
+				return;
+			}
+		}
+
+		var fx = e.x - rig.farX;
+		var fy = e.y - rig.farY;
+		if (fx * fx + fy * fy > CAMP_EPS * CAMP_EPS)
+		{
+			rig.farX = e.x;
+			rig.farY = e.y;
+			rig.farTimer = 0;
 			return;
 		}
 
-		rig.stuckTimer += elapsed;
-		if (rig.stuckTimer > STUCK_TIME)
+		if (targetSq < CAMP_ENGAGE * CAMP_ENGAGE)
+		{
+			rig.farTimer = 0;
+			return;
+		}
+
+		rig.farTimer += elapsed;
+		if (rig.farTimer > CAMP_TIME)
 			rescue(rig);
 	}
 
@@ -162,5 +212,9 @@ class EnemySpawner
 		rig.lastX = x;
 		rig.lastY = y;
 		rig.stuckTimer = 0;
+		rig.enterTimer = 0;
+		rig.farX = x;
+		rig.farY = y;
+		rig.farTimer = 0;
 	}
 }
