@@ -47,6 +47,19 @@ class RevolverAttack
 	function get_isReloading():Bool
 		return reloading > 0;
 
+	public var isFanning(get, never):Bool;
+
+	function get_isFanning():Bool
+		return fanning;
+
+	public function cancelFan():Void
+	{
+		if (!fanning)
+			return;
+		fanning = false;
+		fanTimer = 0;
+	}
+
 	public var displayRounds(get, never):Int;
 
 	function get_displayRounds():Int

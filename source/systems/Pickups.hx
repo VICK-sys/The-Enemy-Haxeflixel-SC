@@ -40,12 +40,14 @@ class Pickups
 
 	public function update():Void
 	{
-		if (status.dead || status.health >= status.healthMax)
+		if (status.dead)
 			return;
 		for (p in group.members)
 		{
 			if (p == null || !p.exists)
 				continue;
+			if (status.health >= status.healthMax)
+				return;
 			if (p.x + p.width <= player.x || player.x + player.width <= p.x
 				|| p.y + p.height <= player.y || player.y + player.height <= p.y)
 				continue;

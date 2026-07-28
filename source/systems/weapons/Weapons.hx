@@ -100,6 +100,8 @@ class Weapons
 		jab.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		bow.update(elapsed);
 		var gunAim = aimFromPlayer();
+		if (status.dead)
+			revolver.cancelFan();
 		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
 		shock.update(elapsed);
 		hookAttack.update(elapsed);
@@ -111,6 +113,8 @@ class Weapons
 			hookArms.deactivate();
 		if (status.dead && bounceStrike.active)
 			bounceStrike.cancel();
+		if (status.dead && arrowStorm.active)
+			arrowStorm.cancel();
 		hookArms.update(elapsed);
 		if (status.dead && deadEye.active)
 			deadEye.cancel();

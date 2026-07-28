@@ -32,6 +32,7 @@ class ScrapPickup extends FlxSprite
 	public function drop(cx:Float, cy:Float):Void
 	{
 		revive();
+		velocity.set(0, 0);
 		var ox = flixel.FlxG.random.float(-SPREAD, SPREAD);
 		var oy = flixel.FlxG.random.float(-SPREAD, SPREAD);
 		setPosition(cx + ox - width / 2, cy + oy - height / 2);
@@ -52,8 +53,8 @@ class ScrapPickup extends FlxSprite
 		if (step > len)
 			step = len;
 		x += dx / len * step;
-		y += dy / len * step;
-		restY = y;
+		restY += dy / len * step;
+		y = restY + Math.sin(bob) * BOB_AMP;
 	}
 
 	override public function update(elapsed:Float):Void

@@ -49,8 +49,25 @@ class BossHud
 		flashTimer = FLASH_TIME;
 	}
 
+	function dropBar():Void
+	{
+		if (bar != null)
+		{
+			state.remove(bar, true);
+			bar.destroy();
+			bar = null;
+		}
+		for (t in letters)
+		{
+			state.remove(t, true);
+			t.destroy();
+		}
+		letters = [];
+	}
+
 	public function showBar(bossEnemy:Enemies):Void
 	{
+		dropBar();
 		boss = bossEnemy;
 
 		bar = new FlxBar(0, 0, LEFT_TO_RIGHT, BAR_W, BAR_H, boss, "hp", 0, boss.hp);

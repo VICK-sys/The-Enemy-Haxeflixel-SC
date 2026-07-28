@@ -76,7 +76,7 @@ class DeadEye
 		return phase == 1;
 
 	public function canActivate():Bool
-		return phase == 0 && !revolver.isReloading && revolver.rounds > 0;
+		return phase == 0 && !revolver.isReloading && !revolver.isFanning && revolver.rounds > 0;
 
 	public function activate():Void
 	{

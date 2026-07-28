@@ -43,7 +43,7 @@ class Arrow extends FlxSprite
 		var speed = SPEED * speedMult;
 		velocity.set(dx * speed, dy * speed);
 		angle = angleDeg + 90;
-		life = RANGE / SPEED;
+		life = RANGE / speed;
 	}
 
 	public function hasHit(e:FlxObject):Bool

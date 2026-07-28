@@ -65,6 +65,18 @@ class ArrowStorm
 		FlxG.sound.play(Paths.sound("bow"), 0.9);
 	}
 
+	public function cancel():Void
+	{
+		if (phase == 0)
+			return;
+		phase = 0;
+		timer = 0;
+		spawnTimer = 0;
+		launchTimer = 0;
+		superArrow.velocity.set(0, 0);
+		superArrow.kill();
+	}
+
 	public function update(elapsed:Float):Void
 	{
 		if (phase == 0)
