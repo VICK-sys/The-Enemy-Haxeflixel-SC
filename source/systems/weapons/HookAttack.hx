@@ -356,10 +356,10 @@ class HookAttack
 		return hook.y + hook.height / 2 + Math.cos(hook.angle * Math.PI / 180) * HANDLE_LEN;
 
 	function handX():Float
-		return player.x + 30;
+		return player.x + HeldWeapon.HAND_DX;
 
 	function handY():Float
-		return player.y + 65;
+		return player.y + HeldWeapon.HAND_DY;
 
 	function updateRope():Void
 	{

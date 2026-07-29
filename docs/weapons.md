@@ -6,9 +6,9 @@ The combat coordinator. It owns the weapon for the run, which `equip` sets once 
 
 It splits the two buttons. Left click runs `primary`, right click runs `secondary`, and both key on the equipped weapon.
 
-It triggers the supers on Q at a full meter. The hammer launches SuperOrbit, the revolver DeadEye, the crossbow ArrowStorm, and the hook HookArms. `hasSuper` still gates the key. Dead Eye needs a round in the cylinder. The meter should not go on a super that cannot fire.
+It triggers the supers on Q at a full meter. The hammer launches SuperOrbit, the revolver DeadEye, the crossbow ArrowStorm, and the yoyo HookArms. `hasSuper` still gates the key. Dead Eye needs a round in the cylinder. The meter should not go on a super that cannot fire.
 
-It also handles attack input dispatch: super priority, the held-enemy throw intercept, and the aim math. It hides the held weapon while the hook is out. Everything else goes to the systems below.
+It also handles attack input dispatch: super priority, the held-enemy throw intercept, and the aim math. It hides the held weapon while the grab or the yoyo is out. Everything else goes to the systems below.
 
 ## WeaponMode
 
@@ -22,7 +22,7 @@ The shared hit pipeline. It applies damage with a hit sound, sparks, kill reward
 
 ## Rope
 
-Shared rope drawing. It tiles rope segments along a straight line for the hook's rope. For the arms' curved ropes it follows a quadratic bezier with an explicit control point. It draws into a caller-owned sprite group.
+Shared cord drawing. It tiles `yoyo_string` segments along a straight line for the grab line and the yoyo's string. For the arms' curved ropes it follows a quadratic bezier with an explicit control point. It draws into a caller-owned sprite group.
 
 ## HeldWeapon
 
@@ -38,11 +38,23 @@ Both flips use the same margin around 90 degrees. A cursor near straight up or d
 
 ## SwingAttack
 
-The shared melee. `Weapons` builds two of them from separate config blocks. The hammer's `swing` has long reach, a wide arc, 2 damage and an oversized slash to match the weapon. The hook's `jab` has short reach, a tight arc, 1 damage and a small slash.
+The hammer's melee, built from the `swing` config block: long reach, a wide arc, 2 damage and an oversized slash to match the weapon. The yoyo runs `YoyoJab` instead.
 
 Each fire spawns a slash effect and strikes every enemy inside its arc. It also opens a short guard window, during which it deflects enemy shots. The window runs for `GUARD_TIME` rather than only the frame of the click, so a swing catches bullets that arrive mid-animation. A deflected shot swaps to the player bullet sprite rather than taking a tint. A round coming back at its owner therefore reads as yours.
 
-The hammer's block also carries a `cooldown`. Each swing starts it, and both the next swing and the throw wait for it out. Catching a thrown hammer starts the shorter `catchCooldown` from the thrown block, so a catch cannot chain straight into a hit. The jab sets no cooldown and keeps its old cadence. The reload bar above the player shows the wait, the same way it shows a reload. Dexterity shortens it like every other recovery.
+The hammer's block also carries a `cooldown`. Each swing starts it, and both the next swing and the throw wait for it out. Catching a thrown hammer starts the shorter `catchCooldown` from the thrown block, so a catch cannot chain straight into a hit. The reload bar above the player shows the wait, the same way it shows a reload. Dexterity shortens it like every other recovery.
+
+## YoyoJab
+
+The yoyo's primary. Left click pushes the yoyo out along the aim and pulls it back, on a string. `YoyoFlight` owns the motion and the art: it carries the `yoyo_axel` sprite out to `reach` and home again, spinning it, and tiles the string from the hand to wherever the yoyo is. `YoyoJab` wraps that with the damage.
+
+The path eases out of the hand and eases back into it, so the yoyo is quickest at both ends and hangs at full extension. That hang is where most of the hit window sits.
+
+Damage is once per throw per enemy. The yoyo crosses the same ground twice, and without that rule a target parked mid-path would take double for one click. A list of who has already been struck resets on each throw. The push follows the string rather than the enemy: going out it shoves a target away, coming home it drags one toward the player.
+
+It deflects enemy fire on contact, the same as a swing does, but only where the yoyo actually is rather than across a whole arc.
+
+The held sprite hides for the throw and comes back when the yoyo does. The throw itself blocks the next one, plus a short recovery, so the cadence is the animation rather than the click.
 
 ## RevolverAttack
 
@@ -82,13 +94,13 @@ It sits after `props.overlay` in the display list, above the wall redraw that bu
 
 ### Melee weight
 
-Each melee weapon carries its own `knock`, multiplying the push the arc hands to `takeHit`. The hammer sends a struck enemy out at over three times the base, far enough that it has to walk back in; the jab moves one barely further than its own stride. A struck enemy braces before it goes. `brace` takes the launch off it, shakes its draw offset for the length of the stop, then hands the velocity back on the frame the stop ends. Both count frames rather than seconds, so they cannot drift apart however slow the world is running, and the shake moves the sprite only: the hitbox and the shadow stay where the enemy is. The jab braces for nothing, because two frames of shake is not something anyone sees.
+Each melee weapon carries its own `knock`, multiplying the push the arc hands to `takeHit`. The hammer sends a struck enemy out at over three times the base, far enough that it has to walk back in; the yoyo moves one barely further than its own stride, and shoves it away going out or drags it back coming home. A struck enemy braces before it goes. `brace` takes the launch off it, shakes its draw offset for the length of the stop, then hands the velocity back on the frame the stop ends. Both count frames rather than seconds, so they cannot drift apart however slow the world is running, and the shake moves the sprite only: the hitbox and the shadow stay where the enemy is. The yoyo braces for nothing, because two frames of shake is not something anyone sees.
 
-A killed enemy is launched too, if whatever killed it braces. `takeHit` still parks a corpse, and the dead branch of `update` still holds it there, but a corpse that finished a brace is left alone so its drag can carry it out. It keeps its death animation and its fade the whole way, because those run on time rather than on where it is. Anything that does not brace kills the way it always did: the jab, every gun, every arrow.
+A killed enemy is launched too, if whatever killed it braces. `takeHit` still parks a corpse, and the dead branch of `update` still holds it there, but a corpse that finished a brace is left alone so its drag can carry it out. It keeps its death animation and its fade the whole way, because those run on time rather than on where it is. Anything that does not brace kills the way it always did: the yoyo, every gun, every arrow.
 
 ### Melee hitstop
 
-A connecting swing freezes the world for a moment, weighted per weapon out of `weapons.json`. The hammer holds for many frames at six percent speed with a real shake; the hook's jab holds for two at thirty percent and barely shakes. The numbers live in the data, so the weight of each weapon is a tuning question rather than a code one. The hammer lands like a hammer and the jab stays quick.
+A connecting swing freezes the world for a moment, weighted per weapon out of `weapons.json`. The hammer holds for many frames at six percent speed with a real shake; the yoyo holds for two at thirty percent and barely shakes. The numbers live in the data, so the weight of each weapon is a tuning question rather than a code one. The hammer lands like a hammer and the yoyo stays quick.
 
 The hitch fires once per swing, on the first enemy the arc catches, and before the damage is dealt.
 
@@ -122,17 +134,17 @@ Impact points are floor coordinates. The marker, the arrow's descent and the bla
 
 ## HookAttack
 
-The hook's secondary, split two ways. The phase machine and the catch-and-throw chain live in `HookAttack`: fly out, latch, reel in, hold, spin, release. It owns the hook sprite and rope. `HookFlight` carries a thrown enemy after the hook has let go. It lives apart because its lifetime outlasts the phase that started it. It keeps running while the hook is idle or thrown again.
+The yoyo's secondary, split two ways. The phase machine and the catch-and-throw chain live in `HookAttack`: fly out, latch, reel in, hold, spin, release. It owns the flying sprite and its string. `HookFlight` carries a thrown enemy after the grab has let go. It lives apart because its lifetime outlasts the phase that started it. It keeps running while the yoyo is idle or thrown again.
 
-The grab throws the held hook itself, trailing a rope line back to the player. The hand stays empty and all attacks block until it returns. It latches the first enemy it hits, with light damage plus a seize that suspends the AI. It then reels that enemy in and holds it in front of the cursor.
+The grab throws the yoyo itself, trailing its string back to the player. The hand stays empty and all attacks block until it returns. It latches the first enemy it hits, with light damage plus a seize that suspends the AI. It then reels that enemy in and holds it in front of the cursor.
 
-Left click while holding whips the enemy in one quick revolution around the player, then launches it as a projectile. That projectile damages every enemy it passes through. The hook returns to the hand at the moment of release, so the enemy flies alone. Hitting a wall damages the thrown enemy. Otherwise the flight ends with a short stun.
+Left click while holding whips the enemy in one quick revolution around the player, then launches it as a projectile. That projectile damages every enemy it passes through. The yoyo returns to the hand at the moment of release, so the enemy flies alone. Hitting a wall damages the thrown enemy. Otherwise the flight ends with a short stun.
 
-On a miss the hook retracts to the hand, and it stays live on the way back. A returning hook grabs the first enemy it touches that nobody already holds, so a shot that missed ahead of a target still catches it on the return. Seized enemies deal no contact damage and skip crowd separation.
+On a miss it retracts to the hand, and it stays live on the way back. A returning grab takes the first enemy it touches that nobody already holds, so a shot that missed ahead of a target still catches it on the return. Seized enemies deal no contact damage and skip crowd separation.
 
-A held enemy is a shield. Enemy fire that reaches it stops there and wounds the enemy instead of the player, so you can walk a body into a firing line. Enough shots kill it, and a dead victim drops off the hook the same way any other loss does.
+A held enemy is a shield. Enemy fire that reaches it stops there and wounds the enemy instead of the player, so you can walk a body into a firing line. Enough shots kill it, and a dead victim drops off the string the same way any other loss does.
 
-The hook cannot latch an enemy flagged not `grabbable`, which means the boss. It deals `snagDamage` instead, then retracts. That is much more than a normal hit, since it is the only thing the grab can do to them. The auto-grabbing arms are the hook's super, covered under `HookArms`.
+The grab cannot latch an enemy flagged not `grabbable`, which means the boss. It deals `snagDamage` instead, then retracts. That is much more than a normal hit, since it is the only thing the grab can do to them. The auto-grabbing arms are the yoyo's super, covered under `HookArms`.
 
 ## ThrowAttack
 
@@ -140,9 +152,9 @@ The boomerang throw. It covers the thrown hammer's flight: out leg, wall turnaro
 
 ## HookArms
 
-The hook super. Q with the hook equipped and a full super meter drains the meter. It then extends two mechanical hook-arms from the player's back, rendered behind them, for a few seconds.
+The yoyo super. Q with the yoyo equipped and a full super meter drains the meter. It then extends two mechanical grab-arms from the player's back, rendered behind them, for a few seconds.
 
-Each arm works alone. It picks whatever lies nearest the cursor rather than nearest the player, grabs it, reels it up, whips it in an arc and hurls it along the line to the cursor. Aiming therefore steers both halves of the throw. The arms rest tilted, and their curved ropes trail with inertia. They retract into the body when the super ends. The held hook hides, and the player can still move.
+Each arm works alone. It picks whatever lies nearest the cursor rather than nearest the player, grabs it, reels it up, whips it in an arc and hurls it along the line to the cursor. Aiming therefore steers both halves of the throw. The arms rest tilted, and their curved ropes trail with inertia. They retract into the body when the super ends. The held yoyo hides, and the player can still move.
 
 The arms also catch bullets, which the ordinary grab cannot do. With no enemy in reach an arm snatches the enemy shot nearest the cursor out of the air, holds it through the same whip, and hurls it back as a friendly round. A held shot harms nobody while it waits.
 

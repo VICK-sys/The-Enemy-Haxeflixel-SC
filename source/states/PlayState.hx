@@ -161,7 +161,8 @@ class PlayState extends FlxState
 		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups, scraps);
 
 		add(combat.swing.slashes);
-		add(combat.jab.slashes);
+		add(combat.yoyoJab.flight.string);
+		add(combat.yoyoJab.flight.yoyo);
 		add(combat.bow.arrows);
 		add(combat.revolver.bullets);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
@@ -298,7 +299,8 @@ class PlayState extends FlxState
 			petals.update(step);
 		heldSprite.alpha = props.buried ? 0 : 1;
 		combat.swing.slashes.visible = !props.buried;
-		combat.jab.slashes.visible = !props.buried;
+		combat.yoyoJab.flight.string.visible = !props.buried;
+		combat.yoyoJab.flight.yoyo.visible = !props.buried;
 		if (!inputLocked)
 			combat.update(elapsed);
 		director.updateShots();

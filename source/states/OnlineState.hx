@@ -172,7 +172,7 @@ class OnlineState extends FlxState
 	static inline var HAND_X:Float = 0.19;
 	static inline var HAND_Y:Float = 0.64;
 
-	static var HELD_ART:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/hook"];
+	static var HELD_ART:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/yoyo"];
 
 	function cycleColor(dir:Int):Void
 	{

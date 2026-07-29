@@ -32,9 +32,9 @@ You pick one weapon at the start and keep it for the whole run.
 - Hammer - swing, or throw.
 - Revolver - shoot, or fan the hammer. Fanning rips through every remaining round in one burst. Six rounds, fired as fast as you can click. Running dry reloads on its own, or press R to top up early.
 - Crossbow - a charged shot. Hold to charge, release to fire. A full charge pierces and can fire back to back, a tap cannot. Arrow rain is the secondary, once its meter fills.
-- Hook - a quick jab, or a grab.
+- Yoyo - a throw out and back, or a grab.
 
-Melee attacks deflect enemy bullets back at whoever fired them. That covers the hammer swing and the hook jab.
+Melee attacks deflect enemy bullets back at whoever fired them. That covers the hammer swing and the yoyo throw.
 
 ## Supers
 
@@ -43,7 +43,7 @@ Q fires the super once the meter is full. Each weapon has its own.
 - Hammer - orbits blades around you. Left click launches them.
 - Revolver - Dead Eye. The world stops while you paint a target for every round left in the cylinder. The fire button then empties the cylinder into them.
 - Crossbow - Arrow Storm, an arena-wide downpour.
-- Hook - two auto-grabbing arms that snatch and hurl enemies.
+- Yoyo - two auto-grabbing arms that snatch and hurl enemies.
 
 ## Debug keys
 

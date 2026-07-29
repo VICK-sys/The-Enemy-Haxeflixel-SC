@@ -88,7 +88,7 @@ The time-stop ability on E, with a cooldown from player.json. It ramps a world-t
 
 It publishes that factor through `WorldClock`. Enemies, enemy shots and pickups read it, and scale or skip their own updates. PlayState multiplies it into the elapsed it passes to the director and arena. Wave timers, boss logic and cinematics therefore freeze too.
 
-The player, weapons and player projectiles run at full speed throughout. Seized enemies stay in player-time, so the hook still works on frozen targets. Frozen enemies are immovable statues that deal no contact damage, and frozen shots hang harmlessly in the air.
+The player, weapons and player projectiles run at full speed throughout. Seized enemies stay in player-time, so the grab still works on frozen targets. Frozen enemies are immovable statues that deal no contact damage, and frozen shots hang harmlessly in the air.
 
 Music pitch rides the factor down for the record-slowdown effect, pauses at the full stop, and ramps back on resume. While time runs slow the player leaves a blue afterimage trail, built from frame-accurate ghosts through GhostTrail. A subtle blue overlay tints the screen. The HUD shows READY, the cooldown, or STOPPED through `hudLabel()`. Dying cancels the stop.
 
@@ -360,7 +360,7 @@ It shows the current wave or boss fight, plus the equipped weapon and kill count
 
 ### PerfLog
 
-A frame-time logger for native builds. It writes `perflog.txt` next to the executable. Each second gets one aggregate line of average, worst and fps. Spike frames and long gaps get an immediate line. Every line carries the live enemy count, pathfinding calls, projectile count and wave. The projectile count covers enemy shots, bullets, arrows, rain arrows, the thrown hammer and the hook.
+A frame-time logger for native builds. It writes `perflog.txt` next to the executable. Each second gets one aggregate line of average, worst and fps. Spike frames and long gaps get an immediate line. Every line carries the live enemy count, pathfinding calls, projectile count and wave. The projectile count covers enemy shots, bullets, arrows, rain arrows, the thrown hammer and the yoyo.
 
 ---
 

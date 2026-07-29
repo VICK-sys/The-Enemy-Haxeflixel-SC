@@ -16,8 +16,10 @@ import systems.weapons.ArrowRain;
 import systems.weapons.ArrowStorm;
 import systems.weapons.HitPipeline;
 import systems.weapons.Rope;
+import systems.weapons.HeldWeapon;
 import systems.weapons.SuperOrbit;
 import systems.weapons.WeaponMode;
+import systems.weapons.YoyoFlight;
 import data.WeaponData.WeaponDataRegistry;
 import util.GhostTrail;
 import util.Paths;
@@ -33,6 +35,7 @@ class RemoteFx
 	private var rope:FlxTypedGroup<FlxSprite>;
 	private var hook:HookShot;
 	private var thrown:ThrownWeapon;
+	private var yoyo:YoyoFlight;
 	private var rain:ArrowRain;
 	private var thrownTrail:GhostTrail;
 
@@ -52,6 +55,7 @@ class RemoteFx
 	private var handTY:Float = 0;
 	private var handCX:Float = 0;
 	private var handCY:Float = 0;
+	private var yoyoSpin:Float = 1;
 
 	public function new(state:FlxState, layers:RenderLayers, director:EnemyDirector, hits:HitPipeline, fx:Fx, avatar:RemoteAvatar)
 	{
@@ -70,6 +74,7 @@ class RemoteFx
 		hook.kill();
 		thrown = new ThrownWeapon();
 		thrown.kill();
+		yoyo = new YoyoFlight();
 		thrownTrail = new GhostTrail("items/hammer", 0.45, 3, 0.035);
 
 		blades = SuperOrbit.decoration(avatar.sprite, fx);
@@ -92,6 +97,8 @@ class RemoteFx
 		state.add(slashes);
 		state.add(rope);
 		state.add(hook);
+		state.add(yoyo.string);
+		state.add(yoyo.yoyo);
 		state.add(thrownTrail.group);
 		state.add(thrown);
 		state.add(blades.frontLayer);
@@ -132,9 +139,10 @@ class RemoteFx
 				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.swing.spawnDist, pmy + dy * cfg.swing.spawnDist, dx, dy, aimDeg, cfg.swing.effectScale);
 				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
-			case Jab:
-				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.jab.spawnDist, pmy + dy * cfg.jab.spawnDist, dx, dy, aimDeg, cfg.jab.effectScale);
-				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
+			case Yoyo:
+				yoyoSpin = -yoyoSpin;
+				yoyo.fire(pmx, pmy, dx, dy, yoyoSpin);
+				FlxG.sound.play(Paths.sound("weapon/throw"), 0.35);
 
 			case Shoot:
 				var rc = cfg.revolver;
@@ -226,6 +234,7 @@ class RemoteFx
 		blades.update(elapsed);
 		storm.update(elapsed);
 		arms.update(elapsed);
+		yoyo.update(elapsed, avatar.sprite.x + HeldWeapon.HAND_DX, avatar.sprite.y + HeldWeapon.HAND_DY);
 
 		var stamp = thrownTrail.tick(elapsed);
 		if (thrown.exists)

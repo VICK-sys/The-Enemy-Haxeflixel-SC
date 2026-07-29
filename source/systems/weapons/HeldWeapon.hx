@@ -23,8 +23,9 @@ class HeldWeapon
 	static inline var RAIN_TIME:Float = 0.6;
 	static inline var RAIN_RAISE:Float = 35;
 	static inline var HOOK_TIME:Float = 0.4;
-	static inline var JAB_TIME:Float = 0.13;
 	static inline var CHARGE_SCALE:Float = 1.6;
+	public static inline var HAND_DX:Float = 30;
+	public static inline var HAND_DY:Float = 65;
 	static inline var CHARGE_DRAW:Float = 0.35;
 	public static inline var CHARGE_TINT:Int = 0xFF9BE9FF;
 
@@ -106,7 +107,6 @@ class HeldWeapon
 			case Bow: BOW_TIME;
 			case Rain: RAIN_TIME;
 			case Hook: HOOK_TIME;
-			case Jab: JAB_TIME;
 			default: SWING_TIME;
 		};
 		activeSwingTime *= util.Levels.actionScale();
@@ -125,7 +125,7 @@ class HeldWeapon
 		{
 			case 1: "items/revolver";
 			case 2: "items/crossbow";
-			case 3: "items/hook";
+			case 3: "items/yoyo";
 			default: "items/hammer";
 		};
 		sprite.loadGraphic(Paths.image(img));
@@ -137,8 +137,8 @@ class HeldWeapon
 
 	public function anchor():Void
 	{
-		sprite.x = player.x - sprite.origin.x + 30;
-		sprite.y = player.y - sprite.origin.y + 65;
+		sprite.x = player.x - sprite.origin.x + HAND_DX;
+		sprite.y = player.y - sprite.origin.y + HAND_DY;
 		if (raining())
 		{
 			sprite.y = player.y - sprite.origin.y - RAIN_RAISE;

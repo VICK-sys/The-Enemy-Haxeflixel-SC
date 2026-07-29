@@ -9,6 +9,6 @@ enum WeaponMode
 	Bow;
 	Rain;
 	Hook;
-	Jab;
+	Yoyo;
 	Pellet;
 }

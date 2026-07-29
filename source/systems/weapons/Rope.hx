@@ -7,6 +7,7 @@ import util.Paths;
 class Rope
 {
 	static inline var STEP:Float = 30;
+	static inline var STRAND_SCALE:Float = 4;
 
 	public static function clear(rope:FlxTypedGroup<FlxSprite>):Void
 	{
@@ -57,8 +58,9 @@ class Rope
 		var s = rope.recycle(FlxSprite);
 		if (s.graphic == null)
 		{
-			s.loadGraphic(Paths.image("items/rope"));
+			s.loadGraphic(Paths.image("items/yoyo_string"));
 			s.antialiasing = false;
+			s.scale.set(STRAND_SCALE, STRAND_SCALE);
 		}
 		s.setPosition(cx - s.width / 2, cy - s.height / 2);
 		s.angle = ang;

@@ -16,7 +16,7 @@ class Weapons
 	public var held:HeldWeapon;
 	public var hits:HitPipeline;
 	public var swing:SwingAttack;
-	public var jab:SwingAttack;
+	public var yoyoJab:YoyoJab;
 	public var revolver:RevolverAttack;
 	public var bow:BowAttack;
 	public var throwAttack:ThrowAttack;
@@ -45,7 +45,7 @@ class Weapons
 		held = new HeldWeapon(player, heldSprite);
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
 		swing = new SwingAttack(director, hits, fx, weaponCfg.swing);
-		jab = new SwingAttack(director, hits, fx, weaponCfg.jab);
+		yoyoJab = new YoyoJab(director, hits, fx);
 		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
@@ -96,7 +96,9 @@ class Weapons
 			held.update(elapsed);
 		updateAttackInput();
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
-		jab.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
+		if (status.dead && yoyoJab.active)
+			yoyoJab.stop();
+		yoyoJab.update(elapsed, handX(), handY());
 		bow.update(elapsed);
 		var gunAim = aimFrom(held.handX(), held.handY());
 		if (status.dead)
@@ -140,6 +142,12 @@ class Weapons
 		revolver.reset();
 		held.setKind(weapon);
 	}
+
+	function handX():Float
+		return player.x + HeldWeapon.HAND_DX;
+
+	function handY():Float
+		return player.y + HeldWeapon.HAND_DY;
 
 	function aimFromPlayer():{dx:Float, dy:Float, deg:Float}
 		return aimFrom(player.x + player.width * 0.5, player.y + player.height * 0.5);
@@ -234,7 +242,7 @@ class Weapons
 		}
 
 		if (FlxG.keys.justPressed.Q && hasSuper() && status.canSuper() && !superOrbit.active() && !throwAttack.airborne
-			&& !hookAttack.busy)
+			&& !hookAttack.busy && !yoyoJab.active)
 		{
 			status.spendSuper();
 			switch (weapon)
@@ -290,7 +298,7 @@ class Weapons
 			return;
 		}
 
-		if (hookAttack.busy || held.swinging)
+		if (hookAttack.busy || yoyoJab.active || held.swinging)
 			return;
 
 		if (leftClick)
@@ -304,9 +312,10 @@ class Weapons
 		switch (weapon)
 		{
 			case 3:
-				held.beginSwing(aimDeg, Jab);
-				emitAttack(Jab, pmx, pmy, dx, dy, aimDeg);
-				jab.fire(pmx, pmy, dx, dy, aimDeg);
+				if (!yoyoJab.ready)
+					return;
+				emitAttack(Yoyo, handX(), handY(), dx, dy, aimDeg);
+				yoyoJab.fire(handX(), handY(), dx, dy);
 			default:
 				if (!swing.ready)
 					return;
@@ -341,10 +350,11 @@ class Weapons
 
 	function updateHeldHook():Void
 	{
-		if (hookAttack.busy)
+		var busy = hookAttack.busy || yoyoJab.active;
+		if (busy)
 			held.sprite.visible = false;
 		else if (wasHookBusy && !status.dead && !throwAttack.airborne)
 			held.sprite.visible = true;
-		wasHookBusy = hookAttack.busy;
+		wasHookBusy = busy;
 	}
 }

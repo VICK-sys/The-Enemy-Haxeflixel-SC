@@ -62,7 +62,7 @@ Each page's demo is its own class under `states/tutorial/`: MoveDemo, AttackDemo
 
 ## WeaponPickSubState
 
-The run's one weapon choice, opened as PlayState starts. Four cards: hammer, revolver, crossbow and hook. Choose with 1-4, A/D, the arrows or the mouse, then confirm with ENTER or a click. The pick locks for the whole run. There is no mid-run switching, only the chosen weapon's primary and secondary attacks.
+The run's one weapon choice, opened as PlayState starts. Four cards: hammer, revolver, crossbow and yoyo. Choose with 1-4, A/D, the arrows or the mouse, then confirm with ENTER or a click. The pick locks for the whole run. There is no mid-run switching, only the chosen weapon's primary and secondary attacks.
 
 Confirming reports where the chosen card's icon sat. The weapon then flies from that card into the player's hand. The throw belongs to `WeaponFlyIn`, which waits until every substate clears. The tutorial opens straight after the pick on a first run. The throw therefore waits on it, rather than playing behind the panel.
 

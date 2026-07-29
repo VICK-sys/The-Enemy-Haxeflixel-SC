@@ -16,6 +16,20 @@ typedef SwingConfig = {
 	?cooldown:Float
 }
 
+typedef YoyoConfig = {
+	reach:Float,
+	outTime:Float,
+	backTime:Float,
+	hitRadius:Float,
+	damage:Int,
+	hitstop:Int,
+	hitstopScale:Float,
+	hitShake:Float,
+	knock:Float,
+	hitBrace:Float,
+	cooldown:Float
+}
+
 typedef RevolverConfig = {
 	cylinder:Int,
 	damage:Int,
@@ -103,7 +117,7 @@ typedef HookArmsConfig = {
 
 typedef WeaponsData = {
 	swing:SwingConfig,
-	jab:SwingConfig,
+	yoyo:YoyoConfig,
 	revolver:RevolverConfig,
 	thrown:ThrownConfig,
 	bowCharge:BowChargeConfig,

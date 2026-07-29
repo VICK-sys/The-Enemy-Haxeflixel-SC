@@ -47,11 +47,13 @@ The held weapon streams its placement as an offset from the player. The far side
 
 The receiver rebuilds each effect from its own local classes. Those are a slash, an arrow, or a rain volley from a cosmetic `ArrowRain`.
 
-The hook, its rope and the thrown hammer stream as state on the avatar packet. They persist and follow the world instead of flying straight. Snapshots go out every fourth frame, far too coarse for a hammer at 1000 px/s. The thrown copy is dead-reckoned instead. The packet carries velocity rather than angle, and the sprite integrates that velocity at full framerate. The streamed position then acts as a weak correction that pulls out drift.
+The yoyo throw replays rather than streams. Its whole path follows from the launch point and the aim, so one event is enough to run the same out-and-back locally. It anchors to the moving avatar's hand rather than the point it left, which is what the thrower sees too. Only the owner's copy deals damage.
 
-The thrown hammer spins and trails locally. The hook uses a plain position lerp. Both rope ends interpolate, so the rope does not jitter. A hook stuck in a victim keeps a stale velocity, so it cannot dead-reckon. Host hits also emit an impact event so the client sees sparks. The client draws its own hits already, so only the host's need sending.
+The grab, its string and the thrown hammer stream as state on the avatar packet. They persist and follow the world instead of flying straight. Snapshots go out every fourth frame, far too coarse for a hammer at 1000 px/s. The thrown copy is dead-reckoned instead. The packet carries velocity rather than angle, and the sprite integrates that velocity at full framerate. The streamed position then acts as a weak correction that pulls out drift.
 
-A guest's hook grab crosses the wire as a seize message. The host marks the enemy seized and holds it still, the guest's mirror leaves a seized puppet alone so the drag belongs to the grabber, and the release hands the host the enemy's final spot. Everyone else sees the enemy freeze for the grab and snap onward after the throw.
+The thrown hammer spins and trails locally. The grab uses a plain position lerp. Both string ends interpolate, so the string does not jitter. A grab stuck in a victim keeps a stale velocity, so it cannot dead-reckon. Host hits also emit an impact event so the client sees sparks. The client draws its own hits already, so only the host's need sending.
+
+A guest's grab crosses the wire as a seize message. The host marks the enemy seized and holds it still, the guest's mirror leaves a seized puppet alone so the drag belongs to the grabber, and the release hands the host the enemy's final spot. Everyone else sees the enemy freeze for the grab and snap onward after the throw.
 
 Fanning the hammer sends each pellet as its own event. The burst therefore draws every bullet on the other machines instead of only the muzzle flash.
 
@@ -67,7 +69,7 @@ What a remote machine can reproduce decides how each other super replicates.
 
 The blade ring and the arrow storm replay from their activation alone. A call to `SuperOrbit.decoration()` builds a copy with no player, arena, director or hit pipeline. That strips the damage and the writes to the body. Blade launches arrive as one event each. The storm scatters its drops at random, and nobody can tell the two machines picked different points.
 
-The hook arms stream their claws, because they grab enemies. Which enemy is nearest can differ between machines. The grabbed enemy is host-authoritative already, so it gets dragged around correctly on its own. Rope curves rebuild locally from the streamed control points. They anchor to the interpolated body, so they stay attached while it moves.
+The grab arms stream their claws, because they grab enemies. Which enemy is nearest can differ between machines. The grabbed enemy is host-authoritative already, so it gets dragged around correctly on its own. String curves rebuild locally from the streamed control points. They anchor to the interpolated body, so they stay attached while it moves.
 
 Supers also lift, spin and squash the player's body. Those three ride along in the avatar packet, and no machine recomputes them. That is what keeps the decoration copies out of the body entirely.
 
@@ -89,7 +91,7 @@ One subtlety is worth knowing. The host never receives its own broadcasts. So wh
 
 The client's copy of the host's world lives in `PuppetMirror`. It holds puppet enemies and pickups, driven by snapshots and interpolated between them. It also holds the kill-credit window for this player's damage claims. Nothing in it decides anything. It only shows what the host said.
 
-`RemoteArms` is the streamed hook-arms channel. It stays out of `RemoteFx`, because it is the one effect that lerps state every frame rather than replaying an event. One shared function builds the boss death blast, `Fx.bossBlast`, so the host's real death and a client's mirror cannot drift apart.
+`RemoteArms` is the streamed grab-arms channel. It stays out of `RemoteFx`, because it is the one effect that lerps state every frame rather than replaying an event. One shared function builds the boss death blast, `Fx.bossBlast`, so the host's real death and a client's mirror cannot drift apart.
 
 ## Joining late
 

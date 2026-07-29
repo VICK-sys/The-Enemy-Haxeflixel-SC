@@ -79,15 +79,15 @@ Combat balance for every weapon system, one object per system. Field names match
 |---|---|
 | `swing` | melee range and arc, slash spawn distance. The hammer's block adds `cooldown`, the wait after each swing |
 | `dropLowHealthBonus` (player.json) | how much the health pack drop chance grows as you lose health. Zero keeps the flat rate, and the full bonus applies at zero health |
-| `jab` | hook jab spawn distance, reach, arc, damage, slash size |
-| `knock` | multiplies the push a connecting melee blow hands the enemy, so the hammer can throw one and the jab cannot |
+| `yoyo` | yoyo reach, out and back durations, hit radius, damage, hitstop, knock, recovery |
+| `knock` | multiplies the push a connecting melee blow hands the enemy, so the hammer can throw one and the yoyo cannot |
 | `hitBrace` | how far the struck enemy shakes, in pixels, while the hitstop holds. Zero means it takes the hit and goes straight away |
-| `hitstop`, `hitstopScale`, `hitShake` | how hard a connecting melee blow bites: frames held, the speed held at, and the shake. Set per weapon, so the hammer can land heavier than the jab |
+| `hitstop`, `hitstopScale`, `hitShake` | how hard a connecting melee blow bites: frames held, the speed held at, and the shake. Set per weapon, so the hammer can land heavier than the yoyo |
 | `revolver` | cylinder size and damage. Reload time, which is flat and does not follow the number of rounds missing. Fan interval and jitter. Bullet speed, range, hit radius and knockback |
 | `thrown` | throw distance, return speed, and the `catchCooldown` a catch starts |
 | `bowCharge` | charged shot. A press below `minTime` is a plain tap shot. `fullTime` is the time to full charge, and `maxDamage` is the damage there. The `speedBonus`/`sizeBonus`/`knockBonus` multipliers scale across the charge range |
 | `arrowRain` | volley size, drop delay and stagger, spread, fall speed, hit radius |
-| `hook` | flight range. Pull speed and timeout. Grab and hold distances. Spin windup. Throw speed, duration and hit radius. Release stun, and the damage for enemies you cannot grab |
+| `hook` | grab flight range. Pull speed and timeout. Grab and hold distances. Spin windup. Throw speed, duration and hit radius. Release stun, and the damage for enemies you cannot grab |
 | `deadEye` | white flash length, sepia strength, fade-out length, cursor radius that paints a mark, delay between shots, damage per round |
 | `superOrbit` | blade count, fire gate |
 | `arrowStorm` | storm duration, spawn cadence, drops per tick |

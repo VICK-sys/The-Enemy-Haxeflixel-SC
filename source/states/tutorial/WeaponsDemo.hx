@@ -20,7 +20,7 @@ class WeaponsDemo extends TutorialDemo
 	public function new(cam:FlxCamera)
 	{
 		super(cam);
-		var names = ["hammer", "revolver", "crossbow", "hook"];
+		var names = ["hammer", "revolver", "crossbow", "yoyo"];
 		for (i in 0...4)
 		{
 			var s = sprite();
