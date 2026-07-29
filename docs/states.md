@@ -36,9 +36,9 @@ The screenshake slider scales every camera shake in the game, and the freeze-fra
 
 ## ControlsSubState
 
-The rebind screen, opened from the CONTROLS row in options. A DEVICE row flips between the keyboard page and the controller page, and every action below it shows its current bind. Choosing an action waits for the next key or button and takes it, ESC backs out of the wait, and a captured bind that another action already holds swaps with it rather than silently unbinding something. RESET DEFAULTS puts both devices back. Binds persist in the save file.
+The rebind screen, opened from the CONTROLS row in options. A DEVICE row flips between the keyboard page and the controller page, and every action below it shows its current bind. Choosing an action waits for the next key, mouse button or pad button and takes it, ESC backs out of the wait, and a captured bind that another action already holds swaps with it rather than silently unbinding something. RESET DEFAULTS puts both devices back. Binds persist in the save file.
 
-Two things are not rebindable, and the footer says so per device: the mouse always aims and its buttons always attack, and on a controller the left stick always moves and the right stick always aims. Menus likewise keep fixed navigation, arrows and ENTER and ESC on keyboard, the dpad and sticks with A and B on a pad, so no rebind can lock you out of the screen that fixes it.
+Two things are not rebindable, and the footer says so per device: the mouse always aims, and on a controller the left stick always moves and the right stick always aims. The mouse buttons are ordinary binds, attack and secondary by default. Menus likewise keep fixed navigation, arrows and ENTER and ESC on keyboard, the dpad and sticks with A and B on a pad, so no rebind can lock you out of the screen that fixes it.
 
 ## PlayState
 

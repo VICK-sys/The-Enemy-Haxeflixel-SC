@@ -4,9 +4,9 @@ The per-run machinery owned by PlayState, the sprites it drives, and the shared 
 
 ## Controls
 
-Every input in the game asks `util/Controls` instead of the keyboard or mouse directly. An action, dash or attack or super or interact, carries one keyboard bind and one controller bind, both saved, plus fixed extras that never move: the mouse buttons always attack, the left stick always moves, the right stick always aims, and Z always confirms.
+Every input in the game asks `util/Controls` instead of the keyboard or mouse directly. An action, dash or attack or super or interact, carries one keyboard side bind, a key or a mouse button, and one controller bind, both saved, plus fixed extras that never move: the left stick always moves, the right stick always aims, and Z always confirms.
 
-Aiming is a device question, so `Controls` owns the answer. It watches which device spoke last, real window coordinates for the mouse, so a drifting camera cannot be mistaken for a moving hand, and serves either the mouse's world position or a virtual cursor held a fixed reach from the player in the right stick's direction. The crosshair, every weapon, the camera lean and the co-op aim targets all read that one answer, which is what makes a controller work everywhere without any weapon knowing devices exist.
+Aiming is a device question, so `Controls` owns the answer. It watches which device spoke last, real window coordinates for the mouse, so a drifting camera cannot be mistaken for a moving hand, and serves either the mouse's world position or a virtual cursor held a fixed reach from the player in the right stick's direction. Panels opened over the game reset only the keyboard, never the pad: keyboard state is event driven and stays quiet after a reset, but a pad is polled, so resetting it makes a still held button read as a fresh press one frame later, which closed the pause the same instant a controller opened it. The crosshair, every weapon, the camera lean and the co-op aim targets all read that one answer, which is what makes a controller work everywhere without any weapon knowing devices exist.
 
 ## Systems (source/systems/)
 

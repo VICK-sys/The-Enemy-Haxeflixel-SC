@@ -12,9 +12,12 @@ import util.Lang;
 
 class PauseSubState extends FlxSubState
 {
+	static inline var ARM_TIME:Float = 0.12;
+
 	private var camUI:FlxCamera;
 	private var list:MenuList;
 	private var leaving:Bool = false;
+	private var arm:Float = ARM_TIME;
 
 	public function new(camUI:FlxCamera)
 	{
@@ -71,6 +74,12 @@ class PauseSubState extends FlxSubState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+
+		if (arm > 0)
+		{
+			arm -= elapsed;
+			return;
+		}
 
 		if (util.Controls.menuBack() || util.Controls.pausePressed())
 			close();

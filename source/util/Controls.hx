@@ -20,6 +20,10 @@ class Controls
 	public static inline var PAUSE:Int = 10;
 	public static inline var COUNT:Int = 11;
 
+	public static inline var MOUSE_LEFT:Int = -101;
+	public static inline var MOUSE_RIGHT:Int = -102;
+	public static inline var MOUSE_MIDDLE:Int = -103;
+
 	static inline var STICK_MOVE:Float = 0.35;
 	static inline var STICK_AIM:Float = 0.25;
 	static inline var STICK_MENU:Float = 0.5;
@@ -46,7 +50,7 @@ class Controls
 	static var gamePoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 
 	public static function defaultKeys():Array<Int>
-		return [FlxKey.W, FlxKey.S, FlxKey.A, FlxKey.D, FlxKey.SPACE, FlxKey.NONE, FlxKey.NONE, FlxKey.Q, FlxKey.R, FlxKey.ENTER, FlxKey.ESCAPE];
+		return [FlxKey.W, FlxKey.S, FlxKey.A, FlxKey.D, FlxKey.SPACE, MOUSE_LEFT, MOUSE_RIGHT, FlxKey.Q, FlxKey.R, FlxKey.ENTER, FlxKey.ESCAPE];
 
 	public static function defaultPads():Array<Int>
 		return [
@@ -63,6 +67,10 @@ class Controls
 		var saved = SaveData.controls();
 		keys = saved != null && saved.keys != null && saved.keys.length == COUNT ? saved.keys.copy() : defaultKeys();
 		pads = saved != null && saved.pad != null && saved.pad.length == COUNT ? saved.pad.copy() : defaultPads();
+		if (keys[ATTACK] == FlxKey.NONE)
+			keys[ATTACK] = MOUSE_LEFT;
+		if (keys[SECOND] == FlxKey.NONE)
+			keys[SECOND] = MOUSE_RIGHT;
 		FlxG.signals.preUpdate.add(tick);
 	}
 
@@ -128,11 +136,22 @@ class Controls
 		return p.anyJustPressed([id]);
 	}
 
+	static function isMouse(k:Int):Bool
+		return k <= MOUSE_LEFT && k >= MOUSE_MIDDLE;
+
 	static function keyPressed(k:Int):Bool
+	{
+		if (isMouse(k))
+			return k == MOUSE_LEFT ? FlxG.mouse.pressed : (k == MOUSE_RIGHT ? FlxG.mouse.pressedRight : FlxG.mouse.pressedMiddle);
 		return k != FlxKey.NONE && FlxG.keys.anyPressed([k]);
+	}
 
 	static function keyJust(k:Int):Bool
+	{
+		if (isMouse(k))
+			return k == MOUSE_LEFT ? FlxG.mouse.justPressed : (k == MOUSE_RIGHT ? FlxG.mouse.justPressedRight : FlxG.mouse.justPressedMiddle);
 		return k != FlxKey.NONE && FlxG.keys.anyJustPressed([k]);
+	}
 
 	public static function pressed(action:Int):Bool
 		return keyPressed(keys[action]) || padPressed(pads[action]);
@@ -165,13 +184,13 @@ class Controls
 		return pressed(RIGHT) || stickX() > STICK_MOVE;
 
 	public static function attackJustPressed():Bool
-		return FlxG.mouse.justPressed || justPressed(ATTACK);
+		return justPressed(ATTACK);
 
 	public static function attackHeld():Bool
-		return FlxG.mouse.pressed || pressed(ATTACK);
+		return pressed(ATTACK);
 
 	public static function secondJustPressed():Bool
-		return FlxG.mouse.justPressedRight || justPressed(SECOND);
+		return justPressed(SECOND);
 
 	public static function acceptJustPressed():Bool
 		return justPressed(ACCEPT) || FlxG.keys.anyJustPressed([FlxKey.Z]);
@@ -265,13 +284,27 @@ class Controls
 	}
 
 	public static function keyName(k:Int):String
+	{
+		if (k == MOUSE_LEFT)
+			return "MOUSE 1";
+		if (k == MOUSE_RIGHT)
+			return "MOUSE 2";
+		if (k == MOUSE_MIDDLE)
+			return "MOUSE 3";
 		return k == FlxKey.NONE ? "-" : (k : FlxKey).toString();
+	}
 
 	public static function padName(id:Int):String
 		return id == FlxGamepadInputID.NONE ? "-" : (id : FlxGamepadInputID).toString();
 
 	public static function capturedKey():Int
 	{
+		if (FlxG.mouse.justPressed)
+			return MOUSE_LEFT;
+		if (FlxG.mouse.justPressedRight)
+			return MOUSE_RIGHT;
+		if (FlxG.mouse.justPressedMiddle)
+			return MOUSE_MIDDLE;
 		var k = FlxG.keys.firstJustPressed();
 		return k <= 0 ? FlxKey.NONE : k;
 	}

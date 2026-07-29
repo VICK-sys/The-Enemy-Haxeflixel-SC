@@ -69,7 +69,7 @@ class PlayState extends FlxState
 	public function openPanel(sub:flixel.FlxSubState):Void
 	{
 		fx.clearHitstop();
-		FlxG.inputs.reset();
+		FlxG.keys.reset();
 		openSubState(sub);
 	}
 
