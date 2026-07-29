@@ -12,8 +12,9 @@ import states.tutorial.MoveDemo;
 import states.tutorial.AttackDemo;
 import states.tutorial.WeaponsDemo;
 import states.tutorial.SuperDemo;
-import states.tutorial.AbilitiesDemo;
+import states.tutorial.ScrapDemo;
 import states.tutorial.HealthDemo;
+import states.tutorial.ReadyDemo;
 import util.Paths;
 import util.Lang;
 
@@ -21,11 +22,11 @@ class TutorialSubState extends FlxSubState
 {
 	public static var shown:Bool = false;
 
-	static inline var PAGES:Int = 6;
+	static inline var PAGES:Int = 7;
 	static inline var FADE_TIME:Float = 0.35;
 	static inline var OPEN_TIME:Float = 0.2;
 
-	static var KEYS:Array<String> = ["move", "attack", "weapons", "super", "abilities", "health"];
+	static var KEYS:Array<String> = ["move", "attack", "weapons", "super", "scrap", "health", "ready"];
 
 	private var camUI:FlxCamera;
 	private var titleText:FlxText;
@@ -100,8 +101,9 @@ class TutorialSubState extends FlxSubState
 			case 1: new AttackDemo(camUI);
 			case 2: new WeaponsDemo(camUI);
 			case 3: new SuperDemo(camUI);
-			case 4: new AbilitiesDemo(camUI);
-			default: new HealthDemo(camUI);
+			case 4: new ScrapDemo(camUI);
+			case 5: new HealthDemo(camUI);
+			default: new ReadyDemo(camUI);
 		}
 		add(demo);
 	}

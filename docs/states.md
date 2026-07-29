@@ -58,13 +58,13 @@ The lobby keeps updating while a substate is open. The socket has to stay servic
 
 ## TutorialSubState
 
-The controls popup, shown the first time PlayState opens each session. Six pages flip with A/D or the arrow keys: move, attack, weapons, super, abilities and health. Each page carries a looping animated demo built from game sprites.
+The controls popup, shown the first time PlayState opens each session. Seven pages flip with A/D or the arrow keys: move, attack, weapons, super, scrap, health and ready. Each page carries a looping animated demo built from game sprites.
 
-The abilities page demos time stop. Four enemies close in around the player until the stop triggers. They freeze mid-stride, while the player keeps running laps around them with the blue afterimage trail. The player steers clear of every frozen body, and everything ramps back up on release.
+The scrap page runs the whole economy in one loop: an enemy falls, the pieces burst out, the player walks the line of them and a counter ticks up as each is crossed. The ready page shows a rest: the prompt throbs until the ready bubble pops over the player's head and the next wave announces itself. The abilities page left with time stop when time stop was parked; if the ability comes back, its page comes back with it.
 
 The popup fades in on open. ENTER or ESC freezes the demo and fades it back out before the game starts. The wave timer stays frozen while the popup is open.
 
-Each page's demo is its own class under `states/tutorial/`: MoveDemo, AttackDemo, WeaponsDemo, SuperDemo, AbilitiesDemo and HealthDemo. All of them extend `TutorialDemo`. That group base holds the shared sprite, text and player factories, the demo clock, and a per-frame `step()` hook. The substate itself owns only the panel, the page texts and page flipping. Flipping destroys the old demo instance and builds the next.
+Each page's demo is its own class under `states/tutorial/`: MoveDemo, AttackDemo, WeaponsDemo, SuperDemo, ScrapDemo, HealthDemo and ReadyDemo. All of them extend `TutorialDemo`. That group base holds the shared sprite, text and player factories, the demo clock, and a per-frame `step()` hook. The substate itself owns only the panel, the page texts and page flipping. Flipping destroys the old demo instance and builds the next.
 
 ## WeaponPickSubState
 

@@ -2,6 +2,7 @@ package states.tutorial;
 
 import flixel.FlxCamera;
 import flixel.FlxSprite;
+import util.Paths;
 
 class HealthDemo extends TutorialDemo
 {
@@ -15,9 +16,10 @@ class HealthDemo extends TutorialDemo
 		actor = player();
 
 		heart = sprite();
-		heart.makeGraphic(12, 12, 0xFFE04848);
-		heart.scale.set(3, 3);
-		heart.setPosition(770 - 6, TutorialDemo.CY + 20 - 6);
+		heart.loadGraphic(Paths.image("items/hp_battery"));
+		heart.scale.set(4, 4);
+		heart.updateHitbox();
+		center(heart, 770, TutorialDemo.CY + 20);
 
 		var barBack = sprite();
 		barBack.makeGraphic(200, 18, 0xFF2A2A2A);
@@ -41,15 +43,15 @@ class HealthDemo extends TutorialDemo
 			actor.flipX = false;
 			actor.animation.play("walk");
 			heart.alpha = 1;
-			heart.scale.set(3, 3);
-			heart.y = TutorialDemo.CY + 14 + Math.sin(time * 4) * 4;
+			heart.scale.set(4, 4);
+			heart.y = TutorialDemo.CY + 14 - heart.height * 0.5 + Math.sin(time * 4) * 4;
 			barFill.scale.x = 0.5;
 		}
 		else if (t < 1.8)
 		{
 			actor.animation.play("idle");
 			var p = (t - 1.4) / 0.4;
-			heart.scale.set(3 + p * 3, 3 + p * 3);
+			heart.scale.set(4 + p * 3, 4 + p * 3);
 			heart.alpha = 1 - p;
 			barFill.scale.x = 0.5 + p * 0.5;
 		}
