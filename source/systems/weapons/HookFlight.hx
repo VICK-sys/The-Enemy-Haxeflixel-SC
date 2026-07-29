@@ -11,6 +11,7 @@ class HookFlight
 	static inline var WALL_PROBE:Float = 50;
 
 	public var active(get, never):Bool;
+	public var passenger(get, never):Enemies;
 	public var onRelease:Enemies->Void;
 
 	private var cfg = WeaponDataRegistry.get().hook;
@@ -33,6 +34,9 @@ class HookFlight
 
 	function get_active():Bool
 		return victim != null;
+
+	function get_passenger():Enemies
+		return victim;
 
 	public function launch(e:Enemies, dx:Float, dy:Float):Void
 	{

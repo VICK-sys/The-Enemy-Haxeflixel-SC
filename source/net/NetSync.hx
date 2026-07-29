@@ -23,6 +23,7 @@ class NetSync
 	static inline var SHOT_DAMAGE_CAP:Float = 4;
 	static inline var SHOT_SPEED_CAP:Float = 4000;
 	static inline var SHOT_RANGE_CAP:Float = 4000;
+	static inline var DRAG_PULL:Float = 10;
 
 	public var onWaveEvt:Int->Void;
 	public var onBossEvt:Void->Void;
@@ -177,15 +178,8 @@ class NetSync
 			Net.send({t: "hit", id: e.netId, px: r2(px), py: r2(py), d: d, s: s});
 		};
 
-		combat.hookAttack.onGrab = function(e, on)
-		{
-			if (e.netId < 0)
-				return;
-			if (on)
-				Net.send({t: "grab", id: e.netId, on: 1});
-			else
-				Net.send({t: "grab", id: e.netId, on: 0, x: r1(e.x), y: r1(e.y)});
-		};
+		combat.hookAttack.onGrab = sendGrab;
+		combat.hookArms.onGrab = sendGrab;
 
 		pickups.onCollect = function(p)
 		{
@@ -239,6 +233,8 @@ class NetSync
 		{
 			if (Net.isHost)
 				sendSnapshot();
+			else
+				sendDrags();
 			sendAvatar();
 		}
 
@@ -347,6 +343,7 @@ class NetSync
 					{
 						e.seized = true;
 						e.velocity.set(0, 0);
+						e.drag.set(0, 0);
 					}
 					else
 					{
@@ -357,6 +354,20 @@ class NetSync
 						e.unseize(0.35);
 					}
 				}
+
+			case "drag" if (Net.isHost):
+				var rows:Array<Dynamic> = msg.g;
+				if (rows != null)
+					for (row in rows)
+					{
+						var e = findEnemy(row[0]);
+						if (e != null && e.seized && !e.isDead)
+						{
+							var rx:Float = row[1];
+							var ry:Float = row[2];
+							e.velocity.set((rx - e.x) * DRAG_PULL, (ry - e.y) * DRAG_PULL);
+						}
+					}
 
 			case "snap" if (Net.isClient):
 				mirror.apply(msg);
@@ -428,6 +439,31 @@ class NetSync
 		if (rg > SHOT_RANGE_CAP)
 			rg = SHOT_RANGE_CAP;
 		director.shots.recycle(EnemyShot).fire(msg.x, msg.y, msg.dx, msg.dy, dm, sp, rg, image);
+	}
+
+	function sendGrab(e:Enemies, on:Bool):Void
+	{
+		if (e.netId < 0)
+			return;
+		if (on)
+			Net.send({t: "grab", id: e.netId, on: 1});
+		else
+			Net.send({t: "grab", id: e.netId, on: 0, x: r1(e.x), y: r1(e.y)});
+	}
+
+	function sendDrags():Void
+	{
+		var rows:Array<Array<Float>> = [];
+		var addRow = function(e:Enemies)
+		{
+			if (e != null && e.exists && !e.isDead && e.seized && e.netId >= 0)
+				rows.push([e.netId, r1(e.x), r1(e.y)]);
+		};
+		addRow(combat.hookAttack.heldEnemy);
+		for (arm in combat.hookArms.arms)
+			addRow(arm.target);
+		if (rows.length > 0)
+			Net.send({t: "drag", g: rows});
 	}
 
 	function findEnemy(id:Int):Enemies

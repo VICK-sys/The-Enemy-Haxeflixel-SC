@@ -22,7 +22,7 @@ class Net
 	public static inline var HOST_ID:Int = 0;
 	static inline var MAX_BUFFER:Int = 262144;
 
-	static var PRIVATE_TO_HOST:Array<String> = ["hit", "took"];
+	static var PRIVATE_TO_HOST:Array<String> = ["hit", "took", "grab", "drag"];
 
 	public static var hostPort:Int = PORT;
 	public static var mode:NetMode = Off;

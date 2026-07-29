@@ -87,6 +87,18 @@ class EnemySpawner
 	{
 		var e = rig.enemy;
 
+		if (e.seized)
+		{
+			rig.lastX = e.x;
+			rig.lastY = e.y;
+			rig.stuckTimer = 0;
+			rig.farX = e.x;
+			rig.farY = e.y;
+			rig.farClock = 0;
+			rig.farTimer = 0;
+			return;
+		}
+
 		if (e.entering)
 		{
 			rig.enterTimer += elapsed;

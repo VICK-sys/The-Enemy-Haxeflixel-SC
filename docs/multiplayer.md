@@ -53,7 +53,7 @@ The grab, the yoyo, their strings and the thrown hammer stream as state on the a
 
 The thrown hammer spins and trails locally. The grab uses a plain position lerp. Both string ends interpolate, so the string does not jitter. A grab stuck in a victim keeps a stale velocity, so it cannot dead-reckon. Host hits also emit an impact event so the client sees sparks. The client draws its own hits already, so only the host's need sending.
 
-A guest's grab crosses the wire as a seize message. The host marks the enemy seized and holds it still, the guest's mirror leaves a seized puppet alone so the drag belongs to the grabber, and the release hands the host the enemy's final spot. Everyone else sees the enemy freeze for the grab and snap onward after the throw.
+A guest's grab crosses the wire as a seize message, and the drag itself streams behind it. The grabber owns the enemy while it holds it: its own mirror leaves the seized puppet alone, and it sends the enemy's position on the avatar cadence. The host steers the real enemy toward each sample instead of teleporting it, so everyone watching sees the enemy reeled in, held at the cursor and whipped around, rather than freezing in place until the throw. The release still hands the host the enemy's final spot. The super's arms speak the same seize and drag protocol, so an arm's grab reads the same as the hook's.
 
 Fanning the hammer sends each pellet as its own event. The burst therefore draws every bullet on the other machines instead of only the muzzle flash.
 

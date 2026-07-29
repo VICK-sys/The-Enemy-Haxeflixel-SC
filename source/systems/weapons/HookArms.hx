@@ -29,6 +29,7 @@ class HookArms
 
 	public var backGroup:FlxGroup;
 	public var frontGroup:FlxGroup;
+	public var onGrab:(Enemies, Bool) -> Void;
 
 	private var cfg = WeaponDataRegistry.get().hookArms;
 	private var player:Player;
@@ -217,6 +218,8 @@ class HookArms
 					arm.target.seized = true;
 					arm.target.drag.set(0, 0);
 					arm.phase = 2;
+					if (onGrab != null)
+						onGrab(arm.target, true);
 				}
 			}
 		}
@@ -311,6 +314,8 @@ class HookArms
 				if (arm.whipTimer <= 0)
 				{
 					e.unseize();
+					if (onGrab != null)
+						onGrab(e, false);
 					throwEnemy(e, aimX(ex, ey), aimY(ex, ey));
 					arm.target = null;
 					arm.phase = 0;
@@ -453,7 +458,11 @@ class HookArms
 	function release(arm:Arm):Void
 	{
 		if (arm.target != null && arm.target.exists)
+		{
 			arm.target.unseize();
+			if (onGrab != null)
+				onGrab(arm.target, false);
+		}
 		arm.target = null;
 		if (arm.shot != null)
 		{

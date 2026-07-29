@@ -76,7 +76,7 @@ The director is also the single home of enemy hit queries. `firstInCircle` and `
 
 A wave ends only once every enemy is dead. One enemy that could never reach the player would therefore hang the run forever. Two guards prevent that.
 
-Spawned enemies pass through walls and prop footprints while entering. They turn solid only once they are inside the arena and clear of any pillar or prop. They therefore cannot turn solid inside one. Beyond that the watchdogs relocate a stuck enemy. As a backstop, a wave running longer than 75 seconds relocates everything still alive. The boss is exempt, since its movement is its own choreography.
+Spawned enemies pass through walls and prop footprints while entering. They turn solid only once they are inside the arena and clear of any pillar or prop. They therefore cannot turn solid inside one. Beyond that the watchdogs relocate a stuck enemy. A seized enemy is exempt, so a long grab cannot be mistaken for a wedged enemy and torn out of the holder's hands. As a backstop, a wave running longer than 75 seconds relocates everything still alive. The boss is exempt, since its movement is its own choreography.
 
 ### Pickups
 

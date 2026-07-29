@@ -34,6 +34,7 @@ class HookAttack
 	public var rope:FlxTypedGroup<FlxSprite>;
 	public var busy(get, never):Bool;
 	public var holding(get, never):Bool;
+	public var heldEnemy(get, never):Enemies;
 	public var onGrab:(Enemies, Bool) -> Void;
 
 	private var cfg = WeaponDataRegistry.get().hook;
@@ -81,6 +82,9 @@ class HookAttack
 
 	function get_holding():Bool
 		return phase == Holding;
+
+	function get_heldEnemy():Enemies
+		return victim != null ? victim : flight.passenger;
 
 	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
