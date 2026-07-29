@@ -196,7 +196,7 @@ class LevelUpSubState extends FlxSubState
 		for (i in 0...STATS.length)
 		{
 			rows[i].color = i == pick ? GOLD : FlxColor.WHITE;
-			vals[i].text = Std.string(Levels.points(i));
+			vals[i].text = Std.string(Levels.shown(i));
 			vals[i].color = i == pick ? GOLD : FlxColor.WHITE;
 		}
 
@@ -238,6 +238,7 @@ class LevelUpSubState extends FlxSubState
 	override public function close():Void
 	{
 		FlxG.mouse.visible = false;
+		Levels.lockIn();
 		super.close();
 	}
 

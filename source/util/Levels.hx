@@ -13,6 +13,7 @@ class Levels
 	public static var exp(default, null):Int = 0;
 
 	static var spent:Array<Int> = [for (i in 0...COUNT) 0];
+	static var locked:Array<Int> = [for (i in 0...COUNT) 0];
 	static var cfg = null;
 
 	static function conf()
@@ -26,11 +27,23 @@ class Levels
 	{
 		exp = 0;
 		for (i in 0...COUNT)
+		{
 			spent[i] = 0;
+			locked[i] = 0;
+		}
 	}
 
 	public static function points(stat:Int):Int
 		return stat >= 0 && stat < COUNT ? spent[stat] : 0;
+
+	public static function shown(stat:Int):Int
+		return points(stat) + 1;
+
+	public static function lockIn():Void
+	{
+		for (i in 0...COUNT)
+			locked[i] = spent[i];
+	}
 
 	public static function level():Int
 	{
@@ -52,7 +65,7 @@ class Levels
 		return costAt(level());
 
 	public static function canRefund(stat:Int):Bool
-		return stat >= 0 && stat < COUNT && spent[stat] > 0;
+		return stat >= 0 && stat < COUNT && spent[stat] > locked[stat];
 
 	public static function refund(stat:Int):Bool
 	{

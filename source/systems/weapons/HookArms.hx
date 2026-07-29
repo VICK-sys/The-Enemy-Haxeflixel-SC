@@ -150,7 +150,8 @@ class HookArms
 		var pcy = player.y + player.height * 0.5;
 		var anchorX = pcx;
 		var anchorY = player.y + ANCHOR_DOWN;
-		var facing = player.flipX ? -1.0 : 1.0;
+		var aimLeft = FlxG.mouse.x < pcx;
+		var facing = aimLeft ? -1.0 : 1.0;
 		var restLen = REST_UP + ANCHOR_DOWN;
 		var restRad = (-90 - REST_TILT_DEG * facing) * Math.PI / 180;
 		var restX = anchorX + Math.cos(restRad) * restLen + arm.restDX;
@@ -319,9 +320,9 @@ class HookArms
 		}
 
 		arm.claw.setPosition(arm.cx - arm.claw.width / 2, arm.cy - arm.claw.height / 2);
-		arm.claw.flipX = player.flipX;
+		arm.claw.flipX = aimLeft;
 
-		var side = player.flipX ? 1.0 : -1.0;
+		var side = aimLeft ? 1.0 : -1.0;
 		var idealCx = anchorX;
 		var idealCy = anchorY;
 		var mdx = arm.cx - anchorX;

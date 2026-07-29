@@ -114,6 +114,10 @@ The health bar is an `FlxBar` bound by reflection to `status.health`. The super 
 
 Enemies pay in scrap rather than in exp. A rewardable kill drops one `ScrapPickup` where the enemy fell, and picking it up pays one scrap. A kill you do not walk over is therefore worth nothing.
 
+Stat rows read one higher than the points behind them. A stat nobody has spent on shows 1 rather than 0, since a zero on a character sheet reads as broken. The maths still runs off the raw point count.
+
+Refunds only reach the points spent in the open session. Closing the screen locks the current spread in, so a later visit cannot claw back what an earlier one bought.
+
 One piece is one scrap, and nothing else pays. Clearing a wave used to hand over a hidden bonus that scaled with the wave number, which meant the counter jumped without anything being picked up and one piece on the ground was worth six. Both read as the number lying about the sprite. The level costs were divided down to match, so the pace is unchanged: the same wave still buys about the same number of levels.
 
 Scrap pulls toward the player inside `MAGNET`, faster the closer it gets, so a kill at your feet collects itself and a kill across the room asks you to go and get it. It expires after fourteen seconds and blinks for the last three, which keeps a cleared arena from filling with debris.
@@ -162,6 +166,8 @@ Each takes the collaborators it needs and nothing else, so the wiring in `create
 The repair shop stands at the top of the arena for the whole run, greyed out and solid. Its counter blocks movement, so you walk up to it rather than through it.
 
 Clearing a round no longer offers a level. Every tenth round does: the shop lights up, a banner announces it, and the next wave holds while it is open. Walk into range and a prompt appears; ENTER or Z opens the screen that spends scrap, which is the same screen the stats allocator always used.
+
+Backing out without spending anything leaves the shop standing and the wave still held, so you can think and come back. Only a visit that actually bought something shuts the shop and lets the round move on. The shop's own patience is the way out of that: it closes itself after a while whether or not you spent, and that release is already wired, so an empty wallet cannot strand the round.
 
 The keeper waits below the counter and rises into the window as the shutter goes up, on a four frame idle. She drops back out of sight when the shop shuts, and hides herself at the bottom of the travel so nothing hangs below the building.
 

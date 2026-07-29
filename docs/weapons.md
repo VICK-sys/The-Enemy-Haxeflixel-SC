@@ -152,11 +152,13 @@ The grab cannot latch an enemy flagged not `grabbable`, which means the boss. It
 
 The boomerang throw. It covers the thrown hammer's flight: out leg, wall turnaround, homing return and catch. It also owns the afterimage trail and the spin sound loop. The return steers around walls with its own EnemyNav instance on a fast re-path interval. The player cannot attack while it is airborne.
 
+Only arena walls turn the outbound leg around. Buildings and the rest of the scenery stop every other projectile in the game, but the hammer sails over them, so a throw across a rooftop reaches what is behind it instead of bouncing back off the roof.
+
 ## HookArms
 
 The yoyo super. Q with the yoyo equipped and a full super meter drains the meter. It then extends two mechanical grab-arms from the player's back, rendered behind them, for a few seconds.
 
-Each arm works alone. It picks whatever lies nearest the cursor rather than nearest the player, grabs it, reels it up, whips it in an arc and hurls it along the line to the cursor. Aiming therefore steers both halves of the throw. The arms rest tilted, and their curved ropes trail with inertia. They retract into the body when the super ends. The held yoyo hides, and the player can still move.
+Each arm works alone. It picks whatever lies nearest the cursor rather than nearest the player, grabs it, reels it up, whips it in an arc and hurls it along the line to the cursor. Every part of that reads off the cursor, including which side the arms rest on and which way the whip sweeps. Those two used to key off which way the body happened to be facing, so the arms swung by the walk rather than by the aim. The arms rest tilted, and their curved ropes trail with inertia. They retract into the body when the super ends. The held yoyo hides, and the player can still move.
 
 The arms also catch bullets, which the ordinary grab cannot do. With no enemy in reach an arm snatches the enemy shot nearest the cursor out of the air, holds it through the same whip, and hurls it back as a friendly round. A held shot harms nobody while it waits.
 

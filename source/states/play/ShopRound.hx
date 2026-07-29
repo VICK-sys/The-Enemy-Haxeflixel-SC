@@ -28,6 +28,7 @@ class ShopRound
 
 	private var holding:Bool = false;
 	private var done:Bool = false;
+	private var spentHere:Bool = false;
 	private var clock:Float = 0;
 	private var acks:Map<Int, Bool>;
 	private var need:Int = 0;
@@ -110,23 +111,29 @@ class ShopRound
 	{
 		if (!shop.open || status.dead || host.restarting || host.subState != null)
 			return;
+		spentHere = false;
 		var screen = new LevelUpSubState(hud.camUI);
 		screen.onSpent = syncScrap;
 		screen.closeCallback = onScreenClosed;
 		host.openPanel(screen);
-		shop.dismiss();
 		if (Net.active)
 			Net.send({t: "lvlin"});
 	}
 
 	function syncScrap():Void
 	{
+		spentHere = true;
 		status.refreshMax();
 		hud.setExp(Levels.exp);
 	}
 
 	function onScreenClosed():Void
+	{
+		if (!spentHere)
+			return;
+		shop.dismiss();
 		reportDone();
+	}
 
 	function onShopShut():Void
 		reportDone();
