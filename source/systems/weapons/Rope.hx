@@ -33,6 +33,46 @@ class Rope
 			place(rope, ax + ux * STEP * (i + 0.5), ay + uy * STEP * (i + 0.5), ang);
 	}
 
+	public static function chain(rope:FlxTypedGroup<FlxSprite>, xs:Array<Float>, ys:Array<Float>):Void
+	{
+		clear(rope);
+
+		var n = xs.length;
+		var arc = 0.0;
+		for (i in 1...n)
+		{
+			var dx = xs[i] - xs[i - 1];
+			var dy = ys[i] - ys[i - 1];
+			arc += Math.sqrt(dx * dx + dy * dy);
+		}
+		if (arc < 8)
+			return;
+
+		var count = Math.ceil(arc / STEP);
+		var span = arc / count;
+		var walked = 0.0;
+		var next = span * 0.5;
+		var placed = 0;
+
+		for (i in 1...n)
+		{
+			var ax = xs[i - 1];
+			var ay = ys[i - 1];
+			var dx = xs[i] - ax;
+			var dy = ys[i] - ay;
+			var seg = Math.sqrt(dx * dx + dy * dy);
+			var ang = Math.atan2(dy, dx) * 180 / Math.PI - 90;
+			while (placed < count && walked + seg >= next)
+			{
+				var f = seg <= 0 ? 0.0 : (next - walked) / seg;
+				place(rope, ax + dx * f, ay + dy * f, ang);
+				placed++;
+				next += span;
+			}
+			walked += seg;
+		}
+	}
+
 	public static function curve(rope:FlxTypedGroup<FlxSprite>, ax:Float, ay:Float, bx:Float, by:Float, ccx:Float, ccy:Float):Void
 	{
 		clear(rope);

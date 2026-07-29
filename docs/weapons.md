@@ -22,7 +22,7 @@ The shared hit pipeline. It applies damage with a hit sound, sparks, kill reward
 
 ## Rope
 
-Shared cord drawing. It tiles `yoyo_string` segments along a straight line for the grab line and the yoyo's string. For the arms' curved cords it follows a quadratic bezier with an explicit control point. It draws into a caller-owned sprite group.
+Shared cord drawing. It tiles `yoyo_string` segments along a straight line for the grab line and the yoyo's string. For the arms' curved cords it follows a quadratic bezier with an explicit control point, and for the yoyo's string it walks the simulated points directly. All three draw into a caller-owned sprite group.
 
 The curve spaces its segments by distance travelled rather than by curve parameter. It samples the bezier once to measure the real arc, then walks that arc placing a segment every fixed step. Both halves matter. Sizing the count from the straight line between the ends under-counts, because the bow is about a third longer than its chord, and stepping the parameter evenly spreads the segments out where the curve runs fastest. Either one alone opens gaps in a long reach. Spacing from the arc keeps every step shorter than a segment, so the cord stays solid at any length.
 
@@ -53,6 +53,10 @@ The yoyo's primary, held rather than tapped. Press left click and the yoyo is th
 `YoyoFlight` owns the motion. Every frame it picks a target, the clamped cursor while deployed or the hand while coming back, and moves toward it. Going out it eases under a speed cap, so a long throw reads as travel rather than a jump and settles rather than stopping dead. `YoyoJab` wraps that with the damage.
 
 Coming home it runs at flat speed instead. Easing chases a target by closing a share of the gap each frame, which settles into a standing lag once the target is moving, and the hand moves whenever the player does. That lag came out just wider than the distance the catch tests for, so walking away from a returning yoyo left it hovering at the hand, spinning, caught by nothing, with every attack locked out behind it. Flat speed always closes.
+
+The string is simulated rather than drawn straight. `YoyoRope` holds a line of points between the hand and the yoyo, carries their momentum frame to frame, and then pulls each pair back to an even spacing a few times over. Both ends are pinned every pass, so the hand and the yoyo always own their ends of it. The middle lags whatever the ends do, which is what makes it bow away from the swing and trail back into line afterwards.
+
+A slack figure lets the rope run slightly longer than the gap it spans, which is what gives the bow room. Nothing pulls it down, since down is not a direction here, so without something else it would keep whatever shape a swing left it in. A weak pull toward the straight line handles that: it loses to momentum while the yoyo is moving and wins once it stops. Measured across a whipped throw, the middle rides about ninety pixels off the straight line at the peak and returns to dead straight when held still.
 
 Two floors guard the rest of that. The yoyo will not sit closer to the hand than a minimum while it is out, so aiming at your own feet throws it clear rather than parking it on your chest, and it cannot be caught in the first fraction of a second, so a tap still reads as a throw rather than a flicker.
 

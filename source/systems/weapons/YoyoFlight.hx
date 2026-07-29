@@ -1,5 +1,6 @@
 package systems.weapons;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import data.WeaponData.WeaponDataRegistry;
@@ -23,6 +24,7 @@ class YoyoFlight
 	private var cfg = WeaponDataRegistry.get().yoyo;
 	private var spin:Float = 1;
 	private var flown:Float = 0;
+	private var cord:YoyoRope = new YoyoRope();
 
 	public function new()
 	{
@@ -42,6 +44,7 @@ class YoyoFlight
 		flown = 0;
 		cx = hx;
 		cy = hy;
+		cord.reset(hx, hy, hx, hy);
 		yoyo.revive();
 		place();
 	}
@@ -116,7 +119,8 @@ class YoyoFlight
 
 		yoyo.angle += spin * SPIN_RATE * elapsed;
 		place();
-		Rope.line(string, hx, hy, cx, cy);
+		cord.update(elapsed, hx, hy, cx, cy);
+		Rope.chain(string, cord.xs, cord.ys);
 	}
 
 	public function drive(px:Float, py:Float, ang:Float, hx:Float, hy:Float):Void
@@ -125,12 +129,14 @@ class YoyoFlight
 		{
 			active = true;
 			yoyo.revive();
+			cord.reset(hx, hy, px, py);
 		}
 		cx = px;
 		cy = py;
 		yoyo.angle = ang;
 		place();
-		Rope.line(string, hx, hy, cx, cy);
+		cord.update(FlxG.elapsed, hx, hy, cx, cy);
+		Rope.chain(string, cord.xs, cord.ys);
 	}
 
 	function place():Void
