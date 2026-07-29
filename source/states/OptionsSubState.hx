@@ -13,7 +13,7 @@ import util.Lang;
 class OptionsSubState extends FlxSubState
 {
 	static inline var RESET_WINDOW:Float = 3.0;
-	static inline var ROWS:Int = 14;
+	static inline var ROWS:Int = 15;
 
 	static var FPS_STEPS:Array<Int> = [60, 120, 144, 165, 240];
 	static var ASPECTS:Array<String> = ["auto", "4:3", "16:9", "16:10", "21:9"];
@@ -43,7 +43,7 @@ class OptionsSubState extends FlxSubState
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
 		add(title);
 
-		list = new MenuList([for (i in 0...ROWS) ""], 112, 40, 22);
+		list = new MenuList([for (i in 0...ROWS) ""], 106, 38, 22);
 		list.onChoose = choose;
 		list.onAdjust = adjust;
 		list.marker.scale.set(1.6, 1.6);
@@ -79,7 +79,7 @@ class OptionsSubState extends FlxSubState
 		if (SaveData.volume() != shownVolume)
 			refreshLabels();
 
-		if (FlxG.keys.justPressed.ESCAPE)
+		if (util.Controls.menuBack())
 			close();
 	}
 
@@ -98,8 +98,9 @@ class OptionsSubState extends FlxSubState
 		list.setLabel(9, Lang.t("options.sound3d", [onOff(SaveData.sound3d())]));
 		list.setLabel(10, Lang.t("options.fps", [onOff(SaveData.showFps())]));
 		list.setLabel(11, Lang.t("options.language", [Lang.t("lang.name")]));
-		list.setLabel(12, Lang.t(resetArmed ? "options.resetBestConfirm" : "options.resetBest"));
-		list.setLabel(13, Lang.t("common.back"));
+		list.setLabel(12, Lang.t("options.controls"));
+		list.setLabel(13, Lang.t(resetArmed ? "options.resetBestConfirm" : "options.resetBest"));
+		list.setLabel(14, Lang.t("common.back"));
 	}
 
 	function onOff(b:Bool):String
@@ -144,6 +145,8 @@ class OptionsSubState extends FlxSubState
 				switchLanguage();
 				return;
 			case 12:
+				openSubState(new ControlsSubState(cam));
+			case 13:
 				if (resetArmed)
 				{
 					SaveData.resetBest();
@@ -155,7 +158,7 @@ class OptionsSubState extends FlxSubState
 					resetTimer = RESET_WINDOW;
 				}
 				refreshLabels();
-			case 13:
+			case 14:
 				close();
 			default:
 				adjust(i, 1);

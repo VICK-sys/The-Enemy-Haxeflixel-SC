@@ -16,14 +16,15 @@ Time stop is off online. Dead Eye marks without stopping the world. Death respaw
 
 ## Controls
 
-- WASD - move
-- Mouse - aim. Left click is the primary attack, right click the secondary.
-- SPACE - dash, with a 2 second cooldown
-- E - time stop, with a 30 second cooldown. The world winds down to a complete stop for 10 seconds. You keep moving and attacking at full speed.
-- Q - super, once the meter is full
-- R - reload the revolver early. It also restarts the run after death.
-- ESC - pause
-- ENTER - skip the intro
+Keyboard and mouse, or a controller. The game follows whichever you touched last, and every bind below can be changed from OPTIONS, CONTROLS.
+
+- WASD or the left stick - move
+- Mouse or the right stick - aim. Left click or the right trigger is the primary attack, right click or the left trigger the secondary.
+- SPACE or A - dash, with a 2 second cooldown
+- Q or Y - super, once the meter is full
+- R or X - reload the revolver early. It also restarts the run after death.
+- ENTER or A - interact and ready up
+- ESC or START - pause
 
 ## Weapons
 

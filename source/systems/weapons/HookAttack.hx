@@ -252,8 +252,8 @@ class HookAttack
 
 		var pmx = player.x + player.width * 0.5;
 		var pmy = player.y + player.height * 0.5;
-		var dx = FlxG.mouse.x - pmx;
-		var dy = FlxG.mouse.y - pmy;
+		var dx = util.Controls.aimX() - pmx;
+		var dy = util.Controls.aimY() - pmy;
 		var len = Math.sqrt(dx * dx + dy * dy);
 		if (len < 0.001)
 		{

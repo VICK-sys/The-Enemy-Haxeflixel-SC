@@ -72,7 +72,7 @@ class PauseSubState extends FlxSubState
 	{
 		super.update(elapsed);
 
-		if (FlxG.keys.justPressed.ESCAPE)
+		if (util.Controls.menuBack() || util.Controls.pausePressed())
 			close();
 
 		if (FlxG.keys.justPressed.MINUS)

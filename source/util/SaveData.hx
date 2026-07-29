@@ -272,6 +272,22 @@ class SaveData
 		save.flush();
 	}
 
+	public static function controls():{keys:Array<Int>, pad:Array<Int>}
+	{
+		ensure();
+		if (save.data.ctrlKeys == null)
+			return null;
+		return {keys: save.data.ctrlKeys, pad: save.data.ctrlPads};
+	}
+
+	public static function setControls(keys:Array<Int>, pad:Array<Int>):Void
+	{
+		ensure();
+		save.data.ctrlKeys = keys.copy();
+		save.data.ctrlPads = pad.copy();
+		save.flush();
+	}
+
 	public static function applySettings():Void
 	{
 		FlxG.sound.volume = volume();

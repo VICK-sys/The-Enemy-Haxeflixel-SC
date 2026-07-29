@@ -323,23 +323,23 @@ class LevelUpSubState extends FlxSubState
 			}
 		}
 
-		if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP)
+		if (util.Controls.menuUp())
 		{
 			pick = (pick + STATS.length) % (STATS.length + 1);
 			refresh();
 		}
-		if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.DOWN)
+		if (util.Controls.menuDown())
 		{
 			pick = (pick + 1) % (STATS.length + 1);
 			refresh();
 		}
-		if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT)
+		if (util.Controls.menuRightJust())
 			buy();
-		if (FlxG.keys.justPressed.A || FlxG.keys.justPressed.LEFT)
+		if (util.Controls.menuLeftJust())
 			sell();
-		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.Z)
+		if (util.Controls.menuAccept())
 			choose();
-		if (FlxG.keys.justPressed.ESCAPE)
+		if (util.Controls.menuBack())
 			leave();
 	}
 

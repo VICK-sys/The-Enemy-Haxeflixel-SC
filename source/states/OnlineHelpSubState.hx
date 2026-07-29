@@ -114,11 +114,11 @@ class OnlineHelpSubState extends FlxSubState
 			return;
 		}
 
-		if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT)
+		if (util.Controls.menuRightJust())
 			flip(1);
-		if (FlxG.keys.justPressed.A || FlxG.keys.justPressed.LEFT)
+		if (util.Controls.menuLeftJust())
 			flip(-1);
-		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.ESCAPE)
+		if (util.Controls.menuAccept() || util.Controls.menuBack())
 			beginClose();
 	}
 

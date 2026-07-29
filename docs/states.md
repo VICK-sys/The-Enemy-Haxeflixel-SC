@@ -26,13 +26,19 @@ Windows will not shrink a window past about 36 px. That is why the end of the va
 
 ## OptionsSubState
 
-The options panel over the menu. It holds master volume, the display mode, V-Sync, the framerate, the aspect ratio, the camera lean, screenshake and freeze-frame sliders, the HUD toggle, the 3D sound toggle, an FPS counter toggle, the language, and a reset-best-wave action. Adjust a row with A/D or the arrows, or click to step it. Reset-best-wave asks for a second press within a few seconds to confirm. Every setting applies at once and persists in the save file. ESC or BACK closes the panel.
+The options panel over the menu. It holds master volume, the display mode, V-Sync, the framerate, the aspect ratio, the camera lean, screenshake and freeze-frame sliders, the HUD toggle, the 3D sound toggle, an FPS counter toggle, the language, a CONTROLS row, and a reset-best-wave action. Adjust a row with A/D or the arrows, or click to step it. Reset-best-wave asks for a second press within a few seconds to confirm. Every setting applies at once and persists in the save file. ESC or BACK closes the panel.
 
 The display mode picks windowed, borderless, or exclusive fullscreen. V-Sync cannot change on a live window, so the toggle instead caps the framerate to the display's refresh rate, which gives the same pacing. With V-Sync off, the framerate row picks the cap directly, and it drives the update rate too. The aspect ratio row constrains the display region to 4:3, 16:9, 16:10 or 21:9 through a custom scale mode. The whole 16:9 frame scales to fit inside that region, so nothing is ever covered or cut, and the space outside the frame fills with bars on the plain stage. The bars fill with `assets/images/ui/side_art.png` when that file exists, and a flat dark panel when it does not. AUTO fits the window itself, and any leftover margins still take the art.
 
 The camera lean slider sets how far the cursor drags the view. At zero the camera sits on the player; at full it sits halfway between the player and the cursor, which puts the player at the screen edge when you aim that far out. It defaults to halfway between those, since playtesting split on how much movement reads well.
 
 The screenshake slider scales every camera shake in the game, and the freeze-frame slider scales every hitstop, both from zero to full. The HUD toggle hides the whole screen HUD except the crosshair. The 3D sound toggle pans and fades world sounds by where they happen relative to the view: hits, enemy shots, charge roars, the boss blast and the shop door. Off plays everything flat and centred.
+
+## ControlsSubState
+
+The rebind screen, opened from the CONTROLS row in options. A DEVICE row flips between the keyboard page and the controller page, and every action below it shows its current bind. Choosing an action waits for the next key or button and takes it, ESC backs out of the wait, and a captured bind that another action already holds swaps with it rather than silently unbinding something. RESET DEFAULTS puts both devices back. Binds persist in the save file.
+
+Two things are not rebindable, and the footer says so per device: the mouse always aims and its buttons always attack, and on a controller the left stick always moves and the right stick always aims. Menus likewise keep fixed navigation, arrows and ENTER and ESC on keyboard, the dpad and sticks with A and B on a pad, so no rebind can lock you out of the screen that fixes it.
 
 ## PlayState
 

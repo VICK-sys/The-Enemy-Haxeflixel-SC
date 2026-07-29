@@ -134,5 +134,5 @@ class DialogueBox
 	}
 
 	function advancePressed():Bool
-		return FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.Z;
+		return util.Controls.acceptJustPressed();
 }

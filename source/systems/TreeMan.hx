@@ -60,7 +60,7 @@ class TreeMan
 		if (dx * dx + dy * dy > REACH * REACH)
 			return;
 
-		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.Z)
+		if (util.Controls.acceptJustPressed())
 			speak();
 	}
 

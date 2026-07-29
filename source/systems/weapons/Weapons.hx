@@ -98,7 +98,7 @@ class Weapons
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		if (status.dead && yoyoJab.active)
 			yoyoJab.stop();
-		yoyoJab.update(elapsed, handX(), handY(), FlxG.mouse.x, FlxG.mouse.y);
+		yoyoJab.update(elapsed, handX(), handY(), util.Controls.aimX(), util.Controls.aimY());
 		bow.update(elapsed);
 		var gunAim = aimFrom(held.handX(), held.handY());
 		if (status.dead)
@@ -154,8 +154,8 @@ class Weapons
 
 	function aimFrom(ox:Float, oy:Float):{dx:Float, dy:Float, deg:Float}
 	{
-		var dx:Float = FlxG.mouse.x - ox;
-		var dy:Float = FlxG.mouse.y - oy;
+		var dx:Float = util.Controls.aimX() - ox;
+		var dy:Float = util.Controls.aimY() - oy;
 		var len:Float = Math.sqrt(dx * dx + dy * dy);
 		if (len < 0.001)
 		{
@@ -176,20 +176,20 @@ class Weapons
 			return;
 		}
 
-		if (FlxG.mouse.justPressedRight && bow.rainReady && !held.swinging)
+		if (util.Controls.secondJustPressed() && bow.rainReady && !held.swinging)
 		{
 			var aim = aimFromPlayer();
 			bow.cancelCharge();
 			held.beginSwing(aim.deg, Rain);
 			emitAttack(Rain, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
-			bow.rainFire(FlxG.mouse.x, FlxG.mouse.y, held.handX(), held.handY());
+			bow.rainFire(util.Controls.aimX(), util.Controls.aimY(), held.handX(), held.handY());
 			return;
 		}
 
-		if (FlxG.mouse.justPressed)
+		if (util.Controls.attackJustPressed())
 			bow.beginCharge();
 
-		if (bow.charging && !FlxG.mouse.pressed)
+		if (bow.charging && !util.Controls.attackHeld())
 		{
 			var aim = aimFromPlayer();
 			var shot = aimFrom(held.handX(), held.handY());
@@ -205,13 +205,13 @@ class Weapons
 		if (throwAttack.airborne || deadEye.active)
 			return;
 
-		if (FlxG.keys.justPressed.R)
+		if (util.Controls.justPressed(util.Controls.RELOAD))
 			revolver.beginReload();
 
 		var aim = aimFromPlayer();
 		var shot = aimFrom(held.handX(), held.handY());
 
-		if (FlxG.mouse.justPressedRight && revolver.canFan())
+		if (util.Controls.secondJustPressed() && revolver.canFan())
 		{
 			held.beginSwing(aim.deg, Fan);
 			emitAttack(Fan, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
@@ -219,7 +219,7 @@ class Weapons
 			return;
 		}
 
-		if (FlxG.mouse.justPressed && revolver.canFire())
+		if (util.Controls.attackJustPressed() && revolver.canFire())
 		{
 			held.beginSwing(aim.deg, Shoot);
 			emitAttack(Shoot, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
@@ -235,13 +235,13 @@ class Weapons
 			return;
 		}
 
-		if (FlxG.keys.justPressed.Q && deadEye.marking)
+		if (util.Controls.justPressed(util.Controls.SUPER) && deadEye.marking)
 		{
 			deadEye.cancel();
 			return;
 		}
 
-		if (FlxG.keys.justPressed.Q && hasSuper() && status.canSuper() && !superOrbit.active() && !throwAttack.airborne
+		if (util.Controls.justPressed(util.Controls.SUPER) && hasSuper() && status.canSuper() && !superOrbit.active() && !throwAttack.airborne
 			&& !hookAttack.busy)
 		{
 			yoyoJab.stop();
@@ -276,8 +276,8 @@ class Weapons
 			return;
 		}
 
-		var leftClick = FlxG.mouse.justPressed;
-		var rightClick = FlxG.mouse.justPressedRight;
+		var leftClick = util.Controls.attackJustPressed();
+		var rightClick = util.Controls.secondJustPressed();
 		if ((!leftClick && !rightClick) || throwAttack.airborne)
 			return;
 
@@ -292,9 +292,9 @@ class Weapons
 		{
 			if (!leftClick)
 				return;
-			superOrbit.tryLaunch(FlxG.mouse.x, FlxG.mouse.y);
+			superOrbit.tryLaunch(util.Controls.aimX(), util.Controls.aimY());
 			if (onSuperLaunch != null)
-				onSuperLaunch(FlxG.mouse.x, FlxG.mouse.y);
+				onSuperLaunch(util.Controls.aimX(), util.Controls.aimY());
 			return;
 		}
 
@@ -335,7 +335,7 @@ class Weapons
 		if (hookAttack.busy)
 			return;
 
-		if (FlxG.mouse.justPressedRight)
+		if (util.Controls.secondJustPressed())
 		{
 			var pmx = player.x + player.width * 0.5;
 			var pmy = player.y + player.height * 0.5;
@@ -346,7 +346,7 @@ class Weapons
 			return;
 		}
 
-		if (FlxG.mouse.justPressed)
+		if (util.Controls.attackJustPressed())
 		{
 			if (yoyoJab.ready)
 			{
@@ -354,14 +354,14 @@ class Weapons
 				yoyoJab.fire(handX(), handY(), aim.dx, aim.dy);
 			}
 		}
-		else if (!FlxG.mouse.pressed)
+		else if (!util.Controls.attackHeld())
 			yoyoJab.release();
 	}
 
 	function emitAttack(mode:WeaponMode, pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0):Void
 	{
 		if (onAttack != null)
-			onAttack(mode, pmx, pmy, dx, dy, aimDeg, FlxG.mouse.x, FlxG.mouse.y, power);
+			onAttack(mode, pmx, pmy, dx, dy, aimDeg, util.Controls.aimX(), util.Controls.aimY(), power);
 	}
 
 	function updateHeldHook():Void

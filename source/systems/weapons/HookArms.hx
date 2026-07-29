@@ -151,7 +151,7 @@ class HookArms
 		var pcy = player.y + player.height * 0.5;
 		var anchorX = pcx;
 		var anchorY = player.y + ANCHOR_DOWN;
-		var aimLeft = FlxG.mouse.x < pcx;
+		var aimLeft = util.Controls.aimX() < pcx;
 		var facing = aimLeft ? -1.0 : 1.0;
 		var restLen = REST_UP + ANCHOR_DOWN;
 		var restRad = (-90 - REST_TILT_DEG * facing) * Math.PI / 180;
@@ -379,8 +379,8 @@ class HookArms
 	{
 		var best:Enemies = null;
 		var bestD = Math.POSITIVE_INFINITY;
-		var mx = FlxG.mouse.x;
-		var my = FlxG.mouse.y;
+		var mx = util.Controls.aimX();
+		var my = util.Controls.aimY();
 		director.eachInCircle(ax, ay, cfg.reach, function(e)
 		{
 			if (e == exclude || e.seized || !e.grabbable)
@@ -401,8 +401,8 @@ class HookArms
 	{
 		var best:EnemyShot = null;
 		var bestD = Math.POSITIVE_INFINITY;
-		var mx = FlxG.mouse.x;
-		var my = FlxG.mouse.y;
+		var mx = util.Controls.aimX();
+		var my = util.Controls.aimY();
 		for (s in director.shots.members)
 		{
 			if (s == null || !s.exists || s.held || s.friendly || s == exclude)
@@ -427,16 +427,16 @@ class HookArms
 
 	function aimX(ax:Float, ay:Float):Float
 	{
-		var dx = FlxG.mouse.x - ax;
-		var dy = FlxG.mouse.y - ay;
+		var dx = util.Controls.aimX() - ax;
+		var dy = util.Controls.aimY() - ay;
 		var len = Math.sqrt(dx * dx + dy * dy);
 		return len <= 0 ? 1 : dx / len;
 	}
 
 	function aimY(ax:Float, ay:Float):Float
 	{
-		var dx = FlxG.mouse.x - ax;
-		var dy = FlxG.mouse.y - ay;
+		var dx = util.Controls.aimX() - ax;
+		var dy = util.Controls.aimY() - ay;
 		var len = Math.sqrt(dx * dx + dy * dy);
 		return len <= 0 ? 0 : dy / len;
 	}

@@ -261,9 +261,9 @@ class WeaponPickSubState extends FlxSubState
 
 	function updateInput():Void
 	{
-		if (FlxG.keys.justPressed.A || FlxG.keys.justPressed.LEFT)
+		if (util.Controls.menuLeftJust())
 			move(-1);
-		if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT)
+		if (util.Controls.menuRightJust())
 			move(1);
 
 		if (FlxG.keys.justPressed.ONE)
@@ -284,7 +284,7 @@ class WeaponPickSubState extends FlxSubState
 				set(over);
 		}
 
-		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE || (FlxG.mouse.justPressed && over >= 0))
+		if (util.Controls.menuAccept() || FlxG.keys.justPressed.SPACE || (FlxG.mouse.justPressed && over >= 0))
 			confirm();
 	}
 

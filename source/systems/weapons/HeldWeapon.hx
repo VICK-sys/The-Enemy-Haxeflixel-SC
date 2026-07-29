@@ -159,8 +159,8 @@ class HeldWeapon
 			{
 				var pmx:Float = player.x + player.width * 0.5;
 				var pmy:Float = player.y + player.height * 0.5;
-				dx = FlxG.mouse.x - pmx;
-				dy = FlxG.mouse.y - pmy;
+				dx = util.Controls.aimX() - pmx;
+				dy = util.Controls.aimY() - pmy;
 				len = Math.sqrt(dx * dx + dy * dy);
 			}
 			if (len > 0.001)
@@ -190,14 +190,14 @@ class HeldWeapon
 			{
 				var s:Float = BASE_SCALE + RECOIL_SCALE * Math.sin(Math.PI * t);
 				sprite.scale.set(s, s);
-				trackCursor(FlxG.mouse.x, FlxG.mouse.y, elapsed);
+				trackCursor(util.Controls.aimX(), util.Controls.aimY(), elapsed);
 			}
 		}
 		else
 		{
 			var s:Float = BASE_SCALE + charge * CHARGE_SCALE;
 			sprite.scale.set(s, s);
-			trackCursor(FlxG.mouse.x, FlxG.mouse.y, elapsed);
+			trackCursor(util.Controls.aimX(), util.Controls.aimY(), elapsed);
 		}
 
 		sprite.color = charge > 0 ? FlxColor.interpolate(FlxColor.WHITE, CHARGE_TINT, charge) : FlxColor.WHITE;

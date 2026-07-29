@@ -179,7 +179,7 @@ class DeadEye
 
 		if (targets.length < revolver.rounds)
 		{
-			var hit = director.firstInCircle(FlxG.mouse.x, FlxG.mouse.y, cfg.markRadius);
+			var hit = director.firstInCircle(util.Controls.aimX(), util.Controls.aimY(), cfg.markRadius);
 			if (hit != null && !hit.isDead && targets.indexOf(hit) < 0)
 			{
 				targets.push(hit);
@@ -188,7 +188,7 @@ class DeadEye
 			}
 		}
 
-		if (arm <= 0 && FlxG.mouse.justPressed)
+		if (arm <= 0 && util.Controls.attackJustPressed())
 			release();
 	}
 

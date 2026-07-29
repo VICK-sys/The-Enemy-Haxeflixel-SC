@@ -131,7 +131,7 @@ class ReadyGate
 		if (ready || status.dead || (blocked != null && blocked()))
 			return;
 
-		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.Z)
+		if (util.Controls.acceptJustPressed())
 			markReady();
 	}
 

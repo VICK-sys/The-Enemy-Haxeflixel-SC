@@ -209,8 +209,8 @@ class Hud
 
 	public function update(elapsed:Float):Void
 	{
-		FlxG.mouse.getViewPosition(camUI, cursorPoint);
-		customCursor.setPosition(cursorPoint.x - customCursor.frameWidth * 0.5, cursorPoint.y - customCursor.frameHeight * 0.5);
+		customCursor.setPosition(util.Controls.aimViewX(FlxG.camera) - customCursor.frameWidth * 0.5,
+			util.Controls.aimViewY(FlxG.camera) - customCursor.frameHeight * 0.5);
 
 		updateHealth();
 		updateSuper();

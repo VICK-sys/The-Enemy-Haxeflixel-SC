@@ -249,7 +249,7 @@ class Shop
 			prompt.text = Lang.t("shop.enter");
 			prompt.x = SPOT_X - PROMPT_W * 0.5;
 			prompt.y = sprite.y + sprite.height + PROMPT_DROP;
-			if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.Z)
+			if (util.Controls.acceptJustPressed())
 			{
 				if (onEnter != null)
 					onEnter();

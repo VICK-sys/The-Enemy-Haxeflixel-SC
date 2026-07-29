@@ -389,7 +389,7 @@ class OnlineState extends FlxState
 			var n = Net.guestCount;
 			status.text = n + (n == 1 ? " PLAYER" : " PLAYERS") + " CONNECTED - PRESS ENTER TO START\n(up to "
 				+ Net.MAX_GUESTS + " can join, and more can drop in later)";
-			if (!helpOpen && FlxG.keys.justPressed.ENTER)
+			if (!helpOpen && util.Controls.menuAccept())
 			{
 				Net.send({t: "start"});
 				launch();
@@ -418,7 +418,7 @@ class OnlineState extends FlxState
 		if (FlxG.keys.justPressed.TAB && !typing)
 			openWeaponPick();
 
-		if (FlxG.keys.justPressed.ESCAPE)
+		if (util.Controls.menuBack())
 		{
 			if (typing)
 				cancelTyping();

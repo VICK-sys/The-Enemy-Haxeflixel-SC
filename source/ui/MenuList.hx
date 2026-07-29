@@ -95,9 +95,9 @@ class MenuList extends FlxGroup
 		if (!enabled)
 			return;
 
-		if (FlxG.keys.justPressed.W || FlxG.keys.justPressed.UP)
+		if (util.Controls.menuUp())
 			move(-1);
-		if (FlxG.keys.justPressed.S || FlxG.keys.justPressed.DOWN)
+		if (util.Controls.menuDown())
 			move(1);
 
 		if (FlxG.mouse.x != lastMouseX || FlxG.mouse.y != lastMouseY)
@@ -119,7 +119,7 @@ class MenuList extends FlxGroup
 		updateAdjust(elapsed);
 
 		var clicked = FlxG.mouse.justPressed && FlxG.mouse.overlaps(rows[index], rowCamera(index));
-		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE || clicked)
+		if (util.Controls.menuAccept() || FlxG.keys.justPressed.SPACE || clicked)
 		{
 			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
 			if (onChoose != null)
@@ -163,9 +163,9 @@ class MenuList extends FlxGroup
 	function updateAdjust(elapsed:Float):Void
 	{
 		var dir = 0;
-		if (FlxG.keys.anyPressed([D, RIGHT]))
+		if (util.Controls.menuRightHeld())
 			dir = 1;
-		else if (FlxG.keys.anyPressed([A, LEFT]))
+		else if (util.Controls.menuLeftHeld())
 			dir = -1;
 
 		if (dir != holdDir)

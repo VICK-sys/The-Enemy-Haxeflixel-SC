@@ -105,10 +105,10 @@ class Player extends FlxSprite
 	{
 		var dx:Float = 0;
 		var dy:Float = 0;
-		if (FlxG.keys.anyPressed([W])) dy -= 1;
-		if (FlxG.keys.anyPressed([S])) dy += 1;
-		if (FlxG.keys.anyPressed([A])) dx -= 1;
-		if (FlxG.keys.anyPressed([D])) dx += 1;
+		if (util.Controls.moveUp()) dy -= 1;
+		if (util.Controls.moveDown()) dy += 1;
+		if (util.Controls.moveLeft()) dx -= 1;
+		if (util.Controls.moveRight()) dx += 1;
 		if (dx == 0 && dy == 0)
 			dx = flipX ? -1 : 1;
 		var len:Float = Math.sqrt(dx * dx + dy * dy);
@@ -138,10 +138,10 @@ class Player extends FlxSprite
 		var left:Bool = false;
 		var right:Bool = false;
 
-		up = FlxG.keys.anyPressed([W]);
-		down = FlxG.keys.anyPressed([S]);
-		left = FlxG.keys.anyPressed([A]);
-		right = FlxG.keys.anyPressed([D]);
+		up = util.Controls.moveUp();
+		down = util.Controls.moveDown();
+		left = util.Controls.moveLeft();
+		right = util.Controls.moveRight();
 
 		if (up && down)
 		{

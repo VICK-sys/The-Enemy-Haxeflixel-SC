@@ -63,7 +63,7 @@ class PlayerCombat
 		if (dashCooldownTimer > 0)
 			dashCooldownTimer -= elapsed;
 
-		if (FlxG.keys.justPressed.SPACE && !dead && !player.blockMovement && dashCooldownTimer <= 0 && player.dashTimer <= 0)
+		if (util.Controls.justPressed(util.Controls.DASH) && !dead && !player.blockMovement && dashCooldownTimer <= 0 && player.dashTimer <= 0)
 		{
 			dashCooldownTimer = data.dashCooldown * util.Levels.dashScale();
 			player.dash();

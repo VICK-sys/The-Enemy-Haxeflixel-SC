@@ -266,6 +266,7 @@ class PlayState extends FlxState
 
 		var inputLocked = Net.active && subState != null;
 
+		util.Controls.setAimAnchor(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5);
 		updateCameraLean();
 
 		super.update(elapsed);
@@ -330,7 +331,7 @@ class PlayState extends FlxState
 		if (subState == null && !status.dead)
 			DiscordPresence.playing(director.wave, boss.fighting, combat.weapon, status.kills);
 
-		if (FlxG.keys.justPressed.ESCAPE && !status.dead && subState == null)
+		if (util.Controls.pausePressed() && !status.dead && subState == null)
 		{
 			DiscordPresence.paused();
 			var pause = new PauseSubState(hud.camUI);
@@ -355,8 +356,8 @@ class PlayState extends FlxState
 
 	function updateCameraLean():Void
 	{
-		var sx = FlxG.mouse.x - FlxG.camera.scroll.x - FlxG.width * 0.5;
-		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
+		var sx = util.Controls.aimX() - FlxG.camera.scroll.x - FlxG.width * 0.5;
+		var sy = util.Controls.aimY() - FlxG.camera.scroll.y - FlxG.height * 0.5;
 		FlxG.camera.targetOffset.set(sx * cursorLean, sy * cursorLean);
 	}
 
@@ -437,7 +438,7 @@ class PlayState extends FlxState
 			hud.hideDeath();
 		}
 
-		if (FlxG.keys.justPressed.R && status.dead && !restarting && (!Net.active || (netSync != null && netSync.runFailed)))
+		if (util.Controls.justPressed(util.Controls.RELOAD) && status.dead && !restarting && (!Net.active || (netSync != null && netSync.runFailed)))
 		{
 			if (netSync != null)
 				netSync.requestRestart();

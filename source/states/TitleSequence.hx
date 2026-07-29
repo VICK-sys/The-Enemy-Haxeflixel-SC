@@ -23,6 +23,7 @@ class TitleSequence extends FlxState
     {
         FlxG.mouse.visible = false;
         util.Lang.init();
+        util.Controls.init();
         SaveData.applySettings();
         FlxG.sound.onVolumeChange.add(function(v:Float)
         {
@@ -60,7 +61,7 @@ class TitleSequence extends FlxState
     override public function update(elapsed:Float):Void
     {
         super.update(elapsed);
-        if (FlxG.keys.justPressed.ENTER && !skipped && canSkip) {
+        if ((util.Controls.menuAccept() || util.Controls.acceptJustPressed()) && !skipped && canSkip) {
             skipped = true;
             FlxTween.tween(modLogoAnimated, {alpha: 0}, 1, {
                 ease:FlxEase.expoIn,
