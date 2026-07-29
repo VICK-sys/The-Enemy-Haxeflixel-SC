@@ -62,7 +62,7 @@ The lobby keeps updating while a substate is open. The socket has to stay servic
 
 The controls popup, shown the first time PlayState opens each session. Seven pages flip with A/D or the arrow keys: move, attack, weapons, super, scrap, health and ready. Each page carries a looping animated demo built from game sprites.
 
-The scrap page runs the whole economy in one loop: an enemy falls, the pieces burst out, the player walks the line of them and a counter ticks up as each is crossed. The ready page shows a rest: the prompt throbs until the ready bubble pops over the player's head and the next wave announces itself. The abilities page left with time stop when time stop was parked; if the ability comes back, its page comes back with it.
+The scrap page runs the whole economy in one loop: an enemy falls, the pieces burst out, the player walks the line of them and a counter ticks up as each is crossed. The ready page shows a rest: the prompt throbs until the ready bubble pops over the player's head, and the next wave announces itself below them, clear of the bubble. The abilities page left with time stop when time stop was parked; if the ability comes back, its page comes back with it.
 
 The popup fades in on open. ENTER or ESC freezes the demo and fades it back out before the game starts. The wave timer stays frozen while the popup is open.
 

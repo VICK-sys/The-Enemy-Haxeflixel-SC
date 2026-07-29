@@ -12,6 +12,8 @@ class ReadyDemo extends TutorialDemo
 	static inline var LOOP:Float = 3.8;
 	static inline var READY_AT:Float = 1.3;
 	static inline var WAVE_AT:Float = 2.5;
+	static inline var PROMPT_Y:Float = 196;
+	static inline var WAVE_Y:Float = 452;
 
 	private var actor:FlxSprite;
 	private var bubble:FlxSprite;
@@ -36,8 +38,8 @@ class ReadyDemo extends TutorialDemo
 		bubble.y = actor.y - bubble.height - 18;
 		bubble.visible = false;
 
-		prompt = label(196, 22, Lang.t("ready.prompt"));
-		wave = label(258, 30, Lang.t("hud.wave", [2]));
+		prompt = label(PROMPT_Y, 22, Lang.t("ready.prompt"));
+		wave = label(WAVE_Y, 30, Lang.t("hud.wave", [2]));
 		wave.alpha = 0;
 
 		step(0);
