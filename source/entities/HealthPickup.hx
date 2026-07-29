@@ -1,5 +1,6 @@
 package entities;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import util.Paths;
 import util.WorldClock;
@@ -18,6 +19,9 @@ class HealthPickup extends FlxSprite
 	public var mounted:Bool = false;
 
 	private var life:Float = 0;
+
+	private var scatterX:Float = 0;
+	private var scatterY:Float = 0;
 
 	public function new()
 	{
@@ -56,6 +60,10 @@ class HealthPickup extends FlxSprite
 	{
 		revive();
 		setPosition(cx - width / 2, cy - height / 2);
+		var ang = FlxG.random.float(0, Math.PI * 2);
+		var kick = FlxG.random.float(140, 260);
+		scatterX = Math.cos(ang) * kick;
+		scatterY = Math.sin(ang) * kick;
 		alpha = 1;
 		life = LIFETIME;
 		placeShadow();
@@ -65,6 +73,16 @@ class HealthPickup extends FlxSprite
 	{
 		elapsed *= WorldClock.scale;
 		velocity.y = 0;
+		if (!puppet && (scatterX != 0 || scatterY != 0))
+		{
+			x += scatterX * elapsed;
+			y += scatterY * elapsed;
+			var fade = Math.pow(0.001, elapsed);
+			scatterX *= fade;
+			scatterY *= fade;
+			if (Math.abs(scatterX) + Math.abs(scatterY) < 10)
+				scatterX = scatterY = 0;
+		}
 		super.update(elapsed);
 		if (!puppet)
 		{

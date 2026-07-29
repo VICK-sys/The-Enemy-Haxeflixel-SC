@@ -12,6 +12,7 @@ class RemoteArms
 	static inline var ROW:Int = 7;
 	static inline var LERP:Float = 18;
 
+	public var hue:Float = 0;
 	public var claws(default, null):Array<HookShot> = [];
 	public var ropes(default, null):Array<FlxTypedGroup<FlxSprite>> = [];
 
@@ -97,7 +98,8 @@ class RemoteArms
 			claw.setPosition(c[0] - claw.width / 2, c[1] - claw.height / 2);
 			claw.angle = c[2];
 			claw.flipX = body.flipX;
-			Rope.curve(ropes[i], ax, ay, c[3], c[4], c[5], c[6]);
+			claw.paint(hue);
+			Rope.curve(ropes[i], ax, ay, c[3], c[4], c[5], c[6], hue);
 		}
 	}
 }

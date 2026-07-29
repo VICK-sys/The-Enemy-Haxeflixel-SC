@@ -18,6 +18,16 @@ class ThrownWeapon extends FlxSprite
 	private var hitList:Array<FlxObject> = [];
 	private var flightTime:Float = 0;
 
+	public var hue(default, null):Float = 0;
+
+	public function paint(h:Float):Void
+	{
+		if (h == hue)
+			return;
+		hue = h;
+		loadGraphic(util.HuePalette.graphic("items/hammer", h));
+	}
+
 	public function new()
 	{
 		super();

@@ -69,6 +69,7 @@ class WeaponPickSubState extends FlxSubState
 	public var onPicked:Int->Void;
 	public var pickedX(default, null):Float = 0;
 	public var pickedY(default, null):Float = 0;
+	public var cancelled(default, null):Bool = false;
 
 	private var camUI:FlxCamera;
 	private var cards:Array<Card> = [];
@@ -160,7 +161,7 @@ class WeaponPickSubState extends FlxSubState
 
 	function art(i:Int):FlxSprite
 	{
-		var s = new FlxSprite(0, CARD_TOP + ICON_TOP, Paths.image(ART[i]));
+		var s = new FlxSprite(0, CARD_TOP + ICON_TOP, util.HuePalette.graphic(ART[i], util.SaveData.playerHue()));
 		s.scale.set(ICON_SCALE, ICON_SCALE);
 		s.updateHitbox();
 		s.antialiasing = false;
@@ -261,6 +262,14 @@ class WeaponPickSubState extends FlxSubState
 
 	function updateInput():Void
 	{
+		if (util.Controls.menuBack())
+		{
+			cancelled = true;
+			done = true;
+			close();
+			return;
+		}
+
 		if (util.Controls.menuLeftJust())
 			move(-1);
 		if (util.Controls.menuRightJust())

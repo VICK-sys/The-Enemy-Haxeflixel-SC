@@ -40,6 +40,7 @@ class RemoteFx
 	private var thrownTrail:GhostTrail;
 
 	private var avatar:RemoteAvatar;
+	private var dummyBow:FlxSprite;
 	private var blades:SuperOrbit;
 	private var storm:ArrowStorm;
 	private var arms:RemoteArms;
@@ -81,7 +82,7 @@ class RemoteFx
 		thrownTrail = new GhostTrail("items/hammer", 0.45, 3, 0.035);
 
 		blades = SuperOrbit.decoration(avatar.sprite, fx);
-		var dummyBow = new FlxSprite();
+		dummyBow = new FlxSprite();
 		dummyBow.loadGraphic(Paths.image("items/crossbow"));
 		storm = new ArrowStorm(avatar.sprite, dummyBow, rain);
 		arms = new RemoteArms(avatar.sprite);
@@ -114,8 +115,11 @@ class RemoteFx
 		switch (kind)
 		{
 			case 0:
+				blades.hue = avatar.hue;
 				blades.activate();
 			case 2:
+				storm.paint(avatar.hue);
+				dummyBow.loadGraphic(util.HuePalette.graphic("items/crossbow", avatar.hue));
 				storm.activate();
 			default:
 		}
@@ -162,7 +166,9 @@ class RemoteFx
 
 			case Bow:
 				var bc = cfg.bowCharge;
-				arrows.recycle(Arrow).fire(pmx + dx * 10, pmy + dy * 10, dx, dy, aimDeg, 1, 1 + power * bc.speedBonus,
+				var arrow = arrows.recycle(Arrow);
+				arrow.paint(avatar.hue);
+				arrow.fire(pmx + dx * 10, pmy + dy * 10, dx, dy, aimDeg, 1, 1 + power * bc.speedBonus,
 					1 + power * bc.sizeBonus, 1);
 				FlxG.sound.play(Paths.sound("bow"), 0.7 + power * 0.3);
 				if (power >= 1)
@@ -259,6 +265,12 @@ class RemoteFx
 
 	public function update(elapsed:Float):Void
 	{
+		arms.hue = avatar.hue;
+		rain.hue = avatar.hue;
+		yoyo.setHue(avatar.hue);
+		hook.paint(avatar.hue);
+		thrown.paint(avatar.hue);
+
 		rain.update(elapsed);
 		blades.update(elapsed);
 		storm.update(elapsed);

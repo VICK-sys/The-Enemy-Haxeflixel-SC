@@ -214,12 +214,15 @@ class OnlineState extends FlxState
 	}
 
 	function reskin():Void
+	{
 		util.HuePalette.live("characters/mufu", SaveData.playerHue());
+		refreshWeapon();
+	}
 
 	function buildPreview():Void
 	{
 		preview.frames = util.HuePalette.liveFrames("characters/mufu", SaveData.playerHue());
-		preview.animation.addByPrefix("idle", "Idle", 12, true);
+		preview.animation.addByPrefix("idle", "Idle", 9, true);
 		preview.animation.play("idle");
 		preview.scale.set(PREVIEW_SCALE, PREVIEW_SCALE);
 		preview.updateHitbox();
@@ -297,7 +300,7 @@ class OnlineState extends FlxState
 		var pick = WeaponPickSubState.lastPick;
 		if (pick < 0 || pick >= HELD_ART.length)
 			pick = 0;
-		previewWeapon.loadGraphic(util.Paths.image(HELD_ART[pick]));
+		previewWeapon.loadGraphic(util.HuePalette.graphic(HELD_ART[pick], SaveData.playerHue()));
 		previewWeapon.antialiasing = false;
 		previewWeapon.scale.set(WEAPON_SCALE, WEAPON_SCALE);
 		previewWeapon.updateHitbox();

@@ -61,6 +61,7 @@ class HookArms
 		var rope = new FlxTypedGroup<FlxSprite>();
 		group.add(rope);
 		var claw = new HookShot();
+		claw.paint(util.SaveData.playerHue());
 		claw.kill();
 		group.add(claw);
 		return new Arm(claw, rope, restDX);
@@ -356,7 +357,7 @@ class HookArms
 		var tr = tangent * Math.PI / 180;
 		arm.handleX = arm.cx - Math.cos(tr) * HANDLE_LEN;
 		arm.handleY = arm.cy - Math.sin(tr) * HANDLE_LEN;
-		Rope.curve(arm.rope, anchorX, anchorY, arm.handleX, arm.handleY, arm.ctrlX, arm.ctrlY);
+		Rope.curve(arm.rope, anchorX, anchorY, arm.handleX, arm.handleY, arm.ctrlX, arm.ctrlY, util.SaveData.playerHue());
 	}
 
 	function stepToward(arm:Arm, tx:Float, ty:Float, maxStep:Float):Bool

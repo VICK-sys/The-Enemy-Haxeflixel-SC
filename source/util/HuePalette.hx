@@ -8,9 +8,6 @@ import openfl.display.BitmapData;
 
 class HuePalette
 {
-	static inline var BAND:Float = 32;
-	static inline var SAT_FLOOR:Float = 0.25;
-
 	public static function sparrow(name:String, hue:Float):FlxAtlasFrames
 	{
 		return FlxAtlasFrames.fromSparrow(graphic(name, hue), "assets/images/" + name + ".xml");
@@ -40,13 +37,8 @@ class HuePalette
 			for (x in 0...src.width)
 			{
 				var px:FlxColor = src.getPixel32(x, y);
-				if (px.alphaFloat > 0)
-				{
-					var h = px.hue;
-					var away = h > 180 ? 360 - h : h;
-					if (away < BAND && px.saturation > SAT_FLOOR)
-						px.hue = (h + turn) % 360;
-				}
+				if (px.alphaFloat > 0 && px.saturation > 0)
+					px.hue = (px.hue + turn) % 360;
 				dst.setPixel32(x, y, px);
 			}
 		}
@@ -81,10 +73,8 @@ class HuePalette
 				var px:FlxColor = src.getPixel32(x, y);
 				if (px.alphaFloat <= 0)
 					continue;
-				var h = px.hue;
-				var away = h > 180 ? 360 - h : h;
-				if (away < BAND && px.saturation > SAT_FLOOR)
-					px.hue = (h + turn) % 360;
+				if (px.saturation > 0)
+					px.hue = (px.hue + turn) % 360;
 				out.setPixel32(x, y, px);
 			}
 		}

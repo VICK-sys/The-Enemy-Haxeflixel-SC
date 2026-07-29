@@ -65,11 +65,11 @@ class Player extends FlxSprite
 		var wasFlip = flipX;
 
 		frames = util.HuePalette.sparrow("characters/mufu", hue);
-		animation.addByPrefix("idle", "Idle", 12, true);
+		animation.addByPrefix("idle", "Idle", 9, true);
 		animation.addByPrefix("walk", "Run", 12, true);
+		animation.addByPrefix("dash", "Dash", 12, false);
 		animation.addByPrefix("hurt", "Hurt", 12, false);
-		animation.addByPrefix("death", "Death", 12, false);
-		offset.set(-19, -17);
+		offset.set(-18, 7);
 
 		if (graphic != null)
 			graphic.persist = true;
@@ -115,9 +115,7 @@ class Player extends FlxSprite
 		dx /= len;
 		dy /= len;
 		velocity.set(dx * data.dashSpeed, dy * data.dashSpeed);
-		if (dx > 0) flipX = false;
-		else if (dx < 0) flipX = true;
-		this.animation.play(floating ? "idle" : "walk");
+		this.animation.play(floating ? "idle" : "dash", true);
 		dashTimer = data.dashTime;
 	}
 
@@ -125,8 +123,11 @@ class Player extends FlxSprite
 	{
 		if (dashTimer > 0)
 			dashTimer -= elapsed;
-		else if (!blockMovement && !isDead)
+		else if (!blockMovement && (!isDead || net.Net.active))
 			movement(elapsed);
+
+		if (!isDead || net.Net.active)
+			flipX = util.Controls.aimX() < x + width * 0.5;
 
 		super.update(elapsed);
 	}
@@ -198,12 +199,10 @@ class Player extends FlxSprite
 			else if (left)
 			{
 				newAngle = 180;
-				this.flipX = true;
 			}
 			else if (right)
 			{
 				newAngle = 0;
-				this.flipX = false;
 			}
 
 			velocity.set(initialSpeed, 0);

@@ -11,6 +11,7 @@ import systems.world.Decor;
 
 class RenderLayers
 {
+	public var host(default, null):FlxState;
 	public var shadowLayer:FlxTypedGroup<FlxSprite>;
 	public var entityLayer:FlxTypedGroup<FlxSprite>;
 	public var tagLayer:FlxTypedGroup<FlxSprite>;
@@ -21,6 +22,7 @@ class RenderLayers
 
 	public function new(state:FlxState, player:Player, heldSprite:FlxSprite)
 	{
+		this.host = state;
 		this.player = player;
 		this.heldSprite = heldSprite;
 

@@ -19,6 +19,7 @@ class BowAttack
 	public var rain:ArrowRain;
 	public var charging:Bool = false;
 	public var charge(get, never):Float;
+	public var onFull:Void->Void;
 	public var rainCharge:Float = 1;
 
 	private var cfg = WeaponDataRegistry.get().bowCharge;
@@ -29,6 +30,7 @@ class BowAttack
 	private var hits:HitPipeline;
 	private var chargeTime:Float = 0;
 	private var fullNoted:Bool = false;
+	private var sweetTimer:Float = 0;
 	private var cooldown:Float = 0;
 	private var cooldownTotal:Float = 0;
 	private var drawSound:FlxSound;
@@ -42,6 +44,7 @@ class BowAttack
 		this.hits = hits;
 		arrows = new FlxTypedGroup<Arrow>();
 		rain = new ArrowRain(fx, hits);
+		rain.hue = util.SaveData.playerHue();
 		drawSound = FlxG.sound.create(Paths.sound("weapon/spin")).setup(0.4, true);
 		reloadSound = FlxG.sound.create(Paths.sound("weapon/crossbowReload")).setup(0.55);
 	}
@@ -80,6 +83,7 @@ class BowAttack
 		charging = true;
 		chargeTime = 0;
 		fullNoted = false;
+		sweetTimer = 0;
 	}
 
 	public function hushReload():Void
@@ -95,6 +99,7 @@ class BowAttack
 		charging = false;
 		chargeTime = 0;
 		fullNoted = false;
+		sweetTimer = 0;
 	}
 
 	public function tickCharge(elapsed:Float):Void
@@ -116,21 +121,28 @@ class BowAttack
 		if (!fullNoted && charge >= 1)
 		{
 			fullNoted = true;
+			sweetTimer = cfg.sweetWindow;
 			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
+			if (onFull != null)
+				onFull();
 		}
+		else if (sweetTimer > 0)
+			sweetTimer -= elapsed;
 	}
 
 	public function release(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
 		var t = charge;
+		var hot = sweetTimer > 0;
 		cancelCharge();
-		shoot(bx, by, dx, dy, aimDeg, t);
+		shoot(bx, by, dx, dy, aimDeg, t, hot);
 	}
 
-	public function shoot(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0):Void
+	public function shoot(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0, hot:Bool = false):Void
 	{
-		var damage = 1 + Math.floor(power * (cfg.maxDamage - 1));
+		var damage = 1 + Math.floor(power * (cfg.maxDamage - 1)) + (hot ? cfg.sweetBonus : 0);
 		var arrow = arrows.recycle(Arrow);
+		arrow.paint(util.SaveData.playerHue());
 		arrow.fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,
 			1 + power * cfg.sizeBonus, 1 + power * cfg.knockBonus);
 		FlxG.sound.play(Paths.sound("bow"), 0.7 + power * 0.3);

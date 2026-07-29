@@ -60,9 +60,9 @@ class GhostTrail
 	public function stamp(s:FlxSprite):Void
 	{
 		var g = group.recycle(FlxSprite);
-		if (g.graphic == null)
+		if (g.graphic != s.graphic)
 		{
-			g.loadGraphic(Paths.image(graphic));
+			g.loadGraphic(s.graphic);
 			g.antialiasing = false;
 		}
 		g.setPosition(s.x, s.y);

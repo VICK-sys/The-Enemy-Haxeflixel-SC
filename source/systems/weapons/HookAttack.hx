@@ -93,6 +93,7 @@ class HookAttack
 		snagged = false;
 		fireX = pmx + dx * SPAWN_DIST;
 		fireY = pmy + dy * SPAWN_DIST;
+		hook.paint(util.SaveData.playerHue());
 		hook.fire(fireX, fireY, dx, dy, aimDeg);
 		phase = Flying;
 		FlxG.sound.play(Paths.sound("weapon/throw"), 0.6);
@@ -390,6 +391,6 @@ class HookAttack
 			Rope.clear(rope);
 			return;
 		}
-		Rope.line(rope, handX(), handY(), hookHandleX(), hookHandleY());
+		Rope.line(rope, handX(), handY(), hookHandleX(), hookHandleY(), util.SaveData.playerHue());
 	}
 }

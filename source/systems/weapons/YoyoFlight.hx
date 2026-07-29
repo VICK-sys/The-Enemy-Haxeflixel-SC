@@ -34,14 +34,24 @@ class YoyoFlight
 	private var grace:Float = 0;
 	private var wobble:Float = 0;
 
+	public var hue(default, null):Float = 0;
+
 	public function new()
 	{
 		yoyo = new FlxSprite();
-		yoyo.loadGraphic(Paths.image("items/yoyo_axel"));
+		yoyo.loadGraphic(util.HuePalette.graphic("items/yoyo_axel", 0));
 		yoyo.antialiasing = false;
 		yoyo.scale.set(SCALE, SCALE);
 		yoyo.kill();
 		string = new FlxTypedGroup<FlxSprite>();
+	}
+
+	public function setHue(h:Float):Void
+	{
+		if (h == hue)
+			return;
+		hue = h;
+		yoyo.loadGraphic(util.HuePalette.graphic("items/yoyo_axel", h));
 	}
 
 	public function fire(hx:Float, hy:Float, dx:Float, dy:Float, spinDir:Float):Void
@@ -164,7 +174,7 @@ class YoyoFlight
 
 		yoyo.angle += spin * SPIN_RATE * elapsed;
 		place();
-		Rope.line(string, hx, hy, cx, cy);
+		Rope.line(string, hx, hy, cx, cy, hue);
 	}
 
 	public function drive(px:Float, py:Float, ang:Float, hx:Float, hy:Float):Void
@@ -178,7 +188,7 @@ class YoyoFlight
 		cy = py;
 		yoyo.angle = ang;
 		place();
-		Rope.line(string, hx, hy, cx, cy);
+		Rope.line(string, hx, hy, cx, cy, hue);
 	}
 
 	function place():Void

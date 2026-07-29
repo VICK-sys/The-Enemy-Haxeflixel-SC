@@ -60,6 +60,9 @@ class PlayState extends FlxState
 	private var intro:states.play.RunIntro;
 	private var perf:PerfLog;
 	private var timeStop:TimeStop;
+	private var burst:systems.DeathBurst;
+	private var ghost:systems.CoopGhost;
+	private var backGear:systems.BackGear;
 	private var wipe:IrisWipe;
 	public var restarting(default, null):Bool = false;
 
@@ -121,7 +124,7 @@ class PlayState extends FlxState
 		heldSprite.scale.set(4, 4);
 		heldSprite.origin.set(heldSprite.width * 0.5, heldSprite.height);
 		heldSprite.x = _player.x - heldSprite.origin.x + 30;
-		heldSprite.y = _player.y - heldSprite.origin.y + 65;
+		heldSprite.y = _player.y - heldSprite.origin.y + 50;
 
 		floor = systems.world.DecorTiles.build(util.CustomArena.tiles, util.CustomArena.tileset);
 		if (floor != null)
@@ -156,6 +159,13 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), pickups.group);
 		scraps = new Scraps(_player, status, layers.shadowLayer);
 		insert(members.indexOf(layers.entityLayer), scraps.group);
+		burst = new systems.DeathBurst();
+		insert(members.indexOf(layers.entityLayer), burst.group);
+		ghost = new systems.CoopGhost();
+		insert(members.indexOf(layers.entityLayer), ghost.sprite);
+		backGear = new systems.BackGear();
+		backGear.paint(SaveData.playerHue());
+		layers.entityLayer.add(backGear.sprite);
 		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
@@ -182,6 +192,7 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), combat.superOrbit.backLayer);
 		add(combat.superOrbit.frontLayer);
 		add(fx.sparks);
+		add(fx.pops);
 		add(director.shots);
 
 		add(props.overlay);
@@ -215,10 +226,11 @@ class PlayState extends FlxState
 		director.bossVeto = function(w) return quiet.tryDetour(w, director, status, combat);
 		perf = new PerfLog();
 
+		_player.setHue(SaveData.playerHue());
+
 		if (Net.active)
 		{
 			Net.inGame = true;
-			_player.setHue(SaveData.playerHue());
 			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
 			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
 			round.useNet(netSync);
@@ -275,8 +287,11 @@ class PlayState extends FlxState
 		var step = elapsed * WorldClock.scale;
 		arena.update(step);
 
-		FlxG.collide(_player, arena.map);
-		props.collidePlayer();
+		if (!status.dead)
+		{
+			FlxG.collide(_player, arena.map);
+			props.collidePlayer();
+		}
 		director.collide();
 
 		status.update(elapsed);
@@ -286,12 +301,29 @@ class PlayState extends FlxState
 			layers.playerShadow.visible = false;
 			intro.drop();
 			heldSprite.visible = false;
+			_player.visible = false;
+			burst.burst(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, SaveData.playerHue());
+			if (Net.active)
+				ghost.show(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, SaveData.playerHue());
 			if (!Net.active)
 			{
 				hud.showDeath(director.wave, SaveData.bestWave());
 				DiscordPresence.died(director.wave, SaveData.bestWave());
 			}
 		}
+
+		if (!status.dead)
+		{
+			if (burst.any())
+				burst.clear();
+			if (ghost.sprite.exists)
+				ghost.hide();
+		}
+		if (ghost.sprite.exists)
+			ghost.track(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, _player.flipX);
+		ghost.update(elapsed);
+		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y + 28, _player.flipX,
+			_player.animation.name == "walk" || _player.animation.name == "dash", _player.visible);
 
 		director.update(step);
 		pickups.update();
@@ -339,6 +371,9 @@ class PlayState extends FlxState
 			{
 				if (Lang.consumeChanged())
 					hud.applyLanguage(director.wave);
+				_player.setHue(SaveData.playerHue());
+				combat.repaint();
+				backGear.paint(SaveData.playerHue());
 			};
 			openPanel(pause);
 		}

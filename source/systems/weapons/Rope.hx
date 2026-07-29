@@ -17,7 +17,7 @@ class Rope
 				s.kill();
 	}
 
-	public static function line(rope:FlxTypedGroup<FlxSprite>, ax:Float, ay:Float, bx:Float, by:Float):Void
+	public static function line(rope:FlxTypedGroup<FlxSprite>, ax:Float, ay:Float, bx:Float, by:Float, hue:Float = 0):Void
 	{
 		clear(rope);
 		var dx = bx - ax;
@@ -30,10 +30,11 @@ class Rope
 		var ang = Math.atan2(dy, dx) * 180 / Math.PI - 90;
 		var count = Math.ceil(len / STEP);
 		for (i in 0...count)
-			place(rope, ax + ux * STEP * (i + 0.5), ay + uy * STEP * (i + 0.5), ang);
+			place(rope, ax + ux * STEP * (i + 0.5), ay + uy * STEP * (i + 0.5), ang, hue);
 	}
 
-	public static function curve(rope:FlxTypedGroup<FlxSprite>, ax:Float, ay:Float, bx:Float, by:Float, ccx:Float, ccy:Float):Void
+	public static function curve(rope:FlxTypedGroup<FlxSprite>, ax:Float, ay:Float, bx:Float, by:Float, ccx:Float, ccy:Float,
+			hue:Float = 0):Void
 	{
 		clear(rope);
 
@@ -74,7 +75,7 @@ class Rope
 				var amt = 1 - at;
 				var tvx = 2 * amt * (ccx - ax) + 2 * at * (bx - ccx);
 				var tvy = 2 * amt * (ccy - ay) + 2 * at * (by - ccy);
-				place(rope, px + (qx - px) * f, py + (qy - py) * f, Math.atan2(tvy, tvx) * 180 / Math.PI - 90);
+				place(rope, px + (qx - px) * f, py + (qy - py) * f, Math.atan2(tvy, tvx) * 180 / Math.PI - 90, hue);
 				placed++;
 				next += span;
 			}
@@ -84,12 +85,13 @@ class Rope
 		}
 	}
 
-	static function place(rope:FlxTypedGroup<FlxSprite>, cx:Float, cy:Float, ang:Float):Void
+	static function place(rope:FlxTypedGroup<FlxSprite>, cx:Float, cy:Float, ang:Float, hue:Float):Void
 	{
 		var s = rope.recycle(FlxSprite);
-		if (s.graphic == null)
+		var want = util.HuePalette.graphic("items/yoyo_string", hue);
+		if (s.graphic != want)
 		{
-			s.loadGraphic(Paths.image("items/yoyo_string"));
+			s.loadGraphic(want);
 			s.antialiasing = false;
 			s.scale.set(STRAND_SCALE, STRAND_SCALE);
 		}

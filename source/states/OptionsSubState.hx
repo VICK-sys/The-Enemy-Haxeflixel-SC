@@ -13,7 +13,8 @@ import util.Lang;
 class OptionsSubState extends FlxSubState
 {
 	static inline var RESET_WINDOW:Float = 3.0;
-	static inline var ROWS:Int = 15;
+	static inline var ROWS:Int = 16;
+	static inline var HUE_STEP:Float = 15 / 360.0;
 
 	static var FPS_STEPS:Array<Int> = [60, 120, 144, 165, 240];
 	static var ASPECTS:Array<String> = ["auto", "4:3", "16:9", "16:10", "21:9"];
@@ -94,13 +95,14 @@ class OptionsSubState extends FlxSubState
 		list.setLabel(5, Lang.t("options.camera", [Math.round(SaveData.cameraLean() * 100)]));
 		list.setLabel(6, Lang.t("options.shake", [Math.round(SaveData.shakeAmount() * 100)]));
 		list.setLabel(7, Lang.t("options.freeze", [Math.round(SaveData.freezeAmount() * 100)]));
-		list.setLabel(8, Lang.t("options.hud", [onOff(SaveData.showHud())]));
-		list.setLabel(9, Lang.t("options.sound3d", [onOff(SaveData.sound3d())]));
-		list.setLabel(10, Lang.t("options.fps", [onOff(SaveData.showFps())]));
-		list.setLabel(11, Lang.t("options.language", [Lang.t("lang.name")]));
-		list.setLabel(12, Lang.t("options.controls"));
-		list.setLabel(13, Lang.t(resetArmed ? "options.resetBestConfirm" : "options.resetBest"));
-		list.setLabel(14, Lang.t("common.back"));
+		list.setLabel(8, Lang.t("options.color", [Math.round(SaveData.playerHue() * 360)]));
+		list.setLabel(9, Lang.t("options.hud", [onOff(SaveData.showHud())]));
+		list.setLabel(10, Lang.t("options.sound3d", [onOff(SaveData.sound3d())]));
+		list.setLabel(11, Lang.t("options.fps", [onOff(SaveData.showFps())]));
+		list.setLabel(12, Lang.t("options.language", [Lang.t("lang.name")]));
+		list.setLabel(13, Lang.t("options.controls"));
+		list.setLabel(14, Lang.t(resetArmed ? "options.resetBestConfirm" : "options.resetBest"));
+		list.setLabel(15, Lang.t("common.back"));
 	}
 
 	function onOff(b:Bool):String
@@ -141,12 +143,12 @@ class OptionsSubState extends FlxSubState
 	{
 		switch (i)
 		{
-			case 11:
+			case 12:
 				switchLanguage();
 				return;
-			case 12:
-				openSubState(new ControlsSubState(cam));
 			case 13:
+				openSubState(new ControlsSubState(cam));
+			case 14:
 				if (resetArmed)
 				{
 					SaveData.resetBest();
@@ -158,7 +160,7 @@ class OptionsSubState extends FlxSubState
 					resetTimer = RESET_WINDOW;
 				}
 				refreshLabels();
-			case 14:
+			case 15:
 				close();
 			default:
 				adjust(i, 1);
@@ -186,12 +188,14 @@ class OptionsSubState extends FlxSubState
 			case 7:
 				SaveData.setFreezeAmount(SaveData.freezeAmount() + dir * 0.1);
 			case 8:
-				SaveData.setShowHud(!SaveData.showHud());
+				SaveData.setPlayerHue(SaveData.playerHue() + dir * HUE_STEP);
 			case 9:
-				SaveData.setSound3d(!SaveData.sound3d());
+				SaveData.setShowHud(!SaveData.showHud());
 			case 10:
-				SaveData.setShowFps(!SaveData.showFps());
+				SaveData.setSound3d(!SaveData.sound3d());
 			case 11:
+				SaveData.setShowFps(!SaveData.showFps());
+			case 12:
 				switchLanguage(dir);
 				return;
 			default:

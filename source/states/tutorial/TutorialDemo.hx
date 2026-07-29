@@ -55,12 +55,12 @@ class TutorialDemo extends FlxGroup
 	{
 		var p = sprite();
 		p.frames = Paths.sparrow("characters/mufu");
-		p.animation.addByPrefix("idle", "Idle", 12, true);
+		p.animation.addByPrefix("idle", "Idle", 9, true);
 		p.animation.addByPrefix("walk", "Run", 12, true);
 		p.scale.set(4, 4);
 		p.width = 75;
 		p.height = 95;
-		p.offset.set(-19, -17);
+		p.offset.set(-18, 7);
 		p.animation.play("walk");
 		return p;
 	}

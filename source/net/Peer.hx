@@ -58,6 +58,7 @@ class Peer
 		id = -1;
 		avatar.setLeveling(false);
 		avatar.setReady(false);
+		avatar.clearDeath();
 		avatar.sprite.visible = false;
 		avatar.held.visible = false;
 		avatar.shadow.visible = false;

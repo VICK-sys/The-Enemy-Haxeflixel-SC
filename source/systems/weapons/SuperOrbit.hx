@@ -120,6 +120,8 @@ class SuperOrbit
 		ascendTimer = 0;
 	}
 
+	public var hue:Float = 0;
+
 	public function activate():Void
 	{
 		ascendTimer = ASCEND_TIME;
@@ -139,6 +141,7 @@ class SuperOrbit
 		for (i in 0...cfg.count)
 		{
 			var b = obtainBlade();
+			b.paint(hue);
 			b.spawnInFormation(i);
 			b.x = pmx - b.width / 2;
 			b.y = apexY - b.height / 2;

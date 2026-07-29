@@ -14,8 +14,14 @@ class Fx
 	public static var shakeScale:Float = 1;
 	public static var freezeScale:Float = 1;
 
+	static inline var POP_W:Int = 12;
+	static inline var POP_H:Int = 12;
+	static inline var POP_FPS:Int = 16;
+	static inline var POP_SCALE:Int = 4;
+
 	public var sparks:FlxEmitter;
 	public var dashTrail:FlxTypedGroup<FlxSprite>;
+	public var pops:FlxTypedGroup<FlxSprite>;
 
 	private var hitstopFrames:Int = 0;
 	private var meleeHeld:Bool = false;
@@ -41,6 +47,23 @@ class Fx
 		sparks.lifespan.set(0.15, 0.35);
 
 		dashTrail = new FlxTypedGroup<FlxSprite>();
+		pops = new FlxTypedGroup<FlxSprite>();
+	}
+
+	public function chargePop(cx:Float, cy:Float):Void
+	{
+		var p = pops.recycle(FlxSprite);
+		if (p.graphic == null)
+		{
+			p.loadGraphic(Paths.image("effects/charge_glow"), true, POP_W, POP_H);
+			p.animation.add("pop", [0, 1, 2, 3], POP_FPS, false);
+			p.animation.finishCallback = function(_) p.kill();
+			p.antialiasing = false;
+			p.scale.set(POP_SCALE, POP_SCALE);
+			p.updateHitbox();
+		}
+		p.setPosition(cx - p.width * 0.5, cy - p.height * 0.5);
+		p.animation.play("pop", true);
 	}
 
 	public function update():Void

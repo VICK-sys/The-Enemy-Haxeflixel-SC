@@ -47,6 +47,16 @@ class ArrowStorm
 	function get_active():Bool
 		return phase != 0;
 
+	public var hue(default, null):Float = 0;
+
+	public function paint(h:Float):Void
+	{
+		if (h == hue)
+			return;
+		hue = h;
+		superArrow.loadGraphic(util.HuePalette.graphic("bullets/arrow", h));
+	}
+
 	public function activate():Void
 	{
 		phase = 1;

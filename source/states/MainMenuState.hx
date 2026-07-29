@@ -1,6 +1,7 @@
 package states;
 
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
@@ -21,6 +22,18 @@ class MainMenuState extends FlxState
 	static inline var SPLASH_ANGLE:Float = -18;
 	static inline var SPLASH_THROB:Float = 0.09;
 	static inline var SPLASH_SPEED:Float = 3.4;
+	static inline var SPLASH_COUNT:Int = 9;
+	static inline var SPLASH_SIZE:Int = 30;
+	static inline var SPLASH_SIZE_MIN:Int = 14;
+	static inline var SPLASH_MAX_W:Float = 360;
+
+	static inline var TITLE_SCALE:Float = 0.5;
+	static inline var TITLE_Y:Float = 72;
+	static inline var SHADOW_OFF_X:Float = 14;
+	static inline var SHADOW_OFF_Y:Float = 16;
+	static inline var SHADOW_TINT:Int = 0x4A0A14;
+	static inline var BOB_AMP:Float = 10;
+	static inline var BOB_SPEED:Float = 1.9;
 
 	static inline var SHUT_FLATTEN:Float = 0.3;
 	static inline var SHUT_PINCH:Float = 0.17;
@@ -32,6 +45,10 @@ class MainMenuState extends FlxState
 	private var wipe:IrisWipe;
 	private var splash:FlxText;
 	private var splashTime:Float = 0;
+	private var titleArt:FlxSprite;
+	private var titleShade:FlxSprite;
+	private var titleBaseY:Float = 0;
+	private var bobTime:Float = 0;
 	private var leaving:Bool = false;
 	private var busy:Bool = false;
 	private var shutX:Int = 0;
@@ -55,12 +72,7 @@ class MainMenuState extends FlxState
 
 		addBands();
 
-		var title = new FlxText(0, 110, FlxG.width, "THE ENEMY");
-		title.setFormat(null, 96, FlxColor.WHITE, CENTER);
-		title.setBorderStyle(OUTLINE, ACCENT, 4);
-		add(title);
-
-		addSplash(title);
+		addTitle();
 
 		findMaps();
 
@@ -116,16 +128,44 @@ class MainMenuState extends FlxState
 		add(new JaggedBand(false, 40, 84, 30, ACCENT, -30));
 	}
 
-	function addSplash(title:FlxText):Void
+	function addTitle():Void
 	{
-		var probe = new FlxText(0, 0, 0, title.text);
-		probe.setFormat(null, 96, FlxColor.WHITE, LEFT);
-		var titleRight = FlxG.width * 0.5 + probe.width * 0.5;
-		var titleBottom = title.y + probe.height;
-		probe.destroy();
+		titleShade = makeTitleArt();
+		titleShade.setColorTransform(0, 0, 0, 1, (SHADOW_TINT >> 16) & 0xFF, (SHADOW_TINT >> 8) & 0xFF, SHADOW_TINT & 0xFF, 0);
+		add(titleShade);
 
-		splash = new FlxText(0, 0, 0, Lang.t("menu.splash"));
-		splash.setFormat(Lang.font(), 26, FlxColor.YELLOW, LEFT);
+		titleArt = makeTitleArt();
+		add(titleArt);
+
+		titleBaseY = titleArt.y;
+		titleShade.setPosition(titleArt.x + SHADOW_OFF_X, titleBaseY + SHADOW_OFF_Y);
+
+		addSplash(titleArt.x + titleArt.width, titleBaseY + titleArt.height);
+	}
+
+	function makeTitleArt():FlxSprite
+	{
+		var s = new FlxSprite();
+		s.loadGraphic(util.Paths.image("ui/title"));
+		s.antialiasing = false;
+		s.scale.set(TITLE_SCALE, TITLE_SCALE);
+		s.updateHitbox();
+		s.setPosition((FlxG.width - s.width) * 0.5, TITLE_Y);
+		return s;
+	}
+
+	function addSplash(titleRight:Float, titleBottom:Float):Void
+	{
+		splash = new FlxText(0, 0, 0, Lang.t("menu.splash." + FlxG.random.int(0, SPLASH_COUNT - 1)));
+		splash.setFormat(Lang.font(), SPLASH_SIZE, FlxColor.YELLOW, LEFT);
+		splash.updateHitbox();
+
+		if (splash.width > SPLASH_MAX_W)
+		{
+			var fit = Std.int(SPLASH_SIZE * SPLASH_MAX_W / splash.width);
+			splash.setFormat(Lang.font(), fit < SPLASH_SIZE_MIN ? SPLASH_SIZE_MIN : fit, FlxColor.YELLOW, LEFT);
+		}
+
 		splash.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		splash.updateHitbox();
 		splash.angle = SPLASH_ANGLE;
@@ -153,6 +193,10 @@ class MainMenuState extends FlxState
 		var s = 1 - SPLASH_THROB * Math.abs(Math.sin(splashTime * SPLASH_SPEED));
 		splash.scale.set(s, s);
 
+		bobTime += elapsed;
+		var lift = Math.sin(bobTime * BOB_SPEED) * BOB_AMP;
+		titleArt.y = titleBaseY + lift;
+		titleShade.y = titleBaseY + SHADOW_OFF_Y + lift;
 	}
 
 	function refreshBest():Void

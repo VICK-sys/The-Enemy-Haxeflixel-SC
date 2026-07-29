@@ -23,6 +23,8 @@ class ScrapPickup extends FlxSprite
 	private var life:Float = 0;
 	private var bob:Float = 0;
 	private var restY:Float = 0;
+	private var scatterX:Float = 0;
+	private var scatterY:Float = 0;
 
 	public function new()
 	{
@@ -56,6 +58,10 @@ class ScrapPickup extends FlxSprite
 		setPosition(cx + ox - width / 2, cy + oy - height / 2);
 		restY = y;
 		bob = FlxG.random.float(0, Math.PI * 2);
+		var ang = FlxG.random.float(0, Math.PI * 2);
+		var kick = FlxG.random.float(140, 260);
+		scatterX = Math.cos(ang) * kick;
+		scatterY = Math.sin(ang) * kick;
 		alpha = 1;
 		life = LIFETIME;
 		placeShadow();
@@ -96,6 +102,16 @@ class ScrapPickup extends FlxSprite
 	{
 		elapsed *= WorldClock.scale;
 		velocity.y = 0;
+		if (scatterX != 0 || scatterY != 0)
+		{
+			x += scatterX * elapsed;
+			restY += scatterY * elapsed;
+			var fade = Math.pow(0.001, elapsed);
+			scatterX *= fade;
+			scatterY *= fade;
+			if (Math.abs(scatterX) + Math.abs(scatterY) < 10)
+				scatterX = scatterY = 0;
+		}
 		bob += BOB_RATE * elapsed;
 		y = restY + Math.sin(bob) * BOB_AMP;
 		super.update(elapsed);

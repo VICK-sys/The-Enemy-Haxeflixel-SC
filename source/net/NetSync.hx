@@ -18,7 +18,7 @@ import util.SaveData;
 class NetSync
 {
 	static inline var SNAP_FRAMES:Int = 4;
-	static inline var RESPAWN_TIME:Float = 5;
+	static inline var RESPAWN_WAVES:Int = 2;
 	static inline var STUN_CAP:Float = 3;
 	static inline var SHOT_DAMAGE_CAP:Float = 4;
 	static inline var SHOT_SPEED_CAP:Float = 4000;
@@ -58,7 +58,7 @@ class NetSync
 
 	public var onPeerLost:Int->Void;
 
-	private var respawnTimer:Float = -1;
+	private var deathWave:Int = -1;
 	private var droppedHandled:Bool = false;
 	private var bossDown:Bool = false;
 	private var hitCap:Float = 0;
@@ -410,7 +410,7 @@ class NetSync
 		{
 			var w = data.WeaponData.WeaponDataRegistry.get();
 			var top:Float = w.swing.damage;
-			for (v in [w.yoyo.damage, w.revolver.damage, w.bowCharge.maxDamage, w.deadEye.damage, w.hook.snagDamage, w.hookArms.damage])
+			for (v in [w.yoyo.damage, w.revolver.damage, w.bowCharge.maxDamage + w.bowCharge.sweetBonus, w.deadEye.damage, w.hook.snagDamage, w.hookArms.damage])
 				if (v > top)
 					top = v;
 			hitCap = top + util.Levels.damageAt(9999);
@@ -554,7 +554,7 @@ class NetSync
 	{
 		if (!status.dead)
 		{
-			respawnTimer = -1;
+			deathWave = -1;
 			runFailed = false;
 			return;
 		}
@@ -564,21 +564,20 @@ class NetSync
 			if (!runFailed)
 			{
 				runFailed = true;
-				respawnTimer = -1;
+				deathWave = -1;
 				hud.showDeath(director.wave, SaveData.bestWave());
 			}
 			return;
 		}
 
-		if (respawnTimer < 0)
+		if (deathWave < 0)
 		{
-			respawnTimer = RESPAWN_TIME;
+			deathWave = director.wave;
 			hud.showRespawn();
 		}
-		respawnTimer -= elapsed;
-		if (respawnTimer <= 0)
+		if (director.wave >= deathWave + RESPAWN_WAVES)
 		{
-			respawnTimer = -1;
+			deathWave = -1;
 			status.revive();
 			status.health = status.healthMax * 0.5;
 			player.setPosition(arena.spawnX, arena.spawnY);

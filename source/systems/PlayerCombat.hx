@@ -45,11 +45,11 @@ class PlayerCombat
 		{
 			iframeTimer -= elapsed;
 			if (blink)
-				player.visible = dead || Std.int(iframeTimer * 20) % 2 == 0;
+				player.visible = !dead && Std.int(iframeTimer * 20) % 2 == 0;
 			if (iframeTimer <= 0)
 			{
 				blink = false;
-				player.visible = true;
+				player.visible = !dead;
 			}
 		}
 
@@ -88,18 +88,13 @@ class PlayerCombat
 
 		if (health <= 0 && !dead)
 		{
-			player.animation.play("death", false);
 			dead = true;
 			player.isDead = true;
 			justDied = true;
 		}
 
 		if (dead)
-		{
-			player.blockMovement = true;
-			if (player.animation.name != "death")
-				player.animation.play("death", false);
-		}
+			player.blockMovement = !net.Net.active;
 
 		if (health <= 0)
 			health = 0;

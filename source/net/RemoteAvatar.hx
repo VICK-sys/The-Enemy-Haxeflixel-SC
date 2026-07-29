@@ -27,13 +27,17 @@ class RemoteAvatar
 	private var haveTarget:Bool = false;
 	private var weaponIdx:Int = -1;
 	private var heldOX:Float = 30;
-	private var heldOY:Float = 65;
+	private var heldOY:Float = 50;
 	private var leveling:Bool = false;
-	private var hue:Float = 0;
+	public var hue(default, null):Float = 0;
+	private var wasDead:Bool = false;
+	private var burst:systems.DeathBurst;
+	private var ghost:systems.CoopGhost;
+	private var gear:systems.BackGear;
 
 	static inline var REVOLVER_INDEX:Int = 1;
 	static inline var BOW_INDEX:Int = 2;
-	static inline var OFFSET_Y:Float = -17;
+	static inline var OFFSET_Y:Float = 7;
 	static inline var TAG_UP:Float = 46;
 	static inline var TAG_WIDTH:Float = 320;
 	static inline var NOTE_UP:Float = 70;
@@ -43,18 +47,26 @@ class RemoteAvatar
 	{
 		sprite = new FlxSprite();
 		sprite.frames = Paths.sparrow("characters/mufu");
-		sprite.animation.addByPrefix("idle", "Idle", 12, true);
+		sprite.animation.addByPrefix("idle", "Idle", 9, true);
 		sprite.animation.addByPrefix("walk", "Run", 12, true);
+		sprite.animation.addByPrefix("dash", "Dash", 12, false);
 		sprite.animation.addByPrefix("hurt", "Hurt", 12, false);
-		sprite.animation.addByPrefix("death", "Death", 12, false);
 		sprite.antialiasing = false;
 		sprite.width = 75;
 		sprite.height = 95;
-		sprite.offset.set(-19, -17);
+		sprite.offset.set(-18, 7);
 		sprite.scale.set(4, 4);
 		sprite.animation.play("idle");
 		sprite.visible = false;
 		layers.entityLayer.add(sprite);
+
+		burst = new systems.DeathBurst();
+		layers.host.insert(layers.host.members.indexOf(layers.entityLayer), burst.group);
+		ghost = new systems.CoopGhost();
+		layers.host.insert(layers.host.members.indexOf(layers.entityLayer), ghost.sprite);
+		gear = new systems.BackGear();
+		gear.sprite.visible = false;
+		layers.entityLayer.add(gear.sprite);
 
 		held = new FlxSprite();
 		held.antialiasing = false;
@@ -91,21 +103,31 @@ class RemoteAvatar
 	public function setReady(on:Bool):Void
 		bubble.visible = on;
 
+	public function clearDeath():Void
+	{
+		wasDead = false;
+		burst.clear();
+		ghost.hide();
+	}
+
 	public function setHue(h:Float):Void
 	{
 		if (h == hue)
 			return;
 		hue = h;
+		gear.paint(h);
+		if (weaponIdx >= 0)
+			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
 		var was = sprite.animation.name;
 		sprite.frames = util.HuePalette.sparrow("characters/mufu", h);
-		sprite.animation.addByPrefix("idle", "Idle", 12, true);
+		sprite.animation.addByPrefix("idle", "Idle", 9, true);
 		sprite.animation.addByPrefix("walk", "Run", 12, true);
+		sprite.animation.addByPrefix("dash", "Dash", 12, false);
 		sprite.animation.addByPrefix("hurt", "Hurt", 12, false);
-		sprite.animation.addByPrefix("death", "Death", 12, false);
 		sprite.animation.play(was == null ? "idle" : was);
 		sprite.width = 75;
 		sprite.height = 95;
-		sprite.offset.set(-19, -17);
+		sprite.offset.set(-18, 7);
 		sprite.scale.set(4, 4);
 	}
 
@@ -130,7 +152,20 @@ class RemoteAvatar
 		}
 		haveTarget = true;
 
-		sprite.visible = true;
+		var dead:Bool = m.dd == true;
+		if (dead && !wasDead)
+		{
+			burst.burst(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue);
+			ghost.show(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue);
+		}
+		else if (!dead && wasDead)
+		{
+			burst.clear();
+			ghost.hide();
+		}
+		wasDead = dead;
+
+		sprite.visible = !dead;
 		sprite.flipX = m.fx;
 		if (m.hu != null)
 			setHue(m.hu);
@@ -141,7 +176,7 @@ class RemoteAvatar
 		if (wi != weaponIdx && wi >= 0 && wi < WEAPON_IMAGES.length)
 		{
 			weaponIdx = wi;
-			held.loadGraphic(Paths.image(WEAPON_IMAGES[wi]));
+			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[wi], hue));
 
 			if (wi == REVOLVER_INDEX || wi == BOW_INDEX)
 				held.origin.set(held.width * 0.5, held.height * 0.5);
@@ -160,8 +195,7 @@ class RemoteAvatar
 			heldOY = ho[1];
 			var hs:Float = ho[2];
 			held.scale.set(hs, hs);
-			var charge:Float = ho[3];
-			held.color = charge > 0 ? FlxColor.interpolate(FlxColor.WHITE, HeldWeapon.CHARGE_TINT, charge) : FlxColor.WHITE;
+			held.color = FlxColor.WHITE;
 		}
 
 		var bd:Array<Dynamic> = m.bd;
@@ -177,6 +211,11 @@ class RemoteAvatar
 
 	public function update(elapsed:Float):Void
 	{
+		if (wasDead && ghost.sprite.exists)
+			ghost.track(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, sprite.flipX);
+		ghost.update(elapsed);
+		gear.update(elapsed, sprite.x + sprite.width * 0.5, sprite.y + 28, sprite.flipX,
+			sprite.animation.name == "walk" || sprite.animation.name == "dash", sprite.visible);
 		if (!haveTarget)
 			return;
 		var k = Math.min(1, LERP * elapsed);

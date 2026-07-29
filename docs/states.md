@@ -8,7 +8,7 @@ The intro logo. ENTER skips it. It applies the saved settings on boot, then swit
 
 ## MainMenuState
 
-PLAY, OPTIONS and QUIT on a black background. QUIT is desktop only. Two pairs of scrolling `JaggedBand` teeth frame the screen. A dark, slow, coarse pair sits behind a bright accent pair, and the two drift opposite ways for depth. A yellow splash line lies angled across the title's lower-right corner and throbs in and out. The best wave sits in the corner, over menu music.
+PLAY, OPTIONS and QUIT on a black background. QUIT is desktop only. Two pairs of scrolling `JaggedBand` teeth frame the screen. A dark, slow, coarse pair sits behind a bright accent pair, and the two drift opposite ways for depth. The title is the logo art rather than set type, drawn twice: a silhouette behind, offset down and right, then the logo itself. The whole assembly rides a slow sine, and the splash rides it too so it stays pinned to the logo's corner. The silhouette is tinted the dark band maroon rather than black, because black on a black background is not a shadow, it is nothing. A yellow splash line lies angled across the title's lower-right corner and throbs in and out. The best wave sits in the corner, over menu music.
 
 Navigate with W/S or the arrows plus ENTER, or with mouse hover and click.
 

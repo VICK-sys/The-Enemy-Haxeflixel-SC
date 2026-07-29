@@ -17,6 +17,8 @@
 		"minTime": 0.15,
 		"fullTime": 1.0,
 		"maxDamage": 3,
+		"sweetWindow": 0.25,
+		"sweetBonus": 1,
 		"speedBonus": 0.8,
 		"sizeBonus": 0.7,
 		"knockBonus": 1.5,

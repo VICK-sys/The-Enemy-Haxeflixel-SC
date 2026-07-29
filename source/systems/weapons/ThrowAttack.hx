@@ -60,6 +60,7 @@ class ThrowAttack
 	public function launch(pmx:Float, pmy:Float, dx:Float, dy:Float):Void
 	{
 		heldSprite.visible = false;
+		thrown.paint(util.SaveData.playerHue());
 		thrown.throwAt(pmx + dx * SPAWN_DIST, pmy + dy * SPAWN_DIST, dx, dy);
 		FlxG.sound.play(Paths.sound("weapon/throw"), 0.8);
 		spinSound.play(true);

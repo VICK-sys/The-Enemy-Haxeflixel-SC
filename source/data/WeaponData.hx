@@ -54,6 +54,8 @@ typedef BowChargeConfig = {
 	minTime:Float,
 	fullTime:Float,
 	maxDamage:Int,
+	sweetWindow:Float,
+	sweetBonus:Int,
 	speedBonus:Float,
 	sizeBonus:Float,
 	knockBonus:Float,

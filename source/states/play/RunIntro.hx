@@ -35,8 +35,28 @@ class RunIntro
 			fromX = picker.pickedX;
 			fromY = picker.pickedY;
 		};
-		picker.closeCallback = openTutorialIfNew;
+		picker.closeCallback = function()
+		{
+			if (picker.cancelled)
+			{
+				quitToMenu();
+				return;
+			}
+			openTutorialIfNew();
+		};
 		host.openPanel(picker);
+	}
+
+	function quitToMenu():Void
+	{
+		Net.stop();
+		host.leaveFor(function()
+		{
+			if (util.CustomArena.fromEditor)
+				flixel.FlxG.switchState(() -> new EditorState());
+			else
+				flixel.FlxG.switchState(() -> new MainMenuState());
+		});
 	}
 
 	public function openTutorialIfNew():Void

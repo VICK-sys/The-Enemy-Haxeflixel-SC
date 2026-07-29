@@ -33,6 +33,16 @@ class Orbiter extends FlxSprite
 	private var targetY:Float = 0;
 	private var hitList:Array<FlxObject> = [];
 
+	public var hue(default, null):Float = 0;
+
+	public function paint(h:Float):Void
+	{
+		if (h == hue)
+			return;
+		hue = h;
+		loadGraphic(util.HuePalette.graphic("items/hammer", h));
+	}
+
 	public function new()
 	{
 		super();

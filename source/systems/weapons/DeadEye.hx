@@ -45,7 +45,6 @@ class DeadEye
 	private var arm:Float = 0;
 	private var shotTimer:Float = 0;
 	private var pulse:Float = 0;
-	private var blockSaved:Bool = false;
 	private var froze:Bool = false;
 	private var liveTimer:Float = 0;
 	private var targets:Array<Enemies> = [];
@@ -87,7 +86,6 @@ class DeadEye
 		if (froze)
 		{
 			WorldClock.superSlow = 0;
-			blockSaved = player.blockMovement;
 			player.blockMovement = true;
 		}
 		else
@@ -114,7 +112,7 @@ class DeadEye
 		if (froze)
 		{
 			WorldClock.superSlow = 1;
-			player.blockMovement = blockSaved;
+			player.blockMovement = false;
 		}
 		held.unlockAim();
 		heartbeat.stop();

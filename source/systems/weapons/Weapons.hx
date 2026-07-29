@@ -12,6 +12,7 @@ import systems.Pickups;
 class Weapons
 {
 	static inline var WEAPON_COUNT:Int = 4;
+	static inline var BOW_MUZZLE:Float = 44;
 
 	public var held:HeldWeapon;
 	public var hits:HitPipeline;
@@ -46,19 +47,34 @@ class Weapons
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
 		swing = new SwingAttack(director, hits, fx, weaponCfg.swing);
 		yoyoJab = new YoyoJab(director, hits, fx);
+		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		revolver = new RevolverAttack(arena, director, fx, hits);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
 		throwAttack.onCaught = function() swing.coolFor(weaponCfg.thrown.catchCooldown);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
 		superOrbit = new SuperOrbit(player, heldSprite, arena, director, status, fx, hits);
+		superOrbit.hue = util.SaveData.playerHue();
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
+		arrowStorm.paint(util.SaveData.playerHue());
 		hookArms = new HookArms(player, director, hits);
 		deadEye = new DeadEye(player, director, revolver, held);
 		deadEye.onShot = function(bx, by, tx, ty, deg)
+		{
+			held.kick();
 			emitAttack(Shoot, bx, by, Math.cos(deg * Math.PI / 180), Math.sin(deg * Math.PI / 180), deg);
+		}
+		bow.onFull = function()
+		{
+			var a = aimFrom(held.handX(), held.handY());
+			fx.chargePop(held.handX() + a.dx * BOW_MUZZLE, held.handY() + a.dy * BOW_MUZZLE);
+			held.flash();
+		}
 		revolver.onPellet = function(bx, by, deg)
+		{
+			held.kick();
 			emitAttack(Pellet, bx, by, Math.cos(deg * Math.PI / 180), Math.sin(deg * Math.PI / 180), deg);
+		}
 	}
 
 	public var superBusy(get, never):Bool;
@@ -135,6 +151,15 @@ class Weapons
 	public function hasSuper():Bool
 		return weapon != 1 || deadEye.canActivate();
 
+	public function repaint():Void
+	{
+		held.repaint();
+		yoyoJab.flight.setHue(util.SaveData.playerHue());
+		superOrbit.hue = util.SaveData.playerHue();
+		arrowStorm.paint(util.SaveData.playerHue());
+		bow.rain.hue = util.SaveData.playerHue();
+	}
+
 	public function equip(i:Int):Void
 	{
 		weapon = i < 0 || i >= WEAPON_COUNT ? 0 : i;
@@ -195,6 +220,7 @@ class Weapons
 			var shot = aimFrom(held.handX(), held.handY());
 			var power = bow.charge;
 			held.beginSwing(aim.deg, Bow);
+			held.loose(power);
 			bow.release(held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
 			emitAttack(Bow, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg, power);
 		}
@@ -222,6 +248,7 @@ class Weapons
 		if (util.Controls.attackJustPressed() && revolver.canFire())
 		{
 			held.beginSwing(aim.deg, Shoot);
+			held.kick();
 			emitAttack(Shoot, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
 			revolver.fire(held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
 		}

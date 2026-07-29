@@ -32,10 +32,16 @@ class ArrowRain
 		markers = new FlxTypedGroup<FlxSprite>();
 	}
 
+	public var hue:Float = 0;
+
 	public function fire(tx:Float, ty:Float, bx:Float, by:Float):Void
 	{
 		for (i in 0...LAUNCH_COUNT)
-			arrows.recycle(RainArrow).launchUp(bx, by, -90 + (i - 1) * 14, LAUNCH_SPEED);
+		{
+			var up = arrows.recycle(RainArrow);
+			up.paint(hue);
+			up.launchUp(bx, by, -90 + (i - 1) * 14, LAUNCH_SPEED);
+		}
 
 		for (i in 0...cfg.volley)
 		{
@@ -72,6 +78,7 @@ class ArrowRain
 			if (d.time <= 0)
 			{
 				var arrow = arrows.recycle(RainArrow);
+				arrow.paint(hue);
 				arrow.drop(d.x, d.y, DROP_HEIGHT, cfg.fallSpeed);
 				arrow.marker = d.marker;
 				pending.splice(i, 1);

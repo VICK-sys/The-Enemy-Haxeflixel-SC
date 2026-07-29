@@ -38,7 +38,7 @@ class WeaponFlyIn
 
 	public function begin(image:String, sx:Float, sy:Float):Void
 	{
-		sprite.loadGraphic(Paths.image(image));
+		sprite.loadGraphic(util.HuePalette.graphic(image, util.SaveData.playerHue()));
 		sprite.scale.set(START_SCALE, START_SCALE);
 		sprite.updateHitbox();
 		sprite.revive();
