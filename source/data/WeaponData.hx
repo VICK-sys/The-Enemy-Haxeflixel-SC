@@ -18,16 +18,19 @@ typedef SwingConfig = {
 
 typedef YoyoConfig = {
 	reach:Float,
-	outTime:Float,
-	backTime:Float,
+	speed:Float,
+	chaseEase:Float,
+	holdTime:Float,
 	hitRadius:Float,
+	hitGap:Float,
 	damage:Int,
 	hitstop:Int,
 	hitstopScale:Float,
 	hitShake:Float,
 	knock:Float,
 	hitBrace:Float,
-	cooldown:Float
+	cooldown:Float,
+	restCooldown:Float
 }
 
 typedef RevolverConfig = {

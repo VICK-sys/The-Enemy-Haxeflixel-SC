@@ -79,7 +79,7 @@ Combat balance for every weapon system, one object per system. Field names match
 |---|---|
 | `swing` | melee range and arc, slash spawn distance. The hammer's block adds `cooldown`, the wait after each swing |
 | `dropLowHealthBonus` (player.json) | how much the health pack drop chance grows as you lose health. Zero keeps the flat rate, and the full bonus applies at zero health |
-| `yoyo` | yoyo reach, out and back durations, hit radius, damage, hitstop, knock, recovery |
+| `yoyo` | yoyo reach, travel speed and easing, how long it can stay out, hit radius and the gap between repeat hits, damage, hitstop, knock, the recovery for a released throw and the longer one for a throw that tired out |
 | `knock` | multiplies the push a connecting melee blow hands the enemy, so the hammer can throw one and the yoyo cannot |
 | `hitBrace` | how far the struck enemy shakes, in pixels, while the hitstop holds. Zero means it takes the hit and goes straight away |
 | `hitstop`, `hitstopScale`, `hitShake` | how hard a connecting melee blow bites: frames held, the speed held at, and the shake. Set per weapon, so the hammer can land heavier than the yoyo |

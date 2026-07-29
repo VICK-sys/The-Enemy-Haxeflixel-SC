@@ -479,6 +479,7 @@ class NetSync
 	{
 		var held = combat.held.sprite;
 		var hookShot = combat.hookAttack.hook;
+		var yo = combat.yoyoJab.flight;
 		var fly = combat.throwAttack.thrown;
 
 		Net.send({
@@ -499,6 +500,7 @@ class NetSync
 			dd: status.dead,
 			ar: armWire(),
 			hk: hookShot.exists ? [r1(hookShot.x), r1(hookShot.y), r1(hookShot.angle), r1(combat.held.handX()), r1(combat.held.handY())] : null,
+			yo: yo.active ? [r1(yo.cx), r1(yo.cy), r1(yo.yoyo.angle)] : null,
 			th: fly.exists ? [r1(fly.x), r1(fly.y), r1(fly.velocity.x), r1(fly.velocity.y)] : null
 		});
 	}

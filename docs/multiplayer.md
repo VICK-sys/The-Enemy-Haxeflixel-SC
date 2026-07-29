@@ -47,9 +47,9 @@ The held weapon streams its placement as an offset from the player. The far side
 
 The receiver rebuilds each effect from its own local classes. Those are a slash, an arrow, or a rain volley from a cosmetic `ArrowRain`.
 
-The yoyo throw replays rather than streams. Its whole path follows from the launch point and the aim, so one event is enough to run the same out-and-back locally. It anchors to the moving avatar's hand rather than the point it left, which is what the thrower sees too. Only the owner's copy deals damage.
+The yoyo streams rather than replays. Its path follows the thrower's cursor for as long as they hold the button, so no single event describes it. It rides the avatar packet next to the grab, carrying position and spin, and the receiver lerps between snapshots and rebuilds the string against the interpolated body. The attack event still goes out, but only to play the throw sound. Only the owner's copy deals damage.
 
-The grab, its string and the thrown hammer stream as state on the avatar packet. They persist and follow the world instead of flying straight. Snapshots go out every fourth frame, far too coarse for a hammer at 1000 px/s. The thrown copy is dead-reckoned instead. The packet carries velocity rather than angle, and the sprite integrates that velocity at full framerate. The streamed position then acts as a weak correction that pulls out drift.
+The grab, the yoyo, their strings and the thrown hammer stream as state on the avatar packet. They persist and follow the world instead of flying straight. Snapshots go out every fourth frame, far too coarse for a hammer at 1000 px/s. The thrown copy is dead-reckoned instead. The packet carries velocity rather than angle, and the sprite integrates that velocity at full framerate. The streamed position then acts as a weak correction that pulls out drift.
 
 The thrown hammer spins and trails locally. The grab uses a plain position lerp. Both string ends interpolate, so the string does not jitter. A grab stuck in a victim keeps a stale velocity, so it cannot dead-reckon. Host hits also emit an impact event so the client sees sparks. The client draws its own hits already, so only the host's need sending.
 

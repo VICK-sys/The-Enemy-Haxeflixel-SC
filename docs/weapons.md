@@ -48,15 +48,15 @@ The hammer's block also carries a `cooldown`. Each swing starts it, and both the
 
 ## YoyoJab
 
-The yoyo's primary. Left click pushes the yoyo out along the aim and pulls it back, on a string. `YoyoFlight` owns the motion and the art: it carries the `yoyo_axel` sprite out to `reach` and home again, spinning it, and tiles the string from the hand to wherever the yoyo is. `YoyoJab` wraps that with the damage.
+The yoyo's primary, held rather than tapped. Press left click and the yoyo is thrown out. Hold it and the yoyo stays out, spinning, chasing the cursor but never further from the hand than `reach`. Aim past that limit and it sits on the edge of the circle in the cursor's direction. Let go and it comes home.
 
-The path eases out of the hand and eases back into it, so the yoyo is quickest at both ends and hangs at full extension. That hang is where most of the hit window sits.
+`YoyoFlight` owns the motion. Every frame it picks a target, the clamped cursor while deployed or the hand while coming back, and eases toward it under a speed cap. The cap makes a long throw read as travel rather than a jump; the ease makes it settle rather than stop dead. The same two numbers drive going out and coming back, so the weight feels the same both ways. `YoyoJab` wraps that with the damage.
 
-Damage is once per throw per enemy. The yoyo crosses the same ground twice, and without that rule a target parked mid-path would take double for one click. A list of who has already been struck resets on each throw. The push follows the string rather than the enemy: going out it shoves a target away, coming home it drags one toward the player.
+Damage repeats rather than landing once. Each enemy the yoyo touches is struck, then sits out `hitGap` before it can be struck again, so parking the yoyo on something grinds it down while sweeping across a crowd clips each of them. The push follows the string: out shoves a target away, coming home drags one toward the player. It deflects enemy fire on contact, which makes a parked yoyo a small moving shield.
 
-It deflects enemy fire on contact, the same as a swing does, but only where the yoyo actually is rather than across a whole arc.
+Holding costs. The throw runs for `holdTime` and then tires out on its own and returns, and a throw that ran itself out pays `restCooldown` rather than the short `cooldown` a released one pays. Letting go early is therefore worth doing. The reload bar above the player shows the wait, the same way it shows a reload.
 
-The held sprite hides for the throw and comes back when the yoyo does. The throw itself blocks the next one, plus a short recovery, so the cadence is the animation rather than the click.
+The held sprite hides for as long as the yoyo is out, since the yoyo is the held weapon. Q recalls it and spends the super. Right click recalls it and throws the grab.
 
 ## RevolverAttack
 

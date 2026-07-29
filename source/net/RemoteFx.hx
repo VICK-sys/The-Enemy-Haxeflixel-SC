@@ -55,7 +55,10 @@ class RemoteFx
 	private var handTY:Float = 0;
 	private var handCX:Float = 0;
 	private var handCY:Float = 0;
-	private var yoyoSpin:Float = 1;
+	private var yoyoOn:Bool = false;
+	private var yoyoTX:Float = 0;
+	private var yoyoTY:Float = 0;
+	private var yoyoAng:Float = 0;
 
 	public function new(state:FlxState, layers:RenderLayers, director:EnemyDirector, hits:HitPipeline, fx:Fx, avatar:RemoteAvatar)
 	{
@@ -140,8 +143,6 @@ class RemoteFx
 				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
 			case Yoyo:
-				yoyoSpin = -yoyoSpin;
-				yoyo.fire(pmx, pmy, dx, dy, yoyoSpin);
 				FlxG.sound.play(Paths.sound("weapon/throw"), 0.35);
 
 			case Shoot:
@@ -209,6 +210,34 @@ class RemoteFx
 		handTY = handY;
 	}
 
+	public function setYoyo(on:Bool, px:Float, py:Float, ang:Float):Void
+	{
+		if (!on)
+		{
+			if (yoyoOn)
+			{
+				yoyoOn = false;
+				yoyo.stop();
+			}
+			return;
+		}
+
+		if (!yoyoOn)
+		{
+			yoyoOn = true;
+			yoyo.drive(px, py, ang, handOfAvatarX(), handOfAvatarY());
+		}
+		yoyoTX = px;
+		yoyoTY = py;
+		yoyoAng = ang;
+	}
+
+	function handOfAvatarX():Float
+		return avatar.sprite.x + HeldWeapon.HAND_DX;
+
+	function handOfAvatarY():Float
+		return avatar.sprite.y + HeldWeapon.HAND_DY;
+
 	public function setThrown(on:Bool, tx:Float, ty:Float, vx:Float, vy:Float):Void
 	{
 		if (!on)
@@ -234,7 +263,12 @@ class RemoteFx
 		blades.update(elapsed);
 		storm.update(elapsed);
 		arms.update(elapsed);
-		yoyo.update(elapsed, avatar.sprite.x + HeldWeapon.HAND_DX, avatar.sprite.y + HeldWeapon.HAND_DY);
+		if (yoyoOn)
+		{
+			var yk = Math.min(1, HOOK_LERP * elapsed);
+			yoyo.drive(yoyo.cx + (yoyoTX - yoyo.cx) * yk, yoyo.cy + (yoyoTY - yoyo.cy) * yk, yoyoAng,
+				handOfAvatarX(), handOfAvatarY());
+		}
 
 		var stamp = thrownTrail.tick(elapsed);
 		if (thrown.exists)

@@ -32,9 +32,9 @@ You pick one weapon at the start and keep it for the whole run.
 - Hammer - swing, or throw.
 - Revolver - shoot, or fan the hammer. Fanning rips through every remaining round in one burst. Six rounds, fired as fast as you can click. Running dry reloads on its own, or press R to top up early.
 - Crossbow - a charged shot. Hold to charge, release to fire. A full charge pierces and can fire back to back, a tap cannot. Arrow rain is the secondary, once its meter fills.
-- Yoyo - a throw out and back, or a grab.
+- Yoyo - hold to keep it out and steer it, or a grab.
 
-Melee attacks deflect enemy bullets back at whoever fired them. That covers the hammer swing and the yoyo throw.
+Melee attacks deflect enemy bullets back at whoever fired them. That covers the hammer swing and the yoyo while it is out.
 
 ## Supers
 

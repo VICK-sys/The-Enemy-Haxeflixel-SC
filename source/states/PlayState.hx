@@ -314,9 +314,11 @@ class PlayState extends FlxState
 		hud.setBowLoaded(!combat.bow.recovering, combat.weapon == 2);
 		var recharging = combat.weapon == 1 ? combat.revolver.isReloading
 			: combat.weapon == 2 ? combat.bow.recovering
-			: combat.weapon == 0 && combat.swing.recovering;
+			: combat.weapon == 3 ? combat.yoyoJab.recovering
+			: combat.swing.recovering;
 		var rechargeAt = combat.weapon == 1 ? combat.revolver.reloadProgress
 			: combat.weapon == 2 ? combat.bow.recoverProgress
+			: combat.weapon == 3 ? combat.yoyoJab.recoverProgress
 			: combat.swing.recoverProgress;
 		reloadBar.update(recharging && !combat.disabled && !status.dead, rechargeAt);
 		hud.setShown(SaveData.showHud());

@@ -98,7 +98,7 @@ class Weapons
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		if (status.dead && yoyoJab.active)
 			yoyoJab.stop();
-		yoyoJab.update(elapsed, handX(), handY());
+		yoyoJab.update(elapsed, handX(), handY(), FlxG.mouse.x, FlxG.mouse.y);
 		bow.update(elapsed);
 		var gunAim = aimFrom(held.handX(), held.handY());
 		if (status.dead)
@@ -242,8 +242,9 @@ class Weapons
 		}
 
 		if (FlxG.keys.justPressed.Q && hasSuper() && status.canSuper() && !superOrbit.active() && !throwAttack.airborne
-			&& !hookAttack.busy && !yoyoJab.active)
+			&& !hookAttack.busy)
 		{
+			yoyoJab.stop();
 			status.spendSuper();
 			switch (weapon)
 			{
@@ -269,6 +270,12 @@ class Weapons
 			return;
 		}
 
+		if (weapon == 3)
+		{
+			updateYoyoInput();
+			return;
+		}
+
 		var leftClick = FlxG.mouse.justPressed;
 		var rightClick = FlxG.mouse.justPressedRight;
 		if ((!leftClick && !rightClick) || throwAttack.airborne)
@@ -291,55 +298,64 @@ class Weapons
 			return;
 		}
 
-		if (hookAttack.holding)
-		{
-			if (leftClick)
-				hookAttack.throwHeld(dx, dy);
-			return;
-		}
-
-		if (hookAttack.busy || yoyoJab.active || held.swinging)
+		if (held.swinging)
 			return;
 
 		if (leftClick)
-			primary(pmx, pmy, dx, dy, aimDeg);
+		{
+			if (!swing.ready)
+				return;
+			held.beginSwing(aimDeg, Swing);
+			emitAttack(Swing, pmx, pmy, dx, dy, aimDeg);
+			swing.fire(pmx, pmy, dx, dy, aimDeg);
+		}
 		else
-			secondary(pmx, pmy, dx, dy, aimDeg);
-	}
-
-	function primary(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
-	{
-		switch (weapon)
 		{
-			case 3:
-				if (!yoyoJab.ready)
-					return;
-				emitAttack(Yoyo, handX(), handY(), dx, dy, aimDeg);
-				yoyoJab.fire(handX(), handY(), dx, dy);
-			default:
-				if (!swing.ready)
-					return;
-				held.beginSwing(aimDeg, Swing);
-				emitAttack(Swing, pmx, pmy, dx, dy, aimDeg);
-				swing.fire(pmx, pmy, dx, dy, aimDeg);
+			if (!swing.ready)
+				return;
+			throwAttack.launch(pmx, pmy, dx, dy);
+			emitAttack(Throw, pmx, pmy, dx, dy, aimDeg);
 		}
 	}
 
-	function secondary(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
+	function updateYoyoInput():Void
 	{
-		switch (weapon)
+		if (throwAttack.airborne)
+			return;
+
+		var aim = aimFromPlayer();
+
+		if (hookAttack.holding)
 		{
-			case 0:
-				if (!swing.ready)
-					return;
-				throwAttack.launch(pmx, pmy, dx, dy);
-				emitAttack(Throw, pmx, pmy, dx, dy, aimDeg);
-			case 3:
-				held.beginSwing(aimDeg, Hook);
-				emitAttack(Hook, pmx, pmy, dx, dy, aimDeg);
-				hookAttack.fire(pmx, pmy, dx, dy, aimDeg);
-			default:
+			if (FlxG.mouse.justPressed)
+				hookAttack.throwHeld(aim.dx, aim.dy);
+			return;
 		}
+
+		if (hookAttack.busy)
+			return;
+
+		if (FlxG.mouse.justPressedRight)
+		{
+			var pmx = player.x + player.width * 0.5;
+			var pmy = player.y + player.height * 0.5;
+			yoyoJab.stop();
+			held.beginSwing(aim.deg, Hook);
+			emitAttack(Hook, pmx, pmy, aim.dx, aim.dy, aim.deg);
+			hookAttack.fire(pmx, pmy, aim.dx, aim.dy, aim.deg);
+			return;
+		}
+
+		if (FlxG.mouse.justPressed)
+		{
+			if (yoyoJab.ready)
+			{
+				emitAttack(Yoyo, handX(), handY(), aim.dx, aim.dy, aim.deg);
+				yoyoJab.fire(handX(), handY());
+			}
+		}
+		else if (!FlxG.mouse.pressed)
+			yoyoJab.release();
 	}
 
 	function emitAttack(mode:WeaponMode, pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0):Void

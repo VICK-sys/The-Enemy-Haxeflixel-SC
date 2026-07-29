@@ -1,6 +1,6 @@
 {
 	"swing": { "spawnDist": 145, "meleeRange": 245, "meleeArcCos": -0.5, "damage": 2, "effectScale": 1.4, "hitstop": 10, "hitstopScale": 0.06, "hitShake": 0.007, "knock": 3.2, "hitBrace": 7, "cooldown": 0.55 },
-	"yoyo": { "reach": 240, "outTime": 0.11, "backTime": 0.16, "hitRadius": 46, "damage": 1, "hitstop": 2, "hitstopScale": 0.3, "hitShake": 0.002, "knock": 1.0, "hitBrace": 0, "cooldown": 0.06 },
+	"yoyo": { "reach": 720, "speed": 2600, "chaseEase": 0.2, "holdTime": 2.5, "hitRadius": 46, "hitGap": 0.28, "damage": 1, "hitstop": 2, "hitstopScale": 0.3, "hitShake": 0.002, "knock": 1.0, "hitBrace": 0, "cooldown": 0.12, "restCooldown": 0.9 },
 	"revolver": {
 		"cylinder": 6,
 		"damage": 2,

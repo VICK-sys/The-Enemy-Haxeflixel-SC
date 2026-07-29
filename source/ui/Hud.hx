@@ -119,8 +119,8 @@ class Hud
 		state.add(piece(gaugeFill));
 
 		capTop = makeUiSprite(0, 0, "ammo_indicator");
+		capTop.flipY = true;
 		capBottom = makeUiSprite(0, 0, "ammo_indicator");
-		capBottom.flipY = true;
 		capTop.visible = false;
 		capBottom.visible = false;
 		state.add(piece(capTop));
