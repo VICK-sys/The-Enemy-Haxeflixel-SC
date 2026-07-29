@@ -29,6 +29,7 @@ class TutorialSubState extends FlxSubState
 	static var KEYS:Array<String> = ["move", "attack", "weapons", "super", "scrap", "health", "ready"];
 
 	private var camUI:FlxCamera;
+	private var closeNav:Bool;
 	private var titleText:FlxText;
 	private var descText:FlxText;
 	private var pageText:FlxText;
@@ -40,10 +41,11 @@ class TutorialSubState extends FlxSubState
 	private var closing:Bool = false;
 	private var opening:Bool = false;
 
-	public function new(camUI:FlxCamera)
+	public function new(camUI:FlxCamera, closeNav:Bool = false)
 	{
 		super();
 		this.camUI = camUI;
+		this.closeNav = closeNav;
 	}
 
 	override public function create():Void
@@ -93,7 +95,7 @@ class TutorialSubState extends FlxSubState
 
 		titleText.text = Lang.t("tutorial." + KEYS[page] + ".title");
 		descText.text = Lang.t("tutorial." + KEYS[page] + ".desc");
-		pageText.text = Lang.t("tutorial.nav", [page + 1, PAGES]);
+		pageText.text = Lang.t(closeNav ? "onlineHelp.nav" : "tutorial.nav", [page + 1, PAGES]);
 
 		demo = switch (page)
 		{

@@ -48,6 +48,8 @@ The camera leans toward the cursor rather than sitting on the player. It feeds `
 
 ESC opens it. It freezes the game, pauses all audio, and dims the screen. ESC closes it again. The volume keys still work while it is open.
 
+A CONTROLS row opens the same seven page popup the first run shows, so the controls are never more than a pause away. Opened from here its footer reads CLOSE rather than PLAY, since closing it lands back on the pause menu rather than into the game.
+
 QUIT TO MENU returns to the editor instead when the run came from a playtest. The editor sets that flag itself. The state does not infer it from the map being custom. The menu can start a custom map too, and those runs belong back at the menu.
 
 ## OnlineHelpSubState

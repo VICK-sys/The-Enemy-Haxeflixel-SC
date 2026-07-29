@@ -35,7 +35,7 @@ class PauseSubState extends FlxSubState
 		title.cameras = [camUI];
 		add(title);
 
-		list = new MenuList([Lang.t("pause.resume"), Lang.t("pause.options"), Lang.t("pause.quit")], 320, 70, 32);
+		list = new MenuList([Lang.t("pause.resume"), Lang.t("pause.controls"), Lang.t("pause.options"), Lang.t("pause.quit")], 300, 66, 32);
 		list.onChoose = choose;
 		list.cameras = [camUI];
 		add(list);
@@ -60,7 +60,7 @@ class PauseSubState extends FlxSubState
 		title.text = Lang.t("pause.title");
 		title.font = Lang.font();
 
-		var keys = ["pause.resume", "pause.options", "pause.quit"];
+		var keys = ["pause.resume", "pause.controls", "pause.options", "pause.quit"];
 		for (i in 0...keys.length)
 		{
 			list.rowAt(i).font = Lang.font();
@@ -92,6 +92,8 @@ class PauseSubState extends FlxSubState
 			case 0:
 				close();
 			case 1:
+				openSubState(new TutorialSubState(camUI, true));
+			case 2:
 				openSubState(new OptionsSubState(camUI));
 			default:
 				leaving = true;

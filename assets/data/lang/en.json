@@ -12,6 +12,7 @@
 	"menu.best": "BEST: WAVE {0}",
 	"pause.title": "PAUSED",
 	"pause.resume": "RESUME",
+	"pause.controls": "CONTROLS",
 	"pause.options": "OPTIONS",
 	"pause.quit": "QUIT TO MENU",
 	"options.title": "OPTIONS",
