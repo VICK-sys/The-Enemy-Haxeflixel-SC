@@ -11,6 +11,9 @@ class Enemies extends FlxSprite
 {
 	static inline var FLASH_TIME:Float = 0.08;
 
+	static inline var ENTER_CLIMB:Float = 0.7;
+	static inline var ENTER_SIDE:Float = 0.714;
+
 	public var speed:Float = 300;
 	public var aggroRange:Float = 200;
 	public var stopThreshold:Float = 170;
@@ -305,7 +308,16 @@ class Enemies extends FlxSprite
 			var ey:Float = target.y + target.height * 0.5 - (y + height * 0.5);
 			var el:Float = Math.sqrt(ex * ex + ey * ey);
 			if (el > 0)
-				velocity.set(ex / el * speed, ey / el * speed);
+			{
+				var ux:Float = ex / el;
+				var uy:Float = ey / el;
+				if (uy > -ENTER_CLIMB)
+				{
+					uy = -ENTER_CLIMB;
+					ux = ux < 0 ? -ENTER_SIDE : ENTER_SIDE;
+				}
+				velocity.set(ux * speed, uy * speed);
+			}
 			return;
 		}
 

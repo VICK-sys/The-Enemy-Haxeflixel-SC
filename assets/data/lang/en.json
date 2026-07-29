@@ -20,6 +20,7 @@
 	"options.vsync": "V-SYNC  {0}",
 	"options.framerate": "FRAMERATE  < {0} >",
 	"options.aspect": "ASPECT RATIO  < {0} >",
+	"options.camera": "CAMERA LEAN  < {0}% >",
 	"options.shake": "SCREENSHAKE  < {0}% >",
 	"options.freeze": "FREEZE FRAMES  < {0}% >",
 	"options.hud": "HUD  {0}",

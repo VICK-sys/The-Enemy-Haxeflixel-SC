@@ -32,8 +32,8 @@ import util.Lang;
 class PlayState extends FlxState
 {
 	public static inline var BASE_ZOOM:Float = 0.8;
+	public static var cursorLean:Float = 0.5;
 
-	static inline var CURSOR_LEAN:Float = 0.45;
 	static inline var FOLLOW_LERP:Float = 0.055;
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
@@ -356,7 +356,7 @@ class PlayState extends FlxState
 	{
 		var sx = FlxG.mouse.x - FlxG.camera.scroll.x - FlxG.width * 0.5;
 		var sy = FlxG.mouse.y - FlxG.camera.scroll.y - FlxG.height * 0.5;
-		FlxG.camera.targetOffset.set(sx * CURSOR_LEAN, sy * CURSOR_LEAN);
+		FlxG.camera.targetOffset.set(sx * cursorLean, sy * cursorLean);
 	}
 
 	function live(n:Int):Int
@@ -383,8 +383,6 @@ class PlayState extends FlxState
 	function onWaveStarted(n:Int):Void
 	{
 		SaveData.submitWave(n);
-		if (n > 1)
-			util.Levels.award(util.Levels.waveExp() * (n - 1));
 		hud.showWave(n);
 	}
 

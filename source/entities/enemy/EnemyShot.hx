@@ -12,6 +12,7 @@ class EnemyShot extends FlxSprite
 	static inline var DEFLECT_BOOST:Float = 1.35;
 	static inline var SCALE:Float = 4;
 	static inline var HIT:Float = 48;
+	static inline var FADE:Float = 0.1;
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
@@ -43,6 +44,7 @@ class EnemyShot extends FlxSprite
 	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, damage:Float, speed:Float, range:Float, sprite:String = null):Void
 	{
 		revive();
+		alpha = 1;
 		var want = sprite == null ? DEFAULT_SPRITE : sprite;
 		if (want != spriteKey)
 			use(want);
@@ -65,6 +67,7 @@ class EnemyShot extends FlxSprite
 		velocity.set(-velocity.x * DEFLECT_BOOST, -velocity.y * DEFLECT_BOOST);
 		angle = Math.atan2(dirY, dirX) * 180 / Math.PI;
 		life = fullLife;
+		alpha = 1;
 		friendly = true;
 		use(TURNED_SPRITE);
 	}
@@ -83,6 +86,7 @@ class EnemyShot extends FlxSprite
 		velocity.set(dx * speed, dy * speed);
 		angle = Math.atan2(dy, dx) * 180 / Math.PI;
 		life = fullLife;
+		alpha = 1;
 		friendly = true;
 		use(TURNED_SPRITE);
 	}
@@ -96,5 +100,7 @@ class EnemyShot extends FlxSprite
 		life -= elapsed;
 		if (life <= 0)
 			kill();
+		else if (life < FADE)
+			alpha = life / FADE;
 	}
 }

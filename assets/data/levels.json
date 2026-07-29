@@ -1,9 +1,8 @@
 {
-	"scrapValue": 6,
-	"expPerWave": 20,
-	"baseCost": 20,
-	"costGrowth": 1.0,
-	"costFlat": 5,
+	"scrapValue": 1,
+	"baseCost": 3,
+	"costGrowth": 1.03,
+	"costFlat": 0,
 	"vigorPerPoint": 0.2,
 	"enduranceDashPerPoint": 0.035,
 	"enduranceSuperPerPoint": 0.06,

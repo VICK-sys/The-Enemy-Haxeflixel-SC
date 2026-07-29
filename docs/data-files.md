@@ -221,7 +221,7 @@ The screen shows what a point buys before you spend it. The left panel holds the
 
 | Field | Meaning |
 |---|---|
-| `scrapValue`, `expPerWave` | exp for one scrap picked up, and per wave cleared. The wave award scales with the wave number |
+| `scrapValue` | scrap paid for one piece picked up. It is one, and the costs are scaled to match, so the counter only ever moves by what you walked over |
 | `hitbox` | `[x, y, w, h]` in art pixels, the band a prop blocks. A prop without one is walked straight through, which is what trees want and what buildings do not |
 | `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)`. With growth at 1.0 that is a flat start plus `costFlat` per level: 20, 25, 30, and so on |
 | `vigorPerPoint` | health added per point |

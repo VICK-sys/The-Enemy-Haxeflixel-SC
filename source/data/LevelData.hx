@@ -5,7 +5,6 @@ import util.Paths;
 typedef LevelSet =
 {
 	scrapValue:Int,
-	expPerWave:Int,
 
 	baseCost:Int,
 	costGrowth:Float,

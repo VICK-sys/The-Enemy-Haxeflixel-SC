@@ -10,6 +10,7 @@ class Arrow extends FlxSprite
 
 	static inline var SPEED:Float = 1600;
 	static inline var RANGE:Float = 900;
+	static inline var FADE:Float = 0.1;
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
@@ -32,6 +33,7 @@ class Arrow extends FlxSprite
 			sizeMult:Float = 1, knock:Float = 1):Void
 	{
 		revive();
+		alpha = 1;
 		this.damage = damage;
 		this.knock = knock;
 		piercing = false;
@@ -62,5 +64,7 @@ class Arrow extends FlxSprite
 		life -= elapsed;
 		if (life <= 0)
 			kill();
+		else if (life < FADE)
+			alpha = life / FADE;
 	}
 }

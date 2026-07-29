@@ -160,7 +160,7 @@ class EnemyDirector
 
 	function separateLive(a:Enemies, b:Enemies):Bool
 	{
-		if (a.isDead || b.isDead || a.seized || b.seized)
+		if (a.isDead || b.isDead || a.seized || b.seized || a.entering || b.entering)
 			return false;
 		return FlxObject.separate(a, b);
 	}

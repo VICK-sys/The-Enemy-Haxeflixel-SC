@@ -11,6 +11,7 @@ class Bullet extends FlxSprite
 
 	static inline var SCALE:Float = 4;
 	static inline var HIT:Float = 48;
+	static inline var FADE:Float = 0.1;
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
@@ -44,6 +45,7 @@ class Bullet extends FlxSprite
 			knock:Float):Void
 	{
 		revive();
+		alpha = 1;
 		this.damage = damage;
 		this.knock = knock;
 		seek = null;
@@ -61,5 +63,7 @@ class Bullet extends FlxSprite
 		life -= elapsed;
 		if (life <= 0)
 			kill();
+		else if (life < FADE)
+			alpha = life / FADE;
 	}
 }

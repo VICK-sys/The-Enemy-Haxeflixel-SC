@@ -136,6 +136,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function cameraLean():Float
+	{
+		ensure();
+		return save.data.cameraLean != null ? save.data.cameraLean : 0.5;
+	}
+
+	public static function setCameraLean(v:Float):Void
+	{
+		ensure();
+		save.data.cameraLean = clampTenth(v);
+		save.flush();
+	}
+
 	public static function showHud():Bool
 	{
 		ensure();
@@ -266,6 +279,7 @@ class SaveData
 		applyFramerate();
 		systems.Fx.shakeScale = shakeAmount();
 		systems.Fx.freezeScale = freezeAmount();
+		states.PlayState.cursorLean = cameraLean();
 		Sfx.positional = sound3d();
 		AspectBars.apply();
 		if (Main.counter != null)

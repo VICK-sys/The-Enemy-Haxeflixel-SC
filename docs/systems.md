@@ -112,11 +112,13 @@ The health bar is an `FlxBar` bound by reflection to `status.health`. The super 
 
 ### Scraps
 
-Enemies pay in scrap rather than in exp. A rewardable kill drops one `ScrapPickup` where the enemy fell, and picking it up awards `scrapValue`. A kill you do not walk over is therefore worth nothing.
+Enemies pay in scrap rather than in exp. A rewardable kill drops one `ScrapPickup` where the enemy fell, and picking it up pays one scrap. A kill you do not walk over is therefore worth nothing.
+
+One piece is one scrap, and nothing else pays. Clearing a wave used to hand over a hidden bonus that scaled with the wave number, which meant the counter jumped without anything being picked up and one piece on the ground was worth six. Both read as the number lying about the sprite. The level costs were divided down to match, so the pace is unchanged: the same wave still buys about the same number of levels.
 
 Scrap pulls toward the player inside `MAGNET`, faster the closer it gets, so a kill at your feet collects itself and a kill across the room asks you to go and get it. It expires after fourteen seconds and blinks for the last three, which keeps a cleared arena from filling with debris.
 
-A dropped piece wears one of five sprites, picked at random, and carries a small ground shadow that stays at the piece's rest height while the piece bobs above it. The sprite is cosmetic only. Every piece pays `scrapValue`, so the counter cannot tell them apart.
+A dropped piece wears one of five sprites, picked at random, and carries a small ground shadow that stays at the piece's rest height while the piece bobs above it. The sprite is cosmetic only. Every piece pays the same one scrap, so the counter cannot tell them apart.
 
 Scrap is collected one piece at a time, a fifth of a second apart, and the nearest piece goes first. Without the gap a heap landed on the same frame: one muddy sound made of several copies of itself, and a counter that jumped in a single step. The gap has to be long enough to see. A tenth of a second was still read as picking up three or five at once.
 

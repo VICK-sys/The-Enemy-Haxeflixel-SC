@@ -84,8 +84,6 @@ class Levels
 	public static function scrapValue():Int
 		return conf().scrapValue;
 
-	public static function waveExp():Int
-		return conf().expPerWave;
 
 	public static function healthAt(pts:Int):Float
 		return pts * conf().vigorPerPoint;
