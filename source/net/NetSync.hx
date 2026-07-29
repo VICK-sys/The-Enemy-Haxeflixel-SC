@@ -484,10 +484,19 @@ class NetSync
 		{
 			if (e.netId < 0)
 				e.netId = nextEnemyId++;
-			en.push([
+			var row:Array<Dynamic> = [
 				e.netId, e.kind, r1(e.x), r1(e.y), e.flipX ? 1 : 0,
 				e.animation.name, e.hp, e.isDead ? 1 : 0
-			]);
+			];
+			if (e.gun != null && e.gun.graphic != null)
+			{
+				row.push(e.gun.graphic.key);
+				row.push(r1(e.gun.x));
+				row.push(r1(e.gun.y));
+				row.push(r1(e.gun.angle));
+				row.push(e.gun.flipY ? 1 : 0);
+			}
+			en.push(row);
 		});
 
 		var pk:Array<Array<Dynamic>> = [];

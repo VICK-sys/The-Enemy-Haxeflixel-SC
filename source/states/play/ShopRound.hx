@@ -127,11 +127,13 @@ class ShopRound
 		hud.setExp(Levels.exp);
 	}
 
+	public function shutShop():Void
+		shop.setOpen(false);
+
 	function onScreenClosed():Void
 	{
 		if (!spentHere)
 			return;
-		shop.dismiss();
 		reportDone();
 	}
 
@@ -195,7 +197,6 @@ class ShopRound
 			Net.send({t: "lvlgo"});
 		holding = false;
 		acks = null;
-		shop.setOpen(false);
 		director.holdWave = false;
 		if (netSync != null)
 			netSync.setAllLeveling(false);

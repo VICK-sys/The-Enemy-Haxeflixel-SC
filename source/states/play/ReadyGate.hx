@@ -23,6 +23,7 @@ class ReadyGate
 
 	public var armed(default, null):Bool = false;
 	public var blocked:Void->Bool;
+	public var onCommit:Void->Void;
 
 	private var host:PlayState;
 	private var player:Player;
@@ -150,6 +151,8 @@ class ReadyGate
 		ready = true;
 		bubble.visible = true;
 		FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
+		if (onCommit != null)
+			onCommit();
 
 		if (!Net.active)
 		{
@@ -185,6 +188,8 @@ class ReadyGate
 	{
 		if (!armed)
 			return;
+		if (onCommit != null)
+			onCommit();
 		if (Net.isHost)
 			Net.send({t: "rdygo"});
 		armed = false;

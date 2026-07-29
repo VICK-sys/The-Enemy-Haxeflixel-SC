@@ -27,6 +27,9 @@ class PuppetMirror
 	private var puppets:Map<Int, Enemies> = new Map();
 	private var targetsX:Map<Int, Float> = new Map();
 	private var targetsY:Map<Int, Float> = new Map();
+	private var gunTX:Map<Int, Float> = new Map();
+	private var gunTY:Map<Int, Float> = new Map();
+	private var gunTA:Map<Int, Float> = new Map();
 	private var puppetPickups:Map<Int, HealthPickup> = new Map();
 	private var claimedAt:Map<Int, Float> = new Map();
 	private var clock:Float = 0;
@@ -71,6 +74,14 @@ class PuppetMirror
 			{
 				e.x += (tx - e.x) * k;
 				e.y += (ty - e.y) * k;
+			}
+
+			if (e.gun != null && gunTX.exists(id))
+			{
+				e.gun.x += (gunTX.get(id) - e.gun.x) * k;
+				e.gun.y += (gunTY.get(id) - e.gun.y) * k;
+				var turn = ((gunTA.get(id) - e.gun.angle) % 360 + 540) % 360 - 180;
+				e.gun.angle += turn * k;
 			}
 		}
 	}
@@ -121,6 +132,21 @@ class PuppetMirror
 				}
 			}
 
+			if (e.gun != null && row.length > 8)
+			{
+				var gkey:String = row[8];
+				if (gkey != null && (e.gun.graphic == null || e.gun.graphic.key != gkey))
+				{
+					e.gun.loadGraphic(gkey);
+					e.gun.origin.set(e.gun.frameWidth * 0.5, e.gun.frameHeight * 0.5);
+					e.gun.scale.set(4, 4);
+				}
+				gunTX.set(id, row[9]);
+				gunTY.set(id, row[10]);
+				gunTA.set(id, row[11]);
+				e.gun.flipY = row[12] == 1;
+			}
+
 			if (id == pendingBossId)
 			{
 				pendingBossId = -1;
@@ -143,6 +169,9 @@ class PuppetMirror
 				puppets.remove(id);
 				targetsX.remove(id);
 				targetsY.remove(id);
+				gunTX.remove(id);
+				gunTY.remove(id);
+				gunTA.remove(id);
 				claimedAt.remove(id);
 			}
 		}

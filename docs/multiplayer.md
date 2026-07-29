@@ -89,7 +89,7 @@ Each other player is a `Peer`: their body, their effects, and whether they are d
 
 One subtlety is worth knowing. The host never receives its own broadcasts. So when it notices a socket die, it queues the departure notice for itself as well. Otherwise the departed player would linger on the host's screen and still count as alive.
 
-The client's copy of the host's world lives in `PuppetMirror`. It holds puppet enemies and pickups, driven by snapshots and interpolated between them. It also holds the kill-credit window for this player's damage claims. Nothing in it decides anything. It only shows what the host said.
+The client's copy of the host's world lives in `PuppetMirror`. The boss's held gun rides its snapshot row, image, place and angle, since the attack logic that drives it runs only on the host and a puppet's gun would otherwise stay a blank sprite. It holds puppet enemies and pickups, driven by snapshots and interpolated between them. It also holds the kill-credit window for this player's damage claims. Nothing in it decides anything. It only shows what the host said.
 
 `RemoteArms` is the streamed grab-arms channel. It stays out of `RemoteFx`, because it is the one effect that lerps state every frame rather than replaying an event. One shared function builds the boss death blast, `Fx.bossBlast`, so the host's real death and a client's mirror cannot drift apart.
 

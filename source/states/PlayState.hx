@@ -200,6 +200,7 @@ class PlayState extends FlxState
 		round.wire(status, director, hud);
 		gate.wire(status, director, hud);
 		gate.blocked = round.shop.inReach;
+		gate.onCommit = round.shutShop;
 		boss = new states.play.BossShow(arena, hud, props, round, scraps, pickups, floor);
 		intro = new states.play.RunIntro(this, combat, hud);
 		add(intro.flyIn.sprite);
