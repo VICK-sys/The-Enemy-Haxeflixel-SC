@@ -19,16 +19,27 @@ class MenuList extends FlxGroup
 	static inline var BOB:Float = 4;
 	static inline var BOB_SPEED:Float = 5;
 
+	static inline var HOLD_DELAY:Float = 0.34;
+	static inline var HOLD_SLOW:Float = 0.055;
+	static inline var HOLD_FAST:Float = 0.008;
+	static inline var HOLD_RAMP:Float = 1.1;
+	static inline var BLIP_GAP:Float = 0.07;
+
 	public var index(default, null):Int = 0;
 	public var onChoose:Int->Void;
 	public var onAdjust:(Int, Int) -> Void;
 	public var enabled:Bool = true;
+	public var repeatAdjust:Bool = false;
 
 	private var rows:Array<FlxText> = [];
 	private var selector:FlxSprite;
 	private var bobTime:Float = 0;
 	private var lastMouseX:Float = 0;
 	private var lastMouseY:Float = 0;
+	private var holdDir:Int = 0;
+	private var holdWait:Float = 0;
+	private var holdTime:Float = 0;
+	private var blipWait:Float = 0;
 
 	public function new(labels:Array<String>, startY:Float, spacing:Float, size:Int)
 	{
@@ -103,10 +114,9 @@ class MenuList extends FlxGroup
 			}
 		}
 
-		if (FlxG.keys.justPressed.A || FlxG.keys.justPressed.LEFT)
-			adjust(-1);
-		if (FlxG.keys.justPressed.D || FlxG.keys.justPressed.RIGHT)
-			adjust(1);
+		if (blipWait > 0)
+			blipWait -= elapsed;
+		updateAdjust(elapsed);
 
 		var clicked = FlxG.mouse.justPressed && FlxG.mouse.overlaps(rows[index], rowCamera(index));
 		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.SPACE || clicked)
@@ -150,11 +160,48 @@ class MenuList extends FlxGroup
 		blip();
 	}
 
+	function updateAdjust(elapsed:Float):Void
+	{
+		var dir = 0;
+		if (FlxG.keys.anyPressed([D, RIGHT]))
+			dir = 1;
+		else if (FlxG.keys.anyPressed([A, LEFT]))
+			dir = -1;
+
+		if (dir != holdDir)
+		{
+			holdDir = dir;
+			holdWait = HOLD_DELAY;
+			holdTime = 0;
+			if (dir != 0)
+				adjust(dir);
+			return;
+		}
+
+		if (dir == 0 || !repeatAdjust)
+			return;
+
+		holdTime += elapsed;
+		holdWait -= elapsed;
+		if (holdWait > 0)
+			return;
+
+		var ramp = holdTime / HOLD_RAMP;
+		if (ramp > 1)
+			ramp = 1;
+		holdWait = HOLD_SLOW + (HOLD_FAST - HOLD_SLOW) * ramp;
+		adjust(dir);
+	}
+
 	function adjust(dir:Int):Void
 	{
 		if (onAdjust == null)
 			return;
-		FlxG.sound.play(Paths.sound("weapon/slice"), 0.2);
+		if (blipWait <= 0)
+		{
+			blipWait = BLIP_GAP;
+			FlxG.sound.play(Paths.sound("weapon/slice"), 0.2);
+		}
 		onAdjust(index, dir);
 	}
 

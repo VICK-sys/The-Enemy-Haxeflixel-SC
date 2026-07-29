@@ -16,6 +16,21 @@ class HuePalette
 		return FlxAtlasFrames.fromSparrow(graphic(name, hue), "assets/images/" + name + ".xml");
 	}
 
+	public static function preview(name:String, hue:Float):FlxAtlasFrames
+	{
+		if (hue == 0)
+			return sparrow(name, 0);
+
+		var key = name + "|scratch";
+		var old = FlxG.bitmap.get(key);
+		if (old != null)
+			FlxG.bitmap.remove(old);
+
+		var src = FlxG.bitmap.add(Paths.image(name)).bitmap;
+		var made = FlxG.bitmap.add(shift(src, hue), false, key);
+		return FlxAtlasFrames.fromSparrow(made, "assets/images/" + name + ".xml");
+	}
+
 	public static function graphic(name:String, hue:Float):FlxGraphic
 	{
 		if (hue == 0)

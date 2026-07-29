@@ -28,6 +28,10 @@ class OnlineState extends FlxState
 	private var nameText:FlxText;
 	private var weaponText:FlxText;
 	private var preview:FlxSprite;
+	private var hueDirty:Bool = false;
+	private var huePending:Bool = false;
+	private var skinClock:Float = 0;
+	private var settleClock:Float = 0;
 
 	static inline var NAME_MAX:Int = 12;
 	private var hosting:Bool = false;
@@ -76,6 +80,8 @@ class OnlineState extends FlxState
 		add(status);
 
 		refreshColor();
+		reskin();
+		list.repeatAdjust = true;
 
 		var hint = new FlxText(0, FlxG.height - 32, FlxG.width, Lang.t("online.hint"));
 		hint.setFormat(Lang.font(), 16, FlxColor.WHITE, CENTER);
@@ -152,11 +158,16 @@ class OnlineState extends FlxState
 		cycleColor(dir);
 	}
 
-	static inline var HUE_STEP:Float = 0.05;
+	static inline var HUE_STEP:Float = 1 / 360.0;
+	static inline var SKIN_GAP:Float = 0.05;
+	static inline var SETTLE_GAP:Float = 0.3;
 
 	function cycleColor(dir:Int):Void
 	{
-		SaveData.setPlayerHue(SaveData.playerHue() + dir * HUE_STEP);
+		SaveData.setPlayerHue(SaveData.playerHue() + dir * HUE_STEP, false);
+		hueDirty = true;
+		huePending = true;
+		settleClock = SETTLE_GAP;
 		refreshColor();
 	}
 
@@ -165,10 +176,37 @@ class OnlineState extends FlxState
 		var h = SaveData.playerHue();
 		list.setLabel(4, Lang.t("online.color", [Math.round(h * 360)]));
 		list.rowAt(4).color = swatch(h);
+	}
 
-		preview.frames = util.HuePalette.sparrow("characters/mufu", h);
+	function updateSkin(elapsed:Float):Void
+	{
+		if (skinClock > 0)
+			skinClock -= elapsed;
+
+		if (hueDirty && skinClock <= 0)
+		{
+			hueDirty = false;
+			skinClock = SKIN_GAP;
+			reskin();
+		}
+
+		if (huePending)
+		{
+			settleClock -= elapsed;
+			if (settleClock <= 0)
+			{
+				huePending = false;
+				SaveData.commit();
+			}
+		}
+	}
+
+	function reskin():Void
+	{
+		var was = preview.animation.name;
+		preview.frames = util.HuePalette.preview("characters/mufu", SaveData.playerHue());
 		preview.animation.addByPrefix("idle", "Idle", 12, true);
-		preview.animation.play("idle");
+		preview.animation.play(was == null ? "idle" : was);
 		preview.offset.set(-19, -17);
 		preview.scale.set(3, 3);
 		preview.setPosition(FlxG.width - 300, 236);
@@ -297,8 +335,9 @@ class OnlineState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
-
 		super.update(elapsed);
+
+		updateSkin(elapsed);
 
 		if (leaving)
 			return;

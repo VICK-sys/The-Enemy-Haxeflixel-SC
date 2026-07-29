@@ -326,6 +326,8 @@ The editor's five map slots. They are JSON files next to the executable on deskt
 
 The menu's confirm animation. The weapon selector winds up to the left of the chosen row and sweeps through it. On contact the row hides, and one sprite per letter replaces it. Those letters tumble away under gravity and fade. The option is therefore cut apart and falls into the void before the game acts on it.
 
+A list can opt into held-key adjustment through `repeatAdjust`. A held left or right then repeats after a short delay and accelerates to a fast crawl, which suits a row counting in single units. Lists leave it off by default, so a row whose step is expensive still takes one press at a time. The tick sound has its own floor either way, so a fast repeat does not machine gun it.
+
 It measures letter widths individually, then scales them to span the row's real width. That keeps the swap smooth at the moment the shards appear. Every menu choice routes through it, and returning from Options restores the shattered row.
 
 ### JaggedBand

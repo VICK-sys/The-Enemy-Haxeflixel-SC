@@ -203,13 +203,20 @@ class SaveData
 		return save.data.playerHue != null ? save.data.playerHue : 0.0;
 	}
 
-	public static function setPlayerHue(h:Float):Void
+	public static function setPlayerHue(h:Float, store:Bool = true):Void
 	{
 		ensure();
-		h = h % 1.0;
-		if (h < 0)
-			h += 1.0;
-		save.data.playerHue = Math.round(h * 100) / 100;
+		var deg = Math.round(h * 360) % 360;
+		if (deg < 0)
+			deg += 360;
+		save.data.playerHue = deg / 360.0;
+		if (store)
+			save.flush();
+	}
+
+	public static function commit():Void
+	{
+		ensure();
 		save.flush();
 	}
 
