@@ -59,13 +59,7 @@ class TimeStop
 		trail = new GhostTrail("characters/mufu", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
 		shadowTrail = new GhostTrail("effects/shadow", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
 
-		overlay = new FlxSprite();
-		overlay.makeGraphic(4, 4, 0xFF2B4E70);
-		overlay.scale.set(400, 225);
-		overlay.updateHitbox();
-		overlay.setPosition(-160, -90);
-		overlay.scrollFactor.set();
-		overlay.alpha = 0;
+		overlay = util.Veil.make(0xFF2B4E70);
 
 		WorldClock.reset();
 	}
@@ -75,6 +69,8 @@ class TimeStop
 
 	public function update(elapsed:Float):Void
 	{
+		util.Veil.fit(overlay);
+
 		if (phase == Running && cooldown > 0)
 			cooldown -= elapsed;
 

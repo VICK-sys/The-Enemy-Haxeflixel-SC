@@ -60,13 +60,7 @@ class DeadEye
 		markers = new FlxTypedGroup<FlxSprite>();
 		heartbeat = FlxG.sound.create(Paths.sound("heartbeat")).setup(0.8, true);
 
-		overlay = new FlxSprite();
-		overlay.makeGraphic(4, 4, FlxColor.WHITE);
-		overlay.scale.set(400, 225);
-		overlay.updateHitbox();
-		overlay.setPosition(-160, -90);
-		overlay.scrollFactor.set();
-		overlay.alpha = 0;
+		overlay = util.Veil.make(FlxColor.WHITE);
 	}
 
 	function get_active():Bool
@@ -131,6 +125,8 @@ class DeadEye
 
 	public function update(elapsed:Float):Void
 	{
+		util.Veil.fit(overlay);
+
 		if (phase == 0)
 		{
 			if (overlay.alpha != 0)

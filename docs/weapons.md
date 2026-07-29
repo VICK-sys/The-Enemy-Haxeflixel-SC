@@ -174,7 +174,7 @@ The storm proper starts once that arrow clears the top of the screen. The bow st
 
 ## DeadEye
 
-The revolver super. Q whites the screen out, then settles into a sepia wash over a looping heartbeat. It stops the world dead. `superSlow` goes to 0, and the player cannot move. Only the cursor still moves.
+The revolver super. Q whites the screen out, then settles into a sepia wash over a looping heartbeat. The wash is a `Veil`, a screen-locked sheet resized from the camera's own view every frame rather than to a written-down size. A fixed sheet only covers the screen at one zoom, and the camera does not hold one: it rests pulled back, pulls back further for the boss and further again in the quiet room. Sizing off the live view means the wash covers whatever the camera is showing, instead of leaving the arena bare around the edges of the fight it is supposed to be tinting. It stops the world dead. `superSlow` goes to 0, and the player cannot move. Only the cursor still moves.
 
 Sweeping the cursor over an enemy marks it, one mark per round left in the cylinder. A full cylinder therefore marks six, and a nearly spent one marks one. There is no timer, and it holds until you press fire. Marking nothing and firing cancels without spending anything.
 

@@ -90,7 +90,7 @@ It publishes that factor through `WorldClock`. Enemies, enemy shots and pickups 
 
 The player, weapons and player projectiles run at full speed throughout. Seized enemies stay in player-time, so the grab still works on frozen targets. Frozen enemies are immovable statues that deal no contact damage, and frozen shots hang harmlessly in the air.
 
-Music pitch rides the factor down for the record-slowdown effect, pauses at the full stop, and ramps back on resume. While time runs slow the player leaves a blue afterimage trail, built from frame-accurate ghosts through GhostTrail. A subtle blue overlay tints the screen. The HUD shows READY, the cooldown, or STOPPED through `hudLabel()`. Dying cancels the stop.
+Music pitch rides the factor down for the record-slowdown effect, pauses at the full stop, and ramps back on resume. While time runs slow the player leaves a blue afterimage trail, built from frame-accurate ghosts through GhostTrail. A subtle blue overlay tints the screen, sized from the camera's view through the same `Veil` the revolver super's sepia uses, so it holds at any zoom. The HUD shows READY, the cooldown, or STOPPED through `hudLabel()`. Dying cancels the stop.
 
 ### WeaponFlyIn
 
