@@ -51,14 +51,14 @@ class YoyoJab
 		return 1 - cooldown / cooldownTotal;
 	}
 
-	public function fire(hx:Float, hy:Float):Void
+	public function fire(hx:Float, hy:Float, dx:Float, dy:Float):Void
 	{
 		struck.resize(0);
 		strikeAt.resize(0);
 		spin = -spin;
 		tired = false;
 		holdLeft = cfg.holdTime * util.Levels.actionScale();
-		flight.fire(hx, hy, spin);
+		flight.fire(hx, hy, dx, dy, spin);
 		FlxG.sound.play(Paths.sound("weapon/throw"), 0.45);
 	}
 
@@ -143,6 +143,7 @@ class YoyoJab
 
 			hits.damageN(e, vx, vy, cfg.damage);
 			e.brace(cfg.hitstop, cfg.hitBrace, vx, vy);
+			flight.bounce(cx - (e.x + e.width * 0.5), cy - (e.y + e.height * 0.5));
 		});
 
 		for (shot in director.shots.members)

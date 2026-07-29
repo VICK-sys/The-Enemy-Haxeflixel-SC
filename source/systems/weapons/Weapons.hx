@@ -351,7 +351,7 @@ class Weapons
 			if (yoyoJab.ready)
 			{
 				emitAttack(Yoyo, handX(), handY(), aim.dx, aim.dy, aim.deg);
-				yoyoJab.fire(handX(), handY());
+				yoyoJab.fire(handX(), handY(), aim.dx, aim.dy);
 			}
 		}
 		else if (!FlxG.mouse.pressed)

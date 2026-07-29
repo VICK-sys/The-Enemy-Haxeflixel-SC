@@ -1,6 +1,5 @@
 package systems.weapons;
 
-import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import data.WeaponData.WeaponDataRegistry;
@@ -13,6 +12,12 @@ class YoyoFlight
 	static inline var CATCH_DIST:Float = 28;
 	static inline var MIN_REACH:Float = 140;
 	static inline var MIN_FLIGHT:Float = 0.1;
+	static inline var TURN:Float = 6.5;
+	static inline var SLOW_RADIUS:Float = 110;
+	static inline var BOUNCE:Float = 1000;
+	static inline var BOUNCE_GRACE:Float = 0.12;
+	static inline var WOBBLE:Float = 5;
+	static inline var WOBBLE_SPIN:Float = 11;
 
 	public var yoyo:FlxSprite;
 	public var string:FlxTypedGroup<FlxSprite>;
@@ -24,7 +29,10 @@ class YoyoFlight
 	private var cfg = WeaponDataRegistry.get().yoyo;
 	private var spin:Float = 1;
 	private var flown:Float = 0;
-	private var cord:YoyoRope = new YoyoRope();
+	private var vx:Float = 0;
+	private var vy:Float = 0;
+	private var grace:Float = 0;
+	private var wobble:Float = 0;
 
 	public function new()
 	{
@@ -36,7 +44,7 @@ class YoyoFlight
 		string = new FlxTypedGroup<FlxSprite>();
 	}
 
-	public function fire(hx:Float, hy:Float, spinDir:Float):Void
+	public function fire(hx:Float, hy:Float, dx:Float, dy:Float, spinDir:Float):Void
 	{
 		spin = spinDir;
 		active = true;
@@ -44,13 +52,29 @@ class YoyoFlight
 		flown = 0;
 		cx = hx;
 		cy = hy;
-		cord.reset(hx, hy, hx, hy);
+		vx = dx * cfg.speed;
+		vy = dy * cfg.speed;
+		grace = 0;
 		yoyo.revive();
 		place();
 	}
 
 	public function recall():Void
 		homing = true;
+
+	public function bounce(dx:Float, dy:Float):Void
+	{
+		var len = Math.sqrt(dx * dx + dy * dy);
+		if (len < 0.001)
+		{
+			dx = -1;
+			dy = 0;
+			len = 1;
+		}
+		vx = dx / len * BOUNCE;
+		vy = dy / len * BOUNCE;
+		grace = BOUNCE_GRACE;
+	}
 
 	public function stop():Void
 	{
@@ -67,10 +91,29 @@ class YoyoFlight
 
 		flown += elapsed;
 
-		var tx = hx;
-		var ty = hy;
-		if (!homing)
+		if (homing)
 		{
+			var gx = hx - cx;
+			var gy = hy - cy;
+			var gap = Math.sqrt(gx * gx + gy * gy);
+			if (flown >= MIN_FLIGHT && gap < CATCH_DIST)
+			{
+				stop();
+				return;
+			}
+			if (gap > 0.001)
+			{
+				var step = cfg.speed * elapsed;
+				if (step > gap)
+					step = gap;
+				cx += gx / gap * step;
+				cy += gy / gap * step;
+			}
+		}
+		else
+		{
+			wobble += elapsed * WOBBLE_SPIN;
+
 			var rx = aimX - hx;
 			var ry = aimY - hy;
 			var span = Math.sqrt(rx * rx + ry * ry);
@@ -81,46 +124,47 @@ class YoyoFlight
 				span = 1;
 			}
 			var want = span > cfg.reach ? cfg.reach : (span < MIN_REACH ? MIN_REACH : span);
-			tx = hx + rx / span * want;
-			ty = hy + ry / span * want;
-		}
+			var tx = hx + rx / span * want + Math.cos(wobble) * WOBBLE;
+			var ty = hy + ry / span * want + Math.sin(wobble * 1.7) * WOBBLE;
 
-		var gx = tx - cx;
-		var gy = ty - cy;
-		var gap = Math.sqrt(gx * gx + gy * gy);
-		if (gap > 0.001)
-		{
-			var step:Float;
-			if (homing)
-				step = cfg.speed * elapsed;
+			if (grace > 0)
+				grace -= elapsed;
 			else
 			{
-				step = gap * (1 - Math.pow(1 - cfg.chaseEase, elapsed * 60));
-				var cap = cfg.speed * elapsed;
-				if (step > cap)
-					step = cap;
+				var gx = tx - cx;
+				var gy = ty - cy;
+				var gap = Math.sqrt(gx * gx + gy * gy);
+				var slow = gap / SLOW_RADIUS;
+				if (slow > 1)
+					slow = 1;
+				var k = TURN * elapsed;
+				if (k > 1)
+					k = 1;
+				vx += ((gap > 0.001 ? gx / gap * cfg.speed * slow : 0) - vx) * k;
+				vy += ((gap > 0.001 ? gy / gap * cfg.speed * slow : 0) - vy) * k;
 			}
-			if (step > gap)
-				step = gap;
-			cx += gx / gap * step;
-			cy += gy / gap * step;
-		}
+			cx += vx * elapsed;
+			cy += vy * elapsed;
 
-		if (homing && flown >= MIN_FLIGHT)
-		{
-			var hdx = cx - hx;
-			var hdy = cy - hy;
-			if (hdx * hdx + hdy * hdy < CATCH_DIST * CATCH_DIST)
+			var ox = cx - hx;
+			var oy = cy - hy;
+			var od = Math.sqrt(ox * ox + oy * oy);
+			if (od > cfg.reach)
 			{
-				stop();
-				return;
+				cx = hx + ox / od * cfg.reach;
+				cy = hy + oy / od * cfg.reach;
+				var out = (vx * ox + vy * oy) / od;
+				if (out > 0)
+				{
+					vx -= ox / od * out;
+					vy -= oy / od * out;
+				}
 			}
 		}
 
 		yoyo.angle += spin * SPIN_RATE * elapsed;
 		place();
-		cord.update(elapsed, hx, hy, cx, cy);
-		Rope.chain(string, cord.xs, cord.ys);
+		Rope.line(string, hx, hy, cx, cy);
 	}
 
 	public function drive(px:Float, py:Float, ang:Float, hx:Float, hy:Float):Void
@@ -129,14 +173,12 @@ class YoyoFlight
 		{
 			active = true;
 			yoyo.revive();
-			cord.reset(hx, hy, px, py);
 		}
 		cx = px;
 		cy = py;
 		yoyo.angle = ang;
 		place();
-		cord.update(FlxG.elapsed, hx, hy, cx, cy);
-		Rope.chain(string, cord.xs, cord.ys);
+		Rope.line(string, hx, hy, cx, cy);
 	}
 
 	function place():Void

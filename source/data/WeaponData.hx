@@ -19,7 +19,6 @@ typedef SwingConfig = {
 typedef YoyoConfig = {
 	reach:Float,
 	speed:Float,
-	chaseEase:Float,
 	holdTime:Float,
 	hitRadius:Float,
 	hitGap:Float,
