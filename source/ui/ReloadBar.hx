@@ -10,7 +10,8 @@ class ReloadBar
 {
 	static inline var SCALE:Float = 4;
 	static inline var LIFT:Float = 40;
-	static inline var FALLBACK_INSET:Float = 3;
+	static inline var FALLBACK_INSET:Float = 1;
+	static inline var CHANNEL_PAD:Float = 2;
 
 	public var group:FlxTypedGroup<FlxSprite>;
 
@@ -75,8 +76,8 @@ class ReloadBar
 
 		if (bestLen >= 2)
 		{
-			trackLo = bestLo;
-			trackHi = bestLo + bestLen - line.frameWidth;
+			trackLo = bestLo - CHANNEL_PAD;
+			trackHi = bestLo + bestLen - line.frameWidth + CHANNEL_PAD;
 		}
 	}
 
