@@ -14,7 +14,7 @@ import util.Paths;
 
 class BossShow
 {
-	static inline var BOSS_ZOOM:Float = 0.8;
+	static inline var BOSS_PULL:Float = 0.8;
 	static inline var MUSIC:String = "batallon_de_las_velas";
 
 	public var fighting(default, null):Bool = false;
@@ -66,7 +66,7 @@ class BossShow
 				}
 			});
 		Music.play(MUSIC, 0.5);
-		FlxTween.tween(FlxG.camera, {zoom: BOSS_ZOOM}, 1.2);
+		FlxTween.tween(FlxG.camera, {zoom: PlayState.BASE_ZOOM * BOSS_PULL}, 1.2);
 	}
 
 	public function dropLoot(cx:Float, cy:Float):Void
@@ -88,7 +88,7 @@ class BossShow
 	{
 		showDecor(true);
 		Music.play(QuietRoom.track(), 0.3);
-		FlxTween.tween(FlxG.camera, {zoom: 1}, 0.8);
+		FlxTween.tween(FlxG.camera, {zoom: PlayState.BASE_ZOOM}, 0.8);
 	}
 
 	function showDecor(on:Bool):Void

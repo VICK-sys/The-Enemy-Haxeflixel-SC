@@ -31,7 +31,10 @@ import util.Lang;
 
 class PlayState extends FlxState
 {
-	static inline var CURSOR_LEAN:Float = 1.0;
+	public static inline var BASE_ZOOM:Float = 0.8;
+
+	static inline var CURSOR_LEAN:Float = 0.45;
+	static inline var FOLLOW_LERP:Float = 0.055;
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
 	static inline var DEFLECT_PUSH:Float = 1.2;
@@ -110,9 +113,9 @@ class PlayState extends FlxState
 		_player = new Player(arena.spawnX, arena.spawnY);
 
 		FlxG.camera.follow(_player);
-		FlxG.camera.followLerp = 0.1;
+		FlxG.camera.followLerp = FOLLOW_LERP;
 		FlxG.camera.setScrollBoundsRect(0, 0, arena.width, arena.height);
-		FlxG.camera.zoom = 1;
+		FlxG.camera.zoom = BASE_ZOOM;
 
 		heldSprite = new FlxSprite(0, 0, Paths.image("items/hammer"));
 		heldSprite.scale.set(4, 4);

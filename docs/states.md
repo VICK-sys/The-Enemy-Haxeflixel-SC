@@ -36,7 +36,11 @@ The screenshake slider scales every camera shake in the game, and the freeze-fra
 
 It builds the systems in `create()`, calls them in order in `update()`, and handles the debug keys. It holds almost no gameplay logic of its own. What it does own is the wiring that needs two systems at once, plus the camera. The deflected-shot handler is one such piece, since it needs the director and the hit pipeline together.
 
-The camera sits at the midpoint between the player and the cursor. It feeds `targetOffset` the cursor's full offset from screen centre, which puts the camera centre exactly halfway between the two. That offset comes from screen space rather than world space on purpose. The cursor's world position moves with the camera, so deriving the lean from it would feed back into itself.
+The camera leans toward the cursor rather than sitting on the player. It feeds `targetOffset` a fraction of the cursor's offset from the view centre, so the player drifts under half the way to the edge at full reach instead of pinning against it. That offset comes from the view rather than from world space on purpose. The cursor's world position moves with the camera, so deriving the lean from it would feed back into itself.
+
+Three numbers set how the view reads, all at the top of the state. `BASE_ZOOM` pulls the frame back so more of the arena is in shot. `FOLLOW_LERP` sets how fast the camera closes on its target, and takes about twice as long to settle as it once did. `CURSOR_LEAN` sets how far the cursor drags the frame. Earlier tuning had all three tighter, and the result moved too much to read a fight.
+
+`BASE_ZOOM` is the one every other zoom multiplies. The boss pull-back and the quiet room are fractions of it rather than absolute numbers, and the boss tween returns to it. Pulling the base back therefore keeps both of those the same relative change.
 
 ## PauseSubState
 

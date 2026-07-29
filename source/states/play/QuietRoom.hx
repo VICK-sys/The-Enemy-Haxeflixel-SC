@@ -13,7 +13,7 @@ import util.Detour;
 class QuietRoom
 {
 	static inline var PLAYER_SCALE:Float = 1.5;
-	static inline var ZOOM:Float = 0.7;
+	static inline var ROOM_PULL:Float = 0.7;
 	static inline var ARM_UP:Float = 240;
 	static inline var BACK:Float = 40;
 
@@ -54,7 +54,7 @@ class QuietRoom
 		director.spawning = false;
 		heldSprite.visible = false;
 		player.setSizeScale(PLAYER_SCALE);
-		FlxG.camera.zoom = ZOOM;
+		FlxG.camera.zoom = PlayState.BASE_ZOOM * ROOM_PULL;
 		addMan(hud);
 
 		if (!Detour.inRoom)

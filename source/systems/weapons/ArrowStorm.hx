@@ -122,10 +122,12 @@ class ArrowStorm
 			spawnTimer += cfg.spawnInterval;
 			var vw = FlxG.width / FlxG.camera.zoom;
 			var vh = FlxG.height / FlxG.camera.zoom;
+			var vl = FlxG.camera.scroll.x + FlxG.camera.viewMarginLeft;
+			var vt = FlxG.camera.scroll.y + FlxG.camera.viewMarginTop;
 			for (i in 0...cfg.dropsPer)
 			{
-				var vx = FlxG.camera.scroll.x + FlxG.random.float() * vw;
-				var vy = FlxG.camera.scroll.y + FlxG.random.float() * vh;
+				var vx = vl + FlxG.random.float() * vw;
+				var vy = vt + FlxG.random.float() * vh;
 				rain.rainAt(vx, vy);
 			}
 		}
