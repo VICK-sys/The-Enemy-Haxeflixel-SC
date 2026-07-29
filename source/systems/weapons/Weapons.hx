@@ -123,6 +123,8 @@ class Weapons
 			bow.hushReload();
 		}
 		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
+		if (held.kind == HeldWeapon.REVOLVER && revolver.isReloading)
+			held.reloadPose(revolver.reloadProgress);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
 		superOrbit.update(elapsed);

@@ -13,6 +13,8 @@ class HeldWeapon
 	static inline var SWING_TIME:Float = 0.2;
 	static inline var SWING_ARC:Float = 300;
 	static inline var SWING_SCALE:Float = 2.5;
+	static inline var TOSS_ARC:Float = 90;
+	static inline var TOSS_SPIN:Float = 720;
 	static inline var REV_KICK:Float = 16;
 	static inline var REV_BACK:Float = 11;
 	static inline var REV_TIME:Float = 0.4;
@@ -66,6 +68,7 @@ class HeldWeapon
 	private var flashTime:Float = 0;
 	private var shakeClock:Float = 0;
 	private var shakeSign:Int = 1;
+	private var reloadP:Float = -1;
 
 	public function new(player:Player, sprite:FlxSprite)
 	{
@@ -98,6 +101,7 @@ class HeldWeapon
 		flashTime = 0;
 		shakeClock = 0;
 		shakeSign = 1;
+		reloadP = -1;
 		sprite.flipX = false;
 		sprite.flipY = false;
 		applyGraphic();
@@ -140,7 +144,18 @@ class HeldWeapon
 
 		anchor();
 		updateSwing(elapsed);
+
+		if (reloadP >= 0)
+		{
+			sprite.y -= Math.sin(Math.PI * reloadP) * TOSS_ARC;
+			sprite.angle = TOSS_SPIN * FlxEase.cubeOut(reloadP);
+			tiltShown = 0;
+			reloadP = -1;
+		}
 	}
+
+	public function reloadPose(p:Float):Void
+		reloadP = p;
 
 	public function loose(power:Float):Void
 	{
