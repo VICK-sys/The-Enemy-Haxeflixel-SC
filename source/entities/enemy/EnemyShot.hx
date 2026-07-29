@@ -17,6 +17,7 @@ class EnemyShot extends FlxSprite
 	public var dirY:Float = 0;
 	public var damage:Float = 0.25;
 	public var friendly:Bool = false;
+	public var held:Bool = false;
 
 	private var life:Float = 0;
 	private var spriteKey:String = null;
@@ -50,6 +51,7 @@ class EnemyShot extends FlxSprite
 		dirY = dy;
 		this.damage = damage;
 		friendly = false;
+		held = false;
 		angle = Math.atan2(dy, dx) * 180 / Math.PI;
 		velocity.set(dx * speed, dy * speed);
 		fullLife = range / speed;
@@ -67,8 +69,28 @@ class EnemyShot extends FlxSprite
 		use(TURNED_SPRITE);
 	}
 
+	public function seize():Void
+	{
+		held = true;
+		velocity.set(0, 0);
+	}
+
+	public function hurl(dx:Float, dy:Float, speed:Float):Void
+	{
+		held = false;
+		dirX = dx;
+		dirY = dy;
+		velocity.set(dx * speed, dy * speed);
+		angle = Math.atan2(dy, dx) * 180 / Math.PI;
+		life = fullLife;
+		friendly = true;
+		use(TURNED_SPRITE);
+	}
+
 	override public function update(elapsed:Float):Void
 	{
+		if (held)
+			return;
 		elapsed *= WorldClock.scale;
 		super.update(elapsed);
 		life -= elapsed;

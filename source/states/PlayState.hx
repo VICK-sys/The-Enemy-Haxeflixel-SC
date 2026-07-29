@@ -35,6 +35,8 @@ class PlayState extends FlxState
 	static inline var DEFLECT_RADIUS:Float = 45;
 	static inline var DEFLECT_DAMAGE:Int = 1;
 	static inline var DEFLECT_PUSH:Float = 1.2;
+	static inline var SHIELD_DAMAGE:Int = 1;
+	static inline var SHIELD_PUSH:Float = 0.15;
 
 	private var fx:Fx;
 	private var arena:Arena;
@@ -204,6 +206,7 @@ class PlayState extends FlxState
 		director.onBossDefeated = boss.defeated;
 		director.onBossDrops = boss.dropLoot;
 		director.onFriendlyShot = onDeflectedShot;
+		director.onShieldShot = onShieldedShot;
 		director.bossVeto = function(w) return quiet.tryDetour(w, director, status, combat);
 		perf = new PerfLog();
 
@@ -358,6 +361,15 @@ class PlayState extends FlxState
 		if (hit == null)
 			return false;
 		combat.hits.damageN(hit, shot.dirX * DEFLECT_PUSH, shot.dirY * DEFLECT_PUSH, DEFLECT_DAMAGE);
+		return true;
+	}
+
+	function onShieldedShot(shot:entities.enemy.EnemyShot):Bool
+	{
+		var e = director.seizedAt(shot);
+		if (e == null)
+			return false;
+		combat.hits.damageN(e, shot.dirX * SHIELD_PUSH, shot.dirY * SHIELD_PUSH, SHIELD_DAMAGE);
 		return true;
 	}
 

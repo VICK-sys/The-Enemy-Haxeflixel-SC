@@ -12,6 +12,7 @@ typedef PlayerData = {
 	dashTime:Float,
 	dashCooldown:Float,
 	dashIframes:Float,
+	dropLowHealthBonus:Float,
 	healthMax:Float,
 	superMax:Float,
 	superPerKill:Float,

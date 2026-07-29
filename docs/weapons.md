@@ -128,7 +128,9 @@ The grab throws the held hook itself, trailing a rope line back to the player. T
 
 Left click while holding whips the enemy in one quick revolution around the player, then launches it as a projectile. That projectile damages every enemy it passes through. The hook returns to the hand at the moment of release, so the enemy flies alone. Hitting a wall damages the thrown enemy. Otherwise the flight ends with a short stun.
 
-On a miss the hook retracts to the hand. Seized enemies deal no contact damage and skip crowd separation.
+On a miss the hook retracts to the hand, and it stays live on the way back. A returning hook grabs the first enemy it touches that nobody already holds, so a shot that missed ahead of a target still catches it on the return. Seized enemies deal no contact damage and skip crowd separation.
+
+A held enemy is a shield. Enemy fire that reaches it stops there and wounds the enemy instead of the player, so you can walk a body into a firing line. Enough shots kill it, and a dead victim drops off the hook the same way any other loss does.
 
 The hook cannot latch an enemy flagged not `grabbable`, which means the boss. It deals `snagDamage` instead, then retracts. That is much more than a normal hit, since it is the only thing the grab can do to them. The auto-grabbing arms are the hook's super, covered under `HookArms`.
 
@@ -140,7 +142,9 @@ The boomerang throw. It covers the thrown hammer's flight: out leg, wall turnaro
 
 The hook super. Q with the hook equipped and a full super meter drains the meter. It then extends two mechanical hook-arms from the player's back, rendered behind them, for a few seconds.
 
-Each arm works alone. It finds the nearest enemy, grabs it, reels it up, whips it in an arc and hurls it. It does that automatically and continuously. The arms rest tilted, and their curved ropes trail with inertia. They retract into the body when the super ends. The held hook hides, and the player can still move.
+Each arm works alone. It picks whatever lies nearest the cursor rather than nearest the player, grabs it, reels it up, whips it in an arc and hurls it along the line to the cursor. Aiming therefore steers both halves of the throw. The arms rest tilted, and their curved ropes trail with inertia. They retract into the body when the super ends. The held hook hides, and the player can still move.
+
+The arms also catch bullets, which the ordinary grab cannot do. With no enemy in reach an arm snatches the enemy shot nearest the cursor out of the air, holds it through the same whip, and hurls it back as a friendly round. A held shot harms nobody while it waits.
 
 ## ArrowStorm
 

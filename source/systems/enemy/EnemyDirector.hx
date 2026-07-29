@@ -98,6 +98,32 @@ class EnemyDirector
 		return f;
 	}
 
+	public var onShieldShot(get, set):EnemyShot->Bool;
+
+	function get_onShieldShot()
+		return gunfire.onShield;
+
+	function set_onShieldShot(f:EnemyShot->Bool)
+	{
+		gunfire.onShield = f;
+		return f;
+	}
+
+	public function seizedAt(shot:EnemyShot):Enemies
+	{
+		for (rig in rigs)
+		{
+			var e = rig.enemy;
+			if (!e.seized || e.isDead || !e.exists)
+				continue;
+			if (shot.x + shot.width <= e.x || e.x + e.width <= shot.x
+				|| shot.y + shot.height <= e.y || e.y + e.height <= shot.y)
+				continue;
+			return e;
+		}
+		return null;
+	}
+
 	public var onBossDrops(get, set):(Float, Float) -> Void;
 
 	function get_onBossDrops()

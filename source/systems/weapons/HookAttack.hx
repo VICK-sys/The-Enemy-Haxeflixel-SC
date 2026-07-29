@@ -160,6 +160,12 @@ class HookAttack
 			return;
 		}
 
+		if (!latch(hit))
+			beginRetract();
+	}
+
+	function latch(hit:Enemies):Bool
+	{
 		var pmx = player.x + player.width * 0.5;
 		var pmy = player.y + player.height * 0.5;
 		var ptx = pmx - (hit.x + hit.width / 2);
@@ -170,10 +176,7 @@ class HookAttack
 		hits.damage(hit, ptx / plen * 0.3, pty / plen * 0.3);
 
 		if (hit.isDead || !hit.exists)
-		{
-			beginRetract();
-			return;
-		}
+			return false;
 
 		victim = hit;
 		victim.seized = true;
@@ -183,6 +186,7 @@ class HookAttack
 		phase = Pulling;
 		if (onGrab != null)
 			onGrab(victim, true);
+		return true;
 	}
 
 	function updatePulling(elapsed:Float):Void
@@ -290,6 +294,10 @@ class HookAttack
 			phase = Idle;
 			return;
 		}
+
+		var snag = director.firstInCircle(hook.x + hook.width / 2, hook.y + hook.height / 2, HookShot.RADIUS, true);
+		if (snag != null && snag.grabbable && latch(snag))
+			return;
 
 		var dx = handX() - (hook.x + hook.width / 2);
 		var dy = handY() - (hook.y + hook.height / 2);

@@ -78,6 +78,7 @@ Combat balance for every weapon system, one object per system. Field names match
 | Section | Covers |
 |---|---|
 | `swing` | melee range and arc, slash spawn distance. The hammer's block adds `cooldown`, the wait after each swing |
+| `dropLowHealthBonus` (player.json) | how much the health pack drop chance grows as you lose health. Zero keeps the flat rate, and the full bonus applies at zero health |
 | `jab` | hook jab spawn distance, reach, arc, damage, slash size |
 | `knock` | multiplies the push a connecting melee blow hands the enemy, so the hammer can throw one and the jab cannot |
 | `hitBrace` | how far the struck enemy shakes, in pixels, while the hitstop holds. Zero means it takes the hit and goes straight away |

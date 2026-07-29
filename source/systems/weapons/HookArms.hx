@@ -7,6 +7,7 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.Player;
 import entities.weapon.HookShot;
 import entities.enemy.Enemies;
+import entities.enemy.EnemyShot;
 import systems.enemy.EnemyDirector;
 import data.WeaponData.WeaponDataRegistry;
 
@@ -24,6 +25,7 @@ class HookArms
 	static inline var CTRL_EASE:Float = 11;
 	static inline var EXTEND_DELAY:Float = 0.35;
 	static inline var RETRACT_EASE:Float = 8;
+	static inline var SHOT_HURL_SPEED:Float = 1500;
 
 	public var backGroup:FlxGroup;
 	public var frontGroup:FlxGroup;
@@ -179,6 +181,20 @@ class HookArms
 					arm.target = t;
 					arm.phase = 1;
 				}
+				else
+				{
+					var s = findShot(anchorX, anchorY, other(arm).shot);
+					if (s != null)
+					{
+						arm.shot = s;
+						s.seize();
+						arm.cx = s.x + s.width * 0.5;
+						arm.cy = s.y + s.height * 0.5;
+						arm.whipTimer = cfg.whipTime;
+						arm.whipBase = Math.atan2(arm.cy - anchorY, arm.cx - anchorX) * 180 / Math.PI;
+						arm.phase = 4;
+					}
+				}
 			}
 		}
 		else if (arm.phase == 1)
@@ -238,6 +254,36 @@ class HookArms
 				}
 			}
 		}
+		else if (arm.phase == 4)
+		{
+			var s = arm.shot;
+			if (s == null || !s.exists)
+			{
+				arm.shot = null;
+				arm.phase = 0;
+			}
+			else
+			{
+				arm.whipTimer -= elapsed;
+				var t = 1 - arm.whipTimer / cfg.whipTime;
+				if (t > 1)
+					t = 1;
+				var deg = arm.whipBase + WHIP_ARC * facing * t;
+				var rad = deg * Math.PI / 180;
+				var ex = anchorX + Math.cos(rad) * WHIP_RADIUS;
+				var ey = anchorY + Math.sin(rad) * WHIP_RADIUS;
+				s.setPosition(ex - s.width * 0.5, ey - s.height * 0.5);
+				arm.cx = ex;
+				arm.cy = ey;
+				if (arm.whipTimer <= 0)
+				{
+					s.hurl(aimX(ex, ey), aimY(ex, ey), SHOT_HURL_SPEED);
+					arm.shot = null;
+					arm.phase = 0;
+					arm.cooldown = cfg.cooldown;
+				}
+			}
+		}
 		else
 		{
 			if (invalid(arm.target))
@@ -264,7 +310,7 @@ class HookArms
 				if (arm.whipTimer <= 0)
 				{
 					e.unseize();
-					throwEnemy(e, Math.cos(rad), Math.sin(rad));
+					throwEnemy(e, aimX(ex, ey), aimY(ex, ey));
 					arm.target = null;
 					arm.phase = 0;
 					arm.cooldown = cfg.cooldown;
@@ -326,13 +372,15 @@ class HookArms
 	function findTarget(ax:Float, ay:Float, exclude:Enemies):Enemies
 	{
 		var best:Enemies = null;
-		var bestD = cfg.reach * cfg.reach;
+		var bestD = Math.POSITIVE_INFINITY;
+		var mx = FlxG.mouse.x;
+		var my = FlxG.mouse.y;
 		director.eachInCircle(ax, ay, cfg.reach, function(e)
 		{
 			if (e == exclude || e.seized || !e.grabbable)
 				return;
-			var dx = e.x + e.width * 0.5 - ax;
-			var dy = e.y + e.height * 0.5 - ay;
+			var dx = e.x + e.width * 0.5 - mx;
+			var dy = e.y + e.height * 0.5 - my;
 			var d = dx * dx + dy * dy;
 			if (d < bestD)
 			{
@@ -341,6 +389,50 @@ class HookArms
 			}
 		});
 		return best;
+	}
+
+	function findShot(ax:Float, ay:Float, exclude:EnemyShot):EnemyShot
+	{
+		var best:EnemyShot = null;
+		var bestD = Math.POSITIVE_INFINITY;
+		var mx = FlxG.mouse.x;
+		var my = FlxG.mouse.y;
+		for (s in director.shots.members)
+		{
+			if (s == null || !s.exists || s.held || s.friendly || s == exclude)
+				continue;
+			var scx = s.x + s.width * 0.5;
+			var scy = s.y + s.height * 0.5;
+			var rx = scx - ax;
+			var ry = scy - ay;
+			if (rx * rx + ry * ry > cfg.reach * cfg.reach)
+				continue;
+			var dx = scx - mx;
+			var dy = scy - my;
+			var d = dx * dx + dy * dy;
+			if (d < bestD)
+			{
+				bestD = d;
+				best = s;
+			}
+		}
+		return best;
+	}
+
+	function aimX(ax:Float, ay:Float):Float
+	{
+		var dx = FlxG.mouse.x - ax;
+		var dy = FlxG.mouse.y - ay;
+		var len = Math.sqrt(dx * dx + dy * dy);
+		return len <= 0 ? 1 : dx / len;
+	}
+
+	function aimY(ax:Float, ay:Float):Float
+	{
+		var dx = FlxG.mouse.x - ax;
+		var dy = FlxG.mouse.y - ay;
+		var len = Math.sqrt(dx * dx + dy * dy);
+		return len <= 0 ? 0 : dy / len;
 	}
 
 	function throwEnemy(e:Enemies, dx:Float, dy:Float):Void
@@ -362,6 +454,12 @@ class HookArms
 		if (arm.target != null && arm.target.exists)
 			arm.target.unseize();
 		arm.target = null;
+		if (arm.shot != null)
+		{
+			if (arm.shot.exists)
+				arm.shot.kill();
+			arm.shot = null;
+		}
 		arm.phase = 0;
 	}
 
@@ -378,6 +476,7 @@ class Arm
 	public var rope:FlxTypedGroup<FlxSprite>;
 	public var phase:Int = 0;
 	public var target:Enemies = null;
+	public var shot:EnemyShot = null;
 	public var restDX:Float;
 	public var cx:Float = 0;
 	public var cy:Float = 0;

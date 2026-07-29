@@ -67,7 +67,7 @@ class HitPipeline
 				status.rewardKill();
 				scraps.drop(e.x + e.width / 2, e.y + e.height / 2);
 			}
-			if (FlxG.random.float() < e.dropChance)
+			if (FlxG.random.float() < e.dropChance * status.dropScale())
 				pickups.drop(e.x + e.width / 2, e.y + e.height / 2);
 		}
 	}

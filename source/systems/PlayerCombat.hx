@@ -139,6 +139,18 @@ class PlayerCombat
 		return true;
 	}
 
+	public function dropScale():Float
+	{
+		if (healthMax <= 0)
+			return 1;
+		var frac = health / healthMax;
+		if (frac < 0)
+			frac = 0;
+		if (frac > 1)
+			frac = 1;
+		return 1 + (1 - frac) * data.dropLowHealthBonus;
+	}
+
 	public function refreshMax():Void
 	{
 		var was = healthMax;
