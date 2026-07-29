@@ -14,7 +14,7 @@ class HitPipeline
 {
 	public var remote:Bool = false;
 	public var owner:entities.Player;
-	public var onClaim:(Enemies, Float, Float, Int, Float) -> Void;
+	public var onClaim:(Enemies, Float, Float, Float, Float) -> Void;
 	public var onImpact:(Float, Float) -> Void;
 
 	private var status:PlayerCombat;
@@ -37,7 +37,7 @@ class HitPipeline
 		damageN(e, pushX, pushY, 1);
 	}
 
-	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Int):Void
+	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Float):Void
 	{
 		damage += util.Levels.damageBonus();
 		if (owner != null && PropBlock.between(owner.x + owner.width / 2, owner.feetY, e.x + e.width / 2, e.feetY))
@@ -50,7 +50,7 @@ class HitPipeline
 		applyHit(e, pushX, pushY, damage, true);
 	}
 
-	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Int, rewardable:Bool):Void
+	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Float, rewardable:Bool):Void
 	{
 		e.takeHit(pushX, pushY, damage);
 
@@ -72,7 +72,7 @@ class HitPipeline
 		}
 	}
 
-	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Int, stunTime:Float):Void
+	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Float, stunTime:Float):Void
 	{
 		util.Sfx.at("enemies/hit", e.x + e.width / 2, e.y + e.height / 2, 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
@@ -82,7 +82,7 @@ class HitPipeline
 			onClaim(e, pushX, pushY, damage, stunTime);
 	}
 
-	public function blastRadial(cx:Float, cy:Float, radius:Float, force:Float, damage:Int):Void
+	public function blastRadial(cx:Float, cy:Float, radius:Float, force:Float, damage:Float):Void
 	{
 		director.eachInCircle(cx, cy, radius, function(e)
 		{

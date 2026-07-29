@@ -60,7 +60,7 @@ The string draws taut from hand to yoyo. An earlier pass simulated it as a loose
 
 Two floors guard the rest of that. The yoyo will not sit closer to the hand than a minimum while it is out, so aiming at your own feet throws it clear rather than parking it on your chest, and it cannot be caught in the first fraction of a second, so a tap still reads as a throw rather than a flicker.
 
-Damage repeats rather than landing once. Each enemy the yoyo touches is struck, then sits out `hitGap` before it can be struck again, so parking the yoyo on something grinds it down while sweeping across a crowd clips each of them. The push follows the string: out shoves a target away, coming home drags one toward the player. It deflects enemy fire on contact, which makes a parked yoyo a small moving shield.
+Damage repeats rather than landing once. Each enemy the yoyo touches is struck, then sits out `hitGap` before it can be struck again, so parking the yoyo on something grinds it down while sweeping across a crowd clips each of them. The push follows the string: out shoves a target away, coming home drags one toward the player. It does not touch enemy fire; the hammer keeps the deflect to itself.
 
 Holding costs. The throw runs for `holdTime` and then tires out on its own and returns, and a throw that ran itself out pays `restCooldown` rather than the short `cooldown` a released one pays. Letting go early is therefore worth doing. The reload bar above the player shows the wait, the same way it shows a reload.
 
@@ -82,11 +82,7 @@ Running dry starts a reload, and so does fanning. R reloads early. Three cases r
 
 ### The ammo readout
 
-The HUD prints `displayRounds` against `capacity`. That is `rounds` at rest. During a reload it is the count chambered so far. The number therefore tallies up as the cylinder fills, rather than snapping from empty to full.
-
-Each climb pops the readout and plays `bulletLoad`, one round at a time. The cylinder snaps shut on the last one. An early reload with three in hand therefore clicks three times, not six. The counter jumps to whatever the tally reached, rather than stepping one at a time. A frame long enough to skip a number therefore costs a click, instead of stacking several at once.
-
-It counts from what was left rather than from zero. Reloading early with three still in hand therefore reads three to six. Every reload costs the same `reloadTime`, whether it chambers one round or six. You can therefore read the wait off the bar alone and never off the count.
+The HUD prints `displayRounds` against `capacity`. That is `rounds` at rest. During a reload it holds at whatever was left, then the whole cylinder loads at once when the timer lands, with one load click and the snap of the cylinder. It used to chamber round by round, and playtesting read the trickle as wrong for a revolver: you swing the cylinder out, fill it, and snap it shut. Every reload costs the same `reloadTime` whether it chambers one round or six, so the bar carries the wait and the count carries the payoff.
 
 `rounds` itself does not move until the reload finishes, so nothing can fire off a half-full display. The blue bar stays with the crossbow's arrow rain, which is a continuous charge with no count to show.
 

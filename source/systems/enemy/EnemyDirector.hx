@@ -259,7 +259,7 @@ class EnemyDirector
 		betweenWaves = breatherTime();
 	}
 
-	function isBossWave(n:Int):Bool
+	public function isBossWave(n:Int):Bool
 	{
 		if (n < bossWave)
 			return false;

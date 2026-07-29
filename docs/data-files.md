@@ -16,7 +16,7 @@
 | `attack` | String | `"charge"`, `"shoot"`, or `"boss"` |
 | `boss` | Object | boss attack only: `moveSpeed`, `prefMin`/`prefMax` (kiting distance band), `strafeWeight`, `gunDist` (gun hold distance), and `guns`, an array of gun configs (`image`, `bullet`, `speed`, `count`, `spread`, `damage`, `burst`, `burstInterval`, `cooldown`, `range`, `muzzle`) |
 | `contactDamage` | Float | damage dealt to the player on contact |
-| `shotDamage`, `shotSpeed`, `shotRange` | Float | shooters only, and `shotSpeed`/`shotRange` are optional. Projectile damage, speed, and range |
+| `shotDamage`, `shotSpeed`, `shotRange` | Float | shooters only, and `shotSpeed`/`shotRange` are optional. Projectile damage, speed, and travel range. Every gun in the game currently sets travel effectively infinite, so bullets die on walls and cover rather than mid-air |
 | `shotSprite`, `shotSound` | String | optional. Image and sound for the projectile. Defaults are the green pellet and `enemies/shoot` |
 | `dropChance` | Float | chance from 0 to 1 of dropping a health pickup on death |
 | `knockback`, `knockbackDrag`, `stunTime` | Float | optional. Knockback taken when hit, its decay, and stun duration |
@@ -223,17 +223,17 @@ The screen shows what a point buys before you spend it. The left panel holds the
 |---|---|
 | `scrapValue` | scrap paid for one piece picked up. It is one, and the costs are scaled to match, so the counter only ever moves by what you walked over |
 | `hitbox` | `[x, y, w, h]` in art pixels, the band a prop blocks. A prop without one is walked straight through, which is what trees want and what buildings do not |
-| `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)`. With growth at 1.0 that is a flat start plus `costFlat` per level: 20, 25, 30, and so on |
+| `baseCost`, `costStep` | each stat prices itself: its next point costs `baseCost + costStep x points already in it`. Feeding one stat makes that stat dearer and leaves the others at their own price, so a specialist pays a premium and a spread stays cheap |
 | `vigorPerPoint` | health added per point |
 | `enduranceDashPerPoint`, `enduranceSuperPerPoint` | fraction off the dash cooldown, and fraction on to super meter gained per kill. The cooldown cut compounds, each point trimming a fraction of what remains, so the timer thins forever without ever reaching zero |
-| `strengthPerPoints` | points needed for one more damage. The screen shows progress toward the next one, so a point that does not cross the line still reads as movement |
+| `strengthPerPoint` | damage added per point. It is fractional, a quarter per point, and hits carry the fraction all the way to enemy health, so every point moves the number instead of every second one |
 | `dexterityPerPoint` | fraction off swing, fire and reload time, compounding the same way |
 
 Level is one plus every point spent, so the cost climbs whichever stat you feed.
 
 The numbers are small because the game is. Health starts at 2 and a touch costs a quarter, weapons deal 1 to 3, and a basic enemy holds 3. A point of vigor is a fifth of a heart, and five points of strength is one more damage.
 
-Two of those shapes were chosen against the game rather than against the genre. Strength adds a flat point rather than a percentage, because rounding a percentage into damage of 1 to 3 either does nothing or doubles it. Endurance raises meter gained per kill rather than the meter ceiling, because a larger ceiling means more kills for the same super, which reads as a reward and plays as a punishment.
+One of those shapes was chosen against the game rather than against the genre. Endurance raises meter gained per kill rather than the meter ceiling, because a larger ceiling means more kills for the same super, which reads as a reward and plays as a punishment.
 
 ## Editor tuning - assets/data/editor.json
 

@@ -22,7 +22,7 @@ class NetSync
 	static inline var STUN_CAP:Float = 3;
 	static inline var SHOT_DAMAGE_CAP:Float = 4;
 	static inline var SHOT_SPEED_CAP:Float = 4000;
-	static inline var SHOT_RANGE_CAP:Float = 4000;
+	static inline var SHOT_RANGE_CAP:Float = 100000;
 	static inline var DRAG_PULL:Float = 10;
 
 	public var onWaveEvt:Int->Void;
@@ -61,7 +61,7 @@ class NetSync
 	private var respawnTimer:Float = -1;
 	private var droppedHandled:Bool = false;
 	private var bossDown:Bool = false;
-	private var hitCap:Int = 0;
+	private var hitCap:Float = 0;
 
 	public function new(player:Player, status:PlayerCombat, arena:Arena, layers:RenderLayers, director:EnemyDirector,
 			combat:Weapons, pickups:Pickups, scraps:Scraps, hud:Hud, heldSprite:FlxSprite)
@@ -404,12 +404,12 @@ class NetSync
 		}
 	}
 
-	function clampHit(d:Int):Int
+	function clampHit(d:Float):Float
 	{
 		if (hitCap == 0)
 		{
 			var w = data.WeaponData.WeaponDataRegistry.get();
-			var top = w.swing.damage;
+			var top:Float = w.swing.damage;
 			for (v in [w.yoyo.damage, w.revolver.damage, w.bowCharge.maxDamage, w.deadEye.damage, w.hook.snagDamage, w.hookArms.damage])
 				if (v > top)
 					top = v;

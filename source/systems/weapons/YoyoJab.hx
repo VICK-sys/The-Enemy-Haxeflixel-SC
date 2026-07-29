@@ -146,16 +146,5 @@ class YoyoJab
 			flight.bounce(cx - (e.x + e.width * 0.5), cy - (e.y + e.height * 0.5));
 		});
 
-		for (shot in director.shots.members)
-		{
-			if (shot == null || !shot.exists || shot.friendly)
-				continue;
-			var sx = shot.x + shot.width / 2 - cx;
-			var sy = shot.y + shot.height / 2 - cy;
-			if (sx * sx + sy * sy > cfg.hitRadius * cfg.hitRadius)
-				continue;
-			shot.deflect();
-			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
-		}
 	}
 }

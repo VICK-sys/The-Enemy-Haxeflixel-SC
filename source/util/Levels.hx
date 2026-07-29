@@ -53,16 +53,8 @@ class Levels
 		return n;
 	}
 
-	public static function costAt(lv:Int):Int
-	{
-		var c = conf();
-		if (lv < 1)
-			lv = 1;
-		return Std.int(c.baseCost * Math.pow(c.costGrowth, lv - 1)) + c.costFlat * (lv - 1);
-	}
-
-	public static function costNext():Int
-		return costAt(level());
+	public static function costOf(stat:Int):Int
+		return conf().baseCost + conf().costStep * points(stat);
 
 	public static function canRefund(stat:Int):Bool
 		return stat >= 0 && stat < COUNT && spent[stat] > locked[stat];
@@ -71,19 +63,19 @@ class Levels
 	{
 		if (!canRefund(stat))
 			return false;
-		exp += costAt(level() - 1);
 		spent[stat]--;
+		exp += costOf(stat);
 		return true;
 	}
 
-	public static function canSpend():Bool
-		return exp >= costNext();
+	public static function canSpendOn(stat:Int):Bool
+		return stat >= 0 && stat < COUNT && exp >= costOf(stat);
 
 	public static function spend(stat:Int):Bool
 	{
-		if (stat < 0 || stat >= COUNT || !canSpend())
+		if (!canSpendOn(stat))
 			return false;
-		exp -= costNext();
+		exp -= costOf(stat);
 		spent[stat]++;
 		return true;
 	}
@@ -116,17 +108,11 @@ class Levels
 	public static function dashScale():Float
 		return dashAt(points(ENDURANCE));
 
-	public static function damageAt(pts:Int):Int
-		return Std.int(pts / conf().strengthPerPoints);
+	public static function damageAt(pts:Int):Float
+		return pts * conf().strengthPerPoint;
 
-	public static function damageBonus():Int
+	public static function damageBonus():Float
 		return damageAt(points(STRENGTH));
-
-	public static function damageStep():Int
-		return conf().strengthPerPoints;
-
-	public static function damageProgress(pts:Int):Int
-		return pts % conf().strengthPerPoints;
 
 	public static function actionAt(pts:Int):Float
 		return Math.pow(1 - conf().dexterityPerPoint, pts);

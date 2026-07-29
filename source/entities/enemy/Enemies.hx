@@ -21,7 +21,7 @@ class Enemies extends FlxSprite
 	public var contactDamage:Float = 0.25;
 	public var shotDamage:Float = 0.25;
 	public var shotSpeed:Float = 480;
-	public var shotRange:Float = 640;
+	public var shotRange:Float = 99999;
 	public var shotSprite:String = null;
 	public var shotSound:String = null;
 	public var dropChance:Float = 0;
@@ -48,7 +48,7 @@ class Enemies extends FlxSprite
 
 	private var shotPool:Array<ShotSpec> = [];
 
-	public var hp:Int = 3;
+	public var hp:Float = 3;
 	public var isDead:Bool = false;
 	public var stun:Float = 0;
 	public var flashTimer:Float = 0;
@@ -67,7 +67,7 @@ class Enemies extends FlxSprite
 
 	public function applyScale(hpMult:Float, speedMult:Float, damageMult:Float):Void
 	{
-		hp = Math.round(hp * hpMult);
+		hp *= hpMult;
 		if (hp < 1)
 			hp = 1;
 		speed *= speedMult;
@@ -159,7 +159,7 @@ class Enemies extends FlxSprite
 		hitOffY = data.hitOffY;
     }
 
-	public function takeHit(pushX:Float, pushY:Float, damage:Int = 1):Void
+	public function takeHit(pushX:Float, pushY:Float, damage:Float = 1):Void
 	{
 		if (isDead)
 			return;

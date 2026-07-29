@@ -1,11 +1,10 @@
 {
 	"scrapValue": 1,
 	"baseCost": 3,
-	"costGrowth": 1.025,
-	"costFlat": 0,
+	"costStep": 1,
 	"vigorPerPoint": 0.2,
 	"enduranceDashPerPoint": 0.035,
 	"enduranceSuperPerPoint": 0.06,
-	"strengthPerPoints": 2,
+	"strengthPerPoint": 0.25,
 	"dexterityPerPoint": 0.03
 }

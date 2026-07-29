@@ -9,7 +9,7 @@ class Arrow extends FlxSprite
 	public static inline var RADIUS:Float = 30;
 
 	static inline var SPEED:Float = 1600;
-	static inline var RANGE:Float = 900;
+	static inline var RANGE:Float = 99999;
 	static inline var FADE:Float = 0.1;
 
 	public var dirX:Float = 1;

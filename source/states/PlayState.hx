@@ -247,7 +247,7 @@ class PlayState extends FlxState
 				intro.openTutorialIfNew();
 			else
 				intro.openWeaponPick();
-			if (Net.isHost)
+			if (!Net.isClient)
 				gate.arm();
 		}
 
@@ -389,7 +389,8 @@ class PlayState extends FlxState
 	function onWaveCleared():Void
 	{
 		round.onWaveCleared();
-		if (Net.isHost)
+		var rest = director.wave % systems.Shop.EVERY == 0 || director.isBossWave(director.wave);
+		if (rest && !Net.isClient)
 			gate.arm();
 	}
 

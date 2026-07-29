@@ -8,7 +8,7 @@
 		"fanInterval": 0.06,
 		"fanJitter": 7,
 		"speed": 2200,
-		"range": 1100,
+		"range": 99999,
 		"hitRadius": 26,
 		"knock": 1.2
 	},

@@ -7,13 +7,12 @@ typedef LevelSet =
 	scrapValue:Int,
 
 	baseCost:Int,
-	costGrowth:Float,
-	costFlat:Int,
+	costStep:Int,
 
 	vigorPerPoint:Float,
 	enduranceDashPerPoint:Float,
 	enduranceSuperPerPoint:Float,
-	strengthPerPoints:Int,
+	strengthPerPoint:Float,
 	dexterityPerPoint:Float
 }
 

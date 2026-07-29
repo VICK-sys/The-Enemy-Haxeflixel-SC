@@ -22,7 +22,7 @@
 	"contactDamage": 0.25,
 	"shotDamage": 0.25,
 	"shotSpeed": 480,
-	"shotRange": 640,
+	"shotRange": 99999,
 	"dropChance": 0.2,
 	"shadowOffX": 33,
 	"shadowOffXFlip": 33,

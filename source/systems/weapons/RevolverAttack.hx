@@ -27,7 +27,6 @@ class RevolverAttack
 	private var hits:HitPipeline;
 	private var reloading:Float = 0;
 	private var reloadFrom:Int = 0;
-	private var chambered:Int = 0;
 	private var reloadTotal:Float = 0;
 	private var fanning:Bool = false;
 	private var fanTimer:Float = 0;
@@ -64,15 +63,7 @@ class RevolverAttack
 	public var displayRounds(get, never):Int;
 
 	function get_displayRounds():Int
-	{
-		if (reloading <= 0)
-			return rounds;
-		var fill = 1 - reloading / reloadTotal;
-		var n = reloadFrom + Math.floor(fill * (cfg.cylinder - reloadFrom));
-		if (n < reloadFrom)
-			n = reloadFrom;
-		return n > cfg.cylinder ? cfg.cylinder : n;
-	}
+		return reloading > 0 ? reloadFrom : rounds;
 
 	public var reloadProgress(get, never):Float;
 
@@ -86,7 +77,6 @@ class RevolverAttack
 	function beginReloadFrom(n:Int):Void
 	{
 		reloadFrom = n;
-		chambered = n;
 		reloadTotal = cfg.reloadTime * util.Levels.actionScale();
 		reloading = reloadTotal;
 	}
@@ -265,17 +255,11 @@ class RevolverAttack
 		{
 			reloading -= elapsed;
 			if (reloading <= 0)
-				rounds = cfg.cylinder;
-
-			var loaded = displayRounds;
-			if (chambered < loaded)
 			{
-				chambered = loaded;
+				rounds = cfg.cylinder;
 				FlxG.sound.play(Paths.sound("bulletLoad"), 0.55);
-			}
-
-			if (reloading <= 0)
 				FlxG.sound.play(Paths.sound("weapon/catch"), 0.3);
+			}
 		}
 	}
 }

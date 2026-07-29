@@ -23,10 +23,10 @@
 		"strafeWeight": 0.85,
 		"gunDist": 64,
 		"guns": [
-			{ "image": "enemies/guns/pistol", "bullet": "bullets/bullet_enemy", "speed": 780, "count": 1, "spread": 0, "damage": 0.25, "burst": 5, "burstInterval": 0.13, "cooldown": 0.7, "range": 1000, "muzzle": 70 },
-			{ "image": "enemies/guns/shotgun", "bullet": "bullets/bullet_long_enemy", "speed": 640, "count": 5, "spread": 12, "damage": 0.2, "burst": 1, "burstInterval": 0, "cooldown": 1.0, "range": 640, "muzzle": 80 },
-			{ "image": "enemies/guns/sniper", "bullet": "bullets/bullet_long_enemy", "speed": 1600, "count": 1, "spread": 0, "damage": 0.5, "burst": 1, "burstInterval": 0, "cooldown": 1.25, "range": 1500, "muzzle": 130 },
-			{ "image": "enemies/guns/revolver", "bullet": "bullets/bullet_enemy", "speed": 800, "count": 1, "spread": 4, "damage": 0.3, "burst": 6, "burstInterval": 0.16, "cooldown": 0.9, "range": 1050, "muzzle": 70 }
+			{ "image": "enemies/guns/pistol", "bullet": "bullets/bullet_enemy", "speed": 780, "count": 1, "spread": 0, "damage": 0.25, "burst": 5, "burstInterval": 0.13, "cooldown": 0.7, "range": 99999, "muzzle": 70 },
+			{ "image": "enemies/guns/shotgun", "bullet": "bullets/bullet_long_enemy", "speed": 640, "count": 5, "spread": 12, "damage": 0.2, "burst": 1, "burstInterval": 0, "cooldown": 1.0, "range": 99999, "muzzle": 80 },
+			{ "image": "enemies/guns/sniper", "bullet": "bullets/bullet_long_enemy", "speed": 1600, "count": 1, "spread": 0, "damage": 0.5, "burst": 1, "burstInterval": 0, "cooldown": 1.25, "range": 99999, "muzzle": 130 },
+			{ "image": "enemies/guns/revolver", "bullet": "bullets/bullet_enemy", "speed": 800, "count": 1, "spread": 4, "damage": 0.3, "burst": 6, "burstInterval": 0.16, "cooldown": 0.9, "range": 99999, "muzzle": 70 }
 		]
 	},
 	"contactDamage": 0.5,

@@ -171,14 +171,15 @@ class LevelUpSubState extends FlxSubState
 		return Std.string(Math.round(v * 100) / 100);
 
 	function dmg(pts:Int):String
-		return "+" + Levels.damageAt(pts) + "  (" + Levels.damageProgress(pts) + "/" + Levels.damageStep() + ")";
+		return "+" + two(Levels.damageAt(pts));
 
 	function refresh():Void
 	{
 		head[0].text = Lang.t("level.level") + "   " + Levels.level();
 		head[1].text = Lang.t("level.exp") + "   " + Levels.exp;
-		head[2].text = Lang.t("level.next") + "   " + Levels.costNext();
-		head[2].color = Levels.canSpend() ? GOLD : DIM;
+		var onRow = pick < STATS.length;
+		head[2].text = Lang.t("level.next") + "   " + (onRow ? Std.string(Levels.costOf(pick)) : "-");
+		head[2].color = onRow && Levels.canSpendOn(pick) ? GOLD : DIM;
 
 		marker.y = TOP + 137 + pick * ROW;
 		marker.visible = pick < STATS.length;
@@ -186,7 +187,7 @@ class LevelUpSubState extends FlxSubState
 		var onStat = pick < STATS.length;
 		less.y = more.y = TOP + 140 + pick * ROW;
 		less.visible = onStat && Levels.canRefund(pick);
-		more.visible = onStat && Levels.canSpend();
+		more.visible = onStat && Levels.canSpendOn(pick);
 		accept.color = pick == STATS.length ? GOLD : FlxColor.WHITE;
 
 		for (i in 0...STATS.length)
@@ -197,7 +198,7 @@ class LevelUpSubState extends FlxSubState
 		}
 
 		var base = PlayerDataRegistry.get();
-		var up = pick < STATS.length && Levels.canSpend();
+		var up = pick < STATS.length && Levels.canSpendOn(pick);
 		var vg = Levels.points(Levels.VIGOR) + (up && pick == Levels.VIGOR ? 1 : 0);
 		var en = Levels.points(Levels.ENDURANCE) + (up && pick == Levels.ENDURANCE ? 1 : 0);
 		var st = Levels.points(Levels.STRENGTH) + (up && pick == Levels.STRENGTH ? 1 : 0);
