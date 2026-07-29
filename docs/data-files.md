@@ -34,8 +34,7 @@ To add an enemy type, do three things. Put an atlas under `assets/images/enemies
 |---|---|
 | `firstDelay` | seconds before wave 1 |
 | `breather` | seconds between waves, before `scaling` shortens it |
-| `baseCount`, `countPerWave` | enemy count = baseCount + wave x countPerWave |
-| `maxCount` | count cap, or 0 for no cap |
+| `baseCount`, `countPerWave` | enemy count = baseCount + wave x countPerWave, and it never stops climbing |
 | `spawnBatch`, `spawnEvery` | a wave arrives in pulses of `spawnBatch` enemies, `spawnEvery` seconds apart, instead of all at once. A batch of 0 restores the single burst |
 | `bossWaveMin`, `bossWaveRange` | the first boss wave is `bossWaveMin + random(0..bossWaveRange)`, rolled once per run |
 | `bossRepeat` | waves between bosses after the first. 0 means the boss happens once and never again |
@@ -44,16 +43,17 @@ To add an enemy type, do three things. Put an atlas under `assets/images/enemies
 
 ### scaling - assets/data/waves.json
 
-Each multiplier is `1 + (wave - 1) x perWave`. It holds at its `Max`, unless that is 0, which means no ceiling. It applies to the values the enemy just read from its own JSON. Wave 1 always multiplies by 1, so the enemy files stay the source of truth for how something starts.
+Each multiplier is `1 + (wave - 1) x perWave`, with no ceiling. It applies to the values the enemy just read from its own JSON. Wave 1 always multiplies by 1, so the enemy files stay the source of truth for how something starts.
 
 | Field | Meaning |
 |---|---|
-| `hpPerWave`, `hpMax` | health multiplier |
-| `speedPerWave`, `speedMax` | movement multiplier. Enemies pass the player's 450 speed around wave 30 and keep going. Late runs therefore outrun you rather than let you kite |
-| `damagePerWave`, `damageMax` | contact and shot damage multiplier |
+| `hpPerWave` | health multiplier |
+| `speedPerWave` | movement multiplier. Enemies pass the player's 450 speed around wave 30 and keep going. Late runs therefore outrun you rather than let you kite |
+| `damagePerWave` | contact and shot damage multiplier |
+| `bossHpPerWave`, `bossSpeedPerWave`, `bossDamagePerWave` | the boss's own ramp, same shape, steeper on health and damage and gentler on speed. Each return visit is meaningfully harder, while the charge stays dodgeable |
 | `breatherPerWave`, `breatherMin` | seconds taken off the gap between waves each wave, down to a floor |
 
-Enemy count is not part of this. It grows on its own from `baseCount` and `countPerWave`, and `maxCount` decides whether it ever stops.
+Enemy count is not part of this. It grows on its own from `baseCount` and `countPerWave`.
 
 Count is the expensive kind of difficulty. Every live enemy pathfinds against the per-frame budget in `EnemyNav`, and crowd separation compares every pair. The multipliers cost nothing by comparison.
 
@@ -225,11 +225,9 @@ The screen shows what a point buys before you spend it. The left panel holds the
 | `hitbox` | `[x, y, w, h]` in art pixels, the band a prop blocks. A prop without one is walked straight through, which is what trees want and what buildings do not |
 | `baseCost`, `costGrowth`, `costFlat` | the next level costs `baseCost x costGrowth^(level-1) + costFlat x (level-1)`. With growth at 1.0 that is a flat start plus `costFlat` per level: 20, 25, 30, and so on |
 | `vigorPerPoint` | health added per point |
-| `enduranceDashPerPoint`, `enduranceSuperPerPoint` | fraction off the dash cooldown, and fraction on to super meter gained per kill |
+| `enduranceDashPerPoint`, `enduranceSuperPerPoint` | fraction off the dash cooldown, and fraction on to super meter gained per kill. The cooldown cut compounds, each point trimming a fraction of what remains, so the timer thins forever without ever reaching zero |
 | `strengthPerPoints` | points needed for one more damage. The screen shows progress toward the next one, so a point that does not cross the line still reads as movement |
-| `dexterityPerPoint` | fraction off swing, fire and reload time |
-| `enduranceDashFloor`, `dexterityFloor` | the shortest a timer can get, as a fraction of its base |
-| `enduranceSuperCap`, `strengthMax` | ceilings on the super gain multiplier and the damage bonus |
+| `dexterityPerPoint` | fraction off swing, fire and reload time, compounding the same way |
 
 Level is one plus every point spent, so the cost climbs whichever stat you feed.
 

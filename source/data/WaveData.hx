@@ -8,11 +8,11 @@ typedef WavePool = {
 
 typedef WaveScaling = {
 	hpPerWave:Float,
-	hpMax:Float,
 	speedPerWave:Float,
-	speedMax:Float,
 	damagePerWave:Float,
-	damageMax:Float,
+	bossHpPerWave:Float,
+	bossSpeedPerWave:Float,
+	bossDamagePerWave:Float,
 	breatherPerWave:Float,
 	breatherMin:Float
 }
@@ -22,7 +22,6 @@ typedef WaveData = {
 	breather:Float,
 	baseCount:Int,
 	countPerWave:Int,
-	maxCount:Int,
 	spawnBatch:Int,
 	spawnEvery:Float,
 	bossWaveMin:Int,

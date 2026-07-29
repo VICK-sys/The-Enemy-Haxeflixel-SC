@@ -3,7 +3,6 @@
 	"breather": 3,
 	"baseCount": 2,
 	"countPerWave": 1,
-	"maxCount": 0,
 	"spawnBatch": 3,
 	"spawnEvery": 2,
 	"bossWaveMin": 4,
@@ -11,11 +10,11 @@
 	"bossRepeat": 6,
 	"scaling": {
 		"hpPerWave": 0.1,
-		"hpMax": 0,
 		"speedPerWave": 0.025,
-		"speedMax": 0,
 		"damagePerWave": 0.04,
-		"damageMax": 0,
+		"bossHpPerWave": 0.15,
+		"bossSpeedPerWave": 0.015,
+		"bossDamagePerWave": 0.06,
 		"breatherPerWave": 0.12,
 		"breatherMin": 1.0
 	},

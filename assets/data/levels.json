@@ -7,9 +7,5 @@
 	"enduranceDashPerPoint": 0.035,
 	"enduranceSuperPerPoint": 0.06,
 	"strengthPerPoints": 2,
-	"dexterityPerPoint": 0.03,
-	"enduranceDashFloor": 0.45,
-	"enduranceSuperCap": 3.0,
-	"strengthMax": 8,
-	"dexterityFloor": 0.45
+	"dexterityPerPoint": 0.03
 }

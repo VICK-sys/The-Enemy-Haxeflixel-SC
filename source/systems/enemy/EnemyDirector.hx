@@ -190,7 +190,8 @@ class EnemyDirector
 
 		bossPending = false;
 		var boss = new Enemies("rofel");
-		applyWaveScale(boss);
+		var s = waveData.scaling;
+		boss.applyScale(ramp(s.bossHpPerWave), ramp(s.bossSpeedPerWave), ramp(s.bossDamagePerWave));
 		spawner.placeAtEdge(boss);
 		register(boss);
 		bossDeath.watch(boss);
@@ -235,11 +236,8 @@ class EnemyDirector
 				spawner.rescue(rig);
 	}
 
-	function ramp(perWave:Float, cap:Float):Float
-	{
-		var m = 1 + (wave - 1) * perWave;
-		return cap > 0 && m > cap ? cap : m;
-	}
+	function ramp(perWave:Float):Float
+		return 1 + (wave - 1) * perWave;
 
 	function breatherTime():Float
 	{
@@ -251,7 +249,7 @@ class EnemyDirector
 	private function applyWaveScale(e:Enemies):Void
 	{
 		var s = waveData.scaling;
-		e.applyScale(ramp(s.hpPerWave, s.hpMax), ramp(s.speedPerWave, s.speedMax), ramp(s.damagePerWave, s.damageMax));
+		e.applyScale(ramp(s.hpPerWave), ramp(s.speedPerWave), ramp(s.damagePerWave));
 	}
 
 	public function resumeAfter(atWave:Int, atBossWave:Int):Void
@@ -288,8 +286,6 @@ class EnemyDirector
 		}
 
 		var count = waveData.baseCount + wave * waveData.countPerWave;
-		if (waveData.maxCount > 0 && count > waveData.maxCount)
-			count = waveData.maxCount;
 		var poolIndex = wave - 1;
 		if (poolIndex >= waveData.waves.length)
 			poolIndex = waveData.waves.length - 1;

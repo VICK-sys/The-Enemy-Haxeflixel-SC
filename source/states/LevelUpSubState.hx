@@ -171,11 +171,7 @@ class LevelUpSubState extends FlxSubState
 		return Std.string(Math.round(v * 100) / 100);
 
 	function dmg(pts:Int):String
-	{
-		var out = "+" + Levels.damageAt(pts);
-		var p = Levels.damageProgress(pts);
-		return p < 0 ? out : out + "  (" + p + "/" + Levels.damageStep() + ")";
-	}
+		return "+" + Levels.damageAt(pts) + "  (" + Levels.damageProgress(pts) + "/" + Levels.damageStep() + ")";
 
 	function refresh():Void
 	{

@@ -14,12 +14,7 @@ typedef LevelSet =
 	enduranceDashPerPoint:Float,
 	enduranceSuperPerPoint:Float,
 	strengthPerPoints:Int,
-	dexterityPerPoint:Float,
-
-	enduranceDashFloor:Float,
-	enduranceSuperCap:Float,
-	strengthMax:Int,
-	dexterityFloor:Float
+	dexterityPerPoint:Float
 }
 
 class LevelDataRegistry
