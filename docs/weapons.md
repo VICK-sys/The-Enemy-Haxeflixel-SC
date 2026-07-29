@@ -50,7 +50,11 @@ The hammer's block also carries a `cooldown`. Each swing starts it, and both the
 
 The yoyo's primary, held rather than tapped. Press left click and the yoyo is thrown out. Hold it and the yoyo stays out, spinning, chasing the cursor but never further from the hand than `reach`. Aim past that limit and it sits on the edge of the circle in the cursor's direction. Let go and it comes home.
 
-`YoyoFlight` owns the motion. Every frame it picks a target, the clamped cursor while deployed or the hand while coming back, and eases toward it under a speed cap. The cap makes a long throw read as travel rather than a jump; the ease makes it settle rather than stop dead. The same two numbers drive going out and coming back, so the weight feels the same both ways. `YoyoJab` wraps that with the damage.
+`YoyoFlight` owns the motion. Every frame it picks a target, the clamped cursor while deployed or the hand while coming back, and moves toward it. Going out it eases under a speed cap, so a long throw reads as travel rather than a jump and settles rather than stopping dead. `YoyoJab` wraps that with the damage.
+
+Coming home it runs at flat speed instead. Easing chases a target by closing a share of the gap each frame, which settles into a standing lag once the target is moving, and the hand moves whenever the player does. That lag came out just wider than the distance the catch tests for, so walking away from a returning yoyo left it hovering at the hand, spinning, caught by nothing, with every attack locked out behind it. Flat speed always closes.
+
+Two floors guard the rest of that. The yoyo will not sit closer to the hand than a minimum while it is out, so aiming at your own feet throws it clear rather than parking it on your chest, and it cannot be caught in the first fraction of a second, so a tap still reads as a throw rather than a flicker.
 
 Damage repeats rather than landing once. Each enemy the yoyo touches is struck, then sits out `hitGap` before it can be struck again, so parking the yoyo on something grinds it down while sweeping across a crowd clips each of them. The push follows the string: out shoves a target away, coming home drags one toward the player. It deflects enemy fire on contact, which makes a parked yoyo a small moving shield.
 
