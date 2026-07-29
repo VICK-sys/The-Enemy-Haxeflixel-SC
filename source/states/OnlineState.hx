@@ -1,6 +1,7 @@
 package states;
 
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
@@ -26,6 +27,7 @@ class OnlineState extends FlxState
 	private var playerName:String = "";
 	private var nameText:FlxText;
 	private var weaponText:FlxText;
+	private var preview:FlxSprite;
 
 	static inline var NAME_MAX:Int = 12;
 	private var hosting:Bool = false;
@@ -44,31 +46,36 @@ class OnlineState extends FlxState
 		title.setBorderStyle(OUTLINE, ACCENT, 4);
 		add(title);
 
-		list = new MenuList([Lang.t("online.host"), Lang.t("online.join"), Lang.t("online.weapon"), Lang.t("online.setName"), Lang.t("online.color"), Lang.t("common.back")], 236, 58, 32);
+		list = new MenuList([Lang.t("online.host"), Lang.t("online.join"), Lang.t("online.weapon"), Lang.t("online.setName"), Lang.t("online.color"), Lang.t("common.back")], 196, 50, 30);
 		list.onChoose = choose;
 		list.onAdjust = adjust;
 		add(list);
-		refreshColor();
 
-		weaponText = new FlxText(0, 514, FlxG.width, "");
+		preview = new FlxSprite();
+		preview.antialiasing = false;
+		add(preview);
+
+		weaponText = new FlxText(0, 508, FlxG.width, "");
 		weaponText.setFormat(Lang.font(), 22, FlxColor.WHITE, CENTER);
 		weaponText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(weaponText);
 
-		nameText = new FlxText(0, 546, FlxG.width, "");
+		nameText = new FlxText(0, 538, FlxG.width, "");
 		nameText.setFormat(Lang.font(), 22, FlxColor.WHITE, CENTER);
 		nameText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(nameText);
 
-		ipText = new FlxText(0, 578, FlxG.width, "");
+		ipText = new FlxText(0, 568, FlxG.width, "");
 		ipText.setFormat(Lang.font(), 24, FlxColor.WHITE, CENTER);
 		ipText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(ipText);
 
-		status = new FlxText(0, 620, FlxG.width, "");
+		status = new FlxText(0, 604, FlxG.width, "");
 		status.setFormat(Lang.font(), 20, FlxColor.YELLOW, CENTER);
 		status.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(status);
+
+		refreshColor();
 
 		var hint = new FlxText(0, FlxG.height - 32, FlxG.width, Lang.t("online.hint"));
 		hint.setFormat(Lang.font(), 16, FlxColor.WHITE, CENTER);
@@ -145,22 +152,30 @@ class OnlineState extends FlxState
 		cycleColor(dir);
 	}
 
-	static var COLORS:Array<Int> = [
-		0xFFFFFFFF, 0xFFFF7373, 0xFFFFB973, 0xFFFFFF73, 0xFFB9FF73, 0xFF73FF73, 0xFF73FFB9,
-		0xFF73FFFF, 0xFF73B9FF, 0xFF7373FF, 0xFFB973FF, 0xFFFF73FF, 0xFFFF73B9
-	];
+	static inline var HUE_STEP:Float = 0.05;
 
 	function cycleColor(dir:Int):Void
 	{
-		var idx = COLORS.indexOf(SaveData.playerColor());
-		if (idx < 0)
-			idx = 0;
-		SaveData.setPlayerColor(COLORS[(idx + dir + COLORS.length) % COLORS.length]);
+		SaveData.setPlayerHue(SaveData.playerHue() + dir * HUE_STEP);
 		refreshColor();
 	}
 
 	function refreshColor():Void
-		list.rowAt(4).color = SaveData.playerColor();
+	{
+		var h = SaveData.playerHue();
+		list.setLabel(4, Lang.t("online.color", [Math.round(h * 360)]));
+		list.rowAt(4).color = swatch(h);
+
+		preview.frames = util.HuePalette.sparrow("characters/mufu", h);
+		preview.animation.addByPrefix("idle", "Idle", 12, true);
+		preview.animation.play("idle");
+		preview.offset.set(-19, -17);
+		preview.scale.set(3, 3);
+		preview.setPosition(FlxG.width - 300, 236);
+	}
+
+	static function swatch(h:Float):Int
+		return FlxColor.fromHSB(((0.98 + h) % 1.0) * 360, 0.72, 1);
 
 	function releaseMenu():Void
 	{
@@ -282,6 +297,7 @@ class OnlineState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+
 		super.update(elapsed);
 
 		if (leaving)

@@ -29,6 +29,7 @@ class RemoteAvatar
 	private var heldOX:Float = 30;
 	private var heldOY:Float = 65;
 	private var leveling:Bool = false;
+	private var hue:Float = 0;
 
 	static inline var REVOLVER_INDEX:Int = 1;
 	static inline var BOW_INDEX:Int = 2;
@@ -90,6 +91,24 @@ class RemoteAvatar
 	public function setReady(on:Bool):Void
 		bubble.visible = on;
 
+	public function setHue(h:Float):Void
+	{
+		if (h == hue)
+			return;
+		hue = h;
+		var was = sprite.animation.name;
+		sprite.frames = util.HuePalette.sparrow("characters/mufu", h);
+		sprite.animation.addByPrefix("idle", "Idle", 12, true);
+		sprite.animation.addByPrefix("walk", "Run", 12, true);
+		sprite.animation.addByPrefix("hurt", "Hurt", 12, false);
+		sprite.animation.addByPrefix("death", "Death", 12, false);
+		sprite.animation.play(was == null ? "idle" : was);
+		sprite.width = 75;
+		sprite.height = 95;
+		sprite.offset.set(-19, -17);
+		sprite.scale.set(4, 4);
+	}
+
 	public function setLeveling(on:Bool):Void
 	{
 		leveling = on;
@@ -113,8 +132,8 @@ class RemoteAvatar
 
 		sprite.visible = true;
 		sprite.flipX = m.fx;
-		if (m.cl != null)
-			sprite.color = m.cl;
+		if (m.hu != null)
+			setHue(m.hu);
 		if (m.an != null && sprite.animation.name != m.an && sprite.animation.getByName(m.an) != null)
 			sprite.animation.play(m.an);
 

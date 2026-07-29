@@ -485,7 +485,7 @@ class NetSync
 			t: "av",
 			x: r1(player.x),
 			y: r1(player.y),
-			cl: SaveData.playerColor(),
+			hu: SaveData.playerHue(),
 			fx: player.flipX,
 			an: player.animation.name,
 			wi: combat.weapon,

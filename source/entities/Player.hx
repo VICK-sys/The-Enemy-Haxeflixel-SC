@@ -49,12 +49,22 @@ class Player extends FlxSprite
 		drag.x = drag.y = data.drag;
 	}
 
+	public var hue(default, null):Float = 0;
+
+	public function setHue(h:Float):Void
+	{
+		if (h == hue)
+			return;
+		hue = h;
+		applySkin();
+	}
+
 	public function applySkin():Void
 	{
 		var wasAnim = animation.name;
 		var wasFlip = flipX;
 
-		frames = Paths.sparrow("characters/mufu");
+		frames = util.HuePalette.sparrow("characters/mufu", hue);
 		animation.addByPrefix("idle", "Idle", 12, true);
 		animation.addByPrefix("walk", "Run", 12, true);
 		animation.addByPrefix("hurt", "Hurt", 12, false);

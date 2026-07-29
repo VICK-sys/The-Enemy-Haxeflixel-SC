@@ -69,7 +69,9 @@ The blade ring and the arrow storm replay from their activation alone. A call to
 
 The hook arms stream their claws, because they grab enemies. Which enemy is nearest can differ between machines. The grabbed enemy is host-authoritative already, so it gets dragged around correctly on its own. Rope curves rebuild locally from the streamed control points. They anchor to the interpolated body, so they stay attached while it moves.
 
-Supers also lift, spin and squash the player's body. Those three ride along in the avatar packet, and no machine recomputes them. That is what keeps the decoration copies out of the body entirely. The packet also carries the player colour picked in the lobby, and every machine tints that body with it.
+Supers also lift, spin and squash the player's body. Those three ride along in the avatar packet, and no machine recomputes them. That is what keeps the decoration copies out of the body entirely.
+
+The packet also carries the hue the player picked in the lobby. That hue is not a tint over the whole sprite, which would muddy the greys. Every machine bakes its own recoloured copy of the character sheet, rotating only the pixels close to red, and keeps it cached under the hue's own key. Skin, bone and metal therefore hold their colour while the red reads as whatever the player chose. The bake runs once per hue on a sheet of a few thousand pixels, so it costs nothing worth measuring.
 
 ## Transport shape
 

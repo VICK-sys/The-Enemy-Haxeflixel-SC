@@ -12,6 +12,8 @@ PLAY, OPTIONS and QUIT on a black background. QUIT is desktop only. Two pairs of
 
 Navigate with W/S or the arrows plus ENTER, or with mouse hover and click.
 
+The online menu carries a COLOR row. Left and right walk the player's hue a step at a time, the row prints the angle and wears the colour itself, and a live character stands beside the menu wearing it. The hue rides into the run and across the wire.
+
 PLAY fades to black and switches to PlayState. Left and right on that row choose the map. The options are the stock arena, or any editor slot holding a save. The row always opens on the stock arena. It therefore reads PLAY, rather than naming a slot you edited last. OPTIONS opens `OptionsSubState`.
 
 The editor has no row of its own. F7 opens it. It stays off the menu on purpose. The editor serves whoever builds the game, and is not something to offer a player.

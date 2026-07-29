@@ -197,16 +197,19 @@ class SaveData
 		save.flush();
 	}
 
-	public static function playerColor():Int
+	public static function playerHue():Float
 	{
 		ensure();
-		return save.data.playerColor != null ? save.data.playerColor : 0xFFFFFFFF;
+		return save.data.playerHue != null ? save.data.playerHue : 0.0;
 	}
 
-	public static function setPlayerColor(c:Int):Void
+	public static function setPlayerHue(h:Float):Void
 	{
 		ensure();
-		save.data.playerColor = c;
+		h = h % 1.0;
+		if (h < 0)
+			h += 1.0;
+		save.data.playerHue = Math.round(h * 100) / 100;
 		save.flush();
 	}
 
