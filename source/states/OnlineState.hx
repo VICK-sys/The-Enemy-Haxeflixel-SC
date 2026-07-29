@@ -28,6 +28,7 @@ class OnlineState extends FlxState
 	private var nameText:FlxText;
 	private var weaponText:FlxText;
 	private var preview:FlxSprite;
+	private var previewWeapon:FlxSprite;
 	private var hueDirty:Bool = false;
 	private var huePending:Bool = false;
 	private var skinClock:Float = 0;
@@ -59,6 +60,10 @@ class OnlineState extends FlxState
 		preview.antialiasing = false;
 		add(preview);
 
+		previewWeapon = new FlxSprite();
+		previewWeapon.antialiasing = false;
+		add(previewWeapon);
+
 		weaponText = new FlxText(0, 508, FlxG.width, "");
 		weaponText.setFormat(Lang.font(), 22, FlxColor.WHITE, CENTER);
 		weaponText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
@@ -80,7 +85,7 @@ class OnlineState extends FlxState
 		add(status);
 
 		refreshColor();
-		reskin();
+		buildPreview();
 		list.repeatAdjust = true;
 
 		var hint = new FlxText(0, FlxG.height - 32, FlxG.width, Lang.t("online.hint"));
@@ -161,6 +166,13 @@ class OnlineState extends FlxState
 	static inline var HUE_STEP:Float = 1 / 360.0;
 	static inline var SKIN_GAP:Float = 0.05;
 	static inline var SETTLE_GAP:Float = 0.3;
+	static inline var PREVIEW_SCALE:Float = 6;
+	static inline var WEAPON_SCALE:Float = 4;
+	static inline var WEAPON_TILT:Float = -35;
+	static inline var HAND_X:Float = 0.19;
+	static inline var HAND_Y:Float = 0.64;
+
+	static var HELD_ART:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/hook"];
 
 	function cycleColor(dir:Int):Void
 	{
@@ -202,14 +214,24 @@ class OnlineState extends FlxState
 	}
 
 	function reskin():Void
+		util.HuePalette.live("characters/mufu", SaveData.playerHue());
+
+	function buildPreview():Void
 	{
-		var was = preview.animation.name;
-		preview.frames = util.HuePalette.preview("characters/mufu", SaveData.playerHue());
+		preview.frames = util.HuePalette.liveFrames("characters/mufu", SaveData.playerHue());
 		preview.animation.addByPrefix("idle", "Idle", 12, true);
-		preview.animation.play(was == null ? "idle" : was);
-		preview.offset.set(-19, -17);
-		preview.scale.set(3, 3);
-		preview.setPosition(FlxG.width - 300, 236);
+		preview.animation.play("idle");
+		preview.scale.set(PREVIEW_SCALE, PREVIEW_SCALE);
+		preview.updateHitbox();
+		preview.setPosition(FlxG.width - 260 - preview.width * 0.5, 330 - preview.height * 0.5);
+	}
+
+	function placeWeapon():Void
+	{
+		if (previewWeapon == null || preview.width <= 0)
+			return;
+		previewWeapon.x = preview.x + preview.width * HAND_X - previewWeapon.width * 0.5;
+		previewWeapon.y = preview.y + preview.height * HAND_Y - previewWeapon.height * 0.5;
 	}
 
 	static function swatch(h:Float):Int
@@ -269,7 +291,19 @@ class OnlineState extends FlxState
 	}
 
 	function refreshWeapon():Void
+	{
 		weaponText.text = Lang.t("online.weaponLabel", [WeaponPickSubState.nameOf(WeaponPickSubState.lastPick)]);
+
+		var pick = WeaponPickSubState.lastPick;
+		if (pick < 0 || pick >= HELD_ART.length)
+			pick = 0;
+		previewWeapon.loadGraphic(util.Paths.image(HELD_ART[pick]));
+		previewWeapon.antialiasing = false;
+		previewWeapon.scale.set(WEAPON_SCALE, WEAPON_SCALE);
+		previewWeapon.updateHitbox();
+		previewWeapon.angle = WEAPON_TILT;
+		placeWeapon();
+	}
 
 	function beginNaming():Void
 	{

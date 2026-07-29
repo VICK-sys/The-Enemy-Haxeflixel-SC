@@ -12,7 +12,7 @@ PLAY, OPTIONS and QUIT on a black background. QUIT is desktop only. Two pairs of
 
 Navigate with W/S or the arrows plus ENTER, or with mouse hover and click.
 
-The online menu carries a COLOR row. Left and right walk the player's hue one degree at a time, and holding either repeats, slowly at first and then faster, so a full turn of the wheel takes a few seconds. The row prints the angle and wears the colour itself, and a live character stands beside the menu wearing it. The hue rides into the run and across the wire.
+The online menu carries a COLOR row. Left and right walk the player's hue one degree at a time, and holding either repeats, slowly at first and then faster, so a full turn of the wheel takes a few seconds. The row prints the angle and wears the colour itself, and a live character stands beside the menu wearing it, holding whichever weapon the run is set to. That character keeps idling while the hue moves. The recolour repaints the bitmap the sprite already points at rather than handing it a new one, so the animation never restarts. Swapping the frames instead would reset the frame clock faster than a frame could elapse, which reads as a freeze. The hue rides into the run and across the wire.
 
 Two throttles keep that cheap. The character rebake runs at most twenty times a second however fast the number climbs, so a full sweep costs about fifty bakes rather than three hundred and sixty. The save waits for the value to sit still for a moment before it writes, so a sweep is one write rather than one per degree. Both key on time rather than on the key being down, so anything that drives the row gets the same protection.
 

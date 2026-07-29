@@ -16,19 +16,42 @@ class HuePalette
 		return FlxAtlasFrames.fromSparrow(graphic(name, hue), "assets/images/" + name + ".xml");
 	}
 
-	public static function preview(name:String, hue:Float):FlxAtlasFrames
+	public static function liveFrames(name:String, hue:Float):FlxAtlasFrames
 	{
-		if (hue == 0)
-			return sparrow(name, 0);
+		return FlxAtlasFrames.fromSparrow(live(name, hue), "assets/images/" + name + ".xml");
+	}
 
-		var key = name + "|scratch";
-		var old = FlxG.bitmap.get(key);
-		if (old != null)
-			FlxG.bitmap.remove(old);
-
+	public static function live(name:String, hue:Float):FlxGraphic
+	{
+		var key = name + "|live";
 		var src = FlxG.bitmap.add(Paths.image(name)).bitmap;
-		var made = FlxG.bitmap.add(shift(src, hue), false, key);
-		return FlxAtlasFrames.fromSparrow(made, "assets/images/" + name + ".xml");
+		var g = FlxG.bitmap.get(key);
+		if (g == null)
+		{
+			g = FlxG.bitmap.add(new BitmapData(src.width, src.height, true, 0), false, key);
+			g.persist = true;
+		}
+
+		var dst = g.bitmap;
+		var turn = hue * 360;
+		dst.lock();
+		for (y in 0...src.height)
+		{
+			for (x in 0...src.width)
+			{
+				var px:FlxColor = src.getPixel32(x, y);
+				if (px.alphaFloat > 0)
+				{
+					var h = px.hue;
+					var away = h > 180 ? 360 - h : h;
+					if (away < BAND && px.saturation > SAT_FLOOR)
+						px.hue = (h + turn) % 360;
+				}
+				dst.setPixel32(x, y, px);
+			}
+		}
+		dst.unlock();
+		return g;
 	}
 
 	public static function graphic(name:String, hue:Float):FlxGraphic
