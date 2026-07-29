@@ -22,7 +22,9 @@ The shared hit pipeline. It applies damage with a hit sound, sparks, kill reward
 
 ## Rope
 
-Shared cord drawing. It tiles `yoyo_string` segments along a straight line for the grab line and the yoyo's string. For the arms' curved ropes it follows a quadratic bezier with an explicit control point. It draws into a caller-owned sprite group.
+Shared cord drawing. It tiles `yoyo_string` segments along a straight line for the grab line and the yoyo's string. For the arms' curved cords it follows a quadratic bezier with an explicit control point. It draws into a caller-owned sprite group.
+
+The curve spaces its segments by distance travelled rather than by curve parameter. It samples the bezier once to measure the real arc, then walks that arc placing a segment every fixed step. Both halves matter. Sizing the count from the straight line between the ends under-counts, because the bow is about a third longer than its chord, and stepping the parameter evenly spreads the segments out where the curve runs fastest. Either one alone opens gaps in a long reach. Spacing from the arc keeps every step shorter than a segment, so the cord stays solid at any length.
 
 ## HeldWeapon
 
@@ -144,7 +146,7 @@ On a miss it retracts to the hand, and it stays live on the way back. A returnin
 
 A held enemy is a shield. Enemy fire that reaches it stops there and wounds the enemy instead of the player, so you can walk a body into a firing line. Enough shots kill it, and a dead victim drops off the string the same way any other loss does.
 
-The grab cannot latch an enemy flagged not `grabbable`, which means the boss. It deals `snagDamage` instead, then retracts. That is much more than a normal hit, since it is the only thing the grab can do to them. The auto-grabbing arms are the yoyo's super, covered under `HookArms`.
+The grab cannot latch an enemy flagged not `grabbable`, which means the boss. It deals `snagDamage` instead, then retracts. The return trip snags the same way, so a throw that reaches the boss on the way home still hurts it. One throw lands one snag either way. Without that cap the returning line would bill the boss every frame it overlapped. That is much more than a normal hit, since it is the only thing the grab can do to them. The auto-grabbing arms are the yoyo's super, covered under `HookArms`.
 
 ## ThrowAttack
 

@@ -8,6 +8,7 @@ class Rope
 {
 	static inline var STEP:Float = 30;
 	static inline var STRAND_SCALE:Float = 4;
+	static inline var SAMPLES:Int = 24;
 
 	public static function clear(rope:FlxTypedGroup<FlxSprite>):Void
 	{
@@ -35,21 +36,51 @@ class Rope
 	public static function curve(rope:FlxTypedGroup<FlxSprite>, ax:Float, ay:Float, bx:Float, by:Float, ccx:Float, ccy:Float):Void
 	{
 		clear(rope);
-		var dx = bx - ax;
-		var dy = by - ay;
-		var dist = Math.sqrt(dx * dx + dy * dy);
-		if (dist < 8)
-			return;
-		var count = Math.ceil(dist / STEP) + 2;
-		for (i in 0...count)
+
+		var arc = 0.0;
+		var px = ax;
+		var py = ay;
+		for (i in 1...SAMPLES + 1)
 		{
-			var t = (i + 0.5) / count;
+			var t = i / SAMPLES;
 			var mt = 1 - t;
 			var qx = mt * mt * ax + 2 * mt * t * ccx + t * t * bx;
 			var qy = mt * mt * ay + 2 * mt * t * ccy + t * t * by;
-			var tvx = 2 * mt * (ccx - ax) + 2 * t * (bx - ccx);
-			var tvy = 2 * mt * (ccy - ay) + 2 * t * (by - ccy);
-			place(rope, qx, qy, Math.atan2(tvy, tvx) * 180 / Math.PI - 90);
+			arc += Math.sqrt((qx - px) * (qx - px) + (qy - py) * (qy - py));
+			px = qx;
+			py = qy;
+		}
+		if (arc < 8)
+			return;
+
+		var count = Math.ceil(arc / STEP);
+		var span = arc / count;
+		var walked = 0.0;
+		var next = span * 0.5;
+		var placed = 0;
+		px = ax;
+		py = ay;
+		for (i in 1...SAMPLES + 1)
+		{
+			var t = i / SAMPLES;
+			var mt = 1 - t;
+			var qx = mt * mt * ax + 2 * mt * t * ccx + t * t * bx;
+			var qy = mt * mt * ay + 2 * mt * t * ccy + t * t * by;
+			var seg = Math.sqrt((qx - px) * (qx - px) + (qy - py) * (qy - py));
+			while (placed < count && walked + seg >= next)
+			{
+				var f = seg <= 0 ? 0.0 : (next - walked) / seg;
+				var at = (i - 1 + f) / SAMPLES;
+				var amt = 1 - at;
+				var tvx = 2 * amt * (ccx - ax) + 2 * at * (bx - ccx);
+				var tvy = 2 * amt * (ccy - ay) + 2 * at * (by - ccy);
+				place(rope, px + (qx - px) * f, py + (qy - py) * f, Math.atan2(tvy, tvx) * 180 / Math.PI - 90);
+				placed++;
+				next += span;
+			}
+			walked += seg;
+			px = qx;
+			py = qy;
 		}
 	}
 

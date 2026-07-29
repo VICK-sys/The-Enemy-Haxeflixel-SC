@@ -54,6 +54,7 @@ class HookAttack
 	private var throwDirY:Float = 0;
 	private var fireX:Float = 0;
 	private var fireY:Float = 0;
+	private var snagged:Bool = false;
 
 	public function new(player:Player, arena:Arena, director:EnemyDirector, status:PlayerCombat, hits:HitPipeline)
 	{
@@ -85,6 +86,7 @@ class HookAttack
 	{
 		if (phase != Idle)
 			return;
+		snagged = false;
 		fireX = pmx + dx * SPAWN_DIST;
 		fireY = pmy + dy * SPAWN_DIST;
 		hook.fire(fireX, fireY, dx, dy, aimDeg);
@@ -155,13 +157,21 @@ class HookAttack
 
 		if (!hit.grabbable)
 		{
-			hits.damageN(hit, hook.dirX, hook.dirY, cfg.snagDamage);
+			snag(hit);
 			beginRetract();
 			return;
 		}
 
 		if (!latch(hit))
 			beginRetract();
+	}
+
+	function snag(hit:Enemies):Void
+	{
+		if (snagged)
+			return;
+		snagged = true;
+		hits.damageN(hit, hook.dirX, hook.dirY, cfg.snagDamage);
 	}
 
 	function latch(hit:Enemies):Bool
@@ -295,9 +305,17 @@ class HookAttack
 			return;
 		}
 
-		var snag = director.firstInCircle(hook.x + hook.width / 2, hook.y + hook.height / 2, HookShot.RADIUS, true);
-		if (snag != null && snag.grabbable && latch(snag))
-			return;
+		var caught = director.firstInCircle(hook.x + hook.width / 2, hook.y + hook.height / 2, HookShot.RADIUS, true);
+		if (caught != null)
+		{
+			if (caught.grabbable)
+			{
+				if (latch(caught))
+					return;
+			}
+			else
+				snag(caught);
+		}
 
 		var dx = handX() - (hook.x + hook.width / 2);
 		var dy = handY() - (hook.y + hook.height / 2);
