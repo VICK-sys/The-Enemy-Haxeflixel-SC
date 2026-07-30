@@ -32,7 +32,7 @@
 	"options.title": "OPTIONS",
 	"options.volume": "VOLUME  < {0}% >",
 	"options.display": "DISPLAY  < {0} >",
-	"options.resolution": "RESOLUTION  < {0} >",
+	"options.resolution": "WINDOW SIZE  < {0}% OF SCREEN >",
 	"options.vsync": "V-SYNC  {0}",
 	"options.framerate": "FRAMERATE  < {0} >",
 	"options.aspect": "ASPECT RATIO  < {0} >",

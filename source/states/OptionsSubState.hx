@@ -312,7 +312,7 @@ class OptionsSubState extends FlxSubState
 			case BACK: Lang.t("common.back");
 			case VOLUME: Lang.t("options.volume", [Math.round(shownVolume * 100)]);
 			case DISPLAY: Lang.t("options.display", [Lang.t("display." + SaveData.displayMode())]);
-			case RESOLUTION: Lang.t("options.resolution", [resLabel()]);
+			case RESOLUTION: Lang.t("options.resolution", [SaveData.windowFill()]);
 			case VSYNC: Lang.t("options.vsync", [onOff(SaveData.vsync())]);
 			case FRAMERATE: Lang.t("options.framerate", [fpsLabel()]);
 			case ASPECT: Lang.t("options.aspect", [aspectLabel()]);
@@ -354,23 +354,8 @@ class OptionsSubState extends FlxSubState
 	static function windowed():Bool
 		return SaveData.displayMode() == "windowed";
 
-	function resLabel():String
-	{
-		var s = SaveData.windowSize();
-		return s[0] + " x " + s[1];
-	}
-
 	function stepResolution(dir:Int):Void
-	{
-		var list = SaveData.windowChoices();
-		var cur = SaveData.windowSize();
-		var at = 0;
-		for (i in 0...list.length)
-			if (list[i][0] == cur[0] && list[i][1] == cur[1])
-				at = i;
-		var pick = list[(at + dir + list.length) % list.length];
-		SaveData.setWindowSize(pick[0], pick[1]);
-	}
+		SaveData.setWindowFill(cycled(SaveData.WINDOW_STEPS, SaveData.windowFill(), dir));
 
 	function fpsLabel():String
 	{

@@ -24,7 +24,7 @@
 	"options.title": "OPCIONES",
 	"options.volume": "VOLUMEN  < {0}% >",
 	"options.display": "PANTALLA  < {0} >",
-	"options.resolution": "RESOLUCIÓN  < {0} >",
+	"options.resolution": "TAMAÑO DE VENTANA  < {0}% DE LA PANTALLA >",
 	"options.vsync": "V-SYNC  {0}",
 	"options.framerate": "FOTOGRAMAS  < {0} >",
 	"options.aspect": "ASPECTO  < {0} >",

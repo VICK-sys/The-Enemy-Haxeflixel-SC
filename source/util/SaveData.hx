@@ -97,34 +97,32 @@ class SaveData
 		save.flush();
 	}
 
-	public static var WINDOW_SIZES:Array<Array<Int>> = [[1280, 720], [1600, 900], [1920, 1080], [2560, 1440], [3200, 1800]];
+	public static var WINDOW_STEPS:Array<Int> = [50, 65, 80, 100];
 
-	public static function windowSize():Array<Int>
+	public static function windowFill():Int
 	{
 		ensure();
-		var w = save.data.windowW != null ? save.data.windowW : WINDOW_SIZES[0][0];
-		var h = save.data.windowH != null ? save.data.windowH : WINDOW_SIZES[0][1];
-		return [w, h];
+		var v:Int = save.data.windowFill != null ? save.data.windowFill : WINDOW_STEPS[0];
+		return WINDOW_STEPS.indexOf(v) >= 0 ? v : WINDOW_STEPS[0];
 	}
 
-	public static function setWindowSize(w:Int, h:Int):Void
+	public static function setWindowFill(pct:Int):Void
 	{
 		ensure();
-		save.data.windowW = w;
-		save.data.windowH = h;
+		save.data.windowFill = pct;
 		save.flush();
 	}
 
-	public static function windowChoices():Array<Array<Int>>
+	public static function windowSize():Array<Int>
 	{
 		var limit = displayBounds();
 		if (limit == null)
-			return WINDOW_SIZES;
-		var out:Array<Array<Int>> = [];
-		for (s in WINDOW_SIZES)
-			if (s[0] <= limit[0] && s[1] <= limit[1])
-				out.push(s);
-		return out.length > 0 ? out : [WINDOW_SIZES[0]];
+			return [1280, 720];
+		var pct = windowFill() / 100.0;
+		var w = limit[0] * pct;
+		var h = limit[1] * pct;
+		var side = w / h > 16 / 9 ? h * 16 / 9 : w;
+		return [Std.int(side), Std.int(side * 9 / 16)];
 	}
 
 	static function displayBounds():Array<Int>
