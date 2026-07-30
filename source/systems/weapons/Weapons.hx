@@ -12,11 +12,12 @@ import systems.Pickups;
 class Weapons
 {
 	static inline var WEAPON_COUNT:Int = 4;
-	static inline var BOW_MUZZLE:Float = 44;
+	static inline var BOW_MUZZLE:Float = 70;
 
 	public var held:HeldWeapon;
 	public var hits:HitPipeline;
 	public var swing:SwingAttack;
+	public var bash:SwingAttack;
 	public var yoyoJab:YoyoJab;
 	public var revolver:RevolverAttack;
 	public var bow:BowAttack;
@@ -46,6 +47,7 @@ class Weapons
 		held = new HeldWeapon(player, heldSprite);
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
 		swing = new SwingAttack(director, hits, fx, weaponCfg.swing);
+		bash = new SwingAttack(director, hits, fx, weaponCfg.bash);
 		yoyoJab = new YoyoJab(director, hits, fx);
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		revolver = new RevolverAttack(arena, director, fx, hits);
@@ -57,6 +59,11 @@ class Weapons
 		superOrbit.hue = util.SaveData.playerHue();
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
 		arrowStorm.paint(util.SaveData.playerHue());
+		arrowStorm.onMarked = function(x, y)
+		{
+			if (onSuperLaunch != null)
+				onSuperLaunch(x, y);
+		}
 		hookArms = new HookArms(player, director, hits);
 		deadEye = new DeadEye(player, director, revolver, held);
 		deadEye.onShot = function(bx, by, tx, ty, deg)
@@ -80,7 +87,7 @@ class Weapons
 	public var superBusy(get, never):Bool;
 
 	function get_superBusy():Bool
-		return superOrbit.activating || arrowStorm.active || hookArms.active;
+		return superOrbit.activating || arrowStorm.busy || hookArms.active;
 
 	public var playerBusy(get, never):Bool;
 
@@ -112,6 +119,7 @@ class Weapons
 			held.update(elapsed);
 		updateAttackInput();
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
+		bash.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		if (status.dead && yoyoJab.active)
 			yoyoJab.stop();
 		yoyoJab.update(elapsed, handX(), handY(), util.Controls.aimX(), util.Controls.aimY());
@@ -162,6 +170,33 @@ class Weapons
 		bow.rain.hue = util.SaveData.playerHue();
 	}
 
+	public var meleeShown(get, never):Float;
+
+	function get_meleeShown():Float
+	{
+		if (!held.swinging)
+			return 0;
+		return held.attack == Bash ? bash.reach : (held.attack == Swing ? swing.reach : 0);
+	}
+
+	public var meleeLift(get, never):Float;
+
+	function get_meleeLift():Float
+	{
+		if (!held.swinging)
+			return 0;
+		return held.attack == Bash ? bash.hitLift : (held.attack == Swing ? swing.hitLift : 0);
+	}
+
+	public var meleePush(get, never):Float;
+
+	function get_meleePush():Float
+	{
+		if (!held.swinging)
+			return 0;
+		return held.attack == Bash ? bash.hitPush : (held.attack == Swing ? swing.hitPush : 0);
+	}
+
 	public function equip(i:Int):Void
 	{
 		weapon = i < 0 || i >= WEAPON_COUNT ? 0 : i;
@@ -203,13 +238,15 @@ class Weapons
 			return;
 		}
 
-		if (util.Controls.secondJustPressed() && bow.rainReady && !held.swinging)
+		if (util.Controls.secondJustPressed() && bash.ready && !held.swinging)
 		{
 			var aim = aimFromPlayer();
+			var pmx = player.x + player.width * 0.5;
+			var pmy = player.y + player.height * 0.5;
 			bow.cancelCharge();
-			held.beginSwing(aim.deg, Rain);
-			emitAttack(Rain, held.handX(), held.handY(), aim.dx, aim.dy, aim.deg);
-			bow.rainFire(util.Controls.aimX(), util.Controls.aimY(), held.handX(), held.handY());
+			held.beginSwing(aim.deg, Bash);
+			emitAttack(Bash, pmx, pmy, aim.dx, aim.dy, aim.deg);
+			bash.fire(pmx, pmy, aim.dx, aim.dy, aim.deg, held.handX(), held.handY());
 			return;
 		}
 

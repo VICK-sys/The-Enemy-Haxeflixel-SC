@@ -31,7 +31,7 @@ import util.Lang;
 
 class PlayState extends FlxState
 {
-	public static inline var BASE_ZOOM:Float = 0.8;
+	public static inline var BASE_ZOOM:Float = 0.75;
 	public static var cursorLean:Float = 0.5;
 
 	static inline var FOLLOW_LERP:Float = 0.055;
@@ -62,18 +62,56 @@ class PlayState extends FlxState
 	private var timeStop:TimeStop;
 	private var burst:systems.DeathBurst;
 	private var ghost:systems.CoopGhost;
+	private var ritual:systems.ReviveRitual;
 	private var backGear:systems.BackGear;
+	private var boxes:systems.HitboxView;
 	private var wipe:IrisWipe;
 	public var restarting(default, null):Bool = false;
 
 	function setRestarting():Void
 		restarting = true;
 
+	function canPause():Bool
+		return !status.dead && subState == null && !restarting;
+
+	function openPause():Void
+	{
+		DiscordPresence.paused();
+		var pause = new PauseSubState(hud.camUI);
+		pause.closeCallback = function()
+		{
+			if (Lang.consumeChanged())
+				hud.applyLanguage(director.wave);
+			_player.setHue(SaveData.playerHue());
+			combat.repaint();
+			backGear.paint(SaveData.playerHue());
+		};
+		openPanel(pause);
+	}
+
+	override public function onFocusLost():Void
+	{
+		super.onFocusLost();
+		if (!Net.active && canPause())
+			openPause();
+	}
+
 	public function openPanel(sub:flixel.FlxSubState):Void
 	{
 		fx.clearHitstop();
 		FlxG.keys.reset();
 		openSubState(sub);
+	}
+
+	static inline var WHITE_OUT:Float = 1.2;
+
+	public function warnInto(go:Void->Void):Void
+	{
+		if (restarting)
+			return;
+		setRestarting();
+		director.spawning = false;
+		boss.warn(go);
 	}
 
 	public function leaveFor(go:Void->Void):Void
@@ -103,6 +141,7 @@ class PlayState extends FlxState
 		if (!util.Detour.resuming() && !util.Detour.inRoom)
 		{
 			util.Levels.startRun();
+			util.Run.reroll();
 			systems.TreeMan.reset();
 		}
 		WorldClock.reset();
@@ -123,8 +162,8 @@ class PlayState extends FlxState
 		heldSprite = new FlxSprite(0, 0, Paths.image("items/hammer"));
 		heldSprite.scale.set(4, 4);
 		heldSprite.origin.set(heldSprite.width * 0.5, heldSprite.height);
-		heldSprite.x = _player.x - heldSprite.origin.x + 30;
-		heldSprite.y = _player.y - heldSprite.origin.y + 50;
+		heldSprite.x = _player.x - heldSprite.origin.x + 10;
+		heldSprite.y = _player.y - heldSprite.origin.y + 1;
 
 		floor = systems.world.DecorTiles.build(util.CustomArena.tiles, util.CustomArena.tileset);
 		if (floor != null)
@@ -138,8 +177,9 @@ class PlayState extends FlxState
 		round = new states.play.ShopRound(this, _player, layers);
 		gate = new states.play.ReadyGate(this, _player, layers);
 		quiet = new states.play.QuietRoom(this, _player);
-		for (s in round.solids())
-			props.solids.add(s);
+		if (!util.CustomArena.quiet)
+			for (s in round.solids())
+				props.solids.add(s);
 
 		bushes = new systems.BushDrift();
 		for (s in props.named("treeBush"))
@@ -163,6 +203,7 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), burst.group);
 		ghost = new systems.CoopGhost();
 		insert(members.indexOf(layers.entityLayer), ghost.sprite);
+		ritual = new systems.ReviveRitual(burst, ghost);
 		backGear = new systems.BackGear();
 		backGear.paint(SaveData.playerHue());
 		layers.entityLayer.add(backGear.sprite);
@@ -174,26 +215,22 @@ class PlayState extends FlxState
 		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups, scraps);
 
 		add(combat.swing.slashes);
+		add(combat.bash.slashes);
 		add(combat.yoyoJab.flight.string);
 		add(combat.yoyoJab.flight.yoyo);
-		add(combat.bow.arrows);
-		add(combat.revolver.bullets);
+		insert(members.indexOf(layers.entityLayer), combat.arrowStorm.marker);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
-		add(combat.bow.rain.arrows);
 		add(combat.arrowStorm.trail.group);
 		add(combat.arrowStorm.superArrow);
 		add(combat.hookAttack.rope);
 		add(combat.hookAttack.hook);
 		insert(members.indexOf(layers.entityLayer), combat.hookArms.backGroup);
 		add(combat.hookArms.frontGroup);
-		add(combat.throwAttack.trail.group);
-		add(combat.throwAttack.thrown);
 		insert(members.indexOf(layers.entityLayer), combat.superOrbit.trail.group);
 		insert(members.indexOf(layers.entityLayer), combat.superOrbit.backLayer);
 		add(combat.superOrbit.frontLayer);
 		add(fx.sparks);
 		add(fx.pops);
-		add(director.shots);
 
 		add(props.overlay);
 
@@ -206,6 +243,9 @@ class PlayState extends FlxState
 		add(timeStop.overlay);
 		add(combat.deadEye.overlay);
 		add(combat.deadEye.markers);
+
+		boxes = new systems.HitboxView();
+		add(boxes.group);
 
 		hud = new Hud(this, status);
 		round.wire(status, director, hud);
@@ -240,6 +280,8 @@ class PlayState extends FlxState
 			netSync.onBossEvt = boss.begin;
 			netSync.onBossDefeatedEvt = boss.defeated;
 			netSync.onDropped = onNetDropped;
+			netSync.startRevive = ritual.begin;
+			netSync.reviveDone = function() return ritual.done;
 		netSync.onRestart = beginRestart;
 		}
 
@@ -251,7 +293,10 @@ class PlayState extends FlxState
 			util.Detour.restore(status, combat, director);
 
 		if (util.CustomArena.quiet)
+		{
+			round.shop.setVisible(false);
 			quiet.enter(combat, director, heldSprite, hud);
+		}
 		else
 		{
 			if (resumed)
@@ -266,8 +311,16 @@ class PlayState extends FlxState
 
 		Music.play(states.play.QuietRoom.track(), 0.3);
 
+		arena.raiseWhite(this);
+
 		wipe = new IrisWipe(this);
-		wipe.open();
+		if (util.Detour.consumeWhite())
+		{
+			wipe.visible = false;
+			arena.fadeFromWhite(WHITE_OUT);
+		}
+		else
+			wipe.open();
 
 		super.create();
 	}
@@ -289,23 +342,24 @@ class PlayState extends FlxState
 
 		if (!status.dead)
 		{
-			FlxG.collide(_player, arena.map);
-			props.collidePlayer();
+			systems.world.CircleCollide.resolve(_player, _player.hitRadius, arena.map, props.solids);
 		}
 		director.collide();
 
 		status.update(elapsed);
 
 		if (status.consumeJustDied())
+			intro.drop();
+
+		if (status.consumeJustBurst())
 		{
 			layers.playerShadow.visible = false;
-			intro.drop();
 			heldSprite.visible = false;
 			_player.visible = false;
-			burst.burst(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, SaveData.playerHue());
+			burst.burst(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, SaveData.playerHue(), _player.flipX);
 			if (Net.active)
 				ghost.show(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, SaveData.playerHue());
-			if (!Net.active)
+			else
 			{
 				hud.showDeath(director.wave, SaveData.bestWave());
 				DiscordPresence.died(director.wave, SaveData.bestWave());
@@ -318,18 +372,28 @@ class PlayState extends FlxState
 				burst.clear();
 			if (ghost.sprite.exists)
 				ghost.hide();
+			ritual.cancel();
 		}
+		burst.update(elapsed);
+		ritual.update(elapsed, _player.x + _player.width * 0.5, _player.y + _player.height * 0.5);
 		if (ghost.sprite.exists)
 			ghost.track(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, _player.flipX);
 		ghost.update(elapsed);
-		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y + 28, _player.flipX,
-			_player.animation.name == "walk" || _player.animation.name == "dash", _player.visible);
+		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y - 21, _player.flipX,
+			systems.BackGear.leanFor(_player.animation.name), _player.visible);
 
 		director.update(step);
 		pickups.update();
 		scraps.update(elapsed);
+		layers.adopt(cast director.shots);
+		layers.adopt(cast combat.revolver.bullets);
+		layers.adopt(cast combat.bow.arrows);
+		layers.adopt(cast combat.bow.rain.arrows);
+		layers.adopt(cast combat.throwAttack.trail.group);
+		layers.adoptOne(combat.throwAttack.thrown);
 		layers.update();
 		props.update();
+		drawBoxes();
 		bushes.update(step);
 		round.updateShop(elapsed);
 		if (petals != null)
@@ -343,7 +407,6 @@ class PlayState extends FlxState
 		director.updateShots();
 		if (netSync != null)
 			netSync.update(elapsed);
-		hud.setGauge(combat.bow.rainCharge, combat.weapon == 2);
 		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
 		hud.setBowLoaded(!combat.bow.recovering, combat.weapon == 2);
 		var recharging = combat.weapon == 1 ? combat.revolver.isReloading
@@ -363,20 +426,8 @@ class PlayState extends FlxState
 		if (subState == null && !status.dead)
 			DiscordPresence.playing(director.wave, boss.fighting, combat.weapon, status.kills);
 
-		if (util.Controls.pausePressed() && !status.dead && subState == null)
-		{
-			DiscordPresence.paused();
-			var pause = new PauseSubState(hud.camUI);
-			pause.closeCallback = function()
-			{
-				if (Lang.consumeChanged())
-					hud.applyLanguage(director.wave);
-				_player.setHue(SaveData.playerHue());
-				combat.repaint();
-				backGear.paint(SaveData.playerHue());
-			};
-			openPanel(pause);
-		}
+		if (util.Controls.pausePressed() && canPause())
+			openPause();
 
 		round.updateHold(elapsed);
 		gate.update(elapsed);
@@ -448,6 +499,56 @@ class PlayState extends FlxState
 		}
 	}
 
+	function drawBoxes():Void
+	{
+		if (!boxes.on)
+			return;
+
+		boxes.clear();
+		boxes.circle(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, _player.hitRadius,
+			systems.HitboxView.BODY);
+		boxes.span(_player.x, _player.feetY, _player.width, systems.HitboxView.FEET);
+
+		var reach = combat.meleeShown;
+		if (reach > 0)
+		{
+			var pmx = _player.x + _player.width * 0.5;
+			var pmy = _player.y + _player.height * 0.5 - combat.meleeLift;
+			var rdx = util.Controls.aimX() - pmx;
+			var rdy = util.Controls.aimY() - pmy;
+			var rlen = Math.sqrt(rdx * rdx + rdy * rdy);
+			if (rlen > 0.001)
+			{
+				var push = combat.meleePush;
+				boxes.ray(pmx + rdx / rlen * push, pmy + rdy / rlen * push, rdx / rlen, rdy / rlen, reach,
+					systems.HitboxView.REACH);
+			}
+		}
+
+		for (e in director.bodies.members)
+			if (e != null && e.exists && e.alive)
+			{
+				boxes.circle(e.x + e.width * 0.5, e.y + e.height * 0.5, e.hitRadius, systems.HitboxView.FOE);
+				boxes.span(e.x, e.feetY, e.width, systems.HitboxView.FEET);
+			}
+
+		for (b in director.shots.members)
+			if (b != null && b.exists)
+				boxes.circle(b.x + b.width * 0.5, b.y + b.height * 0.5, b.width * 0.5, systems.HitboxView.FOE);
+
+		for (s in props.solids.members)
+			if (s != null && s.exists)
+				boxes.box(s.x, s.y, s.width, s.height, systems.HitboxView.SOLID);
+
+		for (p in pickups.group.members)
+			if (p != null && p.exists)
+				boxes.box(p.x, p.y, p.width, p.height, systems.HitboxView.LOOT);
+
+		for (s in scraps.group.members)
+			if (s != null && s.exists)
+				boxes.box(s.x, s.y, s.width, s.height, systems.HitboxView.LOOT);
+	}
+
 	function debugKeys():Void
 	{
 		if (FlxG.keys.justPressed.MINUS)
@@ -463,7 +564,7 @@ class PlayState extends FlxState
 		}
 
 		if (FlxG.keys.justPressed.SIX)
-			FlxG.debugger.drawDebug = !FlxG.debugger.drawDebug;
+			boxes.toggle();
 
 		if (FlxG.keys.justPressed.F4)
 		{

@@ -33,6 +33,12 @@ class Enemies extends FlxSprite
 
 	public var target:FlxSprite;
 	public var kind(default, null):String;
+	public var bossBody(default, null):Bool = false;
+
+	public var hitRadius(get, never):Float;
+
+	function get_hitRadius():Float
+		return width * 0.5;
 	public var puppet:Bool = false;
 	public var netId:Int = -1;
 	public var entering:Bool = false;
@@ -124,6 +130,7 @@ class Enemies extends FlxSprite
 
 		if (data.attack == "boss")
 		{
+			bossBody = true;
 			gun = new FlxSprite();
 			gun.antialiasing = false;
 			attack = new RofelBoss(gun, data.boss);

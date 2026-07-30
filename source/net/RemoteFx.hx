@@ -41,6 +41,7 @@ class RemoteFx
 
 	private var avatar:RemoteAvatar;
 	private var dummyBow:FlxSprite;
+	private var stormPending:Bool = false;
 	private var blades:SuperOrbit;
 	private var storm:ArrowStorm;
 	private var arms:RemoteArms;
@@ -120,13 +121,24 @@ class RemoteFx
 			case 2:
 				storm.paint(avatar.hue);
 				dummyBow.loadGraphic(util.HuePalette.graphic("items/crossbow", avatar.hue));
-				storm.activate();
+				stormPending = true;
+			case 3:
+				util.Sfx.at("arms_deploy", avatar.sprite.x + avatar.sprite.width * 0.5,
+					avatar.sprite.y + systems.weapons.HookArms.ANCHOR_DOWN, 0.8);
 			default:
 		}
 	}
 
 	public function superLaunch(tx:Float, ty:Float):Void
+	{
+		if (stormPending)
+		{
+			stormPending = false;
+			storm.beginAt(tx, ty);
+			return;
+		}
 		blades.tryLaunch(tx, ty);
+	}
 
 	public function setBladesActive(on:Bool):Void
 	{
@@ -144,6 +156,11 @@ class RemoteFx
 		{
 			case Swing:
 				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.swing.spawnDist, pmy + dy * cfg.swing.spawnDist, dx, dy, aimDeg, cfg.swing.effectScale);
+				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
+
+			case Bash:
+				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.bash.spawnDist, pmy + dy * cfg.bash.spawnDist, dx, dy, aimDeg,
+					cfg.bash.effectScale, cfg.bash.effect == null ? "sword" : cfg.bash.effect);
 				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
 			case Yoyo:
@@ -170,7 +187,7 @@ class RemoteFx
 				arrow.paint(avatar.hue);
 				arrow.fire(pmx + dx * 10, pmy + dy * 10, dx, dy, aimDeg, 1, 1 + power * bc.speedBonus,
 					1 + power * bc.sizeBonus, 1);
-				FlxG.sound.play(Paths.sound("bow"), 0.7 + power * 0.3);
+				FlxG.sound.play(Paths.sound("crossbow_fire"), 0.7 + power * 0.3);
 				if (power >= 1)
 					fx.sparksAt(pmx + dx * 30, pmy + dy * 30);
 

@@ -9,7 +9,7 @@ import util.Paths;
 class ReloadBar
 {
 	static inline var SCALE:Float = 4;
-	static inline var LIFT:Float = 56;
+	static inline var LIFT:Float = 105;
 	static inline var FALLBACK_INSET:Float = 1;
 	static inline var CHANNEL_PAD:Float = 2;
 

@@ -11,4 +11,5 @@ enum WeaponMode
 	Hook;
 	Yoyo;
 	Pellet;
+	Bash;
 }

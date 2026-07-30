@@ -14,12 +14,14 @@ class SlashEffect extends FlxSprite
 	{
 		super();
 		frames = Paths.sparrow("effects/attacks_gfx");
-		animation.addByPrefix("slash", "Sword", 12, false);
+		animation.addByPrefix("sword", "Sword", 12, false);
+		animation.addByPrefix("spear", "Spear", 12, false);
+		animation.addByPrefix("dagger", "Dagger", 12, false);
 		antialiasing = false;
 		scale.set(4, 4);
 	}
 
-	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, size:Float = 1):Void
+	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, size:Float = 1, kind:String = "sword"):Void
 	{
 		revive();
 		scale.set(4 * size, 4 * size);
@@ -28,7 +30,7 @@ class SlashEffect extends FlxSprite
 		angle = angleDeg;
 		alpha = 1;
 		life = EFFECT_TIME;
-		animation.play("slash", true);
+		animation.play(animation.getByName(kind) != null ? kind : "sword", true);
 	}
 
 	override public function update(elapsed:Float):Void

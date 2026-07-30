@@ -52,7 +52,10 @@ class HitPipeline
 
 	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Float, rewardable:Bool):Void
 	{
+		var landed = damage < e.hp ? damage : e.hp;
 		e.takeHit(pushX, pushY, damage);
+		if (rewardable)
+			status.rewardDamage(landed);
 
 		util.Sfx.at("enemies/hit", e.x + e.width / 2, e.y + e.height / 2, 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
@@ -74,6 +77,7 @@ class HitPipeline
 
 	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Float, stunTime:Float):Void
 	{
+		status.rewardDamage(damage < e.hp ? damage : e.hp);
 		util.Sfx.at("enemies/hit", e.x + e.width / 2, e.y + e.height / 2, 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
 		e.flashTimer = 0.08;
@@ -82,10 +86,11 @@ class HitPipeline
 			onClaim(e, pushX, pushY, damage, stunTime);
 	}
 
-	public function blastRadial(cx:Float, cy:Float, radius:Float, force:Float, damage:Float):Void
+	public function blastRadial(cx:Float, cy:Float, radius:Float, force:Float, damage:Float, bossScale:Float = 1):Void
 	{
 		director.eachInCircle(cx, cy, radius, function(e)
 		{
+			var dmg = e.bossBody ? damage * bossScale : damage;
 			var ex = e.x + e.width / 2 - cx;
 			var ey = e.y + e.height / 2 - cy;
 			var len = Math.sqrt(ex * ex + ey * ey);
@@ -95,7 +100,7 @@ class HitPipeline
 				ey = -1;
 				len = 1;
 			}
-			damageN(e, ex / len * force, ey / len * force, damage);
+			damageN(e, ex / len * force, ey / len * force, dmg);
 		});
 	}
 }

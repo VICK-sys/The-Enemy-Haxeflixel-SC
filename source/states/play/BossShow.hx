@@ -16,6 +16,7 @@ class BossShow
 {
 	static inline var BOSS_PULL:Float = 0.8;
 	static inline var MUSIC:String = "batallon_de_las_velas";
+	static inline var WARN_HOLD:Float = 1.1;
 
 	public var fighting(default, null):Bool = false;
 
@@ -67,6 +68,27 @@ class BossShow
 			});
 		Music.play(MUSIC, 0.5);
 		FlxTween.tween(FlxG.camera, {zoom: PlayState.BASE_ZOOM * BOSS_PULL}, 1.2);
+	}
+
+	public function warn(onPeak:Void->Void):Void
+	{
+		hud.showBoss();
+		if (FlxG.sound.music != null)
+			FlxG.sound.music.fadeOut(2.4, 0);
+		alarm = FlxG.sound.play(Paths.sound("boss_alarm"), 0.7);
+		arena.beginWhiteFlash(function()
+		{
+			hud.fadeBanner();
+			if (alarm != null)
+				alarm.fadeOut(WARN_HOLD, 0, function(_)
+				{
+					if (alarm != null)
+					{
+						alarm.stop();
+						alarm = null;
+					}
+				});
+		}, onPeak, WARN_HOLD);
 	}
 
 	public function dropLoot(cx:Float, cy:Float):Void

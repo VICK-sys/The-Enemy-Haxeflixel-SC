@@ -38,13 +38,20 @@ class BackGear
 		sprite.origin.set(PIVOT_X, PIVOT_Y);
 	}
 
-	public function update(elapsed:Float, cx:Float, cy:Float, facingLeft:Bool, moving:Bool, shown:Bool):Void
+	public static function leanFor(anim:String):Float
+	{
+		if (anim == "dashBack")
+			return -1;
+		return anim == "walk" || anim == "dash" ? 1 : 0;
+	}
+
+	public function update(elapsed:Float, cx:Float, cy:Float, facingLeft:Bool, lean:Float, shown:Bool):Void
 	{
 		sprite.visible = shown;
 		if (!shown)
 			return;
 		sprite.angle += SPIN * elapsed;
-		var off = OFF_X - (moving ? LEAN_IN : 0);
+		var off = OFF_X - LEAN_IN * lean;
 		sprite.setPosition(cx + (facingLeft ? off : -off) - PLACE_X, cy + OFF_Y - PLACE_Y);
 	}
 }

@@ -58,9 +58,9 @@ class TutorialDemo extends FlxGroup
 		p.animation.addByPrefix("idle", "Idle", 9, true);
 		p.animation.addByPrefix("walk", "Run", 12, true);
 		p.scale.set(4, 4);
-		p.width = 75;
-		p.height = 95;
-		p.offset.set(-18, 7);
+		p.width = 42;
+		p.height = 44;
+		p.offset.set(2, 56);
 		p.animation.play("walk");
 		return p;
 	}

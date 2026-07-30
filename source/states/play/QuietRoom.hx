@@ -13,7 +13,7 @@ import util.Detour;
 class QuietRoom
 {
 	static inline var PLAYER_SCALE:Float = 1.5;
-	static inline var ROOM_PULL:Float = 0.7;
+	static inline var ROOM_PULL:Float = 2 / 3;
 	static inline var ARM_UP:Float = 240;
 	static inline var BACK:Float = 40;
 
@@ -44,7 +44,8 @@ class QuietRoom
 			return false;
 		if (!Detour.begin(director.wave, bossWave, status.health, status.superMeter, status.kills, combat.weapon))
 			return false;
-		host.leaveFor(function() FlxG.switchState(() -> new PlayState()));
+		Detour.armWhite();
+		host.warnInto(function() FlxG.switchState(() -> new PlayState()));
 		return true;
 	}
 

@@ -12,6 +12,9 @@ class HeldWeapon
 	static inline var BASE_SCALE:Float = 4;
 	static inline var SWING_TIME:Float = 0.2;
 	static inline var SWING_ARC:Float = 300;
+	static inline var BASH_TIME:Float = 0.3;
+	static inline var THRUST_DIST:Float = 34;
+	static inline var THRUST_OUT:Float = 0.35;
 	static inline var SWING_SCALE:Float = 2.5;
 	static inline var TOSS_ARC:Float = 90;
 	static inline var TOSS_SPIN:Float = 720;
@@ -26,6 +29,8 @@ class HeldWeapon
 	static inline var SHAKE_TILT:Float = 2.5;
 	static inline var SHAKE_FLIP:Float = 0.04;
 	static inline var GRIP_DIST:Float = 36;
+	static inline var MUZZLE:Float = 70;
+	static inline var PROBE_STEP:Float = 6;
 	static inline var AIM_LERP:Float = 0.25;
 	static inline var FLIP_MARGIN:Float = 12;
 	static inline var SHOOT_TIME:Float = 0.12;
@@ -35,8 +40,8 @@ class HeldWeapon
 	static inline var RAIN_TIME:Float = 0.6;
 	static inline var RAIN_RAISE:Float = 35;
 	static inline var HOOK_TIME:Float = 0.4;
-	public static inline var HAND_DX:Float = 30;
-	public static inline var HAND_DY:Float = 50;
+	public static inline var HAND_DX:Float = 10;
+	public static inline var HAND_DY:Float = 1;
 
 	public static inline var HAMMER:Int = 0;
 	public static inline var REVOLVER:Int = 1;
@@ -49,7 +54,7 @@ class HeldWeapon
 	public var swinging(get, never):Bool;
 
 	private var player:Player;
-	private var attack:WeaponMode = Swing;
+	public var attack(default, null):WeaponMode = Swing;
 	private var swingTimer:Float = 0;
 	private var swingBaseAngle:Float = 0;
 	private var swingDir:Int = 1;
@@ -69,6 +74,9 @@ class HeldWeapon
 	private var shakeClock:Float = 0;
 	private var shakeSign:Int = 1;
 	private var reloadP:Float = -1;
+	private var tossTurn:Float = 0;
+	private var tossSeen:Float = 0;
+	private var tossLift:Float = 0;
 
 	public function new(player:Player, sprite:FlxSprite)
 	{
@@ -102,6 +110,9 @@ class HeldWeapon
 		shakeClock = 0;
 		shakeSign = 1;
 		reloadP = -1;
+		tossTurn = 0;
+		tossSeen = 0;
+		tossLift = 0;
 		sprite.flipX = false;
 		sprite.flipY = false;
 		applyGraphic();
@@ -142,20 +153,43 @@ class HeldWeapon
 			}
 		}
 
+		updateToss(elapsed);
 		anchor();
 		updateSwing(elapsed);
-
-		if (reloadP >= 0)
-		{
-			sprite.y -= Math.sin(Math.PI * reloadP) * TOSS_ARC;
-			sprite.angle = TOSS_SPIN * FlxEase.cubeOut(reloadP);
-			tiltShown = 0;
-			reloadP = -1;
-		}
 	}
 
 	public function reloadPose(p:Float):Void
-		reloadP = p;
+	{
+		if (kind == REVOLVER)
+			reloadP = p;
+	}
+
+	function updateToss(elapsed:Float):Void
+	{
+		if (reloadP >= 0)
+		{
+			var want:Float = TOSS_SPIN * FlxEase.cubeOut(reloadP);
+			var step:Float = want - tossSeen;
+			tossSeen = want;
+			if (step > 0)
+				tossTurn += sprite.flipY ? -step : step;
+			tossLift = Math.sin(Math.PI * reloadP) * TOSS_ARC;
+			reloadP = -1;
+			return;
+		}
+
+		tossSeen = 0;
+		if (tossTurn == 0 && tossLift == 0)
+			return;
+
+		var decay:Float = Math.pow(1 - AIM_LERP, elapsed * 60);
+		tossTurn *= decay;
+		tossLift *= decay;
+		if (Math.abs(tossTurn) < 0.5)
+			tossTurn = 0;
+		if (tossLift < 0.5)
+			tossLift = 0;
+	}
 
 	public function loose(power:Float):Void
 	{
@@ -184,13 +218,13 @@ class HeldWeapon
 	public function beginSwing(aimDeg:Float, mode:WeaponMode):Void
 	{
 		attack = mode;
-		if (!bowLike())
+		swingSweep = !bowLike();
+		if (swingSweep)
 		{
 			updateFlip(aimDeg);
 			swingDir = sprite.flipX ? -1 : 1;
 			swingBaseAngle = sprite.flipX ? aimDeg - 180 : aimDeg;
 		}
-		swingSweep = !bowLike();
 		activeSwingTime = switch (mode)
 		{
 			case Shoot: SHOOT_TIME;
@@ -198,6 +232,7 @@ class HeldWeapon
 			case Bow: BOW_TIME;
 			case Rain: RAIN_TIME;
 			case Hook: HOOK_TIME;
+			case Bash: BASH_TIME;
 			default: SWING_TIME;
 		};
 		activeSwingTime *= util.Levels.actionScale();
@@ -209,6 +244,44 @@ class HeldWeapon
 
 	function raining():Bool
 		return attack == Rain && swingTimer > 0;
+
+	function clearReach(hx:Float, hy:Float, ux:Float, uy:Float, want:Float):Float
+	{
+		if (systems.world.PropBlock.solids == null)
+			return want;
+
+		var limit = want + MUZZLE;
+		var d = PROBE_STEP;
+		while (d <= limit)
+		{
+			if (systems.world.PropBlock.at(hx + ux * d, hy + uy * d))
+			{
+				limit = d - PROBE_STEP;
+				break;
+			}
+			d += PROBE_STEP;
+		}
+
+		var r = limit - MUZZLE;
+		if (r >= want)
+			return want;
+		return r < 0 ? 0 : r;
+	}
+
+	function thrustReach():Float
+	{
+		if (attack != Bash || swingTimer <= 0 || activeSwingTime <= 0)
+			return 0;
+
+		var t:Float = 1 - swingTimer / activeSwingTime;
+		if (t < 0)
+			t = 0;
+		if (t > 1)
+			t = 1;
+
+		var out:Float = t < THRUST_OUT ? FlxEase.quadOut(t / THRUST_OUT) : 1 - FlxEase.quadIn((t - THRUST_OUT) / (1 - THRUST_OUT));
+		return THRUST_DIST * out;
+	}
 
 	public function repaint():Void
 		applyGraphic();
@@ -257,9 +330,11 @@ class HeldWeapon
 				dy = util.Controls.aimY() - pmy;
 				len = Math.sqrt(dx * dx + dy * dy);
 			}
+			sprite.y -= tossLift;
 			if (len > 0.001)
 			{
-				var reach = BOW_DIST - recoilBack;
+				var reach = BOW_DIST - recoilBack + thrustReach();
+				reach = clearReach(sprite.x + sprite.origin.x, sprite.y + sprite.origin.y, dx / len, dy / len, reach);
 				sprite.x += dx / len * reach;
 				sprite.y += dy / len * reach;
 
@@ -304,6 +379,7 @@ class HeldWeapon
 		tiltShown = sprite.flipY ? recoilTilt : -recoilTilt;
 		if (charge > 0)
 			tiltShown += shakeSign * SHAKE_TILT * charge;
+		tiltShown += tossTurn;
 		sprite.angle += tiltShown;
 
 		applyTint(elapsed);

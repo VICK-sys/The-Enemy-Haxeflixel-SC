@@ -50,6 +50,10 @@ class MainMenuState extends FlxState
 	private var titleBaseY:Float = 0;
 	private var bobTime:Float = 0;
 	private var leaving:Bool = false;
+	private var typed:String = "";
+	private var scare:FlxSprite;
+	private var scareTimer:Float = 0;
+	private var scareSound:flixel.sound.FlxSound;
 	private var busy:Bool = false;
 	private var shutX:Int = 0;
 	private var shutY:Int = 0;
@@ -174,12 +178,93 @@ class MainMenuState extends FlxState
 		add(splash);
 	}
 
+	static inline var CODE:String = "1987";
+	static inline var SCARE_QUIT:Float = 2;
+
+	function readCode():Void
+	{
+		var hit = -1;
+		if (FlxG.keys.justPressed.ZERO || FlxG.keys.justPressed.NUMPADZERO)
+			hit = 0;
+		else if (FlxG.keys.justPressed.ONE || FlxG.keys.justPressed.NUMPADONE)
+			hit = 1;
+		else if (FlxG.keys.justPressed.TWO || FlxG.keys.justPressed.NUMPADTWO)
+			hit = 2;
+		else if (FlxG.keys.justPressed.THREE || FlxG.keys.justPressed.NUMPADTHREE)
+			hit = 3;
+		else if (FlxG.keys.justPressed.FOUR || FlxG.keys.justPressed.NUMPADFOUR)
+			hit = 4;
+		else if (FlxG.keys.justPressed.FIVE || FlxG.keys.justPressed.NUMPADFIVE)
+			hit = 5;
+		else if (FlxG.keys.justPressed.SIX || FlxG.keys.justPressed.NUMPADSIX)
+			hit = 6;
+		else if (FlxG.keys.justPressed.SEVEN || FlxG.keys.justPressed.NUMPADSEVEN)
+			hit = 7;
+		else if (FlxG.keys.justPressed.EIGHT || FlxG.keys.justPressed.NUMPADEIGHT)
+			hit = 8;
+		else if (FlxG.keys.justPressed.NINE || FlxG.keys.justPressed.NUMPADNINE)
+			hit = 9;
+
+		if (hit < 0)
+			return;
+
+		typed += hit;
+		if (typed.length > CODE.length)
+			typed = typed.substr(typed.length - CODE.length);
+		if (typed == CODE)
+		{
+			typed = "";
+			startScare();
+		}
+	}
+
+	function startScare():Void
+	{
+		list.enabled = false;
+		if (FlxG.sound.music != null)
+		{
+			FlxG.sound.music.volume = 0;
+			FlxG.sound.music.pause();
+		}
+
+		scare = new FlxSprite();
+		scare.loadGraphic(util.Paths.image("fun/golden_freddy"));
+		scare.antialiasing = false;
+		scare.scrollFactor.set();
+		scare.setGraphicSize(FlxG.width, FlxG.height);
+		scare.updateHitbox();
+		scare.setPosition(0, 0);
+		add(scare);
+
+		scareSound = FlxG.sound.play(util.Paths.sound("fun/goldie_scare"), 1);
+		scareTimer = SCARE_QUIT;
+	}
+
+	function updateScare(elapsed:Float):Void
+	{
+		scareTimer -= elapsed;
+		if (scareTimer > 0)
+			return;
+		scareTimer = 0;
+		DiscordPresence.shutdown();
+		lime.system.System.exit(0);
+	}
+
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
 
 		if (leaving)
 			return;
+
+		if (scareTimer > 0)
+		{
+			updateScare(elapsed);
+			return;
+		}
+
+		if (subState == null && !busy)
+			readCode();
 
 		if (FlxG.keys.justPressed.F7 && !busy && subState == null)
 		{

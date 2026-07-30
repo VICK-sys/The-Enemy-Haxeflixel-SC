@@ -26,8 +26,8 @@ class RemoteAvatar
 	private var targetY:Float = 0;
 	private var haveTarget:Bool = false;
 	private var weaponIdx:Int = -1;
-	private var heldOX:Float = 30;
-	private var heldOY:Float = 50;
+	private var heldOX:Float = 10;
+	private var heldOY:Float = 1;
 	private var leveling:Bool = false;
 	public var hue(default, null):Float = 0;
 	private var wasDead:Bool = false;
@@ -37,10 +37,10 @@ class RemoteAvatar
 
 	static inline var REVOLVER_INDEX:Int = 1;
 	static inline var BOW_INDEX:Int = 2;
-	static inline var OFFSET_Y:Float = 7;
-	static inline var TAG_UP:Float = 46;
+	static inline var OFFSET_Y:Float = 56;
+	static inline var TAG_UP:Float = 95;
 	static inline var TAG_WIDTH:Float = 320;
-	static inline var NOTE_UP:Float = 70;
+	static inline var NOTE_UP:Float = 119;
 	static inline var NOTE_COLOR:Int = 0xFFE8C860;
 
 	public function new(layers:RenderLayers)
@@ -50,11 +50,12 @@ class RemoteAvatar
 		sprite.animation.addByPrefix("idle", "Idle", 9, true);
 		sprite.animation.addByPrefix("walk", "Run", 12, true);
 		sprite.animation.addByPrefix("dash", "Dash", 12, false);
+		sprite.animation.addByPrefix("dashBack", "Backdash", 12, false);
 		sprite.animation.addByPrefix("hurt", "Hurt", 12, false);
 		sprite.antialiasing = false;
-		sprite.width = 75;
-		sprite.height = 95;
-		sprite.offset.set(-18, 7);
+		sprite.width = 42;
+		sprite.height = 44;
+		sprite.offset.set(2, 56);
 		sprite.scale.set(4, 4);
 		sprite.animation.play("idle");
 		sprite.visible = false;
@@ -123,11 +124,12 @@ class RemoteAvatar
 		sprite.animation.addByPrefix("idle", "Idle", 9, true);
 		sprite.animation.addByPrefix("walk", "Run", 12, true);
 		sprite.animation.addByPrefix("dash", "Dash", 12, false);
+		sprite.animation.addByPrefix("dashBack", "Backdash", 12, false);
 		sprite.animation.addByPrefix("hurt", "Hurt", 12, false);
 		sprite.animation.play(was == null ? "idle" : was);
-		sprite.width = 75;
-		sprite.height = 95;
-		sprite.offset.set(-18, 7);
+		sprite.width = 42;
+		sprite.height = 44;
+		sprite.offset.set(2, 56);
 		sprite.scale.set(4, 4);
 	}
 
@@ -155,7 +157,7 @@ class RemoteAvatar
 		var dead:Bool = m.dd == true;
 		if (dead && !wasDead)
 		{
-			burst.burst(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue);
+			burst.burst(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue, sprite.flipX);
 			ghost.show(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue);
 		}
 		else if (!dead && wasDead)
@@ -213,9 +215,10 @@ class RemoteAvatar
 	{
 		if (wasDead && ghost.sprite.exists)
 			ghost.track(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, sprite.flipX);
+		burst.update(elapsed);
 		ghost.update(elapsed);
-		gear.update(elapsed, sprite.x + sprite.width * 0.5, sprite.y + 28, sprite.flipX,
-			sprite.animation.name == "walk" || sprite.animation.name == "dash", sprite.visible);
+		gear.update(elapsed, sprite.x + sprite.width * 0.5, sprite.y - 21, sprite.flipX,
+			systems.BackGear.leanFor(sprite.animation.name), sprite.visible);
 		if (!haveTarget)
 			return;
 		var k = Math.min(1, LERP * elapsed);
@@ -225,7 +228,7 @@ class RemoteAvatar
 		held.x = sprite.x + heldOX;
 		held.y = sprite.y + heldOY;
 
-		shadow.x = sprite.x + 30;
+		shadow.x = sprite.x + 10;
 		shadow.y = sprite.y + entities.Player.FEET;
 		shadow.scale.set(4, 4);
 
@@ -240,7 +243,7 @@ class RemoteAvatar
 		if (bubble.visible)
 		{
 			bubble.x = sprite.x + sprite.width * 0.5 - bubble.width * 0.5;
-			bubble.y = sprite.y - bubble.height - 18;
+			bubble.y = sprite.y - bubble.height - 67;
 		}
 	}
 }

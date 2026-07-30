@@ -20,10 +20,8 @@ class BowAttack
 	public var charging:Bool = false;
 	public var charge(get, never):Float;
 	public var onFull:Void->Void;
-	public var rainCharge:Float = 1;
 
 	private var cfg = WeaponDataRegistry.get().bowCharge;
-	private var rainCfg = WeaponDataRegistry.get().arrowRain;
 	private var arena:Arena;
 	private var director:EnemyDirector;
 	private var fx:Fx;
@@ -70,11 +68,6 @@ class BowAttack
 			return 0;
 		return 1 - cooldown / cooldownTotal;
 	}
-
-	public var rainReady(get, never):Bool;
-
-	function get_rainReady():Bool
-		return rainCharge >= 1;
 
 	public function beginCharge():Void
 	{
@@ -145,7 +138,7 @@ class BowAttack
 		arrow.paint(util.SaveData.playerHue());
 		arrow.fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,
 			1 + power * cfg.sizeBonus, 1 + power * cfg.knockBonus);
-		FlxG.sound.play(Paths.sound("bow"), 0.7 + power * 0.3);
+		FlxG.sound.play(Paths.sound("crossbow_fire"), 0.7 + power * 0.3);
 		if (power >= 1)
 		{
 			arrow.piercing = true;
@@ -157,13 +150,6 @@ class BowAttack
 		if (reloadSound.playing)
 			reloadSound.stop();
 		reloadSound.play(true);
-	}
-
-	public function rainFire(tx:Float, ty:Float, bx:Float, by:Float):Void
-	{
-		rainCharge = 0;
-		rain.fire(tx, ty, bx, by);
-		FlxG.sound.play(Paths.sound("bow"), 0.7);
 	}
 
 	public function update(elapsed:Float):Void
@@ -202,13 +188,6 @@ class BowAttack
 
 		if (cooldown > 0)
 			cooldown -= elapsed;
-		if (rainCharge < 1)
-		{
-			rainCharge += elapsed / rainCfg.rechargeTime;
-			if (rainCharge > 1)
-				rainCharge = 1;
-		}
-
 		tickCharge(elapsed);
 		rain.update(elapsed);
 	}

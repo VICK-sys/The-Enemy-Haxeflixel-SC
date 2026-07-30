@@ -111,7 +111,7 @@ class ArrowRain
 			soundTimer = 0.05;
 		}
 		if (!cosmetic)
-			hits.blastRadial(ix, iy, cfg.hitRadius, 1, 1);
+			hits.blastRadial(ix, iy, cfg.hitRadius, 1, 1, cfg.bossScale == null ? 1 : cfg.bossScale);
 	}
 }
 

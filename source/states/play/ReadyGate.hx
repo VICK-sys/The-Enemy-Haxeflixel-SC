@@ -17,7 +17,7 @@ import util.Paths;
 class ReadyGate
 {
 	static inline var SCALE:Float = 4;
-	static inline var LIFT:Float = 18;
+	static inline var LIFT:Float = 67;
 	static inline var PROMPT_Y:Float = 150;
 	static inline var WAIT_CAP:Float = 90;
 
@@ -128,7 +128,16 @@ class ReadyGate
 		prompt.visible = true;
 		prompt.text = ready ? waitLabel() : Lang.t("ready.prompt");
 
-		if (ready || status.dead || (blocked != null && blocked()))
+		if (ready)
+			return;
+
+		if (Net.active && status.dead)
+		{
+			markReady(true);
+			return;
+		}
+
+		if (status.dead || (blocked != null && blocked()))
 			return;
 
 		if (util.Controls.acceptJustPressed())
@@ -146,11 +155,12 @@ class ReadyGate
 		return Lang.t("ready.waiting", [Net.isHost ? got : 1, Net.guestCount + 1]);
 	}
 
-	function markReady():Void
+	function markReady(quiet:Bool = false):Void
 	{
 		ready = true;
-		bubble.visible = true;
-		FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
+		bubble.visible = !quiet;
+		if (!quiet)
+			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
 		if (onCommit != null)
 			onCommit();
 

@@ -30,6 +30,8 @@ class MenuList extends FlxGroup
 	public var onAdjust:(Int, Int) -> Void;
 	public var enabled:Bool = true;
 	public var repeatAdjust:Bool = false;
+	public var repeatFor:Int->Bool;
+	public var skipRow:Array<Bool> = [];
 
 	private var rows:Array<FlxText> = [];
 	private var selector:FlxSprite;
@@ -76,6 +78,31 @@ class MenuList extends FlxGroup
 	public function rowAt(i:Int):FlxText
 		return rows[i];
 
+	public function setSkip(i:Int, on:Bool):Void
+	{
+		while (skipRow.length < rows.length)
+			skipRow.push(false);
+		skipRow[i] = on;
+	}
+
+	public function selectable(i:Int):Bool
+		return i < skipRow.length ? !skipRow[i] : true;
+
+	public function place(i:Int, y:Float):Void
+		rows[i].y = y;
+
+	public function settle():Void
+	{
+		if (!selectable(index))
+			for (i in 0...rows.length)
+				if (selectable(i))
+				{
+					index = i;
+					break;
+				}
+		snapSelector();
+	}
+
 	public var marker(get, never):FlxSprite;
 
 	function get_marker():FlxSprite
@@ -106,7 +133,7 @@ class MenuList extends FlxGroup
 			lastMouseY = FlxG.mouse.y;
 			for (i in 0...rows.length)
 			{
-				if (i != index && FlxG.mouse.overlaps(rows[i], rowCamera(i)))
+				if (i != index && selectable(i) && FlxG.mouse.overlaps(rows[i], rowCamera(i)))
 				{
 					index = i;
 					blip();
@@ -156,7 +183,15 @@ class MenuList extends FlxGroup
 
 	function move(dir:Int):Void
 	{
-		index = (index + dir + rows.length) % rows.length;
+		var n = rows.length;
+		var i = index;
+		for (_ in 0...n)
+		{
+			i = (i + dir + n) % n;
+			if (selectable(i))
+				break;
+		}
+		index = i;
 		blip();
 	}
 
@@ -178,7 +213,7 @@ class MenuList extends FlxGroup
 			return;
 		}
 
-		if (dir == 0 || !repeatAdjust)
+		if (dir == 0 || !(repeatFor != null ? repeatFor(index) : repeatAdjust))
 			return;
 
 		holdTime += elapsed;

@@ -33,6 +33,9 @@ class DialogueBox
 	private var blink:Float = 0;
 	private var full:String = "";
 
+	private var host:FlxState;
+	private var parts:Array<FlxSprite> = [];
+
 	public function new(state:FlxState, cam:FlxCamera)
 	{
 		var w = FlxG.width - SIDE * 2;
@@ -50,7 +53,9 @@ class DialogueBox
 		more = new FlxText(0, y + HEIGHT - 40, FlxG.width - SIDE - PAD, "");
 		more.setFormat(Lang.font(), 22, FlxColor.WHITE, RIGHT);
 
-		for (s in [edge, panel, (cast body : FlxSprite), (cast more : FlxSprite)])
+		host = state;
+		parts = [edge, panel, (cast body : FlxSprite), (cast more : FlxSprite)];
+		for (s in parts)
 		{
 			s.cameras = [cam];
 			s.scrollFactor.set();
@@ -66,8 +71,18 @@ class DialogueBox
 		pages = lines;
 		page = 0;
 		open = true;
+		raise();
 		show(true);
 		loadPage();
+	}
+
+	function raise():Void
+	{
+		for (s in parts)
+		{
+			host.remove(s, true);
+			host.add(s);
+		}
 	}
 
 	function show(on:Bool):Void

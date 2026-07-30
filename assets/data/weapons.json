@@ -1,6 +1,32 @@
 {
-	"swing": { "spawnDist": 145, "meleeRange": 245, "meleeArcCos": -0.5, "damage": 2, "effectScale": 1.4, "hitstop": 10, "hitstopScale": 0.06, "hitShake": 0.007, "knock": 3.2, "hitBrace": 7, "cooldown": 0.55 },
-	"yoyo": { "reach": 720, "speed": 2600, "holdTime": 2.5, "hitRadius": 46, "hitGap": 0.28, "damage": 1, "hitstop": 2, "hitstopScale": 0.3, "hitShake": 0.002, "knock": 1.0, "hitBrace": 0, "cooldown": 0.12, "restCooldown": 0.9 },
+	"swing": {
+		"spawnDist": 145,
+		"meleeRange": 245,
+		"meleeArcCos": -0.5,
+		"damage": 2,
+		"effectScale": 1.4,
+		"hitstop": 10,
+		"hitstopScale": 0.06,
+		"hitShake": 0.007,
+		"knock": 3.2,
+		"hitBrace": 7,
+		"cooldown": 0.55
+	},
+	"yoyo": {
+		"reach": 720,
+		"speed": 2600,
+		"holdTime": 2.5,
+		"hitRadius": 46,
+		"hitGap": 0.28,
+		"damage": 1,
+		"hitstop": 2,
+		"hitstopScale": 0.3,
+		"hitShake": 0.002,
+		"knock": 1.0,
+		"hitBrace": 0,
+		"cooldown": 0.12,
+		"restCooldown": 0.9
+	},
 	"revolver": {
 		"cylinder": 6,
 		"damage": 2,
@@ -12,7 +38,11 @@
 		"hitRadius": 26,
 		"knock": 1.2
 	},
-	"thrown": { "maxDist": 500, "returnSpeed": 1250, "catchCooldown": 0.45 },
+	"thrown": {
+		"maxDist": 500,
+		"returnSpeed": 1250,
+		"catchCooldown": 0.45
+	},
 	"bowCharge": {
 		"minTime": 0.15,
 		"fullTime": 1.0,
@@ -31,7 +61,8 @@
 		"spread": 130,
 		"fallSpeed": 1600,
 		"hitRadius": 80,
-		"rechargeTime": 9.0
+		"rechargeTime": 9.0,
+		"bossScale": 0.2
 	},
 	"hook": {
 		"range": 700,
@@ -54,8 +85,16 @@
 		"shotInterval": 0.045,
 		"damage": 15
 	},
-	"superOrbit": { "count": 10, "fireGate": 0.08 },
-	"arrowStorm": { "stormTime": 3.0, "spawnInterval": 0.06, "dropsPer": 2 },
+	"superOrbit": {
+		"count": 10,
+		"fireGate": 0.08
+	},
+	"arrowStorm": {
+		"stormTime": 3.0,
+		"spawnInterval": 0.06,
+		"dropsPer": 2,
+		"radius": 150
+	},
 	"hookArms": {
 		"reach": 540,
 		"reachSpeed": 1600,
@@ -67,5 +106,22 @@
 		"cooldown": 0.18,
 		"whipTime": 0.28,
 		"armsTime": 6.0
+	},
+	"bash": {
+		"spawnDist": 142,
+		"meleeRange": 190,
+		"meleeArcCos": 0.0,
+		"damage": 1,
+		"effectScale": 0.65,
+		"hitstop": 8,
+		"hitstopScale": 0.08,
+		"hitShake": 0.009,
+		"knock": 7.0,
+		"hitBrace": 6,
+		"cooldown": 1.1,
+		"deflects": false,
+		"effect": "spear",
+		"hitLift": 15,
+		"hitPush": -30
 	}
 }

@@ -23,6 +23,21 @@ class SwingAttack
 	private var cooldown:Float = 0;
 	private var cooldownTotal:Float = 0;
 
+	public var reach(get, never):Float;
+
+	function get_reach():Float
+		return cfg.meleeRange;
+
+	public var hitLift(get, never):Float;
+
+	function get_hitLift():Float
+		return cfg.hitLift == null ? 0 : cfg.hitLift;
+
+	public var hitPush(get, never):Float;
+
+	function get_hitPush():Float
+		return cfg.hitPush == null ? 0 : cfg.hitPush;
+
 	public var ready(get, never):Bool;
 
 	function get_ready():Bool
@@ -59,11 +74,14 @@ class SwingAttack
 		slashes = new FlxTypedGroup<SlashEffect>();
 	}
 
-	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
+	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, ?ox:Float, ?oy:Float):Void
 	{
 		if (cfg.cooldown != null)
 			coolFor(cfg.cooldown);
-		slashes.recycle(SlashEffect).fire(pmx + dx * cfg.spawnDist, pmy + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale);
+		var ex = ox == null ? pmx : ox;
+		var ey = oy == null ? pmy : oy;
+		slashes.recycle(SlashEffect).fire(ex + dx * cfg.spawnDist, ey + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale,
+			cfg.effect == null ? "sword" : cfg.effect);
 		strike(pmx, pmy, dx, dy);
 		guardTimer = GUARD_TIME;
 		guardX = dx;
@@ -84,6 +102,8 @@ class SwingAttack
 
 	function strike(pmx:Float, pmy:Float, aimX:Float, aimY:Float):Void
 	{
+		pmx += aimX * hitPush;
+		pmy += aimY * hitPush - hitLift;
 		var connected = false;
 		director.eachInCircle(pmx, pmy, cfg.meleeRange, function(e)
 		{
@@ -109,6 +129,12 @@ class SwingAttack
 
 	function deflect(pmx:Float, pmy:Float, aimX:Float, aimY:Float):Void
 	{
+		if (cfg.deflects == false)
+			return;
+
+		pmx += aimX * hitPush;
+		pmy += aimY * hitPush - hitLift;
+
 		for (shot in director.shots.members)
 		{
 			if (shot == null || !shot.exists || shot.friendly)

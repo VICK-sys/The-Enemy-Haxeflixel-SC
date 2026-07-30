@@ -11,7 +11,7 @@ class EnemyShot extends FlxSprite
 
 	static inline var DEFLECT_BOOST:Float = 1.35;
 	static inline var SCALE:Float = 4;
-	static inline var HIT:Float = 48;
+	static inline var HIT:Float = 28;
 	static inline var FADE:Float = 0.1;
 
 	public var dirX:Float = 1;

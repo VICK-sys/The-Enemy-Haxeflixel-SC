@@ -207,14 +207,14 @@ class LevelUpSubState extends FlxSubState
 		var now = [
 			two(base.healthMax + Levels.healthBonus()),
 			two(base.dashCooldown * Levels.dashScale()),
-			two(base.superPerKill * Levels.superGainScale()),
+			two(base.superPerDamage * 100 * Levels.superGainScale()),
 			dmg(Levels.points(Levels.STRENGTH)),
 			two(Levels.actionScale())
 		];
 		var soon = [
 			two(base.healthMax + Levels.healthAt(vg)),
 			two(base.dashCooldown * Levels.dashAt(en)),
-			two(base.superPerKill * Levels.superGainAt(en)),
+			two(base.superPerDamage * 100 * Levels.superGainAt(en)),
 			dmg(st),
 			two(Levels.actionAt(dx))
 		];

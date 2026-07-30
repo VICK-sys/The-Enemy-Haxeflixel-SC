@@ -5,18 +5,24 @@ import flixel.FlxState;
 import flixel.FlxSprite;
 import flixel.FlxCamera;
 import flixel.text.FlxText;
-import flixel.ui.FlxBar;
+import flixel.math.FlxRect;
 import flixel.util.FlxColor;
+import util.Paths;
 import entities.enemy.Enemies;
 
 class BossHud
 {
-	static inline var BAR_W:Int = 900;
-	static inline var BAR_H:Int = 30;
-	static inline var BAR_START_Y:Float = 20;
-	static inline var BAR_REST_Y:Float = 54;
+	static inline var ART_W:Float = 176;
+	static inline var ART_H:Float = 17;
+	static inline var CH_X:Float = 8;
+	static inline var CH_Y:Float = 7;
+	static inline var CH_W:Float = 160;
+	static inline var CH_H:Float = 4;
+	static inline var BAR_SCALE:Float = 4 * states.PlayState.BASE_ZOOM;
+	static inline var BAR_START_Y:Float = 46;
+	static inline var BAR_REST_Y:Float = 72;
 	static inline var EXPAND:Float = 0.55;
-	static inline var NAME_Y:Float = 78;
+	static inline var NAME_Y:Float = 112;
 	static inline var NAME_SPACING:Float = 4;
 	static inline var LETTER_STAGGER:Float = 0.14;
 	static inline var LETTER_FADE:Float = 0.3;
@@ -27,7 +33,10 @@ class BossHud
 	private var flash:FlxSprite;
 	private var flashTimer:Float = 0;
 	private var boss:Enemies;
-	private var bar:FlxBar;
+	private var barFrame:FlxSprite;
+	private var barFill:FlxSprite;
+	private var fillClip:FlxRect;
+	private var bossMax:Float = 1;
 	private var letters:Array<FlxText> = [];
 	private var barTimer:Float = 0;
 	private var barActive:Bool = false;
@@ -36,8 +45,10 @@ class BossHud
 	public function setShown(on:Bool):Void
 	{
 		shown = on;
-		if (bar != null)
-			bar.visible = on && barActive;
+		if (barFrame != null)
+			barFrame.visible = on && barActive;
+		if (barFill != null)
+			barFill.visible = on && barActive;
 		for (t in letters)
 			t.visible = on;
 	}
@@ -61,11 +72,17 @@ class BossHud
 
 	function dropBar():Void
 	{
-		if (bar != null)
+		if (barFrame != null)
 		{
-			state.remove(bar, true);
-			bar.destroy();
-			bar = null;
+			state.remove(barFrame, true);
+			barFrame.destroy();
+			barFrame = null;
+		}
+		if (barFill != null)
+		{
+			state.remove(barFill, true);
+			barFill.destroy();
+			barFill = null;
 		}
 		for (t in letters)
 		{
@@ -80,13 +97,14 @@ class BossHud
 		dropBar();
 		boss = bossEnemy;
 
-		bar = new FlxBar(0, 0, LEFT_TO_RIGHT, BAR_W, BAR_H, boss, "hp", 0, boss.hp);
-		bar.createFilledBar(0xFF400810, 0xFFE0132D, true, 0xFF000000);
-		bar.antialiasing = false;
-		bar.origin.set(BAR_W / 2, BAR_H / 2);
-		bar.cameras = [camUI];
-		bar.visible = shown;
-		state.add(bar);
+		bossMax = boss.hp > 0 ? boss.hp : 1;
+
+		barFrame = plate("ui/bar_long_empty");
+		barFill = plate("ui/bar_long_red");
+		fillClip = FlxRect.get(0, 0, CH_W, CH_H);
+		barFill.clipRect = fillClip;
+		state.add(barFrame);
+		state.add(barFill);
 
 		var word = "Rofel";
 		var total = 0.0;
@@ -118,6 +136,17 @@ class BossHud
 		barActive = true;
 	}
 
+	function plate(art:String):FlxSprite
+	{
+		var s = new FlxSprite();
+		s.loadGraphic(Paths.image(art));
+		s.antialiasing = false;
+		s.origin.set(0, 0);
+		s.cameras = [camUI];
+		s.visible = shown;
+		return s;
+	}
+
 	public function update(elapsed:Float):Void
 	{
 		if (barActive)
@@ -135,8 +164,10 @@ class BossHud
 	{
 		if (boss == null || !boss.exists)
 		{
-			if (bar != null)
-				bar.visible = false;
+			if (barFrame != null)
+				barFrame.visible = false;
+			if (barFill != null)
+				barFill.visible = false;
 			for (t in letters)
 				t.visible = false;
 			barActive = false;
@@ -147,10 +178,26 @@ class BossHud
 
 		var e = barTimer < EXPAND ? barTimer / EXPAND : 1;
 		var ease = 1 - Math.pow(1 - e, 3);
-		bar.scale.set(0.03 + 0.97 * ease, 1);
 		var cy = BAR_START_Y + (BAR_REST_Y - BAR_START_Y) * ease;
-		bar.x = FlxG.width / 2 - BAR_W / 2;
-		bar.y = cy - BAR_H / 2;
+		var sx = BAR_SCALE * (0.03 + 0.97 * ease);
+		var fw = ART_W * sx;
+		var fh = ART_H * BAR_SCALE;
+
+		barFrame.scale.set(sx, BAR_SCALE);
+		barFrame.x = FlxG.width / 2 - fw / 2;
+		barFrame.y = cy - fh / 2;
+
+		var frac = boss.hp / bossMax;
+		if (frac < 0)
+			frac = 0;
+		if (frac > 1)
+			frac = 1;
+
+		barFill.scale.set(sx, BAR_SCALE);
+		barFill.x = barFrame.x + CH_X * sx;
+		barFill.y = barFrame.y + CH_Y * BAR_SCALE;
+		fillClip.width = CH_W * frac;
+		barFill.clipRect = fillClip;
 
 		for (i in 0...letters.length)
 		{

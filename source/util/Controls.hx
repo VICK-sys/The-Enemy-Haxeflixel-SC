@@ -237,6 +237,9 @@ class Controls
 	public static function menuBack():Bool
 		return FlxG.keys.anyJustPressed([FlxKey.ESCAPE]) || padJust(FlxGamepadInputID.B);
 
+	public static function walkHeld():Bool
+		return FlxG.keys.anyPressed([FlxKey.SHIFT]) || padPressed(FlxGamepadInputID.LEFT_STICK_CLICK);
+
 	public static function pausePressed():Bool
 		return justPressed(PAUSE) || padJust(FlxGamepadInputID.START);
 

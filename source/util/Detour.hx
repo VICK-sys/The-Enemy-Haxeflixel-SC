@@ -1,6 +1,5 @@
 package util;
 
-import flixel.FlxG;
 import data.PropData.PropPlace;
 import net.Net;
 
@@ -8,8 +7,6 @@ class Detour
 {
 	public static inline var EVENT:String = "treeRoom";
 	public static inline var ROOM:String = "treeRoom";
-	public static inline var ODDS:Int = 66;
-
 	public static var inRoom(default, null):Bool = false;
 	public static var used(default, null):Bool = false;
 
@@ -29,12 +26,24 @@ class Detour
 	static var kills:Int;
 	static var weapon:Int;
 	static var pending:Bool = false;
+	static var white:Bool = false;
 
 	public static function reset():Void
 	{
 		inRoom = false;
 		used = false;
 		pending = false;
+		white = false;
+	}
+
+	public static function armWhite():Void
+		white = true;
+
+	public static function consumeWhite():Bool
+	{
+		var was = white;
+		white = false;
+		return was;
 	}
 
 	public static function rolls():Bool
@@ -45,7 +54,7 @@ class Detour
 			return false;
 		if (MapStore.builtin(ROOM) == null)
 			return false;
-		return FlxG.random.int(1, ODDS) == 1;
+		return true;
 	}
 
 	public static function begin(atWave:Int, atBossWave:Int, hp:Float, superAt:Float, killCount:Int, heldWeapon:Int):Bool

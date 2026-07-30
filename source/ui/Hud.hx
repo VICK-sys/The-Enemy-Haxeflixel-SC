@@ -28,14 +28,12 @@ class Hud
 	static inline var SCRAP_GAP:Float = 10;
 	static inline var SCRAP_DROP:Float = 4;
 	static inline var SCRAP_SIZE:Int = 34;
-	static inline var SCRAP_ICON_SCALE:Float = 3;
+	static inline var SCRAP_ICON_SCALE:Float = UI_SCALE * 2 / 3;
 	static inline var SCRAP_SHADE:Float = 0.45;
 
-	static inline var GAUGE_LEFT:Float = 3;
-	static inline var GAUGE_SPAN:Float = 29;
-	static inline var UI_SCALE:Float = 4;
+	static inline var UI_SCALE:Float = 4 * states.PlayState.BASE_ZOOM;
 	static inline var FRAME_X:Float = 16;
-	static inline var FRAME_Y:Float = 600;
+
 	static inline var HP_X:Float = 28;
 	static inline var HP_Y:Float = 8;
 	static inline var SUPER_X:Float = 27;
@@ -67,10 +65,6 @@ class Hud
 	private var timeText:FlxText;
 	private var stopTimerText:FlxText;
 	private var stopTimerTarget:Float = 0;
-	private var gaugeBack:FlxSprite;
-	private var gaugeFill:FlxSprite;
-	private var gaugeClip:FlxRect;
-	private var gaugeShown:Float = -1;
 	private var superFill:FlxSprite;
 	private var superClip:FlxRect;
 	private var superShown:Float = -1;
@@ -95,28 +89,21 @@ class Hud
 		camUI = new FlxCamera();
 		FlxG.cameras.add(camUI, false);
 		camUI.bgColor.alpha = 0;
+		camUI.pixelPerfectRender = true;
 
-		var frame = makeUiSprite(FRAME_X, FRAME_Y, "hp_thing");
+		var frame = makeUiSprite(FRAME_X, 0, "hp_thing");
+		var frameY = AMMO_BOTTOM - frame.height;
+		frame.y = frameY;
 
-		hpFill = makeUiSprite(FRAME_X + HP_X * UI_SCALE, FRAME_Y + HP_Y * UI_SCALE, "hp_bar");
+		hpFill = makeUiSprite(FRAME_X + HP_X * UI_SCALE, frameY + HP_Y * UI_SCALE, "hp_bar");
 		hpClip = FlxRect.get(0, 0, 0, hpFill.frameHeight);
 
-		superFill = makeUiSprite(FRAME_X + SUPER_X * UI_SCALE, FRAME_Y + SUPER_Y * UI_SCALE, "super_bar");
+		superFill = makeUiSprite(FRAME_X + SUPER_X * UI_SCALE, frameY + SUPER_Y * UI_SCALE, "super_bar");
 		superClip = FlxRect.get(0, 0, 0, superFill.frameHeight);
 
 		state.add(piece(frame));
 		state.add(piece(hpFill));
 		state.add(piece(superFill));
-
-		var gaugeY = FRAME_Y - PIP_GAP;
-		gaugeBack = makeUiSprite(hpFill.x, 0, "bar_gauge_back");
-		gaugeBack.y = gaugeY - gaugeBack.height;
-		gaugeFill = makeUiSprite(hpFill.x, gaugeBack.y, "bar_gauge_fill");
-		gaugeClip = FlxRect.get(0, 0, 0, gaugeBack.frameHeight);
-		gaugeBack.visible = false;
-		gaugeFill.visible = false;
-		state.add(piece(gaugeBack));
-		state.add(piece(gaugeFill));
 
 		capTop = makeUiSprite(0, 0, "ammo_indicator");
 		capTop.flipY = true;
@@ -180,8 +167,6 @@ class Hud
 		bossHud.setShown(on);
 		if (on)
 		{
-			gaugeBack.visible = false;
-			gaugeFill.visible = false;
 			hideAmmo();
 			stopTimerText.visible = false;
 			bannerText.visible = bannerTimer > 0 || bannerFading;
@@ -432,17 +417,6 @@ class Hud
 		state.add(bannerText);
 		state.remove(customCursor, true);
 		state.add(customCursor);
-	}
-
-	public function setGauge(fill:Float, shown:Bool):Void
-	{
-		gaugeBack.visible = shown && hudOn;
-		gaugeFill.visible = shown && hudOn;
-		if (!shown || fill == gaugeShown)
-			return;
-		gaugeShown = fill;
-		gaugeClip.width = GAUGE_LEFT + GAUGE_SPAN * fill;
-		gaugeFill.clipRect = gaugeClip;
 	}
 
 	function stackCaps(rows:Int, rowH:Float):Float

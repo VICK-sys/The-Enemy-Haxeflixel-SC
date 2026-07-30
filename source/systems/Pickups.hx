@@ -64,7 +64,7 @@ class Pickups
 				|| p.y + p.height <= player.y || player.y + player.height <= p.y)
 				continue;
 			status.heal(HealthPickup.HEAL);
-			FlxG.sound.play(Paths.sound("heal"), 0.6);
+			FlxG.sound.play(Paths.sound("power_up"), 0.6);
 			p.kill();
 			if (onCollect != null)
 				onCollect(p);

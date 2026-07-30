@@ -149,6 +149,26 @@ class SaveData
 		save.flush();
 	}
 
+	public static inline var VOICE_MIN:Float = 0.6;
+	public static inline var VOICE_MAX:Float = 1.25;
+
+	public static function voicePitch():Float
+	{
+		ensure();
+		return save.data.voicePitch != null ? save.data.voicePitch : 1;
+	}
+
+	public static function setVoicePitch(v:Float):Void
+	{
+		ensure();
+		if (v < VOICE_MIN)
+			v = VOICE_MIN;
+		if (v > VOICE_MAX)
+			v = VOICE_MAX;
+		save.data.voicePitch = Math.round(v * 20) / 20;
+		save.flush();
+	}
+
 	public static function showHud():Bool
 	{
 		ensure();
@@ -302,6 +322,8 @@ class SaveData
 			Main.counter.visible = showFps();
 	}
 
+	static inline var BORDERLESS_BLEED:Int = 1;
+
 	static function applyDisplay():Void
 	{
 		#if desktop
@@ -309,6 +331,7 @@ class SaveData
 		switch (displayMode())
 		{
 			case "fullscreen":
+				win.borderless = false;
 				win.fullscreen = true;
 			case "borderless":
 				win.fullscreen = false;
@@ -316,8 +339,8 @@ class SaveData
 				var d = win.display;
 				if (d != null)
 				{
-					win.resize(Std.int(d.bounds.width), Std.int(d.bounds.height));
 					win.move(Std.int(d.bounds.x), Std.int(d.bounds.y));
+					win.resize(Std.int(d.bounds.width), Std.int(d.bounds.height) + BORDERLESS_BLEED);
 				}
 			default:
 				win.fullscreen = false;

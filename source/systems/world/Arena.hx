@@ -36,6 +36,10 @@ class Arena
 	private var pillars:Array<FlxSprite> = [];
 	private var pillarLayer:FlxTypedGroup<FlxSprite>;
 	private var introPhase:Int = 0;
+	private var flashPeak:Void->Void;
+	private var flashDone:Void->Void;
+	private var flashHold:Float = 0;
+	private var fadeSpan:Float = 0;
 	private var introTimer:Float = 0;
 	private var gridActive:Bool = false;
 	private var state:FlxState;
@@ -94,6 +98,32 @@ class Arena
 		systems.Fx.shake(0.012, SHAKE_TIME);
 	}
 
+	public function fadeFromWhite(time:Float):Void
+	{
+		whiteOverlay.alpha = 1;
+		fadeSpan = time;
+		introPhase = 8;
+		introTimer = time;
+	}
+
+	public function raiseWhite(state:flixel.FlxState):Void
+	{
+		state.remove(whiteOverlay, true);
+		state.add(whiteOverlay);
+	}
+
+	public function beginWhiteFlash(onPeak:Void->Void, onDone:Void->Void, hold:Float):Void
+	{
+		if (introPhase != 0 || gridActive)
+			return;
+		flashPeak = onPeak;
+		flashDone = onDone;
+		flashHold = hold;
+		introPhase = 5;
+		introTimer = SHAKE_TIME;
+		systems.Fx.shake(0.012, SHAKE_TIME);
+	}
+
 	public function endBossTransition():Void
 	{
 		if (introPhase != 0 || !gridActive)
@@ -135,6 +165,46 @@ class Arena
 			{
 				introPhase = 3;
 				introTimer = REVEAL_TIME;
+			}
+		}
+		else if (introPhase == 5)
+		{
+			introTimer -= elapsed;
+			whiteOverlay.alpha = 1 - Math.max(0, introTimer) / SHAKE_TIME;
+			if (introTimer <= 0)
+			{
+				whiteOverlay.alpha = 1;
+				introPhase = 6;
+				introTimer = flashHold;
+				var peak = flashPeak;
+				flashPeak = null;
+				if (peak != null)
+					peak();
+			}
+		}
+		else if (introPhase == 6)
+		{
+			introTimer -= elapsed;
+			whiteOverlay.alpha = 1;
+			if (introTimer <= 0)
+			{
+				introPhase = 7;
+				var done = flashDone;
+				flashDone = null;
+				if (done != null)
+					done();
+			}
+		}
+		else if (introPhase == 7)
+			whiteOverlay.alpha = 1;
+		else if (introPhase == 8)
+		{
+			introTimer -= elapsed;
+			whiteOverlay.alpha = fadeSpan > 0 ? Math.max(0, introTimer) / fadeSpan : 0;
+			if (introTimer <= 0)
+			{
+				whiteOverlay.alpha = 0;
+				introPhase = 0;
 			}
 		}
 		else if (introPhase == 4)

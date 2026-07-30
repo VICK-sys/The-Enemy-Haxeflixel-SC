@@ -11,8 +11,8 @@ class WeaponFlyIn
 {
 	static inline var TIME:Float = 0.55;
 	static inline var SPIN:Float = 720;
-	static inline var START_SCALE:Float = 3;
-	static inline var END_SCALE:Float = 4;
+	static inline var END_SCALE:Float = 4 * states.PlayState.BASE_ZOOM;
+	static inline var START_SCALE:Float = END_SCALE * 2 / 3;
 	static inline var ARC:Float = 110;
 
 	public var sprite:FlxSprite;

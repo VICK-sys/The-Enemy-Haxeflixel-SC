@@ -15,7 +15,8 @@ class HookArms
 {
 	static inline var REST_UP:Float = 78;
 	static inline var REST_DX:Float = 20;
-	public static inline var ANCHOR_DOWN:Float = 46;
+	public static inline var ANCHOR_DOWN:Float = -3;
+	static inline var DEPLOY_VOL:Float = 0.8;
 	static inline var REST_TILT_DEG:Float = 42;
 	static inline var CURVE_FRAC:Float = 0.75;
 	static inline var REST_EASE:Float = 9;
@@ -73,6 +74,7 @@ class HookArms
 		retracting = false;
 		superTimer = cfg.armsTime;
 		var pcx = player.x + player.width * 0.5;
+		util.Sfx.at("arms_deploy", pcx, player.y + ANCHOR_DOWN, DEPLOY_VOL);
 		for (arm in arms)
 		{
 			arm.phase = 0;

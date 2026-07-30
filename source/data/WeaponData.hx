@@ -13,7 +13,11 @@ typedef SwingConfig = {
 	hitShake:Float,
 	knock:Float,
 	hitBrace:Float,
-	?cooldown:Float
+	?cooldown:Float,
+	?deflects:Bool,
+	?effect:String,
+	?hitLift:Float,
+	?hitPush:Float
 }
 
 typedef YoyoConfig = {
@@ -69,7 +73,8 @@ typedef ArrowRainConfig = {
 	spread:Float,
 	fallSpeed:Float,
 	hitRadius:Float,
-	rechargeTime:Float
+	rechargeTime:Float,
+	?bossScale:Float
 }
 
 typedef HookConfig = {
@@ -103,7 +108,8 @@ typedef SuperOrbitConfig = {
 typedef ArrowStormConfig = {
 	stormTime:Float,
 	spawnInterval:Float,
-	dropsPer:Int
+	dropsPer:Int,
+	radius:Float
 }
 
 typedef HookArmsConfig = {
@@ -130,7 +136,8 @@ typedef WeaponsData = {
 	deadEye:DeadEyeConfig,
 	superOrbit:SuperOrbitConfig,
 	arrowStorm:ArrowStormConfig,
-	hookArms:HookArmsConfig
+	hookArms:HookArmsConfig,
+	bash:SwingConfig
 }
 
 class WeaponDataRegistry

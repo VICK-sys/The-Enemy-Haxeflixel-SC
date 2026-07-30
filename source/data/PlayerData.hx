@@ -4,6 +4,7 @@ import util.Paths;
 
 typedef PlayerData = {
 	moveSpeed:Float,
+	walkScale:Float,
 	rampStart:Float,
 	rampRate:Float,
 	rampReset:Float,
@@ -15,9 +16,12 @@ typedef PlayerData = {
 	dropLowHealthBonus:Float,
 	healthMax:Float,
 	superMax:Float,
-	superPerKill:Float,
+	superPerDamage:Float,
+	superCooldown:Float,
 	iframeTime:Float,
 	hurtLockTime:Float,
+	hurtSlowTime:Float,
+	hurtMoveScale:Float,
 	knockback:Float,
 	timestopSlow:Float,
 	timestopHold:Float,

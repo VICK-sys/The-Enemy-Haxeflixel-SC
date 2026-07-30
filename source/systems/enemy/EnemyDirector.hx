@@ -26,6 +26,7 @@ class EnemyDirector
 	private var dripTimer:Float = 0;
 	public var holdWave:Bool = false;
 	public var holdReady:Bool = false;
+	public var lobbyDown:Bool = false;
 	public var shots(get, never):FlxTypedGroup<EnemyShot>;
 	public var onWave:Int->Void;
 	public var onBoss:Void->Void;
@@ -46,7 +47,7 @@ class EnemyDirector
 	private var gunfire:EnemyShots;
 	private var bossDeath:BossDeath;
 
-	private var bodies:FlxTypedGroup<Enemies>;
+	public var bodies(default, null):FlxTypedGroup<Enemies>;
 	private var rigs:Array<EnemyRig> = [];
 	private var waveData:WaveData;
 	private var betweenWaves:Float = 0;
@@ -148,21 +149,25 @@ class EnemyDirector
 
 	public function collide():Void
 	{
-		FlxG.collide(bodies, arena.map);
-		if (solids != null)
-			bodies.forEachAlive(function(e:Enemies)
-			{
-				if (!e.entering)
-					FootCollide.against(e, e.feetY, solids);
-			});
+		bodies.forEachAlive(function(e:Enemies)
+		{
+			if (!e.entering || inBounds(e))
+				systems.world.CircleCollide.resolve(e, e.hitRadius, arena.map, solids);
+		});
 		FlxG.overlap(bodies, bodies, null, separateLive);
+	}
+
+	function inBounds(e:Enemies):Bool
+	{
+		return e.x > ENTER_MARGIN && e.y > ENTER_MARGIN && e.x + e.width < arena.width - ENTER_MARGIN
+			&& e.y + e.height < arena.height - ENTER_MARGIN;
 	}
 
 	function separateLive(a:Enemies, b:Enemies):Bool
 	{
 		if (a.isDead || b.isDead || a.seized || b.seized || a.entering || b.entering)
 			return false;
-		return FlxObject.separate(a, b);
+		return systems.world.CircleCollide.separate(a, a.hitRadius, b, b.hitRadius);
 	}
 
 	public function update(elapsed:Float):Void
@@ -175,7 +180,7 @@ class EnemyDirector
 
 		if (bossPending)
 			updateBossIntro(elapsed);
-		else if (!status.dead)
+		else if (!lobbyDown && (net.Net.active || !status.dead))
 			updateWaves(elapsed);
 
 		updateRigs(elapsed);
@@ -329,9 +334,7 @@ class EnemyDirector
 			if (e.gun != null)
 				e.gun.visible = alive;
 
-			if (e.entering && e.x > ENTER_MARGIN && e.y > ENTER_MARGIN
-				&& e.x + e.width < arena.width - ENTER_MARGIN && e.y + e.height < arena.height - ENTER_MARGIN
-				&& spawner.spotClear(e, e.x, e.y))
+			if (e.entering && inBounds(e) && spawner.spotClear(e, e.x, e.y))
 			{
 				e.entering = false;
 				e.allowCollisions = ANY;
@@ -474,11 +477,10 @@ class EnemyDirector
 
 	function circleTouches(e:Enemies, cx:Float, cy:Float, radius:Float):Bool
 	{
-		var nx = Math.max(e.x, Math.min(cx, e.x + e.width));
-		var ny = Math.max(e.y, Math.min(cy, e.y + e.height));
-		var dx = cx - nx;
-		var dy = cy - ny;
-		return dx * dx + dy * dy <= radius * radius;
+		var dx = cx - (e.x + e.width * 0.5);
+		var dy = cy - (e.y + e.height * 0.5);
+		var reach = radius + e.hitRadius;
+		return dx * dx + dy * dy <= reach * reach;
 	}
 
 	public function enemyCount():Int

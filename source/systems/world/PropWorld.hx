@@ -38,9 +38,6 @@ class PropWorld
 		overlay.active = false;
 	}
 
-	public function collidePlayer():Void
-		FootCollide.against(player, player.feetY, solids);
-
 	public function setDecorVisible(on:Bool):Void
 	{
 		for (s in decor)

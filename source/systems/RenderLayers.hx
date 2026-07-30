@@ -11,6 +11,8 @@ import systems.world.Decor;
 
 class RenderLayers
 {
+	static inline var CORPSE_BAND:Float = -800000;
+
 	public var host(default, null):FlxState;
 	public var shadowLayer:FlxTypedGroup<FlxSprite>;
 	public var entityLayer:FlxTypedGroup<FlxSprite>;
@@ -19,6 +21,7 @@ class RenderLayers
 
 	private var player:Player;
 	private var heldSprite:FlxSprite;
+	private var flying:Array<FlxSprite> = [];
 
 	public function new(state:FlxState, player:Player, heldSprite:FlxSprite)
 	{
@@ -29,7 +32,7 @@ class RenderLayers
 		shadowLayer = new FlxTypedGroup<FlxSprite>();
 		state.add(shadowLayer);
 
-		playerShadow = new FlxSprite(player.x + 30, player.feetY, Paths.image("effects/shadow"));
+		playerShadow = new FlxSprite(player.x + 10, player.feetY, Paths.image("effects/shadow"));
 		playerShadow.scale.set(4, 4);
 		shadowLayer.add(playerShadow);
 
@@ -57,6 +60,30 @@ class RenderLayers
 		shadowLayer.remove(shadow, true);
 	}
 
+	public function adopt(pool:FlxTypedGroup<Dynamic>):Void
+	{
+		for (m in pool.members)
+			adoptOne(cast m);
+	}
+
+	public function adoptOne(s:FlxSprite):Void
+	{
+		if (s != null)
+		{
+			var held = flying.indexOf(s) >= 0;
+			if (s.exists && !held)
+			{
+				flying.push(s);
+				entityLayer.add(s);
+			}
+			else if (!s.exists && held)
+			{
+				flying.remove(s);
+				entityLayer.remove(s, true);
+			}
+		}
+	}
+
 	public function update():Void
 	{
 		playerShadow.x = player.shadowCenterX - playerShadow.width / 2;
@@ -80,7 +107,12 @@ class RenderLayers
 		if (s == player)
 			return player.feetY;
 		if (Std.isOfType(s, Enemies))
-			return cast(s, Enemies).feetY;
+		{
+			var e = cast(s, Enemies);
+			return e.isDead ? CORPSE_BAND + e.feetY : e.feetY;
+		}
+		if (flying.indexOf(s) >= 0)
+			return s.y + s.height * 0.5;
 		return Decor.sortValue(s);
 	}
 }

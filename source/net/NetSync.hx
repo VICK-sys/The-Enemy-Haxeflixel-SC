@@ -59,6 +59,11 @@ class NetSync
 	public var onPeerLost:Int->Void;
 
 	private var deathWave:Int = -1;
+	private var deathBoss:Int = -1;
+	private var bossBeat:Int = 0;
+	private var reviving:Bool = false;
+	public var startRevive:Void->Void;
+	public var reviveDone:Void->Bool;
 	private var droppedHandled:Bool = false;
 	private var bossDown:Bool = false;
 	private var hitCap:Float = 0;
@@ -156,6 +161,7 @@ class NetSync
 		var oldDead = director.onBossDefeated;
 		director.onBossDefeated = function()
 		{
+			bossBeat++;
 			Net.send({t: "bossDead"});
 			if (oldDead != null)
 				oldDead();
@@ -392,6 +398,7 @@ class NetSync
 				if (!bossDown)
 				{
 					bossDown = true;
+					bossBeat++;
 					mirror.blastLastBoss();
 					new FlxTimer().start(0.9, function(_)
 					{
@@ -542,7 +549,7 @@ class NetSync
 			ho: [r1(held.x - player.x), r1(held.y - player.y), r2(held.scale.x), r2(combat.held.charge)],
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
 			sb: combat.superOrbit.active(),
-			dd: status.dead,
+			dd: status.dead && !status.throes,
 			ar: armWire(),
 			hk: hookShot.exists ? [r1(hookShot.x), r1(hookShot.y), r1(hookShot.angle), r1(combat.held.handX()), r1(combat.held.handY())] : null,
 			yo: yo.active ? [r1(yo.cx), r1(yo.cy), r1(yo.yoyo.angle)] : null,
@@ -555,7 +562,10 @@ class NetSync
 		if (!status.dead)
 		{
 			deathWave = -1;
+			deathBoss = -1;
 			runFailed = false;
+			reviving = false;
+			director.lobbyDown = false;
 			return;
 		}
 
@@ -565,6 +575,7 @@ class NetSync
 			{
 				runFailed = true;
 				deathWave = -1;
+				director.lobbyDown = true;
 				hud.showDeath(director.wave, SaveData.bestWave());
 			}
 			return;
@@ -573,11 +584,22 @@ class NetSync
 		if (deathWave < 0)
 		{
 			deathWave = director.wave;
+			deathBoss = bossBeat;
 			hud.showRespawn();
 		}
-		if (director.wave >= deathWave + RESPAWN_WAVES)
+		if (director.wave >= deathWave + RESPAWN_WAVES || bossBeat > deathBoss)
 		{
+			if (!reviving)
+			{
+				reviving = true;
+				if (startRevive != null)
+					startRevive();
+			}
+			if (reviveDone != null && !reviveDone())
+				return;
+			reviving = false;
 			deathWave = -1;
+			deathBoss = -1;
 			status.revive();
 			status.health = status.healthMax * 0.5;
 			player.setPosition(arena.spawnX, arena.spawnY);

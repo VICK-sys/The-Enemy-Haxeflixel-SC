@@ -9,7 +9,7 @@ import data.PlayerData.PlayerDataRegistry;
 
 class Player extends FlxSprite
 {
-	public static inline var FEET:Float = 90;
+	public static inline var FEET:Float = 41;
 
 	public var feetY(get, never):Float;
 
@@ -31,6 +31,8 @@ class Player extends FlxSprite
 	}
 
 	public var blockMovement:Bool = false;
+	public var moveScale:Float = 1;
+	public var animHold:Bool = false;
 	public var isDead:Bool = false;
 	public var floating:Bool = false;
 	public var dashTimer:Float = 0;
@@ -68,15 +70,16 @@ class Player extends FlxSprite
 		animation.addByPrefix("idle", "Idle", 9, true);
 		animation.addByPrefix("walk", "Run", 12, true);
 		animation.addByPrefix("dash", "Dash", 12, false);
+		animation.addByPrefix("dashBack", "Backdash", 12, false);
 		animation.addByPrefix("hurt", "Hurt", 12, false);
-		offset.set(-18, 7);
+		offset.set(2, 56);
 
 		if (graphic != null)
 			graphic.persist = true;
 
 		antialiasing = false;
-		width = 75 * sizeScale;
-		height = 95 * sizeScale;
+		width = 42 * sizeScale;
+		height = 44 * sizeScale;
 		scale.set(4 * sizeScale, 4 * sizeScale);
 		if (sizeScale != 1)
 			offset.set(sizeScale * offset.x + frameWidth * 0.5 * (1 - sizeScale),
@@ -99,7 +102,7 @@ class Player extends FlxSprite
 	public var shadowCenterX(get, never):Float;
 
 	function get_shadowCenterX():Float
-		return x + 36 * sizeScale;
+		return x + 16 * sizeScale;
 
 	public function dash():Void
 	{
@@ -115,8 +118,40 @@ class Player extends FlxSprite
 		dx /= len;
 		dy /= len;
 		velocity.set(dx * data.dashSpeed, dy * data.dashSpeed);
-		this.animation.play(floating ? "idle" : "dash", true);
+		this.animation.play(dashAnim(dx), true);
 		dashTimer = data.dashTime;
+	}
+
+	public var hitRadius(get, never):Float;
+
+	function get_hitRadius():Float
+		return width * 0.5;
+
+	public function touches(bx:Float, by:Float, bw:Float, bh:Float):Bool
+	{
+		var cx = x + width * 0.5;
+		var cy = y + height * 0.5;
+		var nx = cx < bx ? bx : (cx > bx + bw ? bx + bw : cx);
+		var ny = cy < by ? by : (cy > by + bh ? by + bh : cy);
+		var dx = cx - nx;
+		var dy = cy - ny;
+		var r = hitRadius;
+		return dx * dx + dy * dy <= r * r;
+	}
+
+	public function touchesRound(bx:Float, by:Float, bw:Float, bh:Float):Bool
+	{
+		var dx = bx + bw * 0.5 - (x + width * 0.5);
+		var dy = by + bh * 0.5 - (y + height * 0.5);
+		var reach = hitRadius + (bw < bh ? bw : bh) * 0.5;
+		return dx * dx + dy * dy <= reach * reach;
+	}
+
+	public function dashAnim(dx:Float):String
+	{
+		if (floating)
+			return "idle";
+		return dx * (flipX ? -1 : 1) < 0 ? "dashBack" : "dash";
 	}
 
 	override function update(elapsed:Float)
@@ -168,7 +203,8 @@ class Player extends FlxSprite
 				initialSpeed = data.moveSpeed;
 			}
 
-			this.animation.play(floating ? "idle" : "walk");
+			if (!animHold)
+				this.animation.play(floating ? "idle" : "walk");
 
 			if (up)
 			{
@@ -205,12 +241,14 @@ class Player extends FlxSprite
 				newAngle = 0;
 			}
 
-			velocity.set(initialSpeed, 0);
+			var speed = (util.Controls.walkHeld() ? initialSpeed * data.walkScale : initialSpeed) * moveScale;
+			velocity.set(speed, 0);
 			velocity.pivotDegrees(FlxPoint.weak(0, 0), newAngle);
 		}
 		else
 		{
-			this.animation.play("idle");
+			if (!animHold)
+				this.animation.play("idle");
 
 			initialSpeed = data.rampReset;
 		}

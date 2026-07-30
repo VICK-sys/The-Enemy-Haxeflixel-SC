@@ -13,11 +13,14 @@
 	<SubTexture name="Dash00000" x="0" y="80" width="40" height="40"/>
 	<SubTexture name="Dash00001" x="40" y="80" width="40" height="40"/>
 	<SubTexture name="Dash00002" x="80" y="80" width="40" height="40"/>
-	<SubTexture name="Hurt00000" x="0" y="120" width="40" height="40"/>
-	<SubTexture name="Hurt00001" x="40" y="120" width="40" height="40"/>
-	<SubTexture name="Hurt00002" x="80" y="120" width="40" height="40"/>
-	<SubTexture name="Part00000" x="0" y="160" width="40" height="40"/>
-	<SubTexture name="Part00001" x="40" y="160" width="40" height="40"/>
-	<SubTexture name="Part00002" x="80" y="160" width="40" height="40"/>
-	<SubTexture name="Part00003" x="120" y="160" width="40" height="40"/>
+	<SubTexture name="Backdash00000" x="0" y="120" width="40" height="40"/>
+	<SubTexture name="Backdash00001" x="40" y="120" width="40" height="40"/>
+	<SubTexture name="Backdash00002" x="80" y="120" width="40" height="40"/>
+	<SubTexture name="Hurt00000" x="0" y="160" width="40" height="40"/>
+	<SubTexture name="Hurt00001" x="40" y="160" width="40" height="40"/>
+	<SubTexture name="Hurt00002" x="80" y="160" width="40" height="40"/>
+	<SubTexture name="Part00000" x="0" y="200" width="40" height="40"/>
+	<SubTexture name="Part00001" x="40" y="200" width="40" height="40"/>
+	<SubTexture name="Part00002" x="80" y="200" width="40" height="40"/>
+	<SubTexture name="Part00003" x="120" y="200" width="40" height="40"/>
 </TextureAtlas>
