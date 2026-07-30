@@ -128,6 +128,8 @@
 	"online.connecting": "CONNECTING...",
 	"online.connected": "CONNECTED - WAITING FOR HOST TO START",
 	"online.failed": "COULD NOT CONNECT TO {0}",
+	"online.lobbyOne": "1 PLAYER CONNECTED - PRESS ENTER TO START\n(up to {0} can join, and more can drop in later)",
+	"online.lobbyMany": "{0} PLAYERS CONNECTED - PRESS ENTER TO START\n(up to {1} can join, and more can drop in later)",
 	"hud.leveling": "IN SHOP",
 	"level.title": "LEVEL UP",
 	"level.done": "DONE",

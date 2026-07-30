@@ -63,6 +63,15 @@ class Net
 		#end
 	}
 
+	public static function guestIds():Array<Int>
+	{
+		#if desktop
+		return ids.copy();
+		#else
+		return [];
+		#end
+	}
+
 	public static function host():Bool
 	{
 		#if desktop

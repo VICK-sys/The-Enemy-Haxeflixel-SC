@@ -70,6 +70,9 @@ class BossHud
 		flashTimer = FLASH_TIME;
 	}
 
+	public function dispose():Void
+		dropBar();
+
 	function dropBar():Void
 	{
 		if (barFrame != null)
@@ -80,9 +83,15 @@ class BossHud
 		}
 		if (barFill != null)
 		{
+			barFill.clipRect = null;
 			state.remove(barFill, true);
 			barFill.destroy();
 			barFill = null;
+		}
+		if (fillClip != null)
+		{
+			fillClip.put();
+			fillClip = null;
 		}
 		for (t in letters)
 		{

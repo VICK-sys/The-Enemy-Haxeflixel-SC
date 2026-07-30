@@ -4,6 +4,7 @@ import flixel.FlxG;
 import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
+import flixel.input.keyboard.FlxKey;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import ui.MenuList;
@@ -161,7 +162,7 @@ class ControlsSubState extends FlxSubState
 		if (device == 0)
 		{
 			var k = Controls.capturedKey();
-			if (k > 0)
+			if (k != FlxKey.NONE)
 			{
 				Controls.bindKey(ACTIONS[capturing], k);
 				endCapture();

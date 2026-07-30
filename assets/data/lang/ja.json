@@ -120,6 +120,8 @@
 	"online.connecting": "接続中...",
 	"online.connected": "接続完了 - ホストの開始を待っている",
 	"online.failed": "{0} に接続できなかった",
+	"online.lobbyOne": "1人接続中 - ENTERで開始\n(最大{0}人まで参加でき、途中参加もできる)",
+	"online.lobbyMany": "{0}人接続中 - ENTERで開始\n(最大{1}人まで参加でき、途中参加もできる)",
 	"onlineHelp.nav": "A/← <   {0} / {1}   > D/→        ENTER - とじる",
 	"onlineHelp.p1.title": "オンライン協力プレイ",
 	"onlineHelp.p1.body": "みんなでウェーブと戦う - 最大 {0} 人。\n\nだれか1人が「ホスト」になり\nゲームを進行する。\nほかの全員は「参加」して一緒に戦う。\n\nウェーブ数とボスは共有だが\n体力とスーパーゲージはそれぞれ別々。\n\n開始後でも友達は途中参加できる。",

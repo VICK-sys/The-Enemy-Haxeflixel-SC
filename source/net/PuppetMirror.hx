@@ -135,7 +135,7 @@ class PuppetMirror
 			if (e.gun != null && row.length > 8)
 			{
 				var gkey:String = row[8];
-				if (gkey != null && (e.gun.graphic == null || e.gun.graphic.key != gkey))
+				if (gkey != null && (e.gun.graphic == null || e.gun.graphic.key != gkey) && openfl.utils.Assets.exists(gkey))
 				{
 					e.gun.loadGraphic(gkey);
 					e.gun.origin.set(e.gun.frameWidth * 0.5, e.gun.frameHeight * 0.5);

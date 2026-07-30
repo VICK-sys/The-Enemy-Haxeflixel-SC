@@ -3,6 +3,7 @@ package states.play;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import entities.Player;
+import net.AckQuorum;
 import net.Net;
 import net.NetSync;
 import systems.PlayerCombat;
@@ -30,8 +31,7 @@ class ShopRound
 	private var done:Bool = false;
 	private var spentHere:Bool = false;
 	private var clock:Float = 0;
-	private var acks:Map<Int, Bool>;
-	private var need:Int = 0;
+	private var quorum:AckQuorum = new AckQuorum();
 
 	public function new(host:PlayState, player:Player, layers:RenderLayers)
 	{
@@ -101,10 +101,7 @@ class ShopRound
 		done = false;
 		clock = 0;
 		if (Net.isHost)
-		{
-			acks = new Map();
-			need = Net.guestCount + 1;
-		}
+			quorum.arm([Net.selfId].concat(Net.guestIds()));
 	}
 
 	function enter():Void
@@ -165,27 +162,23 @@ class ShopRound
 	{
 		if (netSync != null)
 			netSync.setLeveling(id, false);
-		if (!Net.isHost || !holding || acks == null)
+		if (!Net.isHost || !holding)
 			return;
-		acks.set(id, true);
+		quorum.ack(id);
 		checkAcks();
 	}
 
 	function onPeerLost(id:Int):Void
 	{
-		if (!Net.isHost || !holding || acks == null)
+		if (!Net.isHost || !holding)
 			return;
-		acks.remove(id);
-		need = Net.guestCount + 1;
+		quorum.drop(id);
 		checkAcks();
 	}
 
 	function checkAcks():Void
 	{
-		var got = 0;
-		for (v in acks)
-			got++;
-		if (got >= need)
+		if (quorum.satisfied())
 			release();
 	}
 
@@ -196,7 +189,7 @@ class ShopRound
 		if (Net.isHost)
 			Net.send({t: "lvlgo"});
 		holding = false;
-		acks = null;
+		quorum.disarm();
 		director.holdWave = false;
 		if (netSync != null)
 			netSync.setAllLeveling(false);

@@ -390,8 +390,7 @@ class OnlineState extends FlxState
 		if (hosting && Net.connected)
 		{
 			var n = Net.guestCount;
-			status.text = n + (n == 1 ? " PLAYER" : " PLAYERS") + " CONNECTED - PRESS ENTER TO START\n(up to "
-				+ Net.MAX_GUESTS + " can join, and more can drop in later)";
+			status.text = n == 1 ? Lang.t("online.lobbyOne", [Net.MAX_GUESTS]) : Lang.t("online.lobbyMany", [n, Net.MAX_GUESTS]);
 			if (!helpOpen && util.Controls.menuAccept())
 			{
 				Net.send({t: "start"});

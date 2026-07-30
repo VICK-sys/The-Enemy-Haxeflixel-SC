@@ -157,6 +157,17 @@ class Hud
 		return o;
 	}
 
+	public function dispose():Void
+	{
+		hpFill.clipRect = null;
+		superFill.clipRect = null;
+		hpClip.put();
+		hpClip = null;
+		superClip.put();
+		superClip = null;
+		bossHud.dispose();
+	}
+
 	public function setShown(on:Bool):Void
 	{
 		if (hudOn == on)

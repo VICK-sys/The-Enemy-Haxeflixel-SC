@@ -325,6 +325,13 @@ class PlayState extends FlxState
 		super.create();
 	}
 
+	override public function destroy():Void
+	{
+		if (hud != null)
+			hud.dispose();
+		super.destroy();
+	}
+
 	override public function update(elapsed:Float):Void
 	{
 		EnemyNav.resetBudget();

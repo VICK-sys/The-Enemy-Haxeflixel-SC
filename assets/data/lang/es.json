@@ -120,6 +120,8 @@
 	"online.connecting": "CONECTANDO...",
 	"online.connected": "CONECTADO - ESPERANDO A QUE EL ANFITRIÓN EMPIECE",
 	"online.failed": "NO SE PUDO CONECTAR A {0}",
+	"online.lobbyOne": "1 JUGADOR CONECTADO - PULSA ENTER PARA EMPEZAR\n(pueden entrar hasta {0}, y más pueden unirse luego)",
+	"online.lobbyMany": "{0} JUGADORES CONECTADOS - PULSA ENTER PARA EMPEZAR\n(pueden entrar hasta {1}, y más pueden unirse luego)",
 	"onlineHelp.nav": "A/<- <   {0} / {1}   > D/->        ENTER - CERRAR",
 	"onlineHelp.p1.title": "COOPERATIVO EN LÍNEA",
 	"onlineHelp.p1.body": "Peleas contra las oleadas en equipo - hasta {0}.\n\nUno es el ANFITRIÓN y lleva la partida.\nLos demás SE UNEN y pelean a su lado.\n\nComparten el contador de oleadas y el jefe,\npero cada uno conserva su salud y su barra de súper.\n\nTus amigos pueden entrar con la partida empezada.",

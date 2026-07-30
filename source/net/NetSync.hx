@@ -12,6 +12,7 @@ import systems.Pickups;
 import systems.Scraps;
 import systems.PlayerCombat;
 import systems.RenderLayers;
+import systems.weapons.WeaponMode;
 import systems.weapons.Weapons;
 import util.SaveData;
 
@@ -220,6 +221,16 @@ class NetSync
 	static inline function r2(v:Float):Float
 		return Math.round(v * 100) / 100;
 
+	static var MODE_COUNT:Int = Type.allEnums(WeaponMode).length;
+
+	public static function validAttackMode(m:Dynamic):Bool
+	{
+		if (!Std.isOfType(m, Int))
+			return false;
+		var i:Int = m;
+		return i >= 0 && i < MODE_COUNT;
+	}
+
 	public function update(elapsed:Float):Void
 	{
 		frame++;
@@ -263,7 +274,7 @@ class NetSync
 
 			case "atk":
 				var p = roster.get(msg.f);
-				if (p != null && p.fx != null)
+				if (p != null && p.fx != null && validAttackMode(msg.m))
 					p.fx.attack(msg.m, msg.x, msg.y, msg.dx, msg.dy, msg.a, msg.tx, msg.ty, msg.p);
 
 			case "sup":

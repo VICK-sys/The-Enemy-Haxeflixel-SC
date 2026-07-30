@@ -5,6 +5,7 @@ import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import entities.Player;
+import net.AckQuorum;
 import net.Net;
 import net.NetSync;
 import systems.PlayerCombat;
@@ -35,8 +36,7 @@ class ReadyGate
 	private var bubble:FlxSprite;
 	private var prompt:FlxText;
 	private var ready:Bool = false;
-	private var acks:Map<Int, Bool>;
-	private var need:Int = 0;
+	private var quorum:AckQuorum = new AckQuorum();
 	private var clock:Float = 0;
 
 	public function new(host:PlayState, player:Player, layers:RenderLayers)
@@ -87,18 +87,16 @@ class ReadyGate
 			netSync.setAllReady(false);
 		if (Net.isHost)
 		{
-			acks = new Map();
-			need = Net.guestCount + 1;
+			quorum.arm([Net.selfId].concat(Net.guestIds()));
 			Net.send({t: "rdyarm"});
 		}
 	}
 
 	public function peerLost(id:Int):Void
 	{
-		if (!Net.isHost || !armed || acks == null)
+		if (!Net.isHost || !armed)
 			return;
-		acks.remove(id);
-		need = Net.guestCount + 1;
+		quorum.drop(id);
 		checkAcks();
 	}
 
@@ -148,11 +146,9 @@ class ReadyGate
 	{
 		if (!Net.active)
 			return "";
-		var got = 0;
-		if (acks != null)
-			for (v in acks)
-				got++;
-		return Lang.t("ready.waiting", [Net.isHost ? got : 1, Net.guestCount + 1]);
+		if (Net.isHost)
+			return Lang.t("ready.waiting", [quorum.got(), quorum.need()]);
+		return Lang.t("ready.waiting", [1, Net.guestCount + 1]);
 	}
 
 	function markReady(quiet:Bool = false):Void
@@ -179,18 +175,15 @@ class ReadyGate
 	{
 		if (netSync != null)
 			netSync.setReady(id, true);
-		if (!Net.isHost || !armed || acks == null)
+		if (!Net.isHost || !armed)
 			return;
-		acks.set(id, true);
+		quorum.ack(id);
 		checkAcks();
 	}
 
 	function checkAcks():Void
 	{
-		var got = 0;
-		for (v in acks)
-			got++;
-		if (got >= need)
+		if (quorum.satisfied())
 			release();
 	}
 
@@ -204,7 +197,7 @@ class ReadyGate
 			Net.send({t: "rdygo"});
 		armed = false;
 		ready = false;
-		acks = null;
+		quorum.disarm();
 		bubble.visible = false;
 		prompt.visible = false;
 		director.holdReady = false;

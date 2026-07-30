@@ -1,6 +1,5 @@
 package systems.weapons;
 
-import flixel.FlxG;
 import flixel.FlxSprite;
 import entities.Player;
 import systems.world.Arena;
@@ -393,7 +392,7 @@ class Weapons
 
 		if (hookAttack.holding)
 		{
-			if (FlxG.mouse.justPressed)
+			if (util.Controls.attackJustPressed())
 				hookAttack.throwHeld(aim.dx, aim.dy);
 			return;
 		}
