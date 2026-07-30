@@ -19,6 +19,17 @@ class Arena
 	static inline var REV_IN:Float = 0.6;
 	static inline var REV_OUT:Float = 0.8;
 
+	static inline var IDLE:Int = 0;
+	static inline var BOSS_IN:Int = 1;
+	static inline var BOSS_WAIT:Int = 2;
+	static inline var BOSS_REVEAL:Int = 3;
+	static inline var NORMAL_IN:Int = 4;
+	static inline var NORMAL_REVEAL:Int = 5;
+	static inline var FLASH_IN:Int = 6;
+	static inline var FLASH_WAIT:Int = 7;
+	static inline var FLASH_KEEP:Int = 8;
+	static inline var FADE_OUT:Int = 9;
+
 	public var map:FlxTilemap;
 	public var spawnX:Float;
 	public var spawnY:Float;
@@ -91,9 +102,9 @@ class Arena
 
 	public function beginBossTransition():Void
 	{
-		if (introPhase != 0 || gridActive)
+		if (introPhase != IDLE || gridActive)
 			return;
-		introPhase = 1;
+		introPhase = BOSS_IN;
 		introTimer = SHAKE_TIME;
 		systems.Fx.shake(0.012, SHAKE_TIME);
 	}
@@ -102,7 +113,7 @@ class Arena
 	{
 		whiteOverlay.alpha = 1;
 		fadeSpan = time;
-		introPhase = 8;
+		introPhase = FADE_OUT;
 		introTimer = time;
 	}
 
@@ -114,21 +125,21 @@ class Arena
 
 	public function beginWhiteFlash(onPeak:Void->Void, onDone:Void->Void, hold:Float):Void
 	{
-		if (introPhase != 0 || gridActive)
+		if (introPhase != IDLE || gridActive)
 			return;
 		flashPeak = onPeak;
 		flashDone = onDone;
 		flashHold = hold;
-		introPhase = 5;
+		introPhase = FLASH_IN;
 		introTimer = SHAKE_TIME;
 		systems.Fx.shake(0.012, SHAKE_TIME);
 	}
 
 	public function endBossTransition():Void
 	{
-		if (introPhase != 0 || !gridActive)
+		if (introPhase != IDLE || !gridActive)
 			return;
-		introPhase = 4;
+		introPhase = NORMAL_IN;
 		introTimer = REV_IN;
 		systems.Fx.shake(0.008, REV_IN);
 	}
@@ -138,7 +149,7 @@ class Arena
 		if (gridActive)
 			warp.advance(elapsed);
 
-		if (introPhase == 1)
+		if (introPhase == BOSS_IN)
 		{
 			introTimer -= elapsed;
 			whiteOverlay.alpha = 1 - Math.max(0, introTimer) / SHAKE_TIME;
@@ -150,64 +161,34 @@ class Arena
 				bg.shader = warp;
 				clearObstacles();
 				gridActive = true;
-				introPhase = 2;
+				introPhase = BOSS_WAIT;
 				introTimer = HOLD_TIME;
 				whiteOverlay.alpha = 1;
 				if (onWhiteout != null)
 					onWhiteout();
 			}
 		}
-		else if (introPhase == 2)
+		else if (introPhase == BOSS_WAIT)
 		{
 			introTimer -= elapsed;
 			whiteOverlay.alpha = 1;
 			if (introTimer <= 0)
 			{
-				introPhase = 3;
+				introPhase = BOSS_REVEAL;
 				introTimer = REVEAL_TIME;
 			}
 		}
-		else if (introPhase == 5)
+		else if (introPhase == BOSS_REVEAL)
 		{
 			introTimer -= elapsed;
-			whiteOverlay.alpha = 1 - Math.max(0, introTimer) / SHAKE_TIME;
-			if (introTimer <= 0)
-			{
-				whiteOverlay.alpha = 1;
-				introPhase = 6;
-				introTimer = flashHold;
-				var peak = flashPeak;
-				flashPeak = null;
-				if (peak != null)
-					peak();
-			}
-		}
-		else if (introPhase == 6)
-		{
-			introTimer -= elapsed;
-			whiteOverlay.alpha = 1;
-			if (introTimer <= 0)
-			{
-				introPhase = 7;
-				var done = flashDone;
-				flashDone = null;
-				if (done != null)
-					done();
-			}
-		}
-		else if (introPhase == 7)
-			whiteOverlay.alpha = 1;
-		else if (introPhase == 8)
-		{
-			introTimer -= elapsed;
-			whiteOverlay.alpha = fadeSpan > 0 ? Math.max(0, introTimer) / fadeSpan : 0;
+			whiteOverlay.alpha = Math.max(0, introTimer) / REVEAL_TIME;
 			if (introTimer <= 0)
 			{
 				whiteOverlay.alpha = 0;
-				introPhase = 0;
+				introPhase = IDLE;
 			}
 		}
-		else if (introPhase == 4)
+		else if (introPhase == NORMAL_IN)
 		{
 			introTimer -= elapsed;
 			whiteOverlay.alpha = 1 - Math.max(0, introTimer) / REV_IN;
@@ -219,31 +200,61 @@ class Arena
 				bg.shader = null;
 				restoreObstacles();
 				gridActive = false;
-				introPhase = 5;
+				introPhase = NORMAL_REVEAL;
 				introTimer = REV_OUT;
 				whiteOverlay.alpha = 1;
 				if (onNormal != null)
 					onNormal();
 			}
 		}
-		else if (introPhase == 5)
+		else if (introPhase == NORMAL_REVEAL)
 		{
 			introTimer -= elapsed;
 			whiteOverlay.alpha = Math.max(0, introTimer) / REV_OUT;
 			if (introTimer <= 0)
 			{
 				whiteOverlay.alpha = 0;
-				introPhase = 0;
+				introPhase = IDLE;
 			}
 		}
-		else if (introPhase == 3)
+		else if (introPhase == FLASH_IN)
 		{
 			introTimer -= elapsed;
-			whiteOverlay.alpha = Math.max(0, introTimer) / REVEAL_TIME;
+			whiteOverlay.alpha = 1 - Math.max(0, introTimer) / SHAKE_TIME;
+			if (introTimer <= 0)
+			{
+				whiteOverlay.alpha = 1;
+				introPhase = FLASH_WAIT;
+				introTimer = flashHold;
+				var peak = flashPeak;
+				flashPeak = null;
+				if (peak != null)
+					peak();
+			}
+		}
+		else if (introPhase == FLASH_WAIT)
+		{
+			introTimer -= elapsed;
+			whiteOverlay.alpha = 1;
+			if (introTimer <= 0)
+			{
+				introPhase = FLASH_KEEP;
+				var done = flashDone;
+				flashDone = null;
+				if (done != null)
+					done();
+			}
+		}
+		else if (introPhase == FLASH_KEEP)
+			whiteOverlay.alpha = 1;
+		else if (introPhase == FADE_OUT)
+		{
+			introTimer -= elapsed;
+			whiteOverlay.alpha = fadeSpan > 0 ? Math.max(0, introTimer) / fadeSpan : 0;
 			if (introTimer <= 0)
 			{
 				whiteOverlay.alpha = 0;
-				introPhase = 0;
+				introPhase = IDLE;
 			}
 		}
 	}
