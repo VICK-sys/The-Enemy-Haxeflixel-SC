@@ -9,6 +9,7 @@ import flixel.util.FlxColor;
 import data.PlayerData.PlayerDataRegistry;
 import util.Lang;
 import util.Levels;
+import ui.MenuCursor;
 
 class LevelUpSubState extends FlxSubState
 {
@@ -296,9 +297,12 @@ class LevelUpSubState extends FlxSubState
 
 		var m = FlxG.mouse.getViewPosition(camUI);
 		var over = rowAt(m.x, m.y);
+		if (over >= 0 || arrowAt(m.x, m.y) != 0)
+			MenuCursor.markHover();
 		if (over >= 0 && over != pick)
 		{
 			pick = over;
+			util.MenuSfx.hover();
 			refresh();
 		}
 		if (FlxG.mouse.justPressed)

@@ -8,6 +8,7 @@ import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import util.Paths;
 import util.Lang;
+import ui.MenuCursor;
 
 private class Card
 {
@@ -287,6 +288,8 @@ class WeaponPickSubState extends FlxSubState
 			set(3);
 
 		var over = hovered();
+		if (over >= 0)
+			MenuCursor.markHover();
 		if (FlxG.mouse.x != lastMouseX || FlxG.mouse.y != lastMouseY)
 		{
 			lastMouseX = FlxG.mouse.x;

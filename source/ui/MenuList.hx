@@ -141,6 +141,9 @@ class MenuList extends FlxGroup
 			}
 		}
 
+		if (overRow())
+			MenuCursor.markHover();
+
 		if (blipWait > 0)
 			blipWait -= elapsed;
 		updateAdjust(elapsed);
@@ -238,6 +241,14 @@ class MenuList extends FlxGroup
 			util.MenuSfx.hover();
 		}
 		onAdjust(index, dir);
+	}
+
+	function overRow():Bool
+	{
+		for (i in 0...rows.length)
+			if (selectable(i) && rows[i].visible && FlxG.mouse.overlaps(rows[i], rowCamera(i)))
+				return true;
+		return false;
 	}
 
 	function rowCamera(i:Int):flixel.FlxCamera

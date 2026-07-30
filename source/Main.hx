@@ -18,6 +18,7 @@ class Main extends Sprite
 		DiscordPresence.init();
 		addChild(new FlxGame(0, 0, TitleSequence, 60, 60, true));
 		keepPresenting();
+		ui.MenuCursor.init();
 		util.AspectBars.init(this);
 		counter = new FPS(10, 3, 0xFFFFFF);
 		addChild(counter);
