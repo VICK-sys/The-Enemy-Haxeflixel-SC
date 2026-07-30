@@ -92,7 +92,7 @@ class RevolverAttack
 		if (!canFire())
 			return;
 
-		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.ROUND);
+		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.SHOT);
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		FlxG.sound.play(Paths.sound("revolver"), 0.7);
@@ -117,7 +117,7 @@ class RevolverAttack
 		dx /= len;
 		dy /= len;
 
-		var b = spawn(bx, by, dx, dy, Math.atan2(dy, dx) * 180 / Math.PI, damage, Bullet.LONG);
+		var b = spawn(bx, by, dx, dy, Math.atan2(dy, dx) * 180 / Math.PI, damage, Bullet.SHOT);
 		b.seek = target;
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
@@ -187,7 +187,7 @@ class RevolverAttack
 		var rad = deg * Math.PI / 180;
 		var jx = Math.cos(rad);
 		var jy = Math.sin(rad);
-		spawn(bx, by, jx, jy, deg, cfg.damage, Bullet.ROUND);
+		spawn(bx, by, jx, jy, deg, cfg.damage, Bullet.SHOT);
 		fx.sparksAt(bx + jx * MUZZLE, by + jy * MUZZLE);
 		FlxG.sound.play(Paths.sound("revolver"), 0.55);
 		if (onPellet != null)
@@ -225,6 +225,7 @@ class RevolverAttack
 			var py = cy + b.dirY * cfg.hitRadius;
 			if (arena.wallAt(px, py) || PropBlock.at(px, py))
 			{
+				fx.breakAt(px, py, true);
 				b.kill();
 				continue;
 			}
@@ -238,6 +239,7 @@ class RevolverAttack
 				if (dx * dx + dy * dy <= cfg.hitRadius * cfg.hitRadius || b.seek.overlaps(b))
 				{
 					hits.damageN(b.seek, b.dirX * b.knock, b.dirY * b.knock, b.damage);
+					fx.impactAt(cx, cy);
 					b.kill();
 				}
 				continue;
@@ -247,6 +249,7 @@ class RevolverAttack
 			if (hit != null)
 			{
 				hits.damageN(hit, b.dirX * b.knock, b.dirY * b.knock, b.damage);
+				fx.impactAt(cx, cy);
 				b.kill();
 			}
 		}

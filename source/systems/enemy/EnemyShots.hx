@@ -20,11 +20,13 @@ class EnemyShots
 
 	private var arena:Arena;
 	private var status:PlayerCombat;
+	private var fx:Fx;
 
-	public function new(arena:Arena, status:PlayerCombat)
+	public function new(arena:Arena, status:PlayerCombat, fx:Fx)
 	{
 		this.arena = arena;
 		this.status = status;
+		this.fx = fx;
 		group = new FlxTypedGroup<EnemyShot>();
 	}
 
@@ -67,25 +69,36 @@ class EnemyShots
 			var py = shot.y + shot.height / 2 + shot.dirY * PROBE;
 			if (arena.wallAt(px, py) || PropBlock.at(px, py))
 			{
+				fx.breakAt(px, py, shot.friendly);
 				shot.kill();
 				continue;
 			}
 
+			var cx = shot.x + shot.width / 2;
+			var cy = shot.y + shot.height / 2;
+
 			if (shot.friendly)
 			{
 				if (onFriendly != null && onFriendly(shot))
+				{
+					fx.impactAt(cx, cy);
 					shot.kill();
+				}
 				continue;
 			}
 
 			if (onShield != null && onShield(shot))
 			{
+				fx.impactAt(cx, cy);
 				shot.kill();
 				continue;
 			}
 
 			if (status.hurtPlayer(shot, shot.damage))
+			{
+				fx.impactAt(cx, cy);
 				shot.kill();
+			}
 		}
 	}
 }

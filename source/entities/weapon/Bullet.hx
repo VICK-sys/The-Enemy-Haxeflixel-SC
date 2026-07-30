@@ -6,9 +6,9 @@ import util.Paths;
 
 class Bullet extends FlxSprite
 {
-	public static inline var ROUND:String = "bullets/bullet_player";
-	public static inline var LONG:String = "bullets/bullet_long_player";
+	public static inline var SHOT:String = "bullets/normal_bullet_player";
 
+	static inline var ART_TURN:Float = 90;
 	static inline var SCALE:Float = 4;
 	static inline var HIT:Float = 48;
 	static inline var FADE:Float = 0.1;
@@ -26,7 +26,7 @@ class Bullet extends FlxSprite
 	{
 		super();
 		antialiasing = false;
-		setSprite(ROUND);
+		setSprite(SHOT);
 	}
 
 	public function setSprite(key:String):Void
@@ -53,7 +53,7 @@ class Bullet extends FlxSprite
 		dirX = dx;
 		dirY = dy;
 		velocity.set(dx * speed, dy * speed);
-		angle = angleDeg;
+		angle = angleDeg + ART_TURN;
 		life = range / speed;
 	}
 

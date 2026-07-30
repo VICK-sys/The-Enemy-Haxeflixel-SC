@@ -56,7 +56,7 @@ class EnemyDirector
 	private var bossPending:Bool = false;
 	private var bossTimer:Float = 0;
 
-	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat)
+	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat, fx:Fx)
 	{
 		this.player = player;
 		this.arena = arena;
@@ -70,7 +70,7 @@ class EnemyDirector
 
 		spawner = new EnemySpawner(arena);
 		spawner.anchor = anchorBody;
-		gunfire = new EnemyShots(arena, status);
+		gunfire = new EnemyShots(arena, status, fx);
 		bossDeath = new BossDeath(layers);
 	}
 

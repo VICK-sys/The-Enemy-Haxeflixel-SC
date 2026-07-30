@@ -6,9 +6,10 @@ import util.WorldClock;
 
 class EnemyShot extends FlxSprite
 {
-	public static inline var DEFAULT_SPRITE:String = "bullets/bullet_enemy";
-	public static inline var TURNED_SPRITE:String = "bullets/bullet_player";
+	public static inline var DEFAULT_SPRITE:String = "bullets/round_bullet_enemy";
+	public static inline var TURNED_SPRITE:String = "bullets/round_bullet_player";
 
+	static inline var ART_TURN:Float = 90;
 	static inline var DEFLECT_BOOST:Float = 1.35;
 	static inline var SCALE:Float = 4;
 	static inline var HIT:Float = 28;
@@ -54,7 +55,7 @@ class EnemyShot extends FlxSprite
 		this.damage = damage;
 		friendly = false;
 		held = false;
-		angle = Math.atan2(dy, dx) * 180 / Math.PI;
+		angle = Math.atan2(dy, dx) * 180 / Math.PI + ART_TURN;
 		velocity.set(dx * speed, dy * speed);
 		fullLife = range / speed;
 		life = fullLife;
@@ -65,7 +66,7 @@ class EnemyShot extends FlxSprite
 		dirX = -dirX;
 		dirY = -dirY;
 		velocity.set(-velocity.x * DEFLECT_BOOST, -velocity.y * DEFLECT_BOOST);
-		angle = Math.atan2(dirY, dirX) * 180 / Math.PI;
+		angle = Math.atan2(dirY, dirX) * 180 / Math.PI + ART_TURN;
 		life = fullLife;
 		alpha = 1;
 		friendly = true;
@@ -84,7 +85,7 @@ class EnemyShot extends FlxSprite
 		dirX = dx;
 		dirY = dy;
 		velocity.set(dx * speed, dy * speed);
-		angle = Math.atan2(dy, dx) * 180 / Math.PI;
+		angle = Math.atan2(dy, dx) * 180 / Math.PI + ART_TURN;
 		life = fullLife;
 		alpha = 1;
 		friendly = true;

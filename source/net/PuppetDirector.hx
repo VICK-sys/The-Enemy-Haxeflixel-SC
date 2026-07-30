@@ -9,9 +9,9 @@ import systems.RenderLayers;
 
 class PuppetDirector extends EnemyDirector
 {
-	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat)
+	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat, fx:systems.Fx)
 	{
-		super(player, arena, layers, status);
+		super(player, arena, layers, status, fx);
 	}
 
 	public function addPuppet(e:Enemies):Void

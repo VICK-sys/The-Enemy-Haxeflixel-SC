@@ -7,6 +7,14 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.util.FlxColor;
 import util.Paths;
 
+class Burst extends FlxSprite
+{
+	public var key:String = null;
+
+	public function new()
+		super();
+}
+
 class Fx
 {
 	static inline var DASH_LINE_FADE:Float = 3;
@@ -22,6 +30,37 @@ class Fx
 	public var sparks:FlxEmitter;
 	public var dashTrail:FlxTypedGroup<FlxSprite>;
 	public var pops:FlxTypedGroup<FlxSprite>;
+	public var bursts:FlxTypedGroup<Burst>;
+
+	static inline var BURST_FRAME:Int = 24;
+	static inline var BURST_FPS:Int = 24;
+	static inline var BURST_SCALE:Float = 4;
+
+	static inline var IMPACT:String = "bullets/bullet_impact";
+	static inline var BREAK_PLAYER:String = "bullets/bullet_break_player";
+	static inline var BREAK_ENEMY:String = "bullets/bullet_break_enemy";
+
+	public function impactAt(cx:Float, cy:Float):Void
+		burst(IMPACT, cx, cy);
+
+	public function breakAt(cx:Float, cy:Float, fromPlayer:Bool):Void
+		burst(fromPlayer ? BREAK_PLAYER : BREAK_ENEMY, cx, cy);
+
+	function burst(key:String, cx:Float, cy:Float):Void
+	{
+		var b = bursts.recycle(Burst);
+		if (b.key != key)
+		{
+			b.key = key;
+			b.loadGraphic(Paths.image(key), true, BURST_FRAME, BURST_FRAME);
+			b.animation.add("go", [0, 1, 2, 3], BURST_FPS, false);
+			b.antialiasing = false;
+			b.scale.set(BURST_SCALE, BURST_SCALE);
+			b.updateHitbox();
+		}
+		b.setPosition(cx - b.width * 0.5, cy - b.height * 0.5);
+		b.animation.play("go", true);
+	}
 
 	private var hitstopFrames:Int = 0;
 	private var meleeHeld:Bool = false;
@@ -48,6 +87,7 @@ class Fx
 
 		dashTrail = new FlxTypedGroup<FlxSprite>();
 		pops = new FlxTypedGroup<FlxSprite>();
+		bursts = new FlxTypedGroup<Burst>();
 	}
 
 	public function chargePop(cx:Float, cy:Float):Void
@@ -76,6 +116,10 @@ class Fx
 			if (hitstopFrames <= 0)
 				FlxG.timeScale = 1;
 		}
+
+		for (b in bursts.members)
+			if (b != null && b.exists && b.animation.finished)
+				b.kill();
 
 		for (l in dashTrail.members)
 		{

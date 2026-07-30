@@ -210,7 +210,7 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
-		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status) : new EnemyDirector(_player, arena, layers, status);
+		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status, fx) : new EnemyDirector(_player, arena, layers, status, fx);
 		director.solids = props.solids;
 		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups, scraps);
 
@@ -231,6 +231,7 @@ class PlayState extends FlxState
 		add(combat.superOrbit.frontLayer);
 		add(fx.sparks);
 		add(fx.pops);
+		add(fx.bursts);
 
 		add(props.overlay);
 
@@ -335,6 +336,7 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		EnemyNav.resetBudget();
+
 
 		var inputLocked = Net.active && subState != null;
 
