@@ -14,6 +14,7 @@ class AspectBars
 {
 	public static var bars(default, null):Int = 0;
 	public static var mode(default, null):BoxedScaleMode;
+	public static var resizeCount(default, null):Int = 0;
 
 	static inline var FILL:Int = 0x0A0A0C;
 	static inline var EDGE:Int = 0x2A2A30;
@@ -23,6 +24,8 @@ class AspectBars
 	static var art:BitmapData;
 	static var lastW:Int = -1;
 	static var lastH:Int = -1;
+	static var lastX:Int = -99999;
+	static var lastY:Int = -99999;
 
 	public static function init(parent:DisplayObjectContainer):Void
 	{
@@ -39,11 +42,22 @@ class AspectBars
 
 	static function watch():Void
 	{
+		#if desktop
+		var win = lime.app.Application.current.window;
+		if (win.x != lastX || win.y != lastY)
+		{
+			lastX = win.x;
+			lastY = win.y;
+			resizeCount++;
+		}
+		#end
+
 		var stage = Lib.current.stage;
 		if (stage.stageWidth == lastW && stage.stageHeight == lastH)
 			return;
 		lastW = stage.stageWidth;
 		lastH = stage.stageHeight;
+		resizeCount++;
 		apply();
 	}
 

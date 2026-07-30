@@ -42,6 +42,10 @@ class MenuList extends FlxGroup
 	private var holdWait:Float = 0;
 	private var holdTime:Float = 0;
 	private var blipWait:Float = 0;
+	private var seenResize:Int = -1;
+	private var settleTimer:Float = 0;
+
+	static inline var SETTLE_TIME:Float = 0.5;
 
 	public function new(labels:Array<String>, startY:Float, spacing:Float, size:Int)
 	{
@@ -138,7 +142,19 @@ class MenuList extends FlxGroup
 		if (util.Controls.menuDown())
 			move(1);
 
-		if (FlxG.mouse.x != lastMouseX || FlxG.mouse.y != lastMouseY)
+		if (seenResize != util.AspectBars.resizeCount)
+		{
+			seenResize = util.AspectBars.resizeCount;
+			settleTimer = SETTLE_TIME;
+		}
+
+		if (settleTimer > 0)
+		{
+			settleTimer -= elapsed;
+			lastMouseX = FlxG.mouse.x;
+			lastMouseY = FlxG.mouse.y;
+		}
+		else if (FlxG.mouse.x != lastMouseX || FlxG.mouse.y != lastMouseY)
 		{
 			lastMouseX = FlxG.mouse.x;
 			lastMouseY = FlxG.mouse.y;
