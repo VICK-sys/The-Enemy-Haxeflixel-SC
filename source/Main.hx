@@ -3,14 +3,13 @@ package;
 import flixel.FlxG;
 import flixel.FlxGame;
 import openfl.display.Sprite;
-import openfl.display.FPS;
 import openfl.events.Event;
 import states.TitleSequence;
 import util.DiscordPresence;
 
 class Main extends Sprite
 {
-	public static var counter:FPS;
+	public static var counter:ui.Counter;
 
 	public function new()
 	{
@@ -22,7 +21,7 @@ class Main extends Sprite
 		keepPresenting();
 		ui.MenuCursor.init();
 		util.AspectBars.init(this);
-		counter = new FPS(10, 3, 0xFFFFFF);
+		counter = new ui.Counter(10, 3);
 		addChild(counter);
 		fitCounter();
 		FlxG.signals.gameResized.add(function(_, _) fitCounter());
