@@ -16,7 +16,7 @@ class Main extends Sprite
 	{
 		super();
 		DiscordPresence.init();
-		addChild(new FlxGame(0, 0, TitleSequence, 60, 60, true));
+		addChild(new FlxGame(1280, 720, TitleSequence, 60, 60, true));
 		keepPresenting();
 		ui.MenuCursor.init();
 		util.AspectBars.init(this);

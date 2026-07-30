@@ -21,6 +21,8 @@ class AspectBars
 
 	static var holder:Sprite;
 	static var art:BitmapData;
+	static var lastW:Int = -1;
+	static var lastH:Int = -1;
 
 	public static function init(parent:DisplayObjectContainer):Void
 	{
@@ -32,6 +34,17 @@ class AspectBars
 		if (Assets.exists(ART))
 			art = Assets.getBitmapData(ART);
 		Lib.current.stage.addEventListener(Event.RESIZE, function(_) apply());
+		FlxG.signals.postUpdate.add(watch);
+	}
+
+	static function watch():Void
+	{
+		var stage = Lib.current.stage;
+		if (stage.stageWidth == lastW && stage.stageHeight == lastH)
+			return;
+		lastW = stage.stageWidth;
+		lastH = stage.stageHeight;
+		apply();
 	}
 
 	public static function ratioOf(name:String):Float
