@@ -69,6 +69,17 @@ class MenuList extends FlxGroup
 		snapSelector();
 	}
 
+	override function set_cameras(value:Array<flixel.FlxCamera>):Array<flixel.FlxCamera>
+	{
+		super.set_cameras(value);
+		if (rows != null)
+			for (r in rows)
+				r.cameras = value;
+		if (selector != null)
+			selector.cameras = value;
+		return value;
+	}
+
 	public function setLabel(i:Int, text:String):Void
 	{
 		rows[i].text = text;
