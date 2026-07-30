@@ -422,6 +422,7 @@ class OnlineState extends FlxState
 
 		if (util.Controls.menuBack())
 		{
+			util.MenuSfx.cancel();
 			if (typing)
 				cancelTyping();
 			else if (waiting)

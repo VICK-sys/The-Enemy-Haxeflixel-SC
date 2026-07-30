@@ -207,6 +207,7 @@ class WeaponPickSubState extends FlxSubState
 			return;
 		pick = i;
 		bob = 0;
+		util.MenuSfx.hover();
 		refresh();
 	}
 
@@ -264,6 +265,7 @@ class WeaponPickSubState extends FlxSubState
 	{
 		if (util.Controls.menuBack())
 		{
+			util.MenuSfx.cancel();
 			cancelled = true;
 			done = true;
 			close();
@@ -299,6 +301,7 @@ class WeaponPickSubState extends FlxSubState
 
 	function confirm():Void
 	{
+		util.MenuSfx.click();
 		done = true;
 		lastPick = pick;
 		var icon = cards[pick].icon;

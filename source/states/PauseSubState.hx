@@ -82,7 +82,10 @@ class PauseSubState extends FlxSubState
 		}
 
 		if (util.Controls.menuBack() || util.Controls.pausePressed())
+		{
+			util.MenuSfx.cancel();
 			close();
+		}
 
 		if (FlxG.keys.justPressed.MINUS)
 			FlxG.sound.changeVolume(-0.1);

@@ -163,7 +163,10 @@ class OptionsSubState extends FlxSubState
 		showPreview(ids[list.index] == COLOR);
 
 		if (util.Controls.menuBack())
+		{
+			util.MenuSfx.cancel();
 			close();
+		}
 	}
 
 	function buildPage():Void

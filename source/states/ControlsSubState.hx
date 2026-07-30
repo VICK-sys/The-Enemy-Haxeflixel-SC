@@ -143,7 +143,10 @@ class ControlsSubState extends FlxSubState
 		if (capturing < 0)
 		{
 			if (Controls.menuBack())
+			{
+				util.MenuSfx.cancel();
 				close();
+			}
 			return;
 		}
 
@@ -155,6 +158,7 @@ class ControlsSubState extends FlxSubState
 
 		if (FlxG.keys.justPressed.ESCAPE)
 		{
+			util.MenuSfx.cancel();
 			endCapture();
 			return;
 		}

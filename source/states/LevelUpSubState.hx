@@ -326,11 +326,13 @@ class LevelUpSubState extends FlxSubState
 		if (util.Controls.menuUp())
 		{
 			pick = (pick + STATS.length) % (STATS.length + 1);
+			util.MenuSfx.hover();
 			refresh();
 		}
 		if (util.Controls.menuDown())
 		{
 			pick = (pick + 1) % (STATS.length + 1);
+			util.MenuSfx.hover();
 			refresh();
 		}
 		if (util.Controls.menuRightJust())
@@ -340,7 +342,10 @@ class LevelUpSubState extends FlxSubState
 		if (util.Controls.menuAccept())
 			choose();
 		if (util.Controls.menuBack())
+		{
+			util.MenuSfx.cancel();
 			leave();
+		}
 	}
 
 

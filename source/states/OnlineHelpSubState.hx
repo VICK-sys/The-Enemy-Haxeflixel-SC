@@ -7,7 +7,6 @@ import flixel.FlxSubState;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import net.Net;
-import util.Paths;
 import util.Lang;
 
 class OnlineHelpSubState extends FlxSubState
@@ -118,8 +117,16 @@ class OnlineHelpSubState extends FlxSubState
 			flip(1);
 		if (util.Controls.menuLeftJust())
 			flip(-1);
-		if (util.Controls.menuAccept() || util.Controls.menuBack())
+		if (util.Controls.menuAccept())
+		{
+			util.MenuSfx.click();
 			beginClose();
+		}
+		else if (util.Controls.menuBack())
+		{
+			util.MenuSfx.cancel();
+			beginClose();
+		}
 	}
 
 	function beginOpen():Void
@@ -160,6 +167,6 @@ class OnlineHelpSubState extends FlxSubState
 	{
 		page = (page + dir + PAGES) % PAGES;
 		buildPage();
-		FlxG.sound.play(Paths.sound("weapon/slice"), 0.3);
+		util.MenuSfx.hover();
 	}
 }

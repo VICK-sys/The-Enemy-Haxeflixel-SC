@@ -148,7 +148,7 @@ class MenuList extends FlxGroup
 		var clicked = FlxG.mouse.justPressed && FlxG.mouse.overlaps(rows[index], rowCamera(index));
 		if (util.Controls.menuAccept() || FlxG.keys.justPressed.SPACE || clicked)
 		{
-			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
+			util.MenuSfx.click();
 			if (onChoose != null)
 				onChoose(index);
 		}
@@ -235,7 +235,7 @@ class MenuList extends FlxGroup
 		if (blipWait <= 0)
 		{
 			blipWait = BLIP_GAP;
-			FlxG.sound.play(Paths.sound("weapon/slice"), 0.2);
+			util.MenuSfx.hover();
 		}
 		onAdjust(index, dir);
 	}
@@ -248,7 +248,7 @@ class MenuList extends FlxGroup
 
 	function blip():Void
 	{
-		FlxG.sound.play(Paths.sound("weapon/slice"), 0.25);
+		util.MenuSfx.hover();
 	}
 
 	function positionSelector(elapsed:Float):Void
