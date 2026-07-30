@@ -97,7 +97,7 @@ class SaveData
 		save.flush();
 	}
 
-	public static var WINDOW_STEPS:Array<Int> = [50, 65, 80, 100];
+	public static var WINDOW_STEPS:Array<Int> = [50, 65, 80, 90];
 
 	public static function windowFill():Int
 	{
