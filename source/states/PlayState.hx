@@ -564,6 +564,7 @@ class PlayState extends FlxState
 		if (FlxG.keys.justPressed.PLUS)
 			FlxG.sound.changeVolume(0.1);
 
+		#if debug
 		if (FlxG.keys.justPressed.FIVE)
 		{
 			status.health = 0;
@@ -580,6 +581,7 @@ class PlayState extends FlxState
 			heldSprite.visible = true;
 			hud.hideDeath();
 		}
+		#end
 
 		if (util.Controls.justPressed(util.Controls.RELOAD) && status.dead && !restarting && (!Net.active || (netSync != null && netSync.runFailed)))
 		{

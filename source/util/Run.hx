@@ -6,7 +6,6 @@ import data.RunData.RunDataRegistry;
 class Run
 {
 	static inline var UNSET:Int = 0;
-	static inline var FORCE:Int = 66;
 
 	public static var value(get, never):Int;
 
@@ -14,8 +13,6 @@ class Run
 
 	static function get_value():Int
 	{
-		if (FORCE != UNSET)
-			return FORCE;
 		if (current == UNSET)
 			current = SaveData.runValue();
 		if (current == UNSET)
