@@ -97,6 +97,46 @@ class SaveData
 		save.flush();
 	}
 
+	public static var WINDOW_SIZES:Array<Array<Int>> = [[1280, 720], [1600, 900], [1920, 1080], [2560, 1440], [3200, 1800]];
+
+	public static function windowSize():Array<Int>
+	{
+		ensure();
+		var w = save.data.windowW != null ? save.data.windowW : WINDOW_SIZES[0][0];
+		var h = save.data.windowH != null ? save.data.windowH : WINDOW_SIZES[0][1];
+		return [w, h];
+	}
+
+	public static function setWindowSize(w:Int, h:Int):Void
+	{
+		ensure();
+		save.data.windowW = w;
+		save.data.windowH = h;
+		save.flush();
+	}
+
+	public static function windowChoices():Array<Array<Int>>
+	{
+		var limit = displayBounds();
+		if (limit == null)
+			return WINDOW_SIZES;
+		var out:Array<Array<Int>> = [];
+		for (s in WINDOW_SIZES)
+			if (s[0] <= limit[0] && s[1] <= limit[1])
+				out.push(s);
+		return out.length > 0 ? out : [WINDOW_SIZES[0]];
+	}
+
+	static function displayBounds():Array<Int>
+	{
+		#if desktop
+		var d = lime.app.Application.current.window.display;
+		if (d != null)
+			return [Std.int(d.bounds.width), Std.int(d.bounds.height)];
+		#end
+		return null;
+	}
+
 	public static function aspect():String
 	{
 		ensure();
@@ -345,11 +385,12 @@ class SaveData
 			default:
 				win.fullscreen = false;
 				win.borderless = false;
+				var size = windowSize();
 				var d = win.display;
-				if (d != null && (win.width != 1280 || win.height != 720))
+				if (d != null && (win.width != size[0] || win.height != size[1]))
 				{
-					win.resize(1280, 720);
-					win.move(Std.int(d.bounds.x + (d.bounds.width - 1280) / 2), Std.int(d.bounds.y + (d.bounds.height - 720) / 2));
+					win.resize(size[0], size[1]);
+					win.move(Std.int(d.bounds.x + (d.bounds.width - size[0]) / 2), Std.int(d.bounds.y + (d.bounds.height - size[1]) / 2));
 				}
 		}
 		#else

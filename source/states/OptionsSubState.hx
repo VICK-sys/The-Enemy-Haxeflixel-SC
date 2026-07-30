@@ -23,6 +23,7 @@ class OptionsSubState extends FlxSubState
 	static inline var ROW_SIZE:Int = 22;
 	static inline var TAB_SIZE:Int = 20;
 	static inline var TAB_COLOR:Int = 0xFFE8C860;
+	static inline var DIM:Int = 0xFF9A9A9A;
 	static inline var PREVIEW_SCALE:Float = 6;
 	static inline var PREVIEW_IN:Float = 260;
 	static inline var PREVIEW_Y:Float = 330;
@@ -51,13 +52,14 @@ class OptionsSubState extends FlxSubState
 	static inline var CONTROLS:Int = 13;
 	static inline var RESET:Int = 14;
 	static inline var VOICE:Int = 15;
+	static inline var RESOLUTION:Int = 16;
 
 	static inline var TAB:Int = -1;
 	static inline var BACK:Int = -2;
 	static inline var BLANK:Int = -3;
 
 	static var PAGES:Array<{key:String, items:Array<Int>}> = [
-		{key: "options.page.graphics", items: [DISPLAY, ASPECT, VSYNC, FRAMERATE]},
+		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE]},
 		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, HUD, FPS]},
 		{key: "options.page.sounds", items: [VOLUME, SOUND3D]},
 		{key: "options.page.custom", items: [COLOR, VOICE, LANGUAGE, CONTROLS, RESET]}
@@ -288,6 +290,7 @@ class OptionsSubState extends FlxSubState
 		{
 			case TAB: TAB_COLOR;
 			case COLOR: swatch(SaveData.playerHue());
+			case RESOLUTION: windowed() ? FlxColor.WHITE : DIM;
 			default: FlxColor.WHITE;
 		}
 	}
@@ -309,6 +312,7 @@ class OptionsSubState extends FlxSubState
 			case BACK: Lang.t("common.back");
 			case VOLUME: Lang.t("options.volume", [Math.round(shownVolume * 100)]);
 			case DISPLAY: Lang.t("options.display", [Lang.t("display." + SaveData.displayMode())]);
+			case RESOLUTION: Lang.t("options.resolution", [resLabel()]);
 			case VSYNC: Lang.t("options.vsync", [onOff(SaveData.vsync())]);
 			case FRAMERATE: Lang.t("options.framerate", [fpsLabel()]);
 			case ASPECT: Lang.t("options.aspect", [aspectLabel()]);
@@ -345,6 +349,27 @@ class OptionsSubState extends FlxSubState
 		var v = Math.round(SaveData.voicePitch() * 100);
 		var frac = v % 100;
 		return Std.int(v / 100) + "." + (frac < 10 ? "0" + frac : "" + frac);
+	}
+
+	static function windowed():Bool
+		return SaveData.displayMode() == "windowed";
+
+	function resLabel():String
+	{
+		var s = SaveData.windowSize();
+		return s[0] + " x " + s[1];
+	}
+
+	function stepResolution(dir:Int):Void
+	{
+		var list = SaveData.windowChoices();
+		var cur = SaveData.windowSize();
+		var at = 0;
+		for (i in 0...list.length)
+			if (list[i][0] == cur[0] && list[i][1] == cur[1])
+				at = i;
+		var pick = list[(at + dir + list.length) % list.length];
+		SaveData.setWindowSize(pick[0], pick[1]);
 	}
 
 	function fpsLabel():String
@@ -419,6 +444,10 @@ class OptionsSubState extends FlxSubState
 				SaveData.setVolume(SaveData.volume() + dir * 0.1);
 			case DISPLAY:
 				SaveData.setDisplayMode(cycled(DISPLAYS, SaveData.displayMode(), dir));
+			case RESOLUTION:
+				if (!windowed())
+					return;
+				stepResolution(dir);
 			case VSYNC:
 				SaveData.setVsync(!SaveData.vsync());
 			case FRAMERATE:
@@ -451,7 +480,7 @@ class OptionsSubState extends FlxSubState
 				return;
 		}
 		SaveData.applySettings();
-		if (ids[row] == VSYNC)
+		if (ids[row] == VSYNC || ids[row] == DISPLAY)
 			refreshLabels();
 		else
 			refreshRow(row);
