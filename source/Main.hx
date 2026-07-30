@@ -15,6 +15,8 @@ class Main extends Sprite
 	public function new()
 	{
 		super();
+		if (!util.DpiAware.claimed)
+			return;
 		DiscordPresence.init();
 		addChild(new FlxGame(1280, 720, TitleSequence, 60, 60, true));
 		keepPresenting();
@@ -22,10 +24,21 @@ class Main extends Sprite
 		util.AspectBars.init(this);
 		counter = new FPS(10, 3, 0xFFFFFF);
 		addChild(counter);
+		fitCounter();
+		FlxG.signals.gameResized.add(function(_, _) fitCounter());
 		addEventListener(Event.ENTER_FRAME, onFrame);
 	}
 
 	static inline var IDLE_FPS:Int = 10;
+
+	function fitCounter():Void
+	{
+		if (counter == null)
+			return;
+		var m = FlxG.scaleMode;
+		var s = m != null && m.scale.x > 0 ? m.scale.x : 1;
+		counter.scaleX = counter.scaleY = s;
+	}
 
 	function keepPresenting():Void
 	{
