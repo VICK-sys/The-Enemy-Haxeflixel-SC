@@ -100,7 +100,7 @@ class HookFlight
 		if (onRelease != null)
 			onRelease(v);
 		if (hitWall)
-			hits.damage(v, -dirX * 0.4, -dirY * 0.4);
+			hits.damageN(v, -dirX * 0.4, -dirY * 0.4, cfg.slamDamage);
 	}
 
 	public function stop():Void

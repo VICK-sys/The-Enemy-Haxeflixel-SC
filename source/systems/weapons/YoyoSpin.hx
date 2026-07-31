@@ -11,13 +11,15 @@ class Spun
 {
 	public var e:Enemies;
 	public var relAng:Float;
-	public var dist:Float;
+	public var frac:Float;
+	public var carry:Float;
 
-	public function new(e:Enemies, relAng:Float, dist:Float)
+	public function new(e:Enemies, relAng:Float, frac:Float, carry:Float)
 	{
 		this.e = e;
 		this.relAng = relAng;
-		this.dist = dist;
+		this.frac = frac;
+		this.carry = carry;
 	}
 }
 
@@ -26,6 +28,7 @@ class YoyoSpin
 	static inline var INNER:Float = 70;
 	static inline var TIP_BAND:Float = 60;
 	static inline var SPIN_VISUAL:Float = 1900;
+	static inline var SHRINK:Float = 0.6;
 
 	public var active(get, never):Bool;
 	public var onGrab:(Enemies, Bool) -> Void;
@@ -100,29 +103,31 @@ class YoyoSpin
 		if (t > 1)
 			t = 1;
 		var ang = (baseAng + cfg.turns * 360 * t) * Math.PI / 180;
+		var r = cfg.radius * (1 - SHRINK * t);
 
-		var yx = pcx + Math.cos(ang) * cfg.radius;
-		var yy = pcy + Math.sin(ang) * cfg.radius;
+		var yx = pcx + Math.cos(ang) * r;
+		var yy = pcy + Math.sin(ang) * r;
 		flight.drive(yx, yy, t * cfg.turns * SPIN_VISUAL, hx, hy);
 
-		sweep(pcx, pcy);
+		sweep(pcx, pcy, r);
 
 		for (s in caught)
 		{
 			if (s.e == null || !s.e.exists || s.e.isDead)
 				continue;
 			var ea = ang + s.relAng;
+			var d = s.frac * r;
 			s.e.velocity.set(0, 0);
-			s.e.setPosition(pcx + Math.cos(ea) * s.dist - s.e.width * 0.5, pcy + Math.sin(ea) * s.dist - s.e.height * 0.5);
+			s.e.setPosition(pcx + Math.cos(ea) * d - s.e.width * 0.5, pcy + Math.sin(ea) * d - s.e.height * 0.5);
 		}
 
 		if (timer <= 0)
 			release(pcx, pcy);
 	}
 
-	function sweep(pcx:Float, pcy:Float):Void
+	function sweep(pcx:Float, pcy:Float, r:Float):Void
 	{
-		director.eachInCircle(pcx, pcy, cfg.radius + cfg.grabPad, function(e)
+		director.eachInCircle(pcx, pcy, r + cfg.grabPad, function(e)
 		{
 			var dx = e.x + e.width * 0.5 - pcx;
 			var dy = e.y + e.height * 0.5 - pcy;
@@ -146,16 +151,12 @@ class YoyoSpin
 				if (s.e == e)
 					return;
 
-			var damage = dist >= cfg.radius - TIP_BAND ? cfg.grabDamage : cfg.stringDamage;
-			hits.damageSuper(e, 0, 0, damage);
-			if (e.isDead || !e.exists)
-				return;
-
 			e.seized = true;
 			e.drag.set(0, 0);
 			e.velocity.set(0, 0);
+			var carry = dist >= r - TIP_BAND ? cfg.grabDamage : cfg.stringDamage;
 			var yoyoAng = Math.atan2(flight.cy - pcy, flight.cx - pcx);
-			caught.push(new Spun(e, Math.atan2(dy, dx) - yoyoAng, dist));
+			caught.push(new Spun(e, Math.atan2(dy, dx) - yoyoAng, dist / r, carry));
 			if (onGrab != null)
 				onGrab(e, true);
 		});
@@ -163,19 +164,25 @@ class YoyoSpin
 
 	function release(pcx:Float, pcy:Float):Void
 	{
-		var aimAng = Math.atan2(util.Controls.aimY() - pcy, util.Controls.aimX() - pcx) * 180 / Math.PI;
 		for (s in caught)
 		{
 			if (s.e == null || !s.e.exists)
 				continue;
-			var deg = aimAng + FlxG.random.float(-45, 45);
-			var rad = deg * Math.PI / 180;
-			var dx = Math.cos(rad);
-			var dy = Math.sin(rad);
+			var dx = s.e.x + s.e.width * 0.5 - pcx;
+			var dy = s.e.y + s.e.height * 0.5 - pcy;
+			var len = Math.sqrt(dx * dx + dy * dy);
+			if (len < 0.001)
+			{
+				dx = 1;
+				dy = 0;
+				len = 1;
+			}
+			dx /= len;
+			dy /= len;
 			s.e.unseize(0.5);
 			if (onGrab != null)
 				onGrab(s.e, false);
-			hits.damageSuper(s.e, dx * cfg.launchPush, dy * cfg.launchPush, cfg.launchDamage);
+			hits.damageSuper(s.e, dx * cfg.launchPush, dy * cfg.launchPush, s.carry + cfg.launchDamage);
 			if (s.e.exists)
 				s.e.velocity.set(dx * cfg.launchSpeed, dy * cfg.launchSpeed);
 		}

@@ -18,7 +18,7 @@
 		"holdTime": 2.5,
 		"hitRadius": 46,
 		"hitGap": 0.28,
-		"damage": 1,
+		"damage": 2,
 		"hitstop": 2,
 		"hitstopScale": 0.3,
 		"hitShake": 0.002,
@@ -80,7 +80,8 @@
 		"throwTime": 0.5,
 		"throwHitRadius": 60,
 		"releaseStun": 0.35,
-		"snagDamage": 3
+		"snagDamage": 3,
+		"slamDamage": 3
 	},
 	"bounceStrike": {
 		"strikes": 2,
@@ -101,8 +102,8 @@
 		"grabPad": 46,
 		"time": 1.3,
 		"turns": 2.5,
-		"grabDamage": 2,
-		"stringDamage": 1,
+		"grabDamage": 3,
+		"stringDamage": 2,
 		"launchSpeed": 1400,
 		"launchPush": 4.0,
 		"launchDamage": 1

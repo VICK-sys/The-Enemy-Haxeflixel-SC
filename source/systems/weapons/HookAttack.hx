@@ -167,8 +167,7 @@ class HookAttack
 			return;
 		}
 
-		if (!latch(hit))
-			beginRetract();
+		latch(hit);
 	}
 
 	function snag(hit:Enemies):Void
@@ -179,20 +178,8 @@ class HookAttack
 		hits.damageN(hit, hook.dirX, hook.dirY, cfg.snagDamage);
 	}
 
-	function latch(hit:Enemies):Bool
+	function latch(hit:Enemies):Void
 	{
-		var pmx = player.x + player.width * 0.5;
-		var pmy = player.y + player.height * 0.5;
-		var ptx = pmx - (hit.x + hit.width / 2);
-		var pty = pmy - (hit.y + hit.height / 2);
-		var plen = Math.sqrt(ptx * ptx + pty * pty);
-		if (plen <= 0)
-			plen = 1;
-		hits.damage(hit, ptx / plen * 0.3, pty / plen * 0.3);
-
-		if (hit.isDead || !hit.exists)
-			return false;
-
 		victim = hit;
 		victim.seized = true;
 		victim.drag.set(0, 0);
@@ -201,7 +188,6 @@ class HookAttack
 		phase = Pulling;
 		if (onGrab != null)
 			onGrab(victim, true);
-		return true;
 	}
 
 	function updatePulling(elapsed:Float):Void
@@ -315,11 +301,10 @@ class HookAttack
 		{
 			if (caught.grabbable)
 			{
-				if (latch(caught))
-					return;
+				latch(caught);
+				return;
 			}
-			else
-				snag(caught);
+			snag(caught);
 		}
 
 		var dx = handX() - (hook.x + hook.width / 2);

@@ -148,7 +148,7 @@ class SwingAttack
 			if (slen > 0 && (sx * aimX + sy * aimY) / slen < cfg.meleeArcCos)
 				continue;
 
-			shot.deflect();
+			shot.deflect(aimX, aimY);
 			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
 		}
 	}

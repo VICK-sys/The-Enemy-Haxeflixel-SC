@@ -42,7 +42,7 @@ Both flips use the same margin around 90 degrees. A cursor near straight up or d
 
 The hammer's melee, built from the `swing` config block: long reach, a wide arc, 2 damage and an oversized slash to match the weapon. The yoyo runs `YoyoJab` instead.
 
-Each fire spawns a slash effect and strikes every enemy inside its arc. It also opens a short guard window, during which it deflects enemy shots. The window runs for `GUARD_TIME` rather than only the frame of the click, so a swing catches bullets that arrive mid-animation. A deflected shot swaps to the player bullet sprite rather than taking a tint. A round coming back at its owner therefore reads as yours.
+Each fire spawns a slash effect and strikes every enemy inside its arc. It also opens a short guard window, during which it deflects enemy shots. The window runs for `GUARD_TIME` rather than only the frame of the click, so a swing catches bullets that arrive mid-animation. A deflected shot keeps its bullet type and swaps to the player skin of that type rather than taking a tint, so a batted sniper round stays a sniper round. It leaves along the swing's aim, bent a little by the path it came in on: the new heading is the aim direction plus a fraction of the old one, so a crossing round carries some of its momentum through the deflect instead of snapping straight back the way it came.
 
 The hammer's block also carries a `cooldown`. Each swing starts it, and both the next swing and the throw wait for it out. Catching a thrown hammer starts the shorter `catchCooldown` from the thrown block, so a catch cannot chain straight into a hit. The reload bar above the player shows the wait, the same way it shows a reload. Dexterity shortens it like every other recovery.
 
@@ -144,9 +144,9 @@ Impact points are floor coordinates. The marker, the arrow's descent and the bla
 
 The yoyo's secondary, split two ways. The phase machine and the catch-and-throw chain live in `HookAttack`: fly out, latch, reel in, hold, spin, release. It owns the flying sprite and its string. `HookFlight` carries a thrown enemy after the grab has let go. It lives apart because its lifetime outlasts the phase that started it. It keeps running while the yoyo is idle or thrown again.
 
-The grab throws the yoyo itself, trailing its string back to the player. The hand stays empty and all attacks block until it returns. It latches the first enemy it hits, with light damage plus a seize that suspends the AI. It then reels that enemy in and holds it in front of the cursor.
+The grab throws the yoyo itself, trailing its string back to the player. The hand stays empty and all attacks block until it returns. It latches the first enemy it hits with a seize that suspends the AI, then reels that enemy in and holds it in front of the cursor. The latch itself deals nothing. It used to land a hit on contact, and with damage bonuses stacked that hit killed the catch in the hand, which defeated the point of catching.
 
-Left click while holding whips the enemy in one quick revolution around the player, then launches it as a projectile. That projectile damages every enemy it passes through. The yoyo returns to the hand at the moment of release, so the enemy flies alone. Hitting a wall damages the thrown enemy. Otherwise the flight ends with a short stun.
+Left click while holding whips the enemy in one quick revolution around the player, then launches it as a projectile. That projectile damages every enemy it passes through. The yoyo returns to the hand at the moment of release, so the enemy flies alone. The thrown enemy takes its own hit only on a wall: `slamDamage` on impact, which is where the grab's damage lives now. A flight that runs out in the open ends with a short stun and no hit.
 
 On a miss it retracts to the hand, and it stays live on the way back. A returning grab takes the first enemy it touches that nobody already holds, so a shot that missed ahead of a target still catches it on the return. Seized enemies deal no contact damage and skip crowd separation.
 
@@ -162,11 +162,11 @@ Only arena walls turn the outbound leg around. Buildings and the rest of the sce
 
 ## YoyoSpin
 
-The yoyo super. Q with the yoyo equipped and a full super meter drains the meter. The yoyo then circles the player at `radius` for `turns` revolutions over `time`, drawing its string the whole way. It drives the ordinary `YoyoFlight`, so the string, the sprite, the hue and the co-op stream all come along without their own code.
+The yoyo super. Q with the yoyo equipped and a full super meter drains the meter. The yoyo then circles the player for `turns` revolutions over `time`, starting at `radius` and reeling in as the super runs, so the circle it draws tightens toward the player. It drives the ordinary `YoyoFlight`, so the string, the sprite, the hue and the co-op stream all come along without their own code.
 
-Anything the circle touches gets taken. An enemy caught out near the tip takes `grabDamage`, one caught along the string takes `stringDamage`, and either way it is seized and rides the spin at the angle and distance it was caught. Big enemies cannot be grabbed. Each takes one contact hit and stands its ground.
+Anything the circle touches gets taken. The pickup deals nothing. An enemy caught out near the tip banks `grabDamage`, one caught along the string banks `stringDamage`, and either way it is seized and rides the spin at the angle and string fraction it was caught, pulled inward with the shrinking line. Big enemies cannot be grabbed. Each takes one contact hit and stands its ground.
 
-When the spin ends, every rider is flung at once. Each leaves at `launchSpeed` in its own direction inside a 90 degree cone centred on the aim, with a launch hit behind it. Riders killed on release fly as corpses, since a corpse keeps the knockback of the hit that ended it.
+When the spin ends, every rider is flung at once, straight out from the player along its own angle. Each leaves at `launchSpeed` with a hit of its banked damage plus `launchDamage` behind it, so the damage of the super arrives at the throw rather than on the way in. Riders killed on release fly as corpses, since a corpse keeps the knockback of the hit that ended it.
 
 ## ArrowStorm
 
