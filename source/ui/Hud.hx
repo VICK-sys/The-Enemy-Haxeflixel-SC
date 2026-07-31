@@ -29,6 +29,10 @@ class Hud
 	static inline var SCRAP_SIZE:Int = 34;
 	static inline var SCRAP_ICON_SCALE:Float = UI_SCALE;
 	static inline var SCRAP_SHADE:Float = 0.45;
+	static inline var SUPER_GLOW_BASE:Float = 0.32;
+	static inline var SUPER_GLOW_WAVE:Float = 0.28;
+	static inline var SUPER_GLOW_SPEED:Float = 7.5;
+	static inline var SUPER_READY_VOL:Float = 0.7;
 
 	static inline var UI_SCALE:Float = 4 * states.PlayState.BASE_ZOOM;
 	static inline var FRAME_X:Float = 16;
@@ -67,6 +71,8 @@ class Hud
 	private var superFill:FlxSprite;
 	private var superClip:FlxRect;
 	private var superShown:Float = -1;
+	private var superReady:Bool = false;
+	private var superGlow:Float = 0;
 	private var hpFill:FlxSprite;
 	private var hpClip:FlxRect;
 	private var hpShown:Float = -1;
@@ -222,7 +228,7 @@ class Hud
 			util.Controls.aimViewY(FlxG.camera) - customCursor.frameHeight * 0.5);
 
 		updateHealth();
-		updateSuper();
+		updateSuper(elapsed);
 
 		if (stopTimerText.alpha != stopTimerTarget)
 		{
@@ -314,18 +320,39 @@ class Hud
 		hpFill.clipRect = hpClip;
 	}
 
-	function updateSuper():Void
+	function updateSuper(elapsed:Float):Void
 	{
 		var pct = status.superMax > 0 ? status.superMeter / status.superMax : 0;
 		if (pct < 0)
 			pct = 0;
 		if (pct > 1)
 			pct = 1;
-		if (pct == superShown)
+		if (pct != superShown)
+		{
+			superShown = pct;
+			superClip.width = superFill.frameWidth * pct;
+			superFill.clipRect = superClip;
+		}
+
+		var ready = status.canSuper() && !status.dead;
+		if (ready != superReady)
+		{
+			superReady = ready;
+			superGlow = 0;
+			if (ready)
+				FlxG.sound.play(Paths.sound("super_ready"), SUPER_READY_VOL);
+			else
+				superFill.setColorTransform(1, 1, 1, superFill.alpha, 0, 0, 0, 0);
+		}
+
+		if (!superReady)
 			return;
-		superShown = pct;
-		superClip.width = superFill.frameWidth * pct;
-		superFill.clipRect = superClip;
+
+		superGlow += elapsed * SUPER_GLOW_SPEED;
+		var lit = SUPER_GLOW_BASE + SUPER_GLOW_WAVE * (0.5 + 0.5 * Math.sin(superGlow));
+		var keep = 1 - lit;
+		var add = 255 * lit;
+		superFill.setColorTransform(keep, keep, keep, superFill.alpha, add, add, add, 0);
 	}
 
 	function makeScrapIcon(shade:Bool):FlxSprite

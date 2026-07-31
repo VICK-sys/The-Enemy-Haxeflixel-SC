@@ -136,6 +136,8 @@ It also owns the revolver ammo readout and the crossbow's blue gauge, which sits
 
 The health bar is an `FlxBar` bound by reflection to `status.health`. The super strip cannot be, because both bars live in one piece of art. `bar_red` draws the whole widget, so an `FlxBar` over the strip would clip against the full widget width and read full at two thirds. The strip therefore takes a plain sprite with a `clipRect` measured against the strip's own span, and `bar_super_empty` covers the background's red so the strip can read empty. `bar_main_red` is the health fill with the strip cut out of it, without which the health bar repaints the strip red over the top.
 
+The super bar lights up the moment the super becomes usable. It keys on the same `canSuper` the input check uses rather than on the meter merely reading full, so a meter that refilled while the cooldown was still running stays dark until the cooldown ends, and the bar never invites a press that would do nothing. Becoming usable plays a chime once and starts a slow additive pulse on the fill; spending it, dying, or dropping below full puts the light out. The cue keys on the crossing rather than on the state, so holding a full meter stays quiet.
+
 ### Scraps
 
 Enemies pay in scrap rather than in exp. A rewardable kill drops one `ScrapPickup` where the enemy fell, and picking it up pays one scrap. A kill you do not walk over is therefore worth nothing.
