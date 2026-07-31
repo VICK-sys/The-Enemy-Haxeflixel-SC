@@ -391,9 +391,6 @@ class PlayState extends FlxState
 		if (ghost.sprite.exists)
 			ghost.track(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, _player.flipX);
 		ghost.update(elapsed);
-		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y - 21, _player.flipX,
-			systems.BackGear.leanFor(_player.animation.name), _player.visible);
-
 		director.update(step);
 		pickups.update();
 		scraps.update(elapsed);
@@ -417,6 +414,9 @@ class PlayState extends FlxState
 		combat.yoyoJab.flight.yoyo.visible = !props.buried;
 		if (!inputLocked)
 			combat.update(elapsed);
+		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y - 21, _player.flipX,
+			systems.BackGear.leanFor(_player.animation.name), _player.visible,
+			_player.angle, _player.offset.y - _player.baseOffsetY, _player.y + _player.height * 0.5);
 		director.updateShots();
 		if (netSync != null)
 			netSync.update(elapsed);

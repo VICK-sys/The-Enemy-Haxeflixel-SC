@@ -329,6 +329,10 @@ The boss name and the game title stay in the default face. Both read as logos ra
 
 A language change writes to the save and raises a flag. The main menu reads that flag with `consumeChanged()` and rebuilds itself. In a run, the pause screen relabels itself and the HUD re-applies the font. Nothing rebuilds the whole play state.
 
+### BackGear
+
+The spinning gear on the player's back, drawn as its own sprite so it can turn freely behind the body. It anchors to the player each frame with a lean that tucks it in while walking or dashing. The anchor rides the visual body, not just the hitbox: the update takes the sprite's spin angle, its lift off the ground and the point it spins about, so during the hammer bounce the gear orbits the somersault and rises with the hop instead of sitting at ground level. `PlayState` updates it after combat so those values are current-frame, and `RemoteAvatar` feeds the same three values off the wire for remote players.
+
 ### GhostTrail
 
 A pooled afterimage trail. It fades its ghosts every tick. On a fixed cadence it stamps a copy of a source sprite, carrying position, angle, scale and colour. The time-stop player trail instead uses `stampFrame`, which copies an animated sprite's current frame with a forced tint. The thrown hammer, the orbiters, the Arrow Storm launch arrow and the time-stop trail all use it.

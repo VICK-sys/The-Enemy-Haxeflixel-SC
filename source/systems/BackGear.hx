@@ -45,13 +45,26 @@ class BackGear
 		return anim == "walk" || anim == "dash" ? 1 : 0;
 	}
 
-	public function update(elapsed:Float, cx:Float, cy:Float, facingLeft:Bool, lean:Float, shown:Bool):Void
+	public function update(elapsed:Float, cx:Float, cy:Float, facingLeft:Bool, lean:Float, shown:Bool, spin:Float = 0, lift:Float = 0,
+			spinCy:Float = 0):Void
 	{
 		sprite.visible = shown;
 		if (!shown)
 			return;
 		sprite.angle += SPIN * elapsed;
 		var off = OFF_X - LEAN_IN * lean;
-		sprite.setPosition(cx + (facingLeft ? off : -off) - PLACE_X, cy + OFF_Y - PLACE_Y);
+		var ax = cx + (facingLeft ? off : -off);
+		var ay = cy + OFF_Y;
+		if (spin != 0)
+		{
+			var rad = spin * Math.PI / 180;
+			var cos = Math.cos(rad);
+			var sin = Math.sin(rad);
+			var relX = ax - cx;
+			var relY = ay - spinCy;
+			ax = cx + relX * cos - relY * sin;
+			ay = spinCy + relX * sin + relY * cos;
+		}
+		sprite.setPosition(ax - PLACE_X, ay - lift - PLACE_Y);
 	}
 }

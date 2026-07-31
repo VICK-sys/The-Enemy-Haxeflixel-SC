@@ -218,7 +218,8 @@ class RemoteAvatar
 		burst.update(elapsed);
 		ghost.update(elapsed);
 		gear.update(elapsed, sprite.x + sprite.width * 0.5, sprite.y - 21, sprite.flipX,
-			systems.BackGear.leanFor(sprite.animation.name), sprite.visible);
+			systems.BackGear.leanFor(sprite.animation.name), sprite.visible,
+			sprite.angle, sprite.offset.y - OFFSET_Y, sprite.y + sprite.height * 0.5);
 		if (!haveTarget)
 			return;
 		var k = Math.min(1, LERP * elapsed);
