@@ -184,24 +184,37 @@ class Controls
 		return pressed(RIGHT) || stickX() > STICK_MOVE;
 
 	static var firePinned:Bool = false;
+	static var fireLock:Float = 0;
 
 	public static function pinFire():Void
 		firePinned = true;
 
+	public static function lockFire(seconds:Float):Void
+	{
+		if (seconds > fireLock)
+			fireLock = seconds;
+	}
+
+	public static function fireHeldOff():Bool
+		return firePinned || fireLock > 0;
+
 	public static function firePinnedNow():Bool
 		return firePinned;
 
+	public static function fireLockLeft():Float
+		return fireLock;
+
 	public static function attackJustPressed():Bool
-		return !firePinned && justPressed(ATTACK);
+		return !fireHeldOff() && justPressed(ATTACK);
 
 	public static function attackHeld():Bool
-		return !firePinned && pressed(ATTACK);
+		return !fireHeldOff() && pressed(ATTACK);
 
 	public static function secondJustPressed():Bool
-		return !firePinned && justPressed(SECOND);
+		return !fireHeldOff() && justPressed(SECOND);
 
 	public static function secondHeld():Bool
-		return !firePinned && pressed(SECOND);
+		return !fireHeldOff() && pressed(SECOND);
 
 	public static function acceptJustPressed():Bool
 		return justPressed(ACCEPT) || FlxG.keys.anyJustPressed([FlxKey.Z]);
@@ -258,6 +271,13 @@ class Controls
 	{
 		if (firePinned && !pressed(ATTACK) && !pressed(SECOND))
 			firePinned = false;
+
+		if (fireLock > 0)
+		{
+			fireLock -= FlxG.elapsed;
+			if (fireLock < 0)
+				fireLock = 0;
+		}
 
 		var p = pad();
 

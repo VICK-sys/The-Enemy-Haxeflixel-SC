@@ -8,6 +8,8 @@ import util.DiscordPresence;
 
 class RunIntro
 {
+	static inline var INTRO_LOCK:Float = 1.0;
+
 	public var flyIn(default, null):WeaponFlyIn;
 
 	private var host:PlayState;
@@ -78,6 +80,7 @@ class RunIntro
 		if (pick < 0)
 			return;
 		flyIn.begin(WeaponPickSubState.artOf(pick), fromX, fromY);
+		util.Controls.lockFire(INTRO_LOCK);
 		pick = -1;
 	}
 

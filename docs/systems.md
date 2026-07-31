@@ -10,6 +10,8 @@ Aiming is a device question, so `Controls` owns the answer. It watches which dev
 
 Fire is pinned whenever a panel over the game closes, and stays pinned until neither attack button is down. Every weapon fires on hold rather than on the press, so the click that picks a weapon or dismisses a menu was still held on the first frame of play and went straight into the gun. Requiring the button to come up first means the click that closed the panel can never be the click that fires.
 
+Fire is also locked outright for a second as a run opens. The weapon flies to the hand over half a second and the held sprite is hidden for the trip, but attacking mid flight shows it again, since the yoyo and the thrown hammer both restore it when they finish. That left the weapon in the hand and in the air at once. The lock covers the flight with room to spare, and it is a timer rather than a pin because a player who releases and clicks again during the animation would otherwise walk straight back into it.
+
 ## Fonts
 
 `Lang.font` answers the font for body text and `Lang.display` the one for large names. Japanese keeps `DotGothic16`, which is the only face here carrying kana and kanji. Everything else takes `modernDos`, which covers Latin-1 and so serves English and Spanish alike.
