@@ -18,6 +18,9 @@ class PlayerCombat
 	static inline var WHITEN:Float = 1.7;
 	public static inline var HURT_LINES:Int = 4;
 	static inline var DEATH_LINES:Int = 3;
+	static inline var DASH_LINES:Int = 2;
+	static inline var DASH_VOL:Float = 0.55;
+	static inline var READY_VOL:Float = 0.4;
 
 	public var health:Float = 0;
 	public var superMeter:Float = 0;
@@ -88,12 +91,17 @@ class PlayerCombat
 		}
 
 		if (dashCooldownTimer > 0)
+		{
 			dashCooldownTimer -= elapsed;
+			if (dashCooldownTimer <= 0 && !dead)
+				FlxG.sound.play(Paths.sound("dash/charged"), READY_VOL);
+		}
 
 		if (util.Controls.justPressed(util.Controls.DASH) && !dead && !player.blockMovement && dashCooldownTimer <= 0 && player.dashTimer <= 0)
 		{
 			dashCooldownTimer = data.dashCooldown * util.Levels.dashScale();
 			player.dash();
+			FlxG.sound.play(Paths.sound("dash/dash" + (1 + Std.random(DASH_LINES))), DASH_VOL);
 			iframeTimer = data.dashIframes;
 			blink = false;
 			player.visible = true;

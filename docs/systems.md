@@ -48,6 +48,8 @@ The shadow, entity and tag render groups. It sorts the entity layer every frame 
 
 Player health and the super meter. Damage intake, invincibility frames and blink. Dash input, death and revive, and the run's kill counter. The HUD bars bind straight to its fields.
 
+The dash speaks twice. Launching one plays a random line from `dash/dash1` and `dash/dash2`, and the moment its cooldown runs out `dash/charged` sounds, so the dash announces itself as ready rather than leaving the player to count the seconds. The ready cue keys on the cooldown crossing zero rather than on it being zero, so it sounds once per dash instead of every frame afterwards, and it stays quiet for a player who died mid-cooldown.
+
 It re-asserts death every frame, rather than only on the transition. Several weapon systems clear `blockMovement` when they finish, and one finishing after you die would otherwise hand control back. So while dead it reapplies the block, and restores the death animation if anything overrode it. Separately, `Player` refuses to run its movement routine while `isDead`. That is what actually keeps a corpse from walking and playing an idle.
 
 ### EnemyDirector
