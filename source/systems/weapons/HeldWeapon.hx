@@ -12,6 +12,7 @@ class HeldWeapon
 	static inline var BASE_SCALE:Float = 4;
 	static inline var SWING_TIME:Float = 0.2;
 	static inline var SWING_ARC:Float = 300;
+	static inline var IMPACT_AT:Float = 0.10;
 	static inline var BASH_TIME:Float = 0.3;
 	static inline var THRUST_DIST:Float = 34;
 	static inline var THRUST_OUT:Float = 0.35;
@@ -230,6 +231,15 @@ class HeldWeapon
 		};
 		activeSwingTime *= util.Levels.actionScale();
 		swingTimer = activeSwingTime;
+	}
+
+	public function impactPose():Void
+	{
+		if (swingTimer <= 0 || !swingSweep)
+			return;
+		var at = activeSwingTime * (1 - IMPACT_AT);
+		if (swingTimer > at)
+			swingTimer = at;
 	}
 
 	function bowLike():Bool

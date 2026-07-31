@@ -12,6 +12,7 @@ class SwingAttack
 	static inline var GUARD_TIME:Float = 0.2;
 
 	public var slashes:FlxTypedGroup<SlashEffect>;
+	public var onConnect:Void->Void;
 
 	private var cfg:SwingConfig;
 	private var director:EnemyDirector;
@@ -116,6 +117,8 @@ class SwingAttack
 			if (!connected)
 			{
 				connected = true;
+				if (onConnect != null)
+					onConnect();
 				fx.meleeImpact(cfg.hitstop, cfg.hitstopScale, cfg.hitShake);
 			}
 

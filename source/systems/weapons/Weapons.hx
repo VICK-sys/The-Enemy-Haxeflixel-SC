@@ -45,6 +45,8 @@ class Weapons
 		var weaponCfg = data.WeaponData.WeaponDataRegistry.get();
 		swing = new SwingAttack(director, hits, fx, weaponCfg.swing);
 		bash = new SwingAttack(director, hits, fx, weaponCfg.bash);
+		swing.onConnect = held.impactPose;
+		bash.onConnect = held.impactPose;
 		yoyoJab = new YoyoJab(director, hits, fx);
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		revolver = new RevolverAttack(arena, director, fx, hits, status);
