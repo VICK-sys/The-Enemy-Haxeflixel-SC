@@ -15,7 +15,7 @@ import data.WeaponData.WeaponDataRegistry;
 class RevolverAttack
 {
 	static inline var MUZZLE:Float = 24;
-	static inline var TWIN_GAP:Float = 14;
+	static inline var TWIN_SEP:Float = 16;
 	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
 
 	public var bullets:FlxTypedGroup<Bullet>;
@@ -36,6 +36,9 @@ class RevolverAttack
 	private var fireTimer:Float = 0;
 	private var bigTimer:Float = 0;
 	private var twin:Bool = false;
+	private var twinHandX:Float = 0;
+	private var twinHandY:Float = 0;
+	private var twinPlaced:Bool = false;
 
 	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline, status:PlayerCombat)
 	{
@@ -125,6 +128,7 @@ class RevolverAttack
 	public function activateTwin():Void
 	{
 		twin = true;
+		twinPlaced = false;
 		twinSprite.loadGraphic(util.HuePalette.graphic("items/revolver", util.SaveData.playerHue()));
 		twinSprite.origin.set(twinSprite.width * 0.5, twinSprite.height * 0.5);
 		FlxG.sound.play(Paths.sound("power_up"), 0.7);
@@ -135,18 +139,31 @@ class RevolverAttack
 		if (!twin)
 			return;
 		twin = false;
+		twinPlaced = false;
 		twinSprite.visible = false;
 	}
 
-	public function placeTwin(held:FlxSprite, pcx:Float):Void
+	public function placeTwin(held:FlxSprite, pcx:Float, pcy:Float, aimDx:Float, aimDy:Float):Void
 	{
 		twinSprite.visible = twin && held.visible;
 		if (!twinSprite.visible)
 			return;
-		twinSprite.x = 2 * pcx - held.x - held.width;
-		twinSprite.y = held.y;
-		twinSprite.angle = -held.angle;
-		twinSprite.flipX = !held.flipX;
+
+		var relX = held.x + held.origin.x - pcx;
+		var relY = held.y + held.origin.y - pcy;
+		var perpX = -aimDy;
+		var perpY = aimDx;
+		var lat = relX * perpX + relY * perpY;
+		var want = Math.abs(lat) < TWIN_SEP ? (lat >= 0 ? -TWIN_SEP : TWIN_SEP) : -lat;
+
+		twinHandX = pcx + relX + (want - lat) * perpX;
+		twinHandY = pcy + relY + (want - lat) * perpY;
+		twinPlaced = true;
+
+		twinSprite.x = twinHandX - twinSprite.origin.x;
+		twinSprite.y = twinHandY - twinSprite.origin.y;
+		twinSprite.angle = held.angle;
+		twinSprite.flipX = held.flipX;
 		twinSprite.flipY = held.flipY;
 		twinSprite.scale.set(held.scale.x, held.scale.y);
 	}
@@ -168,11 +185,13 @@ class RevolverAttack
 
 		if (twin)
 		{
+			var tx = twinPlaced ? twinHandX : bx - dy * TWIN_SEP * 2;
+			var ty = twinPlaced ? twinHandY : by + dx * TWIN_SEP * 2;
 			var t = bullets.recycle(Bullet);
 			t.setSprite(key);
-			t.fire(bx + dx * MUZZLE - dy * TWIN_GAP, by + dy * MUZZLE + dx * TWIN_GAP, dx, dy, aimDeg, damage, cfg.speed,
-				cfg.range, cfg.knock, radius);
+			t.fire(tx + dx * MUZZLE, ty + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock, radius);
 			t.fromSuper = true;
+			fx.sparksAt(tx + dx * MUZZLE, ty + dy * MUZZLE);
 		}
 		return b;
 	}
