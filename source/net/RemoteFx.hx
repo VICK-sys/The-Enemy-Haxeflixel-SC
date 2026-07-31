@@ -144,6 +144,10 @@ class RemoteFx
 					cfg.bash.effectScale, cfg.bash.effect == null ? "sword" : cfg.bash.effect);
 				FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.5);
 
+			case Giga:
+				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.giga.spawnDist, pmy + dy * cfg.giga.spawnDist, dx, dy, aimDeg, cfg.giga.effectScale);
+				FlxG.sound.play(Paths.sound("weapon/gigaSwing"), 0.6);
+
 			case Yoyo:
 				FlxG.sound.play(Paths.sound("weapon/throw"), 0.35);
 

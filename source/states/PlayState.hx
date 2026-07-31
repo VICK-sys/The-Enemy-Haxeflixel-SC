@@ -219,6 +219,7 @@ class PlayState extends FlxState
 
 		add(combat.swing.slashes);
 		add(combat.bash.slashes);
+		add(combat.gigaSwing.slashes);
 		add(combat.yoyoJab.flight.string);
 		add(combat.yoyoJab.flight.yoyo);
 		insert(members.indexOf(layers.entityLayer), combat.revolver.twinSprite);
@@ -411,6 +412,7 @@ class PlayState extends FlxState
 			petals.update(step);
 		heldSprite.alpha = props.buried ? 0 : 1;
 		combat.swing.slashes.visible = !props.buried;
+		combat.gigaSwing.slashes.visible = !props.buried;
 		combat.yoyoJab.flight.string.visible = !props.buried;
 		combat.yoyoJab.flight.yoyo.visible = !props.buried;
 		if (!inputLocked)

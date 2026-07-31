@@ -12,4 +12,5 @@ enum WeaponMode
 	Yoyo;
 	Pellet;
 	Bash;
+	Giga;
 }

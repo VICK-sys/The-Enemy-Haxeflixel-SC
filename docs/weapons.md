@@ -48,6 +48,12 @@ Each fire spawns a slash effect and strikes every enemy inside its arc. It also 
 
 The hammer's block also carries a `cooldown`. Each swing starts it, and both the next swing and the throw wait for it out. Catching a thrown hammer starts the shorter `catchCooldown` from the thrown block, so a catch cannot chain straight into a hit. The reload bar above the player shows the wait, the same way it shows a reload. Dexterity shortens it like every other recovery.
 
+## GigaCharge
+
+The hammer's charge, from the `giga` config block, which is a `SwingConfig` plus a `chargeTime` and its own `sound`. A press still swings at once. Keeping the button down past the swing's cooldown starts the charge instead of another swing: the hammer winds back behind the player, trembles harder as it goes, and the charge sound eases in with the square of the progress so it swells rather than fades in linearly. At full charge the charge sound cuts, a ready chime plays, the hammer flashes and holds a pulsing shine for as long as the button stays down. Releasing then delivers the giga swing through its own `SwingAttack`: more than triple damage, longer reach, a wider arc, a heavier hitstop and a bigger slash, with its own swing sound in place of the random one, and an impact sound the first time it connects. Releasing before the shine cancels quietly. Dexterity shortens the charge like every other action.
+
+The charge feeds a keep-alive each frame it is driven. Anything that stops driving it for a frame, such as death, a super, throwing the hammer, or the weapon leaving the hand, cancels it and silences the sound, so no path out of the state can leave the charge loop playing. The wind-back, tremble and shine all ride fields on the held weapon, and remote players see the giga swing as its own event with the giga slash and sound.
+
 ## YoyoJab
 
 The yoyo's primary, held rather than tapped. Press left click and the yoyo is thrown out. Hold it and the yoyo stays out, spinning, chasing the cursor but never further from the hand than `reach`. Aim past that limit and it sits on the edge of the circle in the cursor's direction. Let go and it comes home.

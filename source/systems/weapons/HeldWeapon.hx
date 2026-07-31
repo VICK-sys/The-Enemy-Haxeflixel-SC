@@ -12,6 +12,9 @@ class HeldWeapon
 	static inline var BASE_SCALE:Float = 4;
 	static inline var SWING_TIME:Float = 0.2;
 	static inline var SWING_ARC:Float = 300;
+	static inline var GIGA_TIME:Float = 0.32;
+	static inline var GIGA_SCALE:Float = 4.5;
+	static inline var WINDUP_ARC:Float = 115;
 	static inline var IMPACT_AT:Float = 0.10;
 	static inline var BASH_TIME:Float = 0.3;
 	static inline var THRUST_DIST:Float = 34;
@@ -52,6 +55,8 @@ class HeldWeapon
 	public var sprite:FlxSprite;
 	public var kind:Int = HAMMER;
 	public var charge:Float = 0;
+	public var glow:Float = 0;
+	public var windup:Float = 0;
 	public var swinging(get, never):Bool;
 
 	private var player:Player;
@@ -100,6 +105,8 @@ class HeldWeapon
 		kind = i;
 		aimLocked = false;
 		attack = Swing;
+		glow = 0;
+		windup = 0;
 		swingTimer = 0;
 		recoilBack = 0;
 		recoilTilt = 0;
@@ -227,6 +234,7 @@ class HeldWeapon
 			case Rain: RAIN_TIME;
 			case Hook: HOOK_TIME;
 			case Bash: BASH_TIME;
+			case Giga: GIGA_TIME;
 			default: SWING_TIME;
 		};
 		activeSwingTime *= util.Levels.actionScale();
@@ -368,7 +376,7 @@ class HeldWeapon
 			if (swingSweep)
 			{
 				sprite.angle = swingBaseAngle + swingDir * SWING_ARC * (FlxEase.quintOut(t) - 0.5);
-				var s:Float = BASE_SCALE + SWING_SCALE * Math.sin(Math.PI * t);
+				var s:Float = BASE_SCALE + (attack == Giga ? GIGA_SCALE : SWING_SCALE) * Math.sin(Math.PI * t);
 				sprite.scale.set(s, s);
 			}
 			else
@@ -400,6 +408,8 @@ class HeldWeapon
 			flashTime -= elapsed;
 
 		var lit:Float = flashTime > 0 ? flashTime / FLASH_TIME : 0;
+		if (glow > lit)
+			lit = glow;
 		var keep:Float = 1 - lit;
 		var add:Float = 255 * lit;
 		sprite.setColorTransform(keep, keep, keep, sprite.alpha, add, add, add, 0);
@@ -436,6 +446,7 @@ class HeldWeapon
 			sprite.flipY = false;
 			updateFlip(theta);
 			target = sprite.flipX ? theta - 180 : theta;
+			target -= (sprite.flipX ? -1 : 1) * WINDUP_ARC * windup;
 		}
 		var delta:Float = ((target - sprite.angle) % 360 + 540) % 360 - 180;
 		sprite.angle += delta * (1 - Math.pow(1 - AIM_LERP, elapsed * 60));

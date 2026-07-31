@@ -17,7 +17,9 @@ typedef SwingConfig = {
 	?deflects:Bool,
 	?effect:String,
 	?hitLift:Float,
-	?hitPush:Float
+	?hitPush:Float,
+	?chargeTime:Float,
+	?sound:String
 }
 
 typedef YoyoConfig = {
@@ -138,7 +140,8 @@ typedef WeaponsData = {
 	bounceStrike:BounceConfig,
 	arrowStorm:ArrowStormConfig,
 	yoyoSpin:YoyoSpinConfig,
-	bash:SwingConfig
+	bash:SwingConfig,
+	giga:SwingConfig
 }
 
 class WeaponDataRegistry

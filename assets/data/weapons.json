@@ -12,6 +12,21 @@
 		"hitBrace": 7,
 		"cooldown": 0.55
 	},
+	"giga": {
+		"spawnDist": 145,
+		"meleeRange": 310,
+		"meleeArcCos": -0.75,
+		"damage": 7,
+		"effectScale": 2.6,
+		"hitstop": 20,
+		"hitstopScale": 0.1,
+		"hitShake": 0.018,
+		"knock": 1.5,
+		"hitBrace": 10,
+		"cooldown": 0.85,
+		"chargeTime": 1.0,
+		"sound": "weapon/gigaSwing"
+	},
 	"yoyo": {
 		"reach": 720,
 		"speed": 2600,

@@ -88,7 +88,7 @@ class SwingAttack
 		guardX = dx;
 		guardY = dy;
 		deflect(pmx, pmy, dx, dy);
-		FlxG.sound.play(Paths.sound("swing/swing" + (1 + Std.random(8))), 0.7);
+		FlxG.sound.play(Paths.sound(cfg.sound != null ? cfg.sound : "swing/swing" + (1 + Std.random(8))), 0.7);
 	}
 
 	public function update(elapsed:Float, pmx:Float, pmy:Float):Void

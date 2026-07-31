@@ -6,6 +6,7 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 |---|---|
 | `systems/weapons/HeldWeapon.hx` | swing time per attack, arc, scale pulse, aim smoothing, facing flip margin, bow hold distance, rain raise height, charge grow/draw-back/tint, reload frame count |
 | `systems/weapons/SwingAttack.hx` | melee guard window (how long a swing keeps deflecting shots) |
+| `systems/weapons/GigaCharge.hx` | charge and ready volumes, glow ramp/base/wave, shine pulse speed |
 | `systems/weapons/BowAttack.hx` | draw-loop pitch floor and rise |
 | `systems/weapons/ThrowAttack.hx` | spawn distance, catch radius, wall probe, trail density and fade |
 | `systems/weapons/HookAttack.hx` | spawn distance, wall probe, retract speed, catch radius, rope handle length |

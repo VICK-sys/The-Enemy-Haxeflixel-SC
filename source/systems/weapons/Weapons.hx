@@ -1,5 +1,6 @@
 package systems.weapons;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import entities.Player;
 import systems.world.Arena;
@@ -17,6 +18,8 @@ class Weapons
 	public var hits:HitPipeline;
 	public var swing:SwingAttack;
 	public var bash:SwingAttack;
+	public var gigaSwing:SwingAttack;
+	public var giga:GigaCharge;
 	public var yoyoJab:YoyoJab;
 	public var revolver:RevolverAttack;
 	public var bow:BowAttack;
@@ -47,6 +50,13 @@ class Weapons
 		bash = new SwingAttack(director, hits, fx, weaponCfg.bash);
 		swing.onConnect = held.impactPose;
 		bash.onConnect = held.impactPose;
+		gigaSwing = new SwingAttack(director, hits, fx, weaponCfg.giga);
+		gigaSwing.onConnect = function()
+		{
+			held.impactPose();
+			FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 0.9);
+		}
+		giga = new GigaCharge(held, weaponCfg.giga);
 		yoyoJab = new YoyoJab(director, hits, fx);
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		revolver = new RevolverAttack(arena, director, fx, hits, status);
@@ -100,6 +110,7 @@ class Weapons
 
 	public function update(elapsed:Float):Void
 	{
+		giga.tick();
 		status.meterLocked = superBusy || revolver.twinActive;
 		if (disabled)
 		{
@@ -107,12 +118,13 @@ class Weapons
 			return;
 		}
 
-		held.charge = bow.charging ? bow.charge : 0;
+		held.charge = bow.charging ? bow.charge : (giga.engaged ? giga.progress : 0);
 		if (!superBusy)
 			held.update(elapsed);
 		updateAttackInput();
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		bash.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
+		gigaSwing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		if (status.dead && yoyoJab.active)
 			yoyoJab.stop();
 		yoyoJab.update(elapsed, handX(), handY(), util.Controls.aimX(), util.Controls.aimY());
@@ -158,7 +170,7 @@ class Weapons
 	{
 		if (!held.swinging)
 			return 0;
-		return held.attack == Bash ? bash.reach : (held.attack == Swing ? swing.reach : 0);
+		return held.attack == Bash ? bash.reach : (held.attack == Swing ? swing.reach : (held.attack == Giga ? gigaSwing.reach : 0));
 	}
 
 	public var meleeLift(get, never):Float;
@@ -167,7 +179,7 @@ class Weapons
 	{
 		if (!held.swinging)
 			return 0;
-		return held.attack == Bash ? bash.hitLift : (held.attack == Swing ? swing.hitLift : 0);
+		return held.attack == Bash ? bash.hitLift : (held.attack == Swing ? swing.hitLift : (held.attack == Giga ? gigaSwing.hitLift : 0));
 	}
 
 	public var meleePush(get, never):Float;
@@ -176,13 +188,14 @@ class Weapons
 	{
 		if (!held.swinging)
 			return 0;
-		return held.attack == Bash ? bash.hitPush : (held.attack == Swing ? swing.hitPush : 0);
+		return held.attack == Bash ? bash.hitPush : (held.attack == Swing ? swing.hitPush : (held.attack == Giga ? gigaSwing.hitPush : 0));
 	}
 
 	public function equip(i:Int):Void
 	{
 		weapon = i < 0 || i >= WEAPON_COUNT ? 0 : i;
 		bow.cancelCharge();
+		giga.letGo();
 		revolver.reset();
 		held.setKind(weapon);
 	}
@@ -325,7 +338,7 @@ class Weapons
 
 		var leftClick = util.Controls.attackHeld();
 		var rightClick = util.Controls.secondHeld();
-		if ((!leftClick && !rightClick) || throwAttack.airborne)
+		if (throwAttack.airborne)
 			return;
 
 		var pmx:Float = player.x + player.width * 0.5;
@@ -335,16 +348,37 @@ class Weapons
 		var dy:Float = aim.dy;
 		var aimDeg:Float = aim.deg;
 
+		if (giga.engaged && !leftClick)
+		{
+			var strike = giga.ready;
+			giga.letGo();
+			if (strike)
+			{
+				held.beginSwing(aimDeg, Giga);
+				emitAttack(Giga, pmx, pmy, dx, dy, aimDeg);
+				gigaSwing.fire(pmx, pmy, dx, dy, aimDeg);
+			}
+			return;
+		}
+
+		if (!leftClick && !rightClick)
+			return;
+
 		if (held.swinging)
 			return;
 
 		if (leftClick)
 		{
-			if (!swing.ready)
-				return;
-			held.beginSwing(aimDeg, Swing);
-			emitAttack(Swing, pmx, pmy, dx, dy, aimDeg);
-			swing.fire(pmx, pmy, dx, dy, aimDeg);
+			if (util.Controls.attackJustPressed())
+			{
+				if (!swing.ready)
+					return;
+				held.beginSwing(aimDeg, Swing);
+				emitAttack(Swing, pmx, pmy, dx, dy, aimDeg);
+				swing.fire(pmx, pmy, dx, dy, aimDeg);
+			}
+			else if (swing.ready)
+				giga.charge(FlxG.elapsed);
 		}
 		else
 		{
