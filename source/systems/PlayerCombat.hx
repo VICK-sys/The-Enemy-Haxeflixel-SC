@@ -28,6 +28,7 @@ class PlayerCombat
 	public var superMeter:Float = 0;
 	public var dead:Bool = false;
 	public var invincible:Bool = false;
+	public var onHurt:Void->Void;
 	public var meterLocked:Bool = false;
 	public var kills:Int = 0;
 	public var healthMax:Float = 0;
@@ -238,6 +239,8 @@ class PlayerCombat
 			return false;
 
 		hitSound.play(true);
+		if (onHurt != null)
+			onHurt();
 		if (health - damage > 0)
 			say("voice/hurt" + (1 + Std.random(HURT_LINES)));
 		fx.hurtShake();

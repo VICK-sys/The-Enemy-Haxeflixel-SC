@@ -65,6 +65,7 @@ class Weapons
 				FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 0.9);
 		}
 		giga = new GigaCharge(held, fx, weaponCfg.giga);
+		status.onHurt = function() giga.letGo();
 		yoyoJab = new YoyoJab(director, hits, fx);
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		revolver = new RevolverAttack(arena, director, fx, hits, status);
