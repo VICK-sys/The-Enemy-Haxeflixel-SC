@@ -17,13 +17,13 @@ class Main extends Sprite
 		if (!util.DpiAware.claimed)
 			return;
 		DiscordPresence.init();
+		counter = new ui.Counter(10, 3);
 		var game = new FlxGame(1280, 720, TitleSequence, 60, 60, true);
 		@:privateAccess game._customSoundTray = ui.SoundTray;
 		addChild(game);
 		keepPresenting();
 		ui.MenuCursor.init();
 		util.AspectBars.init(this);
-		counter = new ui.Counter(10, 3);
 		addChild(counter);
 		fitCounter();
 		FlxG.signals.gameResized.add(function(_, _) fitCounter());
