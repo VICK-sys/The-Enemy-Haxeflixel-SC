@@ -69,4 +69,19 @@ class TutorialDemo extends FlxGroup
 	{
 		s.setPosition(cx - s.width / 2, cy - s.height / 2);
 	}
+
+	function midY(s:FlxSprite):Float
+		return s.y - s.offset.y + s.origin.y;
+
+	function halfH(s:FlxSprite):Float
+		return s.frameHeight * s.scale.y * 0.5;
+
+	function placeMid(s:FlxSprite, cx:Float, cy:Float):Void
+	{
+		s.x = cx + s.offset.x - s.origin.x;
+		s.y = cy + s.offset.y - s.origin.y;
+	}
+
+	function standWith(s:FlxSprite, cx:Float, ref:FlxSprite):Void
+		placeMid(s, cx, midY(ref) + halfH(ref) - halfH(s));
 }

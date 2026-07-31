@@ -40,7 +40,6 @@ class ScrapDemo extends TutorialDemo
 		foe.offset.set(-15, -19);
 		foe.animation.play("walk");
 		foe.flipX = true;
-		center(foe, ENEMY_X, TutorialDemo.CY);
 
 		for (i in 0...THROW_X.length)
 		{
@@ -66,6 +65,7 @@ class ScrapDemo extends TutorialDemo
 		actor = player();
 		actor.animation.play("idle");
 		center(actor, HOME_X, TutorialDemo.CY);
+		standWith(foe, ENEMY_X, actor);
 
 		step(0);
 	}

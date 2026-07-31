@@ -44,7 +44,7 @@ class HealthDemo extends TutorialDemo
 			actor.animation.play("walk");
 			heart.alpha = 1;
 			heart.scale.set(4, 4);
-			heart.y = TutorialDemo.CY + 14 - heart.height * 0.5 + Math.sin(time * 4) * 4;
+			heart.y = midY(actor) - heart.height * 0.5 + Math.sin(time * 4) * 4;
 			barFill.scale.x = 0.5;
 		}
 		else if (t < 1.8)
