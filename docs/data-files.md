@@ -124,7 +124,7 @@ The main menu clears `CustomArena` on entry, so a normal PLAY is always the stoc
 
 A false `EnemyDirector.spawning` stops wave pacing and the boss intro. The per-enemy tick still runs, so anything already placed still behaves. A true `Weapons.disabled` drops every attack input and hides the held sprite. The weapon card and the tutorial both stay shut.
 
-The quiet room also takes its own music. `stageTrack()` answers `stage/Man_music` there and `stage/gloomDoomWoods` everywhere else. Both stage music calls read it, so the track holds even on the path back from a boss.
+The quiet room also takes its own music. `track()` answers `stage/Man_music` there. Everywhere else it answers the run's stage track, drawn at random from a pool when the run starts and held for the rest of it. Both stage music calls read it, so the track holds across a detour and on the path back from a boss rather than changing under the player. The main menu keeps `stage/gloomDoomWoods`, which is why that one is not in the gameplay pool.
 
 The slot number carries this rather than a field in the map file. A field would not survive the next save, because the editor writes the map from its own document. The reserved slot keeps that rule intact: the editor never writes slot -2, and the built-in file never changes, so the marker cannot be lost.
 

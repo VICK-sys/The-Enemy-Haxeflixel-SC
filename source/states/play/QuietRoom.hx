@@ -35,8 +35,20 @@ class QuietRoom
 		this.player = player;
 	}
 
+	static var STAGE_TRACKS:Array<String> = ["stage/outerDrylands", "stage/jungleJam"];
+	static var stageTrack:String = null;
+
+	public static function rollTrack():Void
+		stageTrack = STAGE_TRACKS[Std.random(STAGE_TRACKS.length)];
+
 	public static function track():String
-		return CustomArena.quiet ? "stage/Man_music" : "stage/gloomDoomWoods";
+	{
+		if (CustomArena.quiet)
+			return "stage/Man_music";
+		if (stageTrack == null)
+			rollTrack();
+		return stageTrack;
+	}
 
 	public function tryDetour(bossWave:Int, director:EnemyDirector, status:PlayerCombat, combat:Weapons):Bool
 	{

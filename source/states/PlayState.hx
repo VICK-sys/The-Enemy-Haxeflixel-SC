@@ -142,6 +142,7 @@ class PlayState extends FlxState
 		{
 			util.Levels.startRun();
 			util.Run.reroll();
+			states.play.QuietRoom.rollTrack();
 			systems.TreeMan.reset();
 		}
 		WorldClock.reset();
