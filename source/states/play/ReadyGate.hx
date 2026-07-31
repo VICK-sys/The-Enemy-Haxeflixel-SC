@@ -157,8 +157,6 @@ class ReadyGate
 		bubble.visible = !quiet;
 		if (!quiet)
 			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
-		if (onCommit != null)
-			onCommit();
 
 		if (!Net.active)
 		{
