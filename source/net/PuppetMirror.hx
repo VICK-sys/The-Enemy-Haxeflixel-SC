@@ -33,7 +33,8 @@ class PuppetMirror
 	private var puppetPickups:Map<Int, HealthPickup> = new Map();
 	private var claimedAt:Map<Int, Float> = new Map();
 	private var clock:Float = 0;
-	private var pendingBossId:Int = -1;
+	private var pendingBossIds:Array<Int> = [];
+	private var bossPack:Array<Enemies> = [];
 	private var lastBossX:Float = 0;
 	private var lastBossY:Float = 0;
 
@@ -51,7 +52,13 @@ class PuppetMirror
 		claimedAt.set(netId, clock);
 
 	public function expectBoss(id:Int):Void
-		pendingBossId = id;
+		pendingBossIds.push(id);
+
+	public function resetBossPack():Void
+	{
+		pendingBossIds = [];
+		bossPack = [];
+	}
 
 	public function update(elapsed:Float):Void
 	{
@@ -147,10 +154,10 @@ class PuppetMirror
 				e.gun.flipY = row[12] == 1;
 			}
 
-			if (id == pendingBossId)
+			if (pendingBossIds.remove(id))
 			{
-				pendingBossId = -1;
-				hud.showBossBar(e);
+				bossPack.push(e);
+				hud.showBossBar(bossPack);
 			}
 			if (e.kind == "rofel")
 			{
@@ -207,10 +214,13 @@ class PuppetMirror
 	}
 
 	public function blastLastBoss():Void
+		blastAt(lastBossX, lastBossY);
+
+	public function blastAt(x:Float, y:Float):Void
 	{
 		for (i in 0...Scraps.BOSS_SCRAP)
-			scraps.drop(lastBossX, lastBossY);
-		var boom = Fx.bossBlast(lastBossX, lastBossY);
+			scraps.drop(x, y);
+		var boom = Fx.bossBlast(x, y);
 		layers.entityLayer.add(boom);
 		new FlxTimer().start(1.2, function(_)
 		{

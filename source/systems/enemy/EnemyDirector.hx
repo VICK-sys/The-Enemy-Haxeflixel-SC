@@ -33,6 +33,7 @@ class EnemyDirector
 	public var onWaveCleared:Void->Void;
 	public var bossVeto:Int->Bool;
 	public var onBossSpawn:Enemies->Void;
+	public var onBossPack:Array<Enemies>->Void;
 	public var onProbe:(Float, Float, Float) -> Void;
 
 	public var coopBodies(default, null):Array<FlxSprite> = [];
@@ -55,6 +56,7 @@ class EnemyDirector
 	private var bossWave:Int;
 	private var bossPending:Bool = false;
 	private var bossTimer:Float = 0;
+	private var bossesFought:Int = 0;
 
 	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat, fx:Fx)
 	{
@@ -136,6 +138,17 @@ class EnemyDirector
 		return f;
 	}
 
+	public var onBossFall(get, set):(Float, Float, Bool) -> Void;
+
+	function get_onBossFall()
+		return bossDeath.onFall;
+
+	function set_onBossFall(f:(Float, Float, Bool) -> Void)
+	{
+		bossDeath.onFall = f;
+		return f;
+	}
+
 	public var onBossDefeated(get, set):Void->Void;
 
 	function get_onBossDefeated()
@@ -194,14 +207,30 @@ class EnemyDirector
 			return;
 
 		bossPending = false;
-		var boss = new Enemies("rofel");
+		spawnBossPack(bossCount());
+	}
+
+	function bossCount():Int
+		return bossesFought > 0 && FlxG.random.float() < waveData.duoChance ? 2 : 1;
+
+	function spawnBossPack(count:Int):Void
+	{
+		bossesFought++;
+		var pack = [];
 		var s = waveData.scaling;
-		boss.applyScale(ramp(s.bossHpPerWave), ramp(s.bossSpeedPerWave), ramp(s.bossDamagePerWave));
-		spawner.placeAtEdge(boss);
-		register(boss);
-		bossDeath.watch(boss);
-		if (onBossSpawn != null)
-			onBossSpawn(boss);
+		for (i in 0...count)
+		{
+			var boss = new Enemies("rofel");
+			boss.applyScale(ramp(s.bossHpPerWave), ramp(s.bossSpeedPerWave), ramp(s.bossDamagePerWave));
+			spawner.placeAtEdge(boss);
+			register(boss);
+			bossDeath.watch(boss);
+			pack.push(boss);
+			if (onBossSpawn != null)
+				onBossSpawn(boss);
+		}
+		if (onBossPack != null)
+			onBossPack(pack);
 	}
 
 	function updateWaves(elapsed:Float):Void

@@ -32,7 +32,7 @@ class BossHud
 	private var camUI:FlxCamera;
 	private var flash:FlxSprite;
 	private var flashTimer:Float = 0;
-	private var boss:Enemies;
+	private var bosses:Array<Enemies> = [];
 	private var barFrame:FlxSprite;
 	private var barFill:FlxSprite;
 	private var fillClip:FlxRect;
@@ -101,12 +101,14 @@ class BossHud
 		letters = [];
 	}
 
-	public function showBar(bossEnemy:Enemies):Void
+	public function showBar(pack:Array<Enemies>):Void
 	{
 		dropBar();
-		boss = bossEnemy;
+		bosses = pack.copy();
 
-		bossMax = boss.hp > 0 ? boss.hp : 1;
+		bossMax = 0;
+		for (b in bosses)
+			bossMax += b.hp > 0 ? b.hp : 1;
 
 		barFrame = plate("ui/bar_long_empty");
 		barFill = plate("ui/bar_long_red");
@@ -115,7 +117,7 @@ class BossHud
 		state.add(barFrame);
 		state.add(barFill);
 
-		var word = "Rofel";
+		var word = bosses.length > 1 ? "Rofel Duo" : "Rofel";
 		var total = 0.0;
 		var built = [];
 		for (i in 0...word.length)
@@ -169,9 +171,26 @@ class BossHud
 		}
 	}
 
+	function anyAlive():Bool
+	{
+		for (b in bosses)
+			if (b != null && b.exists)
+				return true;
+		return false;
+	}
+
+	function liveHp():Float
+	{
+		var hp = 0.0;
+		for (b in bosses)
+			if (b != null && b.exists && b.hp > 0)
+				hp += b.hp;
+		return hp;
+	}
+
 	function updateBar(elapsed:Float):Void
 	{
-		if (boss == null || !boss.exists)
+		if (!anyAlive())
 		{
 			if (barFrame != null)
 				barFrame.visible = false;
@@ -196,7 +215,7 @@ class BossHud
 		barFrame.x = FlxG.width / 2 - fw / 2;
 		barFrame.y = cy - fh / 2;
 
-		var frac = boss.hp / bossMax;
+		var frac = liveHp() / bossMax;
 		if (frac < 0)
 			frac = 0;
 		if (frac > 1)

@@ -159,6 +159,15 @@ class NetSync
 				oldSpawn(b);
 		};
 
+		var oldFall = director.onBossFall;
+		director.onBossFall = function(x, y, last)
+		{
+			if (!last)
+				Net.send({t: "bossFall", x: r1(x), y: r1(y)});
+			if (oldFall != null)
+				oldFall(x, y, last);
+		};
+
 		var oldDead = director.onBossDefeated;
 		director.onBossDefeated = function()
 		{
@@ -398,12 +407,16 @@ class NetSync
 
 			case "boss" if (Net.isClient):
 				bossDown = false;
+				mirror.resetBossPack();
 				if (onBossEvt != null)
 					onBossEvt();
 
 			case "bossSpawn" if (Net.isClient):
 				bossDown = false;
 				mirror.expectBoss(msg.id);
+
+			case "bossFall" if (Net.isClient):
+				mirror.blastAt(msg.x, msg.y);
 
 			case "bossDead" if (Net.isClient):
 				if (!bossDown)

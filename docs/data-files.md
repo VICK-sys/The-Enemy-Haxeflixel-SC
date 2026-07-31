@@ -38,6 +38,7 @@ To add an enemy type, do three things. Put an atlas under `assets/images/enemies
 | `spawnBatch`, `spawnEvery` | a wave arrives in pulses of `spawnBatch` enemies, `spawnEvery` seconds apart, instead of all at once. A batch of 0 restores the single burst |
 | `bossWaveMin`, `bossWaveRange` | the first boss wave is `bossWaveMin + random(0..bossWaveRange)`, rolled once per run |
 | `bossRepeat` | waves between bosses after the first. 0 means the boss happens once and never again |
+| `duoChance` | chance a boss wave after the run's first brings the Rofel Duo, two Rofels in one encounter, instead of one |
 | `waves` | array of `{types}` spawn pools. The first entry is wave 1, and the last entry repeats for every later wave. Repeat a type inside a pool to weight it |
 | `scaling` | how a wave hardens with its number, applied to every enemy as it spawns |
 

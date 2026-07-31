@@ -255,7 +255,7 @@ class PlayState extends FlxState
 		director.onWave = onWaveStarted;
 		director.onWaveCleared = onWaveCleared;
 		director.onBoss = boss.begin;
-		director.onBossSpawn = hud.showBossBar;
+		director.onBossPack = hud.showBossBar;
 		director.onBossDefeated = boss.defeated;
 		director.onBossDrops = boss.dropLoot;
 		director.onFriendlyShot = onDeflectedShot;

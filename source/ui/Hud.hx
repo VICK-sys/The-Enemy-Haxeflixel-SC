@@ -410,9 +410,9 @@ class Hud
 		bannerText.alpha = age < 0.4 ? age / 0.4 : 1;
 	}
 
-	public function showBossBar(bossEnemy:Enemies):Void
+	public function showBossBar(pack:Array<Enemies>):Void
 	{
-		bossHud.showBar(bossEnemy);
+		bossHud.showBar(pack);
 	}
 
 	public function fadeBanner():Void
