@@ -19,7 +19,8 @@ typedef SwingConfig = {
 	?hitLift:Float,
 	?hitPush:Float,
 	?chargeTime:Float,
-	?sound:String
+	?sound:String,
+	?sparkMult:Float
 }
 
 typedef YoyoConfig = {

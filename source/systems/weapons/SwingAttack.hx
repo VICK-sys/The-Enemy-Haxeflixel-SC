@@ -75,7 +75,7 @@ class SwingAttack
 		slashes = new FlxTypedGroup<SlashEffect>();
 	}
 
-	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, ?ox:Float, ?oy:Float):Void
+	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, ?ox:Float, ?oy:Float, boost:Bool = false):Void
 	{
 		if (cfg.cooldown != null)
 			coolFor(cfg.cooldown);
@@ -83,7 +83,7 @@ class SwingAttack
 		var ey = oy == null ? pmy : oy;
 		slashes.recycle(SlashEffect).fire(ex + dx * cfg.spawnDist, ey + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale,
 			cfg.effect == null ? "sword" : cfg.effect);
-		strike(pmx, pmy, dx, dy);
+		strike(pmx, pmy, dx, dy, boost && cfg.sparkMult != null ? cfg.sparkMult : 1);
 		guardTimer = GUARD_TIME;
 		guardX = dx;
 		guardY = dy;
@@ -101,7 +101,7 @@ class SwingAttack
 		deflect(pmx, pmy, guardX, guardY);
 	}
 
-	function strike(pmx:Float, pmy:Float, aimX:Float, aimY:Float):Void
+	function strike(pmx:Float, pmy:Float, aimX:Float, aimY:Float, scale:Float = 1):Void
 	{
 		pmx += aimX * hitPush;
 		pmy += aimY * hitPush - hitLift;
@@ -125,7 +125,7 @@ class SwingAttack
 			var push = (elen > 0 ? elen : 1) / cfg.knock;
 			var vx = ex / push;
 			var vy = ey / push;
-			hits.damageN(e, vx, vy, cfg.damage);
+			hits.damageN(e, vx, vy, cfg.damage * scale);
 			e.brace(cfg.hitstop, cfg.hitBrace, vx, vy);
 		});
 	}

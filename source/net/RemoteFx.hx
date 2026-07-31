@@ -147,6 +147,8 @@ class RemoteFx
 			case Giga:
 				slashes.recycle(SlashEffect).fire(pmx + dx * cfg.giga.spawnDist, pmy + dy * cfg.giga.spawnDist, dx, dy, aimDeg, cfg.giga.effectScale);
 				FlxG.sound.play(Paths.sound("weapon/gigaSwing"), 0.6);
+				if (perfect)
+					fx.sparksAt(pmx + dx * cfg.giga.spawnDist, pmy + dy * cfg.giga.spawnDist);
 
 			case Yoyo:
 				FlxG.sound.play(Paths.sound("weapon/throw"), 0.35);
