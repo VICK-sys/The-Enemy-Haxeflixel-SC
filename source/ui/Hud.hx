@@ -23,12 +23,11 @@ class Hud
 	static inline var BOSS_BANNER_TOP:Float = -70;
 	static inline var BOSS_BANNER_REST:Float = 250;
 	static inline var STOP_TIMER_FADE:Float = 4;
-	static inline var SCRAP_RIGHT:Float = 18;
-	static inline var SCRAP_TOP:Float = 12;
 	static inline var SCRAP_GAP:Float = 10;
+	static inline var SCRAP_LIFT:Float = 6;
 	static inline var SCRAP_DROP:Float = 4;
 	static inline var SCRAP_SIZE:Int = 34;
-	static inline var SCRAP_ICON_SCALE:Float = UI_SCALE * 2 / 3;
+	static inline var SCRAP_ICON_SCALE:Float = UI_SCALE;
 	static inline var SCRAP_SHADE:Float = 0.45;
 
 	static inline var UI_SCALE:Float = 4 * states.PlayState.BASE_ZOOM;
@@ -81,6 +80,7 @@ class Hud
 	private var capBottom:FlxSprite;
 	private var twinCapTop:FlxSprite;
 	private var twinCapBottom:FlxSprite;
+	private var hpTop:Float = 0;
 	private var cursorPoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 	private var pieces:Array<flixel.FlxBasic> = [];
 	private var hudOn:Bool = true;
@@ -98,6 +98,7 @@ class Hud
 		var frame = makeUiSprite(FRAME_X, 0, "hp_thing");
 		var frameY = AMMO_BOTTOM - frame.height;
 		frame.y = frameY;
+		hpTop = frameY;
 
 		hpFill = makeUiSprite(FRAME_X + HP_X * UI_SCALE, frameY + HP_Y * UI_SCALE, "hp_bar");
 		hpClip = FlxRect.get(0, 0, 0, hpFill.frameHeight);
@@ -368,10 +369,10 @@ class Hud
 
 	function layoutScrap():Void
 	{
-		expText.x = FlxG.width - SCRAP_RIGHT - expText.width;
-		expText.y = SCRAP_TOP;
-		scrapIcon.x = expText.x - scrapIcon.width - SCRAP_GAP;
-		scrapIcon.y = SCRAP_TOP + (expText.height - scrapIcon.height) * 0.5;
+		var rowH = scrapIcon.height > expText.height ? scrapIcon.height : expText.height;
+		var top = hpTop - SCRAP_LIFT - rowH;
+		scrapIcon.setPosition(FRAME_X, top + (rowH - scrapIcon.height) * 0.5);
+		expText.setPosition(scrapIcon.x + scrapIcon.width + SCRAP_GAP, top + (rowH - expText.height) * 0.5);
 		expShade.setPosition(expText.x + SCRAP_DROP, expText.y + SCRAP_DROP);
 		scrapIconShade.setPosition(scrapIcon.x + SCRAP_DROP, scrapIcon.y + SCRAP_DROP);
 	}
