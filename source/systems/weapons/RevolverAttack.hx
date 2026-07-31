@@ -27,6 +27,9 @@ class RevolverAttack
 	static inline var SPIN_END_AT:Float = 8 / 11;
 	static inline var SPIN_VOL:Float = 0.5;
 	static inline var SPIN_END_VOL:Float = 0.45;
+	static inline var TWIN_SPIN_GAP:Float = 0.13;
+	static inline var TWIN_SPIN_VOL:Float = 0.4;
+	static inline var TWIN_SPIN_END_VOL:Float = 0.36;
 
 	public var bullets:FlxTypedGroup<Bullet>;
 	public var twinSprite:FlxSprite;
@@ -47,8 +50,12 @@ class RevolverAttack
 	private var reloadTotal:Float = 0;
 	private var spinSound:flixel.sound.FlxSound;
 	private var spinEndSound:flixel.sound.FlxSound;
+	private var spinSoundB:flixel.sound.FlxSound;
+	private var spinEndSoundB:flixel.sound.FlxSound;
 	private var spunStart:Bool = false;
 	private var spunEnd:Bool = false;
+	private var spinBDelay:Float = 0;
+	private var spinEndBDelay:Float = 0;
 	private var fireTimer:Float = 0;
 	private var bigTimer:Float = 0;
 	private var twin:Bool = false;
@@ -80,6 +87,10 @@ class RevolverAttack
 		spinSound.volume = SPIN_VOL;
 		spinEndSound = FlxG.sound.create(Paths.sound("weapon/gunSpinEnd"));
 		spinEndSound.volume = SPIN_END_VOL;
+		spinSoundB = FlxG.sound.create(Paths.sound("weapon/gunSpin"));
+		spinSoundB.volume = TWIN_SPIN_VOL;
+		spinEndSoundB = FlxG.sound.create(Paths.sound("weapon/gunSpinEnd"));
+		spinEndSoundB.volume = TWIN_SPIN_END_VOL;
 
 		twinSprite = new FlxSprite();
 		twinSprite.antialiasing = false;
@@ -187,6 +198,8 @@ class RevolverAttack
 		twinKick = 0;
 		pendDelay = 0;
 		pendKey = null;
+		spinBDelay = 0;
+		spinEndBDelay = 0;
 		twinSprite.visible = false;
 	}
 
@@ -275,8 +288,14 @@ class RevolverAttack
 			spinSound.stop();
 		if (spinEndSound.playing)
 			spinEndSound.stop();
+		if (spinSoundB.playing)
+			spinSoundB.stop();
+		if (spinEndSoundB.playing)
+			spinEndSoundB.stop();
 		spunStart = false;
 		spunEnd = false;
+		spinBDelay = 0;
+		spinEndBDelay = 0;
 		rounds = cfg.cylinder;
 		reloading = 0;
 		fireTimer = 0;
@@ -296,6 +315,20 @@ class RevolverAttack
 			twinKick -= TWIN_KICK * KICK_FADE * elapsed;
 			if (twinKick < 0)
 				twinKick = 0;
+		}
+
+		if (spinBDelay > 0)
+		{
+			spinBDelay -= elapsed;
+			if (spinBDelay <= 0)
+				spinSoundB.play(true);
+		}
+
+		if (spinEndBDelay > 0)
+		{
+			spinEndBDelay -= elapsed;
+			if (spinEndBDelay <= 0)
+				spinEndSoundB.play(true);
 		}
 
 		if (pendDelay > 0)
@@ -344,11 +377,15 @@ class RevolverAttack
 			{
 				spunStart = true;
 				spinSound.play(true);
+				if (twin)
+					spinBDelay = TWIN_SPIN_GAP;
 			}
 			if (!spunEnd && at >= SPIN_END_AT)
 			{
 				spunEnd = true;
 				spinEndSound.play(true);
+				if (twin)
+					spinEndBDelay = TWIN_SPIN_GAP;
 			}
 			if (reloading <= 0)
 			{

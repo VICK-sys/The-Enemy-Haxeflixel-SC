@@ -86,7 +86,9 @@ Activating it forces both guns into a reload, whatever the cylinder held, and ev
 
 Reloading swaps the held revolver to the `revolver_reload` strip, eleven frames of the cylinder swinging out, spinning and seating again, and steps through them off reload progress.
 
-Two sounds ride that animation rather than the reload as a whole. `weapon/gunSpin` starts on the frame the cylinder first appears and `weapon/gunSpinEnd` on the frame it seats, both keyed to progress rather than to a delay, so they follow the art through a dexterity shortened reload and the faster twin one alike. `bulletLoad` still closes the reload out at the end. The twin mirrors the same frames. The progress drives the frame index directly, so the animation finishes exactly when the reload does at any reload speed.
+Two sounds ride that animation rather than the reload as a whole. `weapon/gunSpin` starts on the frame the cylinder first appears and `weapon/gunSpinEnd` on the frame it seats, both keyed to progress rather than to a delay, so they follow the art through a dexterity shortened reload and the faster twin one alike. `bulletLoad` still closes the reload out at the end.
+
+With the twin out there are two cylinders turning, so both cues sound twice. The second gun's copies are their own sound instances, since a restart would cut the first gun off rather than join it, and they trail by `TWIN_SPIN_GAP` at a lower volume. Firing them together would read as one louder revolver rather than two, and the stagger is what separates them. Ending the super drops any copy still waiting on its delay, so a gun that has gone does not spin after it. The twin mirrors the same frames. The progress drives the frame index directly, so the animation finishes exactly when the reload does at any reload speed.
 
 ### The ammo readout
 
