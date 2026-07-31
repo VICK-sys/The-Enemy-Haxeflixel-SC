@@ -379,6 +379,12 @@ Four oversized black bars track the mask's edges, so the screen stays covered ho
 
 `FlxTween.num` drives the scale. The fully open scale clears the screen comfortably. Anything smaller would pop black into the corners the moment a close began. The title sequence, the menu, the pause menu's quit and the death restart all use it.
 
+### Sfx
+
+Positional playback for world sounds. `at(name, x, y, volume)` fades a one-shot by its distance from the view centre and pans it by its horizontal offset. `tune(sound, x, y, volume)` does the same each frame for a held sound, which the shop door uses. The 3D sound toggle bypasses both and plays everything flat.
+
+Positional sound files must be mono. On the native target the pan value moves the OpenAL source position, and OpenAL ignores source positions for stereo buffers, so a stereo file plays centred no matter what pan it gets. The distance fade still applies either way, since that is plain volume math.
+
 ### Music
 
 The single owner of music playback. `play(name, volume, loop)` switches tracks only when the requested track differs from the current one. Asking for the playing track instead applies the volume, restores pitch, and resumes it if paused. That is what keeps the stage theme unbroken across the menu, the game, pause-quit and restarts.
