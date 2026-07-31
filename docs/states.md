@@ -74,6 +74,8 @@ The popup fades in on open. ENTER or ESC freezes the demo and fades it back out 
 
 The weapons page reads its line-up from the pick screen rather than listing the weapons itself, so the two cannot disagree about which weapon is number one. The super page animates the hammer's bounce, the leap and spin and the ring of the slam under it. The scrap page puts its counter where the real one sits, low and to the left, so the page and the game agree on where to look.
 
+The attack page hangs its hammer off `HeldWeapon`'s own hand offset rather than its own copy of one, so the demo grips the weapon exactly where the game does. It had been carrying the hammer bounce's pivot instead, which hung it off the body.
+
 The move and attack pages name the keys the player actually holds. Their strings carry placeholders and the page fills them from the current binds, so rebinding the dash or putting attack on a different button rewrites the page rather than leaving it advertising a key that does nothing.
 
 Each page's demo is its own class under `states/tutorial/`: MoveDemo, AttackDemo, WeaponsDemo, SuperDemo, ScrapDemo, HealthDemo and ReadyDemo. All of them extend `TutorialDemo`. That group base holds the shared sprite, text and player factories, the demo clock, and a per-frame `step()` hook. The substate itself owns only the panel, the page texts and page flipping. Flipping destroys the old demo instance and builds the next.

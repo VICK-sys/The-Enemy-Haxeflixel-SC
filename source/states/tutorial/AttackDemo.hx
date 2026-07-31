@@ -87,8 +87,8 @@ class AttackDemo extends TutorialDemo
 			heldAngle += delta * (1 - Math.pow(0.75, elapsed * 60));
 		}
 		held.angle = heldAngle;
-		held.x = actor.x - held.origin.x + 30;
-		held.y = actor.y - held.origin.y + 65;
+		held.x = actor.x - held.origin.x + systems.weapons.HeldWeapon.HAND_DX;
+		held.y = actor.y - held.origin.y + systems.weapons.HeldWeapon.HAND_DY;
 
 		if (slash.exists)
 		{
