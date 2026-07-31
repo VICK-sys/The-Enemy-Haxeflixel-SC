@@ -22,7 +22,9 @@ class SoundTray extends FlxSoundTray
 	static inline var PANEL_H:Int = 40;
 	static inline var MIN_W:Int = 92;
 	static inline var FONT_SIZE:Int = 16;
-	static inline var GOLD:Int = 0xE8C860;
+	static inline var QUIET:Int = 0x5FD16A;
+	static inline var MID:Int = 0xE8C860;
+	static inline var LOUD:Int = 0xF04034;
 	static inline var UNLIT:Int = 0x2E2E2E;
 	static inline var BG:Int = 0xE0000000;
 	static inline var IN_TIME:Float = 0.28;
@@ -33,6 +35,7 @@ class SoundTray extends FlxSoundTray
 	static inline var DROP_TIME:Float = 0.22;
 	static inline var DROP_DIP:Float = 0.45;
 	static inline var SETTLED:Float = 999;
+	static inline var TONE_TIME:Float = 0.3;
 	static inline var BLIP_VOL:Float = 0.5;
 
 	static inline var HIDDEN:Int = 0;
@@ -41,10 +44,15 @@ class SoundTray extends FlxSoundTray
 	static inline var SLIDE_OUT:Int = 3;
 
 	var panel:Bitmap;
+	var accent:Bitmap;
 	var text:TextField;
 	var meter:Array<Bitmap> = [];
 	var barClock:Array<Float> = [];
 	var lit:Int = 0;
+	var tone:Int = MID;
+	var toneFrom:Int = MID;
+	var toneClock:Float = TONE_TIME;
+	var shown:Int = MID;
 	var phase:Int = HIDDEN;
 	var phaseClock:Float = 0;
 	var inFrom:Float = 0;
@@ -62,6 +70,11 @@ class SoundTray extends FlxSoundTray
 
 		panel = new Bitmap();
 		addChild(panel);
+
+		accent = new Bitmap(new BitmapData(1, 1, false, 0xFFFFFF));
+		accent.height = 2;
+		accent.y = PANEL_H - 2;
+		addChild(accent);
 
 		text = new TextField();
 		text.selectable = false;
@@ -93,6 +106,11 @@ class SoundTray extends FlxSoundTray
 		var was = held ? lit : 0;
 		var muted = FlxG.sound.muted;
 		lit = muted ? 0 : Math.round(volume * 10);
+		var target = muted ? UNLIT : levelColor(lit / BAR_COUNT);
+		toneFrom = held ? shown : target;
+		tone = target;
+		toneClock = 0;
+		advanceTone(0);
 		rebuild(muted ? word("tray.muted", "MUTED") : word("tray.master", "MASTER") + "  " + Math.round(volume * 100) + "%");
 		retimeBars(was);
 
@@ -105,6 +123,18 @@ class SoundTray extends FlxSoundTray
 		}
 		visible = true;
 		active = true;
+	}
+
+	function advanceTone(dt:Float):Void
+	{
+		toneClock += dt;
+		if (toneClock >= TONE_TIME)
+		{
+			shown = tone;
+			return;
+		}
+		var u = toneClock / TONE_TIME;
+		shown = mix(toneFrom, tone, u * u * (3 - 2 * u));
 	}
 
 	function retimeBars(was:Int):Void
@@ -159,6 +189,9 @@ class SoundTray extends FlxSoundTray
 			default:
 		}
 
+		advanceTone(dt);
+		tint(accent, shown);
+
 		for (i in 0...BAR_COUNT)
 		{
 			barClock[i] += dt;
@@ -195,23 +228,23 @@ class SoundTray extends FlxSoundTray
 			}
 			sizeBar(bar, t >= POP_TIME ? 1.0 : backOut(t / POP_TIME));
 			if (t < FLASH_TIME)
-				tintLerp(bar, 0xFFFFFF, GOLD, t / FLASH_TIME);
+				tintLerp(bar, 0xFFFFFF, shown, t / FLASH_TIME);
 			else
-				tint(bar, GOLD);
+				tint(bar, shown);
 			return;
 		}
 
 		if (t < 0)
 		{
 			sizeBar(bar, 1);
-			tint(bar, GOLD);
+			tint(bar, shown);
 			return;
 		}
 		if (t < DROP_TIME)
 		{
 			var u = t / DROP_TIME;
 			sizeBar(bar, 1 - DROP_DIP * Math.sin(Math.PI * u));
-			tintLerp(bar, GOLD, UNLIT, u);
+			tintLerp(bar, shown, UNLIT, u);
 			return;
 		}
 		sizeBar(bar, 1);
@@ -237,10 +270,10 @@ class SoundTray extends FlxSoundTray
 			panelW = w;
 			if (panel.bitmapData != null)
 				panel.bitmapData.dispose();
-			var bd = new BitmapData(panelW, PANEL_H, true, BG);
-			bd.fillRect(new openfl.geom.Rectangle(0, PANEL_H - 2, panelW, 2), 0xFF000000 | GOLD);
-			panel.bitmapData = bd;
+			panel.bitmapData = new BitmapData(panelW, PANEL_H, true, BG);
+			accent.width = panelW;
 		}
+		tint(accent, shown);
 		text.width = panelW;
 		text.x = 0;
 
@@ -279,6 +312,24 @@ class SoundTray extends FlxSoundTray
 		var s = util.Lang.t(key);
 		return s == key ? fallback : s;
 	}
+
+	static function levelColor(v:Float):Int
+	{
+		if (v <= 0.5)
+			return mix(QUIET, MID, v * 2);
+		return mix(MID, LOUD, (v - 0.5) * 2);
+	}
+
+	static function mix(from:Int, to:Int, u:Float):Int
+	{
+		var r = Math.round(chan(from, 16) + (chan(to, 16) - chan(from, 16)) * u);
+		var g = Math.round(chan(from, 8) + (chan(to, 8) - chan(from, 8)) * u);
+		var b = Math.round(chan(from, 0) + (chan(to, 0) - chan(from, 0)) * u);
+		return (r << 16) | (g << 8) | b;
+	}
+
+	static inline function chan(color:Int, shift:Int):Int
+		return color >> shift & 0xFF;
 
 	static function tint(bar:Bitmap, color:Int):Void
 	{
