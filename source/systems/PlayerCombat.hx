@@ -21,7 +21,7 @@ class PlayerCombat
 	static inline var DASH_LINES:Int = 2;
 	static inline var DASH_VOL:Float = 0.55;
 	static inline var READY_VOL:Float = 0.4;
-	static inline var STEAM_BACK:Float = 18;
+	static inline var STEAM_BACK:Float = 34;
 	static inline var STEAM_RISE:Float = 26;
 
 	public var health:Float = 0;
