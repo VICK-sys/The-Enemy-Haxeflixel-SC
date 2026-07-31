@@ -45,6 +45,7 @@ typedef EnemyData = {
 	stopThreshold:Float,
 	attackRange:Float,
 	attack:String,
+	?big:Bool,
 	?boss:BossData,
 	contactDamage:Float,
 	?shotDamage:Float,

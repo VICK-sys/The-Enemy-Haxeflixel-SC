@@ -51,7 +51,7 @@ class ArrowRain
 		}
 	}
 
-	public function rainAt(ix:Float, iy:Float):Void
+	public function rainAt(ix:Float, iy:Float, superDrop:Bool = false):Void
 	{
 
 		var m = markers.recycle(FlxSprite);
@@ -62,7 +62,7 @@ class ArrowRain
 		}
 		m.alpha = 0.3;
 		m.setPosition(ix - 14, iy - 5);
-		pending.push(new PendingDrop(cfg.delay + FlxG.random.float() * cfg.stagger, ix, iy, m));
+		pending.push(new PendingDrop(cfg.delay + FlxG.random.float() * cfg.stagger, ix, iy, m, superDrop));
 	}
 
 	public function update(elapsed:Float):Void
@@ -81,6 +81,7 @@ class ArrowRain
 				arrow.paint(hue);
 				arrow.drop(d.x, d.y, DROP_HEIGHT, cfg.fallSpeed);
 				arrow.marker = d.marker;
+				arrow.superShot = d.superDrop;
 				pending.splice(i, 1);
 			}
 		}
@@ -110,7 +111,11 @@ class ArrowRain
 			FlxG.sound.play(Paths.sound("weapon/slice"), 0.25);
 			soundTimer = 0.05;
 		}
-		if (!cosmetic)
+		if (cosmetic)
+			return;
+		if (a.superShot)
+			hits.blastRadialSuper(ix, iy, cfg.hitRadius, 1, 1, cfg.bossScale == null ? 1 : cfg.bossScale);
+		else
 			hits.blastRadial(ix, iy, cfg.hitRadius, 1, 1, cfg.bossScale == null ? 1 : cfg.bossScale);
 	}
 }
@@ -121,12 +126,14 @@ class PendingDrop
 	public var x:Float;
 	public var y:Float;
 	public var marker:FlxSprite;
+	public var superDrop:Bool;
 
-	public function new(time:Float, x:Float, y:Float, marker:FlxSprite)
+	public function new(time:Float, x:Float, y:Float, marker:FlxSprite, superDrop:Bool)
 	{
 		this.time = time;
 		this.x = x;
 		this.y = y;
 		this.marker = marker;
+		this.superDrop = superDrop;
 	}
 }

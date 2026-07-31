@@ -11,6 +11,7 @@ class RainArrow extends FlxSprite
 	public var impactY:Float = 0;
 	public var ascending:Bool = false;
 	public var marker:FlxSprite;
+	public var superShot:Bool = false;
 
 	private var fadeTimer:Float = 0;
 	private var fadeFromY:Float = 0;

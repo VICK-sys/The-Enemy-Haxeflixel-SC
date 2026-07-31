@@ -237,7 +237,7 @@ class Weapons
 			return;
 		}
 
-		if (util.Controls.secondJustPressed() && bash.ready && !held.swinging)
+		if (util.Controls.secondHeld() && bash.ready && !held.swinging)
 		{
 			var aim = aimFromPlayer();
 			var pmx = player.x + player.width * 0.5;
@@ -249,7 +249,7 @@ class Weapons
 			return;
 		}
 
-		if (util.Controls.attackJustPressed())
+		if (util.Controls.attackHeld() && !bow.charging)
 			bow.beginCharge();
 
 		if (bow.charging && !util.Controls.attackHeld())
@@ -341,8 +341,8 @@ class Weapons
 			return;
 		}
 
-		var leftClick = util.Controls.attackJustPressed();
-		var rightClick = util.Controls.secondJustPressed();
+		var leftClick = util.Controls.attackHeld();
+		var rightClick = util.Controls.secondHeld();
 		if ((!leftClick && !rightClick) || throwAttack.airborne)
 			return;
 
@@ -400,7 +400,7 @@ class Weapons
 		if (hookAttack.busy)
 			return;
 
-		if (util.Controls.secondJustPressed())
+		if (util.Controls.secondHeld())
 		{
 			var pmx = player.x + player.width * 0.5;
 			var pmy = player.y + player.height * 0.5;
@@ -411,7 +411,7 @@ class Weapons
 			return;
 		}
 
-		if (util.Controls.attackJustPressed())
+		if (util.Controls.attackHeld())
 		{
 			if (yoyoJab.ready)
 			{
@@ -419,7 +419,7 @@ class Weapons
 				yoyoJab.fire(handX(), handY(), aim.dx, aim.dy);
 			}
 		}
-		else if (!util.Controls.attackHeld())
+		else
 			yoyoJab.release();
 	}
 

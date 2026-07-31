@@ -16,6 +16,7 @@
 	"stopThreshold": 320,
 	"attackRange": 540,
 	"attack": "boss",
+	"big": true,
 	"boss": {
 		"moveSpeed": 330,
 		"prefMin": 360,

@@ -234,7 +234,7 @@ class ArrowStorm
 			{
 				var r = cfg.radius * Math.sqrt(FlxG.random.float());
 				var a = FlxG.random.float() * Math.PI * 2;
-				rain.rainAt(zoneX + Math.cos(a) * r, zoneY + Math.sin(a) * r);
+				rain.rainAt(zoneX + Math.cos(a) * r, zoneY + Math.sin(a) * r, true);
 			}
 		}
 

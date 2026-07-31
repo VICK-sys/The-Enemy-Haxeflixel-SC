@@ -38,23 +38,29 @@ class HitPipeline
 	}
 
 	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Float):Void
+		route(e, pushX, pushY, damage, true);
+
+	public function damageSuper(e:Enemies, pushX:Float, pushY:Float, damage:Float):Void
+		route(e, pushX, pushY, damage, false);
+
+	function route(e:Enemies, pushX:Float, pushY:Float, damage:Float, feedMeter:Bool):Void
 	{
 		damage += util.Levels.damageBonus();
 		if (owner != null && PropBlock.between(owner.x + owner.width / 2, owner.feetY, e.x + e.width / 2, e.feetY))
 			return;
 		if (remote)
 		{
-			claim(e, pushX, pushY, damage, 0);
+			claim(e, pushX, pushY, damage, 0, feedMeter);
 			return;
 		}
-		applyHit(e, pushX, pushY, damage, true);
+		applyHit(e, pushX, pushY, damage, true, feedMeter);
 	}
 
-	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Float, rewardable:Bool):Void
+	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Float, rewardable:Bool, feedMeter:Bool = true):Void
 	{
 		var landed = damage < e.hp ? damage : e.hp;
 		e.takeHit(pushX, pushY, damage);
-		if (rewardable)
+		if (rewardable && feedMeter)
 			status.rewardDamage(landed);
 
 		util.Sfx.at("enemies/hit", e.x + e.width / 2, e.y + e.height / 2, 0.6);
@@ -75,9 +81,10 @@ class HitPipeline
 		}
 	}
 
-	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Float, stunTime:Float):Void
+	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Float, stunTime:Float, feedMeter:Bool = true):Void
 	{
-		status.rewardDamage(damage < e.hp ? damage : e.hp);
+		if (feedMeter)
+			status.rewardDamage(damage < e.hp ? damage : e.hp);
 		util.Sfx.at("enemies/hit", e.x + e.width / 2, e.y + e.height / 2, 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
 		e.flashTimer = 0.08;
@@ -87,6 +94,12 @@ class HitPipeline
 	}
 
 	public function blastRadial(cx:Float, cy:Float, radius:Float, force:Float, damage:Float, bossScale:Float = 1):Void
+		blast(cx, cy, radius, force, damage, bossScale, true);
+
+	public function blastRadialSuper(cx:Float, cy:Float, radius:Float, force:Float, damage:Float, bossScale:Float = 1):Void
+		blast(cx, cy, radius, force, damage, bossScale, false);
+
+	function blast(cx:Float, cy:Float, radius:Float, force:Float, damage:Float, bossScale:Float, feedMeter:Bool):Void
 	{
 		director.eachInCircle(cx, cy, radius, function(e)
 		{
@@ -100,7 +113,10 @@ class HitPipeline
 				ey = -1;
 				len = 1;
 			}
-			damageN(e, ex / len * force, ey / len * force, dmg);
+			if (feedMeter)
+				damageN(e, ex / len * force, ey / len * force, dmg);
+			else
+				damageSuper(e, ex / len * force, ey / len * force, dmg);
 		});
 	}
 }

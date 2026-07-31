@@ -192,6 +192,9 @@ class Controls
 	public static function secondJustPressed():Bool
 		return justPressed(SECOND);
 
+	public static function secondHeld():Bool
+		return pressed(SECOND);
+
 	public static function acceptJustPressed():Bool
 		return justPressed(ACCEPT) || FlxG.keys.anyJustPressed([FlxKey.Z]);
 

@@ -29,11 +29,14 @@ class Enemies extends FlxSprite
 	public var knockbackDrag:Float = 1600;
 
 	static inline var CORPSE_KNOCK:Float = 0.85;
+	static inline var BIG_KNOCK:Float = 0.4;
+	static inline var NORMAL_KNOCK:Float = 1.35;
 	public var stunTime:Float = 0.3;
 
 	public var target:FlxSprite;
 	public var kind(default, null):String;
 	public var bossBody(default, null):Bool = false;
+	public var big(default, null):Bool = false;
 
 	public var hitRadius(get, never):Float;
 
@@ -157,6 +160,11 @@ class Enemies extends FlxSprite
 			attack = charge;
 		}
 
+		if (data.big == true || bossBody)
+			big = true;
+		if (big)
+			grabbable = false;
+
 		shadowOffX = data.shadowOffX;
 		shadowOffXFlip = data.shadowOffXFlip;
 		shadowOffY = data.shadowOffY;
@@ -181,9 +189,9 @@ class Enemies extends FlxSprite
 		if (hp <= 0)
 		{
 			isDead = true;
-			flung = false;
-			velocity.set(0, 0);
-			drag.set(0, 0);
+			flung = true;
+			velocity.set(pushX * knockbackTaken * knockScale() * CORPSE_KNOCK, pushY * knockbackTaken * knockScale() * CORPSE_KNOCK);
+			drag.set(knockbackDrag, knockbackDrag);
 			pathing.clear();
 			this.animation.play("death", true);
 			if (!explodes)
@@ -192,11 +200,14 @@ class Enemies extends FlxSprite
 		else
 		{
 			this.animation.play("hurt", true);
-			velocity.set(pushX * knockbackTaken, pushY * knockbackTaken);
+			velocity.set(pushX * knockbackTaken * knockScale(), pushY * knockbackTaken * knockScale());
 			drag.set(knockbackDrag, knockbackDrag);
 			stun = stunTime;
 		}
 	}
+
+	function knockScale():Float
+		return big ? BIG_KNOCK : NORMAL_KNOCK;
 
 	public function brace(frames:Int, amp:Float, pushX:Float, pushY:Float):Void
 	{
@@ -204,8 +215,8 @@ class Enemies extends FlxSprite
 			return;
 		if (isDead)
 		{
-			braceVX = pushX * knockbackTaken * CORPSE_KNOCK;
-			braceVY = pushY * knockbackTaken * CORPSE_KNOCK;
+			braceVX = pushX * knockbackTaken * knockScale() * CORPSE_KNOCK;
+			braceVY = pushY * knockbackTaken * knockScale() * CORPSE_KNOCK;
 		}
 		else
 		{
