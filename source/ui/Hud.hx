@@ -33,6 +33,8 @@ class Hud
 	static inline var SUPER_GLOW_WAVE:Float = 0.28;
 	static inline var SUPER_GLOW_SPEED:Float = 7.5;
 	static inline var SUPER_READY_VOL:Float = 0.7;
+	static inline var BAR_SLIDE:Float = 0.25;
+	static inline var BAR_SETTLE:Float = 0.0005;
 	static inline var HEAL_FLASH:Float = 1.0;
 	static inline var HEAL_HUE:Float = 1 / 3;
 	static inline var HEAL_FADE:Float = 0.35;
@@ -74,6 +76,7 @@ class Hud
 	private var superFill:FlxSprite;
 	private var superClip:FlxRect;
 	private var superShown:Float = -1;
+	private var superWidth:Int = -1;
 	private var superReady:Bool = false;
 	private var superGlow:Float = 0;
 	private var hpFill:FlxSprite;
@@ -81,6 +84,7 @@ class Hud
 	private var healFlash:Float = 0;
 	private var hpClip:FlxRect;
 	private var hpShown:Float = -1;
+	private var hpWidth:Int = -1;
 	private var bulletPips:Array<FlxSprite> = [];
 	private var bulletsShown:Int = -1;
 	private var twinPips:Array<FlxSprite> = [];
@@ -243,7 +247,7 @@ class Hud
 		customCursor.setPosition(util.Controls.aimViewX(FlxG.camera) - customCursor.frameWidth * 0.5,
 			util.Controls.aimViewY(FlxG.camera) - customCursor.frameHeight * 0.5);
 
-		updateHealth();
+		updateHealth(elapsed);
 		updateHeal(elapsed);
 		updateSuper(elapsed);
 
@@ -323,17 +327,28 @@ class Hud
 		}
 	}
 
-	function updateHealth():Void
+	static function slideTo(shown:Float, target:Float, elapsed:Float):Float
+	{
+		if (shown < 0)
+			return target;
+		var k = 1 - Math.pow(1 - BAR_SLIDE, elapsed * 60);
+		var next = shown + (target - shown) * k;
+		return Math.abs(target - next) < BAR_SETTLE ? target : next;
+	}
+
+	function updateHealth(elapsed:Float):Void
 	{
 		var pct = status.healthMax > 0 ? status.health / status.healthMax : 0;
 		if (pct < 0)
 			pct = 0;
 		if (pct > 1)
 			pct = 1;
-		if (pct == hpShown)
+		hpShown = slideTo(hpShown, pct, elapsed);
+		var w = Math.round(hpFill.frameWidth * hpShown);
+		if (w == hpWidth)
 			return;
-		hpShown = pct;
-		hpClip.width = hpFill.frameWidth * pct;
+		hpWidth = w;
+		hpClip.width = w;
 		hpFill.clipRect = hpClip;
 	}
 
@@ -367,10 +382,12 @@ class Hud
 			pct = 0;
 		if (pct > 1)
 			pct = 1;
-		if (pct != superShown)
+		superShown = slideTo(superShown, pct, elapsed);
+		var w = Math.round(superFill.frameWidth * superShown);
+		if (w != superWidth)
 		{
-			superShown = pct;
-			superClip.width = superFill.frameWidth * pct;
+			superWidth = w;
+			superClip.width = w;
 			superFill.clipRect = superClip;
 		}
 
