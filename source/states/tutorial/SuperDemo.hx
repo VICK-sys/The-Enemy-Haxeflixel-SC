@@ -8,10 +8,12 @@ import util.Paths;
 class SuperDemo extends TutorialDemo
 {
 	static inline var HOP_TIME:Float = 0.8;
-	static inline var APEX:Float = 130;
+	static inline var APEX:Float = 60;
 	static inline var SPIN:Float = 360;
-	static inline var GROUND:Float = 60;
-	static inline var HAND:Float = 74;
+	static inline var GROUND:Float = 20;
+	static inline var SCALE:Float = 3;
+	static inline var POP:Float = 1.4;
+	static inline var POP_TIME:Float = 0.25;
 	static inline var RING_TIME:Float = 0.4;
 	static inline var RING_W:Float = 300;
 	static inline var RING_H:Float = 74;
@@ -34,8 +36,8 @@ class SuperDemo extends TutorialDemo
 
 		hammer = sprite();
 		hammer.loadGraphic(Paths.image("items/hammer"));
-		hammer.scale.set(3, 3);
-		hammer.updateHitbox();
+		hammer.scale.set(SCALE, SCALE);
+		hammer.origin.set(hammer.width * 0.5, hammer.height);
 
 		step(0);
 	}
@@ -51,10 +53,19 @@ class SuperDemo extends TutorialDemo
 		center(actor, TutorialDemo.CX, bodyY);
 		actor.angle = turn;
 
-		var rad = (turn - 90) * Math.PI / 180;
+		var pcx = actor.x + actor.width * 0.5;
+		var pcy = actor.y + actor.height * 0.5;
+		var rad = turn * Math.PI / 180;
+		var cos = Math.cos(rad);
+		var sin = Math.sin(rad);
+		var relX = actor.x + systems.weapons.HeldWeapon.HAND_DX - pcx;
+		var relY = actor.y + systems.weapons.HeldWeapon.HAND_DY - pcy;
+		hammer.x = pcx + (relX * cos - relY * sin) - hammer.origin.x;
+		hammer.y = pcy + (relX * sin + relY * cos) - hammer.origin.y;
 		hammer.angle = turn + 180;
-		hammer.setPosition(TutorialDemo.CX + Math.cos(rad) * HAND - hammer.width / 2,
-			bodyY + Math.sin(rad) * HAND - hammer.height / 2);
+
+		var pop = cycle < POP_TIME ? POP * (1 - cycle / POP_TIME) : 0;
+		hammer.scale.set(SCALE + pop, SCALE + pop);
 
 		if (cycle < RING_TIME)
 		{

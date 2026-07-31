@@ -72,7 +72,7 @@ The scrap page runs the whole economy in one loop: an enemy falls, the pieces bu
 
 The popup fades in on open. ENTER or ESC freezes the demo and fades it back out before the game starts. The wave timer stays frozen while the popup is open.
 
-The weapons page reads its line-up from the pick screen rather than listing the weapons itself, so the two cannot disagree about which weapon is number one. The super page animates the hammer's bounce, the leap and spin and the ring of the slam under it. The scrap page puts its counter where the real one sits, low and to the left, so the page and the game agree on where to look.
+The weapons page reads its line-up from the pick screen rather than listing the weapons itself, so the two cannot disagree about which weapon is number one. The super page animates the hammer's bounce, the leap and spin and the ring of the slam under it. It hangs the hammer off the same hand the held weapon uses and rotates that point with the player, so the two turn as one body rather than the weapon orbiting at arm's length. The bounce's own pivot is measured against a player whose sprite is being lifted by an offset, so read plainly it lands at the feet. The scrap page puts its counter where the real one sits, low and to the left, so the page and the game agree on where to look.
 
 The attack page hangs its hammer off `HeldWeapon`'s own hand offset rather than its own copy of one, so the demo grips the weapon exactly where the game does. It had been carrying the hammer bounce's pivot instead, which hung it off the body.
 
