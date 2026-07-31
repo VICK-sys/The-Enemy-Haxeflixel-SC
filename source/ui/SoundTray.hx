@@ -30,6 +30,9 @@ class SoundTray extends FlxSoundTray
 	static inline var POP_TIME:Float = 0.18;
 	static inline var POP_STAGGER:Float = 0.016;
 	static inline var FLASH_TIME:Float = 0.3;
+	static inline var DROP_TIME:Float = 0.22;
+	static inline var DROP_DIP:Float = 0.45;
+	static inline var SETTLED:Float = 999;
 	static inline var BLIP_VOL:Float = 0.5;
 
 	static inline var HIDDEN:Int = 0;
@@ -42,10 +45,10 @@ class SoundTray extends FlxSoundTray
 	var meter:Array<Bitmap> = [];
 	var barClock:Array<Float> = [];
 	var lit:Int = 0;
-	var flashClock:Float = 999;
 	var phase:Int = HIDDEN;
 	var phaseClock:Float = 0;
 	var inFrom:Float = 0;
+	var alphaFrom:Float = 0;
 	var panelW:Int = MIN_W;
 	var fontCache:Map<String, String> = new Map();
 
@@ -72,10 +75,10 @@ class SoundTray extends FlxSoundTray
 			var bar = new Bitmap(new BitmapData(BAR_W, BAR_BASE_H + i, false, 0xFFFFFFFF));
 			addChild(bar);
 			meter.push(bar);
-			barClock.push(999);
+			barClock.push(SETTLED);
 		}
 
-		rebuild("MASTER  100%");
+		rebuild(word("tray.master", "MASTER") + "  100%");
 		y = -height;
 		visible = false;
 	}
@@ -86,27 +89,41 @@ class SoundTray extends FlxSoundTray
 			FlxG.sound.play(sound, BLIP_VOL);
 
 		_timer = duration;
+		var held = visible && (phase == SLIDE_IN || phase == HOLD);
+		var was = held ? lit : 0;
 		var muted = FlxG.sound.muted;
 		lit = muted ? 0 : Math.round(volume * 10);
 		rebuild(muted ? word("tray.muted", "MUTED") : word("tray.master", "MASTER") + "  " + Math.round(volume * 100) + "%");
+		retimeBars(was);
 
-		for (i in 0...BAR_COUNT)
-			barClock[i] = i < lit ? -i * POP_STAGGER : 999;
-		flashClock = 0;
-
-		inFrom = visible ? y : -height;
-		phase = SLIDE_IN;
-		phaseClock = 0;
+		if (!held)
+		{
+			inFrom = visible ? y : -height;
+			alphaFrom = visible ? alpha : 0;
+			phase = SLIDE_IN;
+			phaseClock = 0;
+		}
 		visible = true;
 		active = true;
-		alpha = 1;
+	}
+
+	function retimeBars(was:Int):Void
+	{
+		for (i in 0...BAR_COUNT)
+		{
+			if (i >= was && i < lit)
+				barClock[i] = -(i - was) * POP_STAGGER;
+			else if (i >= lit && i < was)
+				barClock[i] = -(was - 1 - i) * POP_STAGGER;
+			else
+				barClock[i] = SETTLED;
+		}
 	}
 
 	override public function update(MS:Float):Void
 	{
 		var dt = MS / 1000;
 		phaseClock += dt;
-		flashClock += dt;
 
 		switch (phase)
 		{
@@ -118,7 +135,7 @@ class SoundTray extends FlxSoundTray
 					phase = HOLD;
 				}
 				y = inFrom + (0 - inFrom) * backOut(u);
-				alpha = Math.min(1, u * 3);
+				alpha = alphaFrom + (1 - alphaFrom) * Math.min(1, u * 3);
 			case HOLD:
 				_timer -= dt;
 				y = 0;
@@ -167,35 +184,52 @@ class SoundTray extends FlxSoundTray
 	{
 		var bar = meter[i];
 		var t = barClock[i];
-		if (i >= lit)
+		bar.visible = true;
+
+		if (i < lit)
 		{
-			bar.visible = true;
-			bar.scaleY = 1;
-			bar.y = PAD_TOP + 12 - bar.bitmapData.height;
-			tint(bar, UNLIT);
+			if (t < 0)
+			{
+				bar.visible = false;
+				return;
+			}
+			sizeBar(bar, t >= POP_TIME ? 1.0 : backOut(t / POP_TIME));
+			if (t < FLASH_TIME)
+				tintLerp(bar, 0xFFFFFF, GOLD, t / FLASH_TIME);
+			else
+				tint(bar, GOLD);
 			return;
 		}
+
 		if (t < 0)
 		{
-			bar.visible = false;
+			sizeBar(bar, 1);
+			tint(bar, GOLD);
 			return;
 		}
-		bar.visible = true;
-		var k = t >= POP_TIME ? 1.0 : backOut(t / POP_TIME);
+		if (t < DROP_TIME)
+		{
+			var u = t / DROP_TIME;
+			sizeBar(bar, 1 - DROP_DIP * Math.sin(Math.PI * u));
+			tintLerp(bar, GOLD, UNLIT, u);
+			return;
+		}
+		sizeBar(bar, 1);
+		tint(bar, UNLIT);
+	}
+
+	inline function sizeBar(bar:Bitmap, k:Float):Void
+	{
 		bar.scaleY = k;
 		bar.y = PAD_TOP + 12 - bar.bitmapData.height * k;
-		if (i == lit - 1 && flashClock < FLASH_TIME)
-			tintLerp(bar, 0xFFFFFF, GOLD, flashClock / FLASH_TIME);
-		else
-			tint(bar, GOLD);
 	}
 
 	function rebuild(label:String):Void
 	{
 		text.defaultTextFormat = format();
-		text.text = label;
-
+		text.text = word("tray.master", "MASTER") + "  100%";
 		var w = Std.int(text.textWidth) + 24;
+		text.text = label;
 		if (w < MIN_W)
 			w = MIN_W;
 		if (w != panelW || panel.bitmapData == null)
