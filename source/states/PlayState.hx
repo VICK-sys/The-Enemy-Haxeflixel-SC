@@ -218,6 +218,7 @@ class PlayState extends FlxState
 		add(combat.bash.slashes);
 		add(combat.yoyoJab.flight.string);
 		add(combat.yoyoJab.flight.yoyo);
+		insert(members.indexOf(layers.entityLayer), combat.revolver.twinSprite);
 		insert(members.indexOf(layers.entityLayer), combat.arrowStorm.marker);
 		insert(members.indexOf(layers.entityLayer), combat.bow.rain.markers);
 		add(combat.arrowStorm.trail.group);
@@ -235,8 +236,6 @@ class PlayState extends FlxState
 
 		if (petals != null)
 			add(petals.group);
-
-		add(combat.revolver.twinSprite);
 
 		add(timeStop.overlay);
 

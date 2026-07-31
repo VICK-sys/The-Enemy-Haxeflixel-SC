@@ -15,8 +15,9 @@ import data.WeaponData.WeaponDataRegistry;
 class RevolverAttack
 {
 	static inline var MUZZLE:Float = 24;
-	static inline var TWIN_SIDE:Float = 24;
-	static inline var TWIN_BACK:Float = 26;
+	static inline var TWIN_SIDE:Float = 25;
+	static inline var TWIN_FWD:Float = 28;
+	static inline var TWIN_SHADE:Int = 0xFF8A8A8A;
 	static inline var TWIN_STAGGER:Float = 0.09;
 	static inline var TWIN_KICK:Float = 16;
 	static inline var KICK_FADE:Float = 7;
@@ -66,6 +67,7 @@ class RevolverAttack
 		twinSprite = new FlxSprite();
 		twinSprite.antialiasing = false;
 		twinSprite.scale.set(4, 4);
+		twinSprite.color = TWIN_SHADE;
 		twinSprite.visible = false;
 	}
 
@@ -144,6 +146,7 @@ class RevolverAttack
 		twinPlaced = false;
 		twinSprite.loadGraphic(util.HuePalette.graphic("items/revolver", util.SaveData.playerHue()));
 		twinSprite.origin.set(twinSprite.width * 0.5, twinSprite.height * 0.5);
+		twinSprite.color = TWIN_SHADE;
 		FlxG.sound.play(Paths.sound("power_up"), 0.7);
 	}
 
@@ -167,11 +170,10 @@ class RevolverAttack
 
 		var perpX = -aimDy;
 		var perpY = aimDx;
-		var lat = (handX - pcx) * perpX + (handY - pcy) * perpY;
-		var shift = lat >= 0 ? -TWIN_SIDE : TWIN_SIDE;
+		var shift = perpY > 0 ? -TWIN_SIDE : (perpY < 0 ? TWIN_SIDE : (perpX > 0 ? -TWIN_SIDE : TWIN_SIDE));
 
-		twinHandX = held.x + held.origin.x + perpX * shift - aimDx * TWIN_BACK;
-		twinHandY = held.y + held.origin.y + perpY * shift - aimDy * TWIN_BACK;
+		twinHandX = held.x + held.origin.x + perpX * shift + aimDx * TWIN_FWD;
+		twinHandY = held.y + held.origin.y + perpY * shift + aimDy * TWIN_FWD;
 		twinPlaced = true;
 		twinFlip = held.flipY;
 
