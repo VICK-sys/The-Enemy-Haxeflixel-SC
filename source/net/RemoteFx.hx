@@ -129,7 +129,8 @@ class RemoteFx
 		FlxG.sound.play(Paths.sound("hammer"), 0.6);
 	}
 
-	public function attack(modeIndex:Int, pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, tx:Float, ty:Float, power:Float):Void
+	public function attack(modeIndex:Int, pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, tx:Float, ty:Float, power:Float,
+			perfect:Bool = false):Void
 	{
 		var mode = Type.createEnumIndex(WeaponMode, modeIndex);
 		switch (mode)
@@ -168,7 +169,7 @@ class RemoteFx
 			case Bow:
 				var bc = cfg.bowCharge;
 				var arrow = arrows.recycle(Arrow);
-				arrow.paint(avatar.hue);
+				arrow.paint(avatar.hue, perfect);
 				arrow.fire(pmx + dx * 10, pmy + dy * 10, dx, dy, aimDeg, 1, 1 + power * bc.speedBonus,
 					1 + power * bc.sizeBonus, 1);
 				FlxG.sound.play(Paths.sound("crossbow_fire"), 0.7 + power * 0.3);

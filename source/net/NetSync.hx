@@ -91,9 +91,10 @@ class NetSync
 		if (Net.isClient)
 			mirror = new PuppetMirror(director, pickups, scraps, status, hud, layers);
 
-		combat.onAttack = function(mode, pmx, pmy, dx, dy, aimDeg, tx, ty, power)
+		combat.onAttack = function(mode, pmx, pmy, dx, dy, aimDeg, tx, ty, power, perfect)
 			Net.send({
 				t: "atk",
+				h: perfect ? 1 : 0,
 				m: Type.enumIndex(mode),
 				x: r1(pmx),
 				y: r1(pmy),
@@ -284,7 +285,7 @@ class NetSync
 			case "atk":
 				var p = roster.get(msg.f);
 				if (p != null && p.fx != null && validAttackMode(msg.m))
-					p.fx.attack(msg.m, msg.x, msg.y, msg.dx, msg.dy, msg.a, msg.tx, msg.ty, msg.p);
+					p.fx.attack(msg.m, msg.x, msg.y, msg.dx, msg.dy, msg.a, msg.tx, msg.ty, msg.p, msg.h == 1);
 
 			case "sup":
 				var p = roster.get(msg.f);

@@ -61,6 +61,8 @@ The ready gate runs the same quorum shape as the shop hold. It arms at the run's
 
 ## Supers
 
+An attack carries a perfect flag alongside its charge, since a sweet spot shot cannot be told from a merely full one by charge alone, and peers draw the perfect arrow from it.
+
 The twin gun replicates as its shots and nothing else. Both rounds of every pull emit their own event, so the other machines draw the pair without knowing a super is on.
 
 What a remote machine can reproduce decides how each other super replicates.

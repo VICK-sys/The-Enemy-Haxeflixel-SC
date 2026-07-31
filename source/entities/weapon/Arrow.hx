@@ -21,20 +21,27 @@ class Arrow extends FlxSprite
 	private var life:Float = 0;
 	private var hitList:Array<FlxObject> = [];
 
+	public static inline var NORMAL:String = "bullets/arrow";
+	public static inline var PERFECT:String = "bullets/perfect_arrow";
+
 	public var hue(default, null):Float = 0;
 
-	public function paint(h:Float):Void
+	private var skin:String = NORMAL;
+
+	public function paint(h:Float, perfect:Bool = false):Void
 	{
-		if (h == hue)
+		var want = perfect ? PERFECT : NORMAL;
+		if (h == hue && want == skin)
 			return;
 		hue = h;
-		loadGraphic(util.HuePalette.graphic("bullets/arrow", h));
+		skin = want;
+		loadGraphic(util.HuePalette.graphic(want, h));
 	}
 
 	public function new()
 	{
 		super();
-		loadGraphic(Paths.image("bullets/arrow"));
+		loadGraphic(Paths.image(NORMAL));
 		antialiasing = false;
 		scale.set(4, 4);
 	}

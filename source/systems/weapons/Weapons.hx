@@ -27,7 +27,7 @@ class Weapons
 	public var yoyoSpin:YoyoSpin;
 	public var weapon:Int = 0;
 	public var disabled:Bool = false;
-	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float) -> Void;
+	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float, Bool) -> Void;
 	public var onSuper:Int -> Void;
 	public var onSuperLaunch:(Float, Float) -> Void;
 
@@ -242,8 +242,8 @@ class Weapons
 			var power = bow.charge;
 			held.beginSwing(aim.deg, Bow);
 			held.loose(power);
-			bow.release(held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
-			emitAttack(Bow, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg, power);
+			var perfect = bow.release(held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
+			emitAttack(Bow, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg, power, perfect);
 		}
 	}
 
@@ -395,10 +395,11 @@ class Weapons
 			yoyoJab.release();
 	}
 
-	function emitAttack(mode:WeaponMode, pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0):Void
+	function emitAttack(mode:WeaponMode, pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0,
+			perfect:Bool = false):Void
 	{
 		if (onAttack != null)
-			onAttack(mode, pmx, pmy, dx, dy, aimDeg, util.Controls.aimX(), util.Controls.aimY(), power);
+			onAttack(mode, pmx, pmy, dx, dy, aimDeg, util.Controls.aimX(), util.Controls.aimY(), power, perfect);
 	}
 
 	function updateHeldHook():Void

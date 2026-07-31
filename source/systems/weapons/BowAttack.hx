@@ -123,19 +123,20 @@ class BowAttack
 			sweetTimer -= elapsed;
 	}
 
-	public function release(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float):Void
+	public function release(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float):Bool
 	{
 		var t = charge;
 		var hot = sweetTimer > 0;
 		cancelCharge();
 		shoot(bx, by, dx, dy, aimDeg, t, hot);
+		return hot;
 	}
 
 	public function shoot(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0, hot:Bool = false):Void
 	{
 		var damage = hot ? cfg.damage * cfg.sweetMult : cfg.damage * (1 + power * (cfg.fullMult - 1));
 		var arrow = arrows.recycle(Arrow);
-		arrow.paint(util.SaveData.playerHue());
+		arrow.paint(util.SaveData.playerHue(), hot);
 		arrow.fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,
 			1 + power * cfg.sizeBonus, 1 + power * cfg.knockBonus);
 		FlxG.sound.play(Paths.sound("crossbow_fire"), 0.7 + power * 0.3);

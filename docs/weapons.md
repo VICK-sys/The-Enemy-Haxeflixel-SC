@@ -146,6 +146,8 @@ A looping tension sound rises in pitch with the charge. It starts only once the 
 
 ## ArrowRain
 
+A shot released on the sweet spot flies as `perfect_arrow` rather than the usual shaft, so the timing reads on the shot itself and not only in the damage. The arrow pool is shared, so the skin is tracked beside the hue and a recycled arrow drops back to the plain one.
+
 The bow's secondary. The bow rises above the player's head and points skyward. Firing launches a fanned burst of arrows up from it. A staggered volley then falls onto a scatter of points around the cursor.
 
 Each impact point shows a ground marker during the descent. The falling arrow fades in over the first part of its drop rather than popping into view. That fade keys to distance fallen, so it stays proportional if the drop height or fall speed change. A landing arrow damages enemies in a radius with outward knockback. The rain ignores walls.
