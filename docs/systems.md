@@ -54,6 +54,8 @@ The puff comes from `Fx.steamAt`. Its art drifts across its own frames, so it is
 
 It rides the player for the whole of its short life rather than being dropped in the world. Facing here follows the cursor, so it can turn over in a single frame, and a puff left standing where it spawned ends up in front of a player who spun during it. `trackSteam` re-seats it against the current facing every frame, so it stays on the back through any spin, and lets go of it once the animation is done.
 
+The hit sound is one owned `FlxSound` restarted on every hit, not a fresh play each time. Invincibility spaces hits 0.4 seconds apart while the sound runs longer than that, so fresh plays overlapped their own tail and each hit landed on a different amount of the last one. Restarting one instance makes every hit sound the same.
+
 It re-asserts death every frame, rather than only on the transition. Several weapon systems clear `blockMovement` when they finish, and one finishing after you die would otherwise hand control back. So while dead it reapplies the block, and restores the death animation if anything overrode it. Separately, `Player` refuses to run its movement routine while `isDead`. That is what actually keeps a corpse from walking and playing an idle.
 
 ### EnemyDirector

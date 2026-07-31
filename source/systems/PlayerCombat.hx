@@ -49,6 +49,7 @@ class PlayerCombat
 	private var throeX:Float = 0;
 	private var throeY:Float = 0;
 	private var voice:FlxSound;
+	private var hitSound:FlxSound;
 	private var steamPuff:flixel.FlxSprite;
 
 	function steamX():Float
@@ -79,6 +80,7 @@ class PlayerCombat
 		superMax = data.superMax;
 		health = healthMax;
 		superMeter = 0;
+		hitSound = FlxG.sound.create(Paths.sound("damaged/hit"));
 	}
 
 	public function update(elapsed:Float):Void
@@ -234,7 +236,7 @@ class PlayerCombat
 			player.x + player.width / 2, player.feetY))
 			return false;
 
-		FlxG.sound.play(Paths.sound("damaged/hit"));
+		hitSound.play(true);
 		if (health - damage > 0)
 			say("voice/hurt" + (1 + Std.random(HURT_LINES)));
 		fx.hurtShake();
