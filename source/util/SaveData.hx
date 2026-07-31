@@ -48,11 +48,33 @@ class SaveData
 	public static function setVolume(v:Float):Void
 	{
 		ensure();
-		if (v < 0)
-			v = 0;
-		if (v > 1)
-			v = 1;
-		save.data.volume = Math.round(v * 10) / 10;
+		save.data.volume = clampTenth(v);
+		save.flush();
+	}
+
+	public static function musicVolume():Float
+	{
+		ensure();
+		return save.data.musicVolume != null ? save.data.musicVolume : 1.0;
+	}
+
+	public static function setMusicVolume(v:Float):Void
+	{
+		ensure();
+		save.data.musicVolume = clampTenth(v);
+		save.flush();
+	}
+
+	public static function sfxVolume():Float
+	{
+		ensure();
+		return save.data.sfxVolume != null ? save.data.sfxVolume : 1.0;
+	}
+
+	public static function setSfxVolume(v:Float):Void
+	{
+		ensure();
+		save.data.sfxVolume = clampTenth(v);
 		save.flush();
 	}
 
@@ -373,6 +395,8 @@ class SaveData
 	public static function applySettings():Void
 	{
 		FlxG.sound.volume = volume();
+		FlxG.sound.defaultMusicGroup.volume = musicVolume();
+		FlxG.sound.defaultSoundGroup.volume = sfxVolume();
 		applyDisplay();
 		applyFramerate();
 		systems.Fx.shakeScale = shakeAmount();

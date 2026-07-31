@@ -54,6 +54,8 @@ class OptionsSubState extends FlxSubState
 	static inline var VOICE:Int = 15;
 	static inline var RESOLUTION:Int = 16;
 	static inline var IDLE_FPS:Int = 17;
+	static inline var MUSIC:Int = 18;
+	static inline var SFX:Int = 19;
 
 	static inline var TAB:Int = -1;
 	static inline var BACK:Int = -2;
@@ -62,7 +64,7 @@ class OptionsSubState extends FlxSubState
 	static var PAGES:Array<{key:String, items:Array<Int>}> = [
 		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE, IDLE_FPS]},
 		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, HUD, FPS]},
-		{key: "options.page.sounds", items: [VOLUME, SOUND3D]},
+		{key: "options.page.sounds", items: [VOLUME, MUSIC, SFX, SOUND3D]},
 		{key: "options.page.custom", items: [COLOR, VOICE, LANGUAGE, CONTROLS, RESET]}
 	];
 
@@ -300,7 +302,7 @@ class OptionsSubState extends FlxSubState
 	{
 		return switch (ids[row])
 		{
-			case COLOR, VOLUME, CAMERA, SHAKE, FREEZE, VOICE: true;
+			case COLOR, VOLUME, MUSIC, SFX, CAMERA, SHAKE, FREEZE, VOICE: true;
 			default: false;
 		}
 	}
@@ -312,6 +314,8 @@ class OptionsSubState extends FlxSubState
 			case TAB: Lang.t("options.page", [Lang.t(PAGES[page].key), page + 1, PAGES.length]);
 			case BACK: Lang.t("common.back");
 			case VOLUME: Lang.t("options.volume", [Math.round(shownVolume * 100)]);
+			case MUSIC: Lang.t("options.music", [Math.round(SaveData.musicVolume() * 100)]);
+			case SFX: Lang.t("options.sfx", [Math.round(SaveData.sfxVolume() * 100)]);
 			case DISPLAY: Lang.t("options.display", [Lang.t("display." + SaveData.displayMode())]);
 			case RESOLUTION: Lang.t("options.resolution", [SaveData.windowFill()]);
 			case IDLE_FPS: Lang.t("options.idleFps", [idleLabel()]);
@@ -435,6 +439,10 @@ class OptionsSubState extends FlxSubState
 				return;
 			case VOLUME:
 				SaveData.setVolume(SaveData.volume() + dir * 0.1);
+			case MUSIC:
+				SaveData.setMusicVolume(SaveData.musicVolume() + dir * 0.1);
+			case SFX:
+				SaveData.setSfxVolume(SaveData.sfxVolume() + dir * 0.1);
 			case DISPLAY:
 				SaveData.setDisplayMode(cycled(DISPLAYS, SaveData.displayMode(), dir));
 			case RESOLUTION:
