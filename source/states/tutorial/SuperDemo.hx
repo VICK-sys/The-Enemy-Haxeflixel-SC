@@ -8,10 +8,10 @@ import util.Paths;
 class SuperDemo extends TutorialDemo
 {
 	static inline var HOP_TIME:Float = 0.8;
-	static inline var APEX:Float = 60;
+	static inline var APEX:Float = 55;
 	static inline var SPIN:Float = 360;
-	static inline var GROUND:Float = 20;
-	static inline var SCALE:Float = 3;
+	static inline var GROUND:Float = 72;
+	static inline var SCALE:Float = 2.5;
 	static inline var POP:Float = 1.4;
 	static inline var POP_TIME:Float = 0.25;
 	static inline var RING_TIME:Float = 0.4;
@@ -53,15 +53,15 @@ class SuperDemo extends TutorialDemo
 		center(actor, TutorialDemo.CX, bodyY);
 		actor.angle = turn;
 
-		var pcx = actor.x + actor.width * 0.5;
-		var pcy = actor.y + actor.height * 0.5;
+		var pivotX = actor.x - actor.offset.x + actor.origin.x;
+		var pivotY = actor.y - actor.offset.y + actor.origin.y;
 		var rad = turn * Math.PI / 180;
 		var cos = Math.cos(rad);
 		var sin = Math.sin(rad);
-		var relX = actor.x + systems.weapons.HeldWeapon.HAND_DX - pcx;
-		var relY = actor.y + systems.weapons.HeldWeapon.HAND_DY - pcy;
-		hammer.x = pcx + (relX * cos - relY * sin) - hammer.origin.x;
-		hammer.y = pcy + (relX * sin + relY * cos) - hammer.origin.y;
+		var relX = actor.x + systems.weapons.HeldWeapon.HAND_DX - pivotX;
+		var relY = actor.y + systems.weapons.HeldWeapon.HAND_DY - pivotY;
+		hammer.x = pivotX + (relX * cos - relY * sin) - hammer.origin.x;
+		hammer.y = pivotY + (relX * sin + relY * cos) - hammer.origin.y;
 		hammer.angle = turn + 180;
 
 		var pop = cycle < POP_TIME ? POP * (1 - cycle / POP_TIME) : 0;
