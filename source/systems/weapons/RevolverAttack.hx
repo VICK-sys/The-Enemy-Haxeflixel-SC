@@ -15,7 +15,7 @@ import data.WeaponData.WeaponDataRegistry;
 class RevolverAttack
 {
 	static inline var MUZZLE:Float = 24;
-	static inline var TWIN_SEP:Float = 16;
+	static inline var TWIN_SEP:Float = 34;
 	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
 
 	public var bullets:FlxTypedGroup<Bullet>;
@@ -143,21 +143,21 @@ class RevolverAttack
 		twinSprite.visible = false;
 	}
 
-	public function placeTwin(held:FlxSprite, pcx:Float, pcy:Float, aimDx:Float, aimDy:Float):Void
+	public function placeTwin(held:FlxSprite, pcx:Float, pcy:Float, handX:Float, handY:Float, aimDx:Float, aimDy:Float):Void
 	{
 		twinSprite.visible = twin && held.visible;
 		if (!twinSprite.visible)
 			return;
 
-		var relX = held.x + held.origin.x - pcx;
-		var relY = held.y + held.origin.y - pcy;
 		var perpX = -aimDy;
 		var perpY = aimDx;
-		var lat = relX * perpX + relY * perpY;
-		var want = Math.abs(lat) < TWIN_SEP ? (lat >= 0 ? -TWIN_SEP : TWIN_SEP) : -lat;
+		var lat = (handX - pcx) * perpX + (handY - pcy) * perpY;
+		var shift = -2 * lat;
+		if (shift > -TWIN_SEP && shift < TWIN_SEP)
+			shift = shift >= 0 ? TWIN_SEP : -TWIN_SEP;
 
-		twinHandX = pcx + relX + (want - lat) * perpX;
-		twinHandY = pcy + relY + (want - lat) * perpY;
+		twinHandX = held.x + held.origin.x + perpX * shift;
+		twinHandY = held.y + held.origin.y + perpY * shift;
 		twinPlaced = true;
 
 		twinSprite.x = twinHandX - twinSprite.origin.x;

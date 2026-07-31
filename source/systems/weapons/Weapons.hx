@@ -121,7 +121,7 @@ class Weapons
 			bow.hushReload();
 		}
 		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
-		revolver.placeTwin(held.sprite, player.x + player.width * 0.5, player.y + player.height * 0.5, gunAim.dx, gunAim.dy);
+		revolver.placeTwin(held.sprite, player.x + player.width * 0.5, player.y + player.height * 0.5, handX(), handY(), gunAim.dx, gunAim.dy);
 		if (held.kind == HeldWeapon.REVOLVER && revolver.isReloading)
 			held.reloadPose(revolver.reloadProgress);
 		hookAttack.update(elapsed);
