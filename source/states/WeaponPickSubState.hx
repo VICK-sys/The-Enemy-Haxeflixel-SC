@@ -55,6 +55,15 @@ class WeaponPickSubState extends FlxSubState
 	];
 
 	static var KEYS:Array<String> = ["hammer", "revolver", "crossbow", "hook"];
+	static var ORDER:Array<Int> = [1, 2, 0, 3];
+
+	static function slotOf(weapon:Int):Int
+	{
+		for (i in 0...ORDER.length)
+			if (ORDER[i] == weapon)
+				return i;
+		return 0;
+	}
 
 	public static function nameOf(i:Int):String
 		return Lang.t("weapon." + KEYS[i >= 0 && i < KEYS.length ? i : 0]);
@@ -89,7 +98,7 @@ class WeaponPickSubState extends FlxSubState
 
 	override public function create():Void
 	{
-		pick = lastPick;
+		pick = slotOf(lastPick);
 
 		var overlay = new FlxSprite(0, 0);
 		overlay.makeGraphic(FlxG.width, FlxG.height, 0xDD000000);
@@ -117,8 +126,9 @@ class WeaponPickSubState extends FlxSubState
 		super.close();
 	}
 
-	function buildCard(i:Int, x:Float):Card
+	function buildCard(slot:Int, x:Float):Card
 	{
+		var i = ORDER[slot];
 		var c = new Card();
 
 		c.edge = new FlxSprite(x - 3, CARD_TOP - 3);
@@ -153,7 +163,7 @@ class WeaponPickSubState extends FlxSubState
 		blurb.setFormat(Lang.font(), 13, TEXT_DIM, CENTER);
 		ui(blurb);
 
-		var num = new FlxText(x, CARD_TOP + 8, CARD_W - 12, "" + (i + 1));
+		var num = new FlxText(x, CARD_TOP + 8, CARD_W - 12, "" + (slot + 1));
 		num.setFormat(Lang.font(), 16, TEXT_DIM, RIGHT);
 		ui(num);
 
@@ -306,12 +316,12 @@ class WeaponPickSubState extends FlxSubState
 	{
 		util.MenuSfx.click();
 		done = true;
-		lastPick = pick;
+		lastPick = ORDER[pick];
 		var icon = cards[pick].icon;
 		pickedX = icon.x + icon.width * 0.5;
 		pickedY = icon.y + icon.height * 0.5;
 		if (onPicked != null)
-			onPicked(pick);
+			onPicked(lastPick);
 		close();
 	}
 }

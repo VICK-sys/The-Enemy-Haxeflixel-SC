@@ -31,6 +31,11 @@ class Fx
 	public var dashTrail:FlxTypedGroup<FlxSprite>;
 	public var pops:FlxTypedGroup<FlxSprite>;
 	public var bursts:FlxTypedGroup<Burst>;
+	public var steam:FlxTypedGroup<FlxSprite>;
+
+	static inline var STEAM_FRAME:Int = 32;
+	static inline var STEAM_FPS:Int = 18;
+	static inline var STEAM_SCALE:Float = 4;
 
 	static inline var BURST_FRAME:Int = 24;
 	static inline var BURST_FPS:Int = 24;
@@ -88,6 +93,23 @@ class Fx
 		dashTrail = new FlxTypedGroup<FlxSprite>();
 		pops = new FlxTypedGroup<FlxSprite>();
 		bursts = new FlxTypedGroup<Burst>();
+		steam = new FlxTypedGroup<FlxSprite>();
+	}
+
+	public function steamAt(cx:Float, cy:Float, toLeft:Bool):Void
+	{
+		var s = steam.recycle(FlxSprite);
+		if (s.graphic == null)
+		{
+			s.loadGraphic(Paths.image("effects/steam_dash"), true, STEAM_FRAME, STEAM_FRAME);
+			s.animation.add("puff", [0, 1, 2, 3, 4], STEAM_FPS, false);
+			s.antialiasing = false;
+			s.scale.set(STEAM_SCALE, STEAM_SCALE);
+			s.updateHitbox();
+		}
+		s.flipX = toLeft;
+		s.setPosition(cx - s.width * 0.5, cy - s.height * 0.5);
+		s.animation.play("puff", true);
 	}
 
 	public function chargePop(cx:Float, cy:Float):Void
@@ -120,6 +142,10 @@ class Fx
 		for (b in bursts.members)
 			if (b != null && b.exists && b.animation.finished)
 				b.kill();
+
+		for (s in steam.members)
+			if (s != null && s.exists && s.animation.finished)
+				s.kill();
 
 		for (l in dashTrail.members)
 		{

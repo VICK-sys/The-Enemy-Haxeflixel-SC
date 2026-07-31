@@ -208,6 +208,7 @@ class PlayState extends FlxState
 		backGear.paint(SaveData.playerHue());
 		layers.entityLayer.add(backGear.sprite);
 		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
+		insert(members.indexOf(layers.entityLayer), fx.steam);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
 		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status, fx) : new EnemyDirector(_player, arena, layers, status, fx);

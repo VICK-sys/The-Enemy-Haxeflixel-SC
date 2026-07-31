@@ -30,8 +30,8 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `entities/enemy/EnemyBrain.hx` | wander and idle durations, walk-in lean and its slack |
 | `systems/EnemyShots.hx` | shot wall probe |
 | `systems/BossDeath.hx` | boss death shake duration and amplitude |
-| `systems/Fx.hx` | hitstop length, shake strengths, spark settings, dash line fade |
-| `systems/PlayerCombat.hx` | voice volume, death throes length and shake, hurt and death line counts, dash and dash-ready volumes |
+| `systems/Fx.hx` | hitstop length, shake strengths, spark settings, dash line fade, dash steam frame rate and scale |
+| `systems/PlayerCombat.hx` | voice volume, death throes length and shake, hurt and death line counts, dash and dash-ready volumes, dash steam offset from the back |
 | `systems/TimeStop.hx` | trail tint, alpha, fade, cadence, and minimum speed. Overlay tint strength. Minimum music pitch |
 | `states/MainMenuState.hx` | splash text and its angle, throb depth and speed. Quit-collapse flatten, pinch and fade durations, and minimum window size |
 | `util/IrisWipe.hx` | open and close durations, mask resolution, fully open scale |

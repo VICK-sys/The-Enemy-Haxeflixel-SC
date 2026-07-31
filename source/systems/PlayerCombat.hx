@@ -21,6 +21,8 @@ class PlayerCombat
 	static inline var DASH_LINES:Int = 2;
 	static inline var DASH_VOL:Float = 0.55;
 	static inline var READY_VOL:Float = 0.4;
+	static inline var STEAM_BACK:Float = 18;
+	static inline var STEAM_RISE:Float = 26;
 
 	public var health:Float = 0;
 	public var superMeter:Float = 0;
@@ -94,7 +96,12 @@ class PlayerCombat
 		{
 			dashCooldownTimer -= elapsed;
 			if (dashCooldownTimer <= 0 && !dead)
+			{
 				FlxG.sound.play(Paths.sound("dash/charged"), READY_VOL);
+				var face = player.flipX ? -1.0 : 1.0;
+				fx.steamAt(player.x + player.width * 0.5 - face * STEAM_BACK * player.sizeScale,
+					player.y + player.height * 0.5 - STEAM_RISE * player.sizeScale, !player.flipX);
+			}
 		}
 
 		if (util.Controls.justPressed(util.Controls.DASH) && !dead && !player.blockMovement && dashCooldownTimer <= 0 && player.dashTimer <= 0)
