@@ -81,17 +81,6 @@ class EnemyShot extends FlxSprite
 		life = fullLife;
 		alpha = 1;
 		friendly = true;
-		use(turned(spriteKey));
-	}
-
-	static function turned(key:String):String
-	{
-		if (key == null)
-			return TURNED_SPRITE;
-		var flip = StringTools.replace(key, "_enemy", "_player");
-		if (flip != key && openfl.utils.Assets.exists(Paths.image(flip)))
-			return flip;
-		return TURNED_SPRITE;
 	}
 
 	public function seize():Void
