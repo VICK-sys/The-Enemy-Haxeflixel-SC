@@ -13,6 +13,7 @@ class SwingAttack
 
 	public var slashes:FlxTypedGroup<SlashEffect>;
 	public var onConnect:Void->Void;
+	public var boosted(default, null):Bool = false;
 
 	private var cfg:SwingConfig;
 	private var director:EnemyDirector;
@@ -81,9 +82,10 @@ class SwingAttack
 			coolFor(cfg.cooldown);
 		var ex = ox == null ? pmx : ox;
 		var ey = oy == null ? pmy : oy;
+		boosted = boost && cfg.sparkMult != null;
 		slashes.recycle(SlashEffect).fire(ex + dx * cfg.spawnDist, ey + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale,
 			cfg.effect == null ? "sword" : cfg.effect);
-		strike(pmx, pmy, dx, dy, boost && cfg.sparkMult != null ? cfg.sparkMult : 1);
+		strike(pmx, pmy, dx, dy, boosted ? cfg.sparkMult : 1);
 		guardTimer = GUARD_TIME;
 		guardX = dx;
 		guardY = dy;

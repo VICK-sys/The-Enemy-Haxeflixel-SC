@@ -54,7 +54,15 @@ class Weapons
 		gigaSwing.onConnect = function()
 		{
 			held.impactPose();
-			FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 0.9);
+			if (gigaSwing.boosted)
+			{
+				var punch = FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 1.0);
+				if (punch != null)
+					punch.pitch = 0.82;
+				FlxG.sound.play(util.Paths.sound("hammer"), 0.5);
+			}
+			else
+				FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 0.9);
 		}
 		giga = new GigaCharge(held, fx, weaponCfg.giga);
 		yoyoJab = new YoyoJab(director, hits, fx);
