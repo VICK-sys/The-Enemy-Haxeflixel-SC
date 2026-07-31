@@ -113,7 +113,17 @@ class RevolverAttack
 	public var displayTwinRounds(get, never):Int;
 
 	function get_displayTwinRounds():Int
-		return reloading > 0 ? twinReloadFrom : twinRounds;
+	{
+		if (reloading > 0)
+			return twinReloadFrom;
+		return settledTwin();
+	}
+
+	function settledTwin():Int
+	{
+		var n = twinRounds - (pendKey != null ? pendCost : 0);
+		return n < 0 ? 0 : n;
+	}
 
 	public var reloadProgress(get, never):Float;
 
@@ -132,7 +142,7 @@ class RevolverAttack
 	function beginReloadFrom(n:Int):Void
 	{
 		reloadFrom = n;
-		twinReloadFrom = twinRounds;
+		twinReloadFrom = settledTwin();
 		reloadTotal = cfg.reloadTime * (twin ? TWIN_RELOAD : 1) * util.Levels.actionScale();
 		reloading = reloadTotal;
 		spunStart = false;
