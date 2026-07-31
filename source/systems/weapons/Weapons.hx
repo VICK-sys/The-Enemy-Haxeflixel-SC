@@ -360,7 +360,7 @@ class Weapons
 		if (giga.engaged && !leftClick)
 		{
 			var strike = giga.ready;
-			var timed = giga.sparkTimed;
+			var timed = giga.shineTimed;
 			giga.letGo();
 			if (strike)
 			{

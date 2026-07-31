@@ -24,9 +24,9 @@
 		"knock": 1.5,
 		"hitBrace": 10,
 		"cooldown": 0.85,
-		"chargeTime": 1.0,
+		"chargeTime": 1.5,
 		"sound": "weapon/gigaSwing",
-		"sparkMult": 1.5
+		"shineMult": 1.5
 	},
 	"yoyo": {
 		"reach": 720,
