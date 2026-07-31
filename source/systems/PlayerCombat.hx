@@ -49,6 +49,26 @@ class PlayerCombat
 	private var throeX:Float = 0;
 	private var throeY:Float = 0;
 	private var voice:FlxSound;
+	private var steamPuff:flixel.FlxSprite;
+
+	function steamX():Float
+		return player.x + player.width * 0.5 - (player.flipX ? -1.0 : 1.0) * STEAM_BACK * player.sizeScale;
+
+	function steamY():Float
+		return player.y + player.height * 0.5 - STEAM_RISE * player.sizeScale;
+
+	function trackSteam():Void
+	{
+		if (steamPuff == null)
+			return;
+		if (!steamPuff.exists)
+		{
+			steamPuff = null;
+			return;
+		}
+		steamPuff.flipX = !player.flipX;
+		steamPuff.setPosition(steamX() - steamPuff.width * 0.5, steamY() - steamPuff.height * 0.5);
+	}
 
 	public function new(player:Player, fx:Fx)
 	{
@@ -63,6 +83,8 @@ class PlayerCombat
 
 	public function update(elapsed:Float):Void
 	{
+		trackSteam();
+
 		if (iframeTimer > 0)
 		{
 			iframeTimer -= elapsed;
@@ -98,9 +120,7 @@ class PlayerCombat
 			if (dashCooldownTimer <= 0 && !dead)
 			{
 				FlxG.sound.play(Paths.sound("dash/charged"), READY_VOL);
-				var face = player.flipX ? -1.0 : 1.0;
-				fx.steamAt(player.x + player.width * 0.5 - face * STEAM_BACK * player.sizeScale,
-					player.y + player.height * 0.5 - STEAM_RISE * player.sizeScale, !player.flipX);
+				steamPuff = fx.steamAt(steamX(), steamY(), !player.flipX);
 			}
 		}
 

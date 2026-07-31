@@ -52,6 +52,8 @@ The dash speaks twice. Launching one plays a random line from `dash/dash1` and `
 
 The puff comes from `Fx.steamAt`. Its art drifts across its own frames, so it is mirrored against the player's facing rather than with it, which sends it away from the back instead of through the body. It draws under the entity layer beside the dash trail, so the player's own body clips its inner edge and it reads as coming from behind them.
 
+It rides the player for the whole of its short life rather than being dropped in the world. Facing here follows the cursor, so it can turn over in a single frame, and a puff left standing where it spawned ends up in front of a player who spun during it. `trackSteam` re-seats it against the current facing every frame, so it stays on the back through any spin, and lets go of it once the animation is done.
+
 It re-asserts death every frame, rather than only on the transition. Several weapon systems clear `blockMovement` when they finish, and one finishing after you die would otherwise hand control back. So while dead it reapplies the block, and restores the death animation if anything overrode it. Separately, `Player` refuses to run its movement routine while `isDead`. That is what actually keeps a corpse from walking and playing an idle.
 
 ### EnemyDirector

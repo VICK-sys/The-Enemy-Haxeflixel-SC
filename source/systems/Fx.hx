@@ -96,7 +96,7 @@ class Fx
 		steam = new FlxTypedGroup<FlxSprite>();
 	}
 
-	public function steamAt(cx:Float, cy:Float, toLeft:Bool):Void
+	public function steamAt(cx:Float, cy:Float, toLeft:Bool):FlxSprite
 	{
 		var s = steam.recycle(FlxSprite);
 		if (s.graphic == null)
@@ -110,6 +110,7 @@ class Fx
 		s.flipX = toLeft;
 		s.setPosition(cx - s.width * 0.5, cy - s.height * 0.5);
 		s.animation.play("puff", true);
+		return s;
 	}
 
 	public function chargePop(cx:Float, cy:Float):Void
