@@ -32,6 +32,8 @@
 	"options.title": "OPTIONS",
 	"options.volume": "MASTER VOLUME  < {0}% >",
 	"options.music": "MUSIC  < {0}% >",
+	"tray.master": "MASTER",
+	"tray.muted": "MUTED",
 	"options.sfx": "SOUND EFFECTS  < {0}% >",
 	"options.display": "DISPLAY  < {0} >",
 	"options.resolution": "WINDOW SIZE  < {0}% OF SCREEN >",

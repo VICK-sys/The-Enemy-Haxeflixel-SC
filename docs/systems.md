@@ -385,6 +385,10 @@ Positional playback for world sounds. `at(name, x, y, volume)` fades a one-shot 
 
 Positional sound files must be mono. On the native target the pan value moves the OpenAL source position, and OpenAL ignores source positions for stereo buffers, so a stereo file plays centred no matter what pan it gets. The distance fade still applies either way, since that is plain volume math.
 
+### SoundTray
+
+A restyled replacement for the flixel volume tray, installed through the engine's sound-tray hook at boot. It shows the master volume as a percent under ten gold bars, in the game font for the current language, and the mute key shows a muted label instead. It slides in with a small bounce, the lit bars pop in one after another, the newest bar flashes, and after a second it slides away and fades. The volume steps click with the menu scroll sounds. It centres on the game area through the scale mode rather than the stage width, which keeps it centred under Windows display scaling.
+
 ### Music
 
 The single owner of music playback. `play(name, volume, loop)` switches tracks only when the requested track differs from the current one. Asking for the playing track instead applies the volume, restores pitch, and resumes it if paused. That is what keeps the stage theme unbroken across the menu, the game, pause-quit and restarts.

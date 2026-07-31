@@ -24,6 +24,8 @@
 	"options.title": "OPCIONES",
 	"options.volume": "VOLUMEN GENERAL  < {0}% >",
 	"options.music": "MÚSICA  < {0}% >",
+	"tray.master": "MASTER",
+	"tray.muted": "SILENCIADO",
 	"options.sfx": "EFECTOS DE SONIDO  < {0}% >",
 	"options.display": "PANTALLA  < {0} >",
 	"options.resolution": "TAMAÑO DE VENTANA  < {0}% DE LA PANTALLA >",

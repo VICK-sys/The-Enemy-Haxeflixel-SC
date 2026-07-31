@@ -24,6 +24,8 @@
 	"options.title": "設定",
 	"options.volume": "マスター音量  < {0}% >",
 	"options.music": "BGM音量  < {0}% >",
+	"tray.master": "マスター音量",
+	"tray.muted": "ミュート",
 	"options.sfx": "効果音量  < {0}% >",
 	"options.display": "画面モード  < {0} >",
 	"options.resolution": "ウィンドウの大きさ  < 画面の{0}% >",

@@ -17,7 +17,9 @@ class Main extends Sprite
 		if (!util.DpiAware.claimed)
 			return;
 		DiscordPresence.init();
-		addChild(new FlxGame(1280, 720, TitleSequence, 60, 60, true));
+		var game = new FlxGame(1280, 720, TitleSequence, 60, 60, true);
+		@:privateAccess game._customSoundTray = ui.SoundTray;
+		addChild(game);
 		keepPresenting();
 		ui.MenuCursor.init();
 		util.AspectBars.init(this);
