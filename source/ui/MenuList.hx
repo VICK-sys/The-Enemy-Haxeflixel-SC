@@ -265,7 +265,7 @@ class MenuList extends FlxGroup
 		if (blipWait <= 0)
 		{
 			blipWait = BLIP_GAP;
-			util.MenuSfx.hover();
+			util.MenuSfx.step(dir);
 		}
 		onAdjust(index, dir);
 	}
