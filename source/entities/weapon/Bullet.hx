@@ -1,7 +1,6 @@
 package entities.weapon;
 
 import flixel.FlxSprite;
-import entities.enemy.Enemies;
 import util.Paths;
 
 class Bullet extends FlxSprite
@@ -15,9 +14,10 @@ class Bullet extends FlxSprite
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
-	public var damage:Int = 2;
+	public var damage:Float = 2;
 	public var knock:Float = 1;
-	public var seek:Enemies = null;
+	public var hitR:Float = 48;
+	public var fromSuper:Bool = false;
 
 	private var life:Float = 0;
 	private var spriteKey:String = null;
@@ -41,14 +41,15 @@ class Bullet extends FlxSprite
 		centerOffsets();
 	}
 
-	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, damage:Int, speed:Float, range:Float,
-			knock:Float):Void
+	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, damage:Float, speed:Float, range:Float,
+			knock:Float, hitRadius:Float = 48):Void
 	{
 		revive();
 		alpha = 1;
 		this.damage = damage;
 		this.knock = knock;
-		seek = null;
+		hitR = hitRadius;
+		fromSuper = false;
 		setPosition(cx - width / 2, cy - height / 2);
 		dirX = dx;
 		dirY = dy;

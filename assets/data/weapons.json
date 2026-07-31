@@ -29,14 +29,18 @@
 	},
 	"revolver": {
 		"cylinder": 6,
-		"damage": 2,
+		"damage": 2.5,
 		"reloadTime": 1.5,
-		"fanInterval": 0.06,
-		"fanJitter": 7,
+		"fireInterval": 0.22,
 		"speed": 2200,
 		"range": 99999,
 		"hitRadius": 26,
-		"knock": 1.2
+		"knock": 1.2,
+		"bigCost": 3,
+		"bigDamage": 8.75,
+		"bigCooldown": 0.77,
+		"bigRadius": 50,
+		"twinTime": 6.0
 	},
 	"thrown": {
 		"maxDist": 500,
@@ -76,14 +80,6 @@
 		"throwHitRadius": 60,
 		"releaseStun": 0.35,
 		"snagDamage": 3
-	},
-	"deadEye": {
-		"flashTime": 0.18,
-		"sepiaAlpha": 0.42,
-		"fadeTime": 0.7,
-		"markRadius": 70,
-		"shotInterval": 0.045,
-		"damage": 15
 	},
 	"superOrbit": {
 		"count": 10,

@@ -228,7 +228,7 @@ class HeldWeapon
 		activeSwingTime = switch (mode)
 		{
 			case Shoot: SHOOT_TIME;
-			case Fan: FAN_TIME;
+			case BigShot: FAN_TIME;
 			case Bow: BOW_TIME;
 			case Rain: RAIN_TIME;
 			case Hook: HOOK_TIME;

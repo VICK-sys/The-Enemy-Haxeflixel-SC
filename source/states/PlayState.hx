@@ -241,9 +241,9 @@ class PlayState extends FlxState
 		if (petals != null)
 			add(petals.group);
 
+		add(combat.revolver.twinSprite);
+
 		add(timeStop.overlay);
-		add(combat.deadEye.overlay);
-		add(combat.deadEye.markers);
 
 		boxes = new systems.HitboxView();
 		add(boxes.group);

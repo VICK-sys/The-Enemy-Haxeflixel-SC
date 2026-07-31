@@ -38,14 +38,18 @@ typedef YoyoConfig = {
 
 typedef RevolverConfig = {
 	cylinder:Int,
-	damage:Int,
+	damage:Float,
 	reloadTime:Float,
-	fanInterval:Float,
-	fanJitter:Float,
+	fireInterval:Float,
 	speed:Float,
 	range:Float,
 	hitRadius:Float,
-	knock:Float
+	knock:Float,
+	bigCost:Int,
+	bigDamage:Float,
+	bigCooldown:Float,
+	bigRadius:Float,
+	twinTime:Float
 }
 
 typedef ThrownConfig = {
@@ -91,15 +95,6 @@ typedef HookConfig = {
 	snagDamage:Int
 }
 
-typedef DeadEyeConfig = {
-	flashTime:Float,
-	sepiaAlpha:Float,
-	fadeTime:Float,
-	markRadius:Float,
-	shotInterval:Float,
-	damage:Int
-}
-
 typedef SuperOrbitConfig = {
 	count:Int,
 	fireGate:Float
@@ -133,7 +128,6 @@ typedef WeaponsData = {
 	bowCharge:BowChargeConfig,
 	arrowRain:ArrowRainConfig,
 	hook:HookConfig,
-	deadEye:DeadEyeConfig,
 	superOrbit:SuperOrbitConfig,
 	arrowStorm:ArrowStormConfig,
 	hookArms:HookArmsConfig,

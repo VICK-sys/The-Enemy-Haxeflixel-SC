@@ -5,7 +5,7 @@ enum WeaponMode
 	Swing;
 	Throw;
 	Shoot;
-	Fan;
+	BigShot;
 	Bow;
 	Rain;
 	Hook;

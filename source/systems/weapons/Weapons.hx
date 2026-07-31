@@ -25,7 +25,6 @@ class Weapons
 	public var superOrbit:SuperOrbit;
 	public var arrowStorm:ArrowStorm;
 	public var hookArms:HookArms;
-	public var deadEye:DeadEye;
 	public var weapon:Int = 0;
 	public var disabled:Bool = false;
 	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float) -> Void;
@@ -49,7 +48,7 @@ class Weapons
 		bash = new SwingAttack(director, hits, fx, weaponCfg.bash);
 		yoyoJab = new YoyoJab(director, hits, fx);
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
-		revolver = new RevolverAttack(arena, director, fx, hits);
+		revolver = new RevolverAttack(arena, director, fx, hits, status);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
 		throwAttack.onCaught = function() swing.coolFor(weaponCfg.thrown.catchCooldown);
@@ -64,22 +63,11 @@ class Weapons
 				onSuperLaunch(x, y);
 		}
 		hookArms = new HookArms(player, director, hits);
-		deadEye = new DeadEye(player, director, revolver, held);
-		deadEye.onShot = function(bx, by, tx, ty, deg)
-		{
-			held.kick();
-			emitAttack(Shoot, bx, by, Math.cos(deg * Math.PI / 180), Math.sin(deg * Math.PI / 180), deg);
-		}
 		bow.onFull = function()
 		{
 			var a = aimFrom(held.handX(), held.handY());
 			fx.chargePop(held.handX() + a.dx * BOW_MUZZLE, held.handY() + a.dy * BOW_MUZZLE);
 			held.flash();
-		}
-		revolver.onPellet = function(bx, by, deg)
-		{
-			held.kick();
-			emitAttack(Pellet, bx, by, Math.cos(deg * Math.PI / 180), Math.sin(deg * Math.PI / 180), deg);
 		}
 	}
 
@@ -126,10 +114,11 @@ class Weapons
 		var gunAim = aimFrom(held.handX(), held.handY());
 		if (status.dead)
 		{
-			revolver.cancelFan();
+			revolver.endTwin();
 			bow.hushReload();
 		}
 		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
+		revolver.placeTwin(held.sprite, player.x + player.width * 0.5);
 		if (held.kind == HeldWeapon.REVOLVER && revolver.isReloading)
 			held.reloadPose(revolver.reloadProgress);
 		hookAttack.update(elapsed);
@@ -141,9 +130,6 @@ class Weapons
 		if (status.dead && arrowStorm.active)
 			arrowStorm.cancel();
 		hookArms.update(elapsed);
-		if (status.dead && deadEye.active)
-			deadEye.cancel();
-		deadEye.update(elapsed);
 		updateHeldHook();
 		updateHeldArms();
 	}
@@ -158,7 +144,7 @@ class Weapons
 	}
 
 	public function hasSuper():Bool
-		return weapon != 1 || deadEye.canActivate();
+		return weapon != 1 || !revolver.twinActive;
 
 	public function repaint():Void
 	{
@@ -266,7 +252,7 @@ class Weapons
 
 	function updateGunInput():Void
 	{
-		if (throwAttack.airborne || deadEye.active)
+		if (throwAttack.airborne)
 			return;
 
 		if (util.Controls.justPressed(util.Controls.RELOAD))
@@ -275,15 +261,16 @@ class Weapons
 		var aim = aimFromPlayer();
 		var shot = aimFrom(held.handX(), held.handY());
 
-		if (util.Controls.secondJustPressed() && revolver.canFan())
+		if (util.Controls.secondHeld() && revolver.canBig())
 		{
-			held.beginSwing(aim.deg, Fan);
-			emitAttack(Fan, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
-			revolver.fanFire();
+			held.beginSwing(aim.deg, BigShot);
+			held.kick();
+			emitAttack(BigShot, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
+			revolver.fireBig(held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
 			return;
 		}
 
-		if (util.Controls.attackJustPressed() && revolver.canFire())
+		if (util.Controls.attackHeld() && revolver.canFire())
 		{
 			held.beginSwing(aim.deg, Shoot);
 			held.kick();
@@ -300,23 +287,21 @@ class Weapons
 			return;
 		}
 
-		if (util.Controls.justPressed(util.Controls.SUPER) && deadEye.marking)
-		{
-			deadEye.cancel();
-			return;
-		}
-
 		if (util.Controls.justPressed(util.Controls.SUPER) && hasSuper() && status.canSuper() && !superOrbit.active() && !throwAttack.airborne
 			&& !hookAttack.busy)
 		{
 			yoyoJab.stop();
-			status.spendSuper();
-			switch (weapon)
+			if (weapon == 1)
+				revolver.activateTwin();
+			else
 			{
-				case 0: superOrbit.activate();
-				case 1: deadEye.activate();
-				case 2: arrowStorm.activate();
-				default: hookArms.activate();
+				status.spendSuper();
+				switch (weapon)
+				{
+					case 0: superOrbit.activate();
+					case 2: arrowStorm.activate();
+					default: hookArms.activate();
+				}
 			}
 			if (onSuper != null)
 				onSuper(weapon);

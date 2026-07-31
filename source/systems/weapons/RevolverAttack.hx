@@ -1,44 +1,56 @@
 package systems.weapons;
 
 import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.weapon.Bullet;
 import systems.world.Arena;
 import systems.world.PropBlock;
 import systems.enemy.EnemyDirector;
 import systems.Fx;
+import systems.PlayerCombat;
 import util.Paths;
 import data.WeaponData.WeaponDataRegistry;
 
 class RevolverAttack
 {
 	static inline var MUZZLE:Float = 24;
+	static inline var TWIN_GAP:Float = 14;
+	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
 
 	public var bullets:FlxTypedGroup<Bullet>;
+	public var twinSprite:FlxSprite;
 	public var rounds:Int;
 	public var capacity(get, never):Int;
 	public var isReloading(get, never):Bool;
-	public var onPellet:(Float, Float, Float) -> Void;
 
 	private var cfg = WeaponDataRegistry.get().revolver;
 	private var arena:Arena;
 	private var director:EnemyDirector;
 	private var fx:Fx;
 	private var hits:HitPipeline;
+	private var status:PlayerCombat;
 	private var reloading:Float = 0;
 	private var reloadFrom:Int = 0;
 	private var reloadTotal:Float = 0;
-	private var fanning:Bool = false;
-	private var fanTimer:Float = 0;
+	private var fireTimer:Float = 0;
+	private var bigTimer:Float = 0;
+	private var twin:Bool = false;
 
-	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline)
+	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline, status:PlayerCombat)
 	{
 		this.arena = arena;
 		this.director = director;
 		this.fx = fx;
 		this.hits = hits;
+		this.status = status;
 		bullets = new FlxTypedGroup<Bullet>();
 		rounds = cfg.cylinder;
+
+		twinSprite = new FlxSprite();
+		twinSprite.antialiasing = false;
+		twinSprite.scale.set(4, 4);
+		twinSprite.visible = false;
 	}
 
 	function get_capacity():Int
@@ -46,19 +58,6 @@ class RevolverAttack
 
 	function get_isReloading():Bool
 		return reloading > 0;
-
-	public var isFanning(get, never):Bool;
-
-	function get_isFanning():Bool
-		return fanning;
-
-	public function cancelFan():Void
-	{
-		if (!fanning)
-			return;
-		fanning = false;
-		fanTimer = 0;
-	}
 
 	public var displayRounds(get, never):Int;
 
@@ -74,6 +73,11 @@ class RevolverAttack
 		return 1 - reloading / reloadTotal;
 	}
 
+	public var twinActive(get, never):Bool;
+
+	function get_twinActive():Bool
+		return twin;
+
 	function beginReloadFrom(n:Int):Void
 	{
 		reloadFrom = n;
@@ -82,17 +86,18 @@ class RevolverAttack
 	}
 
 	public function canFire():Bool
-		return reloading <= 0 && !fanning && rounds > 0;
+		return reloading <= 0 && fireTimer <= 0 && rounds > 0;
 
-	public function canFan():Bool
-		return reloading <= 0 && !fanning && rounds > 0;
+	public function canBig():Bool
+		return reloading <= 0 && bigTimer <= 0 && fireTimer <= 0 && rounds >= cfg.bigCost;
 
 	public function fire(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
 		if (!canFire())
 			return;
 
-		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.SHOT);
+		fireTimer = cfg.fireInterval * util.Levels.actionScale();
+		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.SHOT, cfg.hitRadius);
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		FlxG.sound.play(Paths.sound("revolver"), 0.7);
@@ -100,129 +105,106 @@ class RevolverAttack
 			beginReloadFrom(0);
 	}
 
-	public function fireAt(bx:Float, by:Float, target:entities.enemy.Enemies, damage:Int):Void
+	public function fireBig(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
-		if (rounds <= 0 || target == null)
+		if (!canBig())
 			return;
 
-		var dx = target.x + target.width / 2 - bx;
-		var dy = target.y + target.height / 2 - by;
-		var len = Math.sqrt(dx * dx + dy * dy);
-		if (len <= 0)
-		{
-			dx = 1;
-			dy = 0;
-			len = 1;
-		}
-		dx /= len;
-		dy /= len;
-
-		var b = spawn(bx, by, dx, dy, Math.atan2(dy, dx) * 180 / Math.PI, damage, Bullet.SHOT);
-		b.seek = target;
-		rounds--;
+		bigTimer = cfg.bigCooldown * util.Levels.actionScale();
+		fireTimer = cfg.fireInterval * util.Levels.actionScale();
+		spawn(bx, by, dx, dy, aimDeg, cfg.bigDamage, BIG_SPRITE, cfg.bigRadius);
+		rounds -= cfg.bigCost;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
-		FlxG.sound.play(Paths.sound("revolver"), 0.75);
+		systems.Fx.shake(0.005, 0.15);
+		FlxG.sound.play(Paths.sound("revolver"), 0.85);
+		FlxG.sound.play(Paths.sound("hammer"), 0.4);
 		if (rounds <= 0)
 			beginReloadFrom(0);
 	}
 
+	public function activateTwin():Void
+	{
+		twin = true;
+		twinSprite.loadGraphic(util.HuePalette.graphic("items/revolver", util.SaveData.playerHue()));
+		twinSprite.origin.set(twinSprite.width * 0.5, twinSprite.height * 0.5);
+		FlxG.sound.play(Paths.sound("power_up"), 0.7);
+	}
+
+	public function endTwin():Void
+	{
+		if (!twin)
+			return;
+		twin = false;
+		twinSprite.visible = false;
+	}
+
+	public function placeTwin(held:FlxSprite, pcx:Float):Void
+	{
+		twinSprite.visible = twin && held.visible;
+		if (!twinSprite.visible)
+			return;
+		twinSprite.x = 2 * pcx - held.x - held.width;
+		twinSprite.y = held.y;
+		twinSprite.angle = -held.angle;
+		twinSprite.flipX = !held.flipX;
+		twinSprite.flipY = held.flipY;
+		twinSprite.scale.set(held.scale.x, held.scale.y);
+	}
+
 	public function beginReload():Bool
 	{
-		if (reloading > 0 || fanning || rounds >= cfg.cylinder)
+		if (reloading > 0 || rounds >= cfg.cylinder)
 			return false;
 
 		beginReloadFrom(rounds);
 		return true;
 	}
 
-	public function fanFire():Void
-	{
-		if (!canFan())
-			return;
-
-		fanning = true;
-		fanTimer = 0;
-		systems.Fx.shake(0.004, 0.25);
-	}
-
-	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Int, key:String):Bullet
+	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Float, key:String, radius:Float):Bullet
 	{
 		var b = bullets.recycle(Bullet);
 		b.setSprite(key);
-		b.fire(bx + dx * MUZZLE, by + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock);
-		return b;
-	}
+		b.fire(bx + dx * MUZZLE, by + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock, radius);
 
-	function steer(b:Bullet):Void
-	{
-		if (b.seek == null)
-			return;
-		if (!b.seek.exists || b.seek.isDead)
+		if (twin)
 		{
-			b.seek = null;
-			return;
+			var t = bullets.recycle(Bullet);
+			t.setSprite(key);
+			t.fire(bx + dx * MUZZLE - dy * TWIN_GAP, by + dy * MUZZLE + dx * TWIN_GAP, dx, dy, aimDeg, damage, cfg.speed,
+				cfg.range, cfg.knock, radius);
+			t.fromSuper = true;
 		}
-		var dx = b.seek.x + b.seek.width / 2 - (b.x + b.width / 2);
-		var dy = b.seek.y + b.seek.height / 2 - (b.y + b.height / 2);
-		var len = Math.sqrt(dx * dx + dy * dy);
-		if (len <= 0)
-			return;
-		b.dirX = dx / len;
-		b.dirY = dy / len;
-		b.velocity.set(b.dirX * cfg.speed, b.dirY * cfg.speed);
-		b.angle = Math.atan2(b.dirY, b.dirX) * 180 / Math.PI;
+		return b;
 	}
 
 	public function reset():Void
 	{
 		rounds = cfg.cylinder;
 		reloading = 0;
-		fanning = false;
-		fanTimer = 0;
-	}
-
-	function fanShot(bx:Float, by:Float, aimDeg:Float):Void
-	{
-		var deg = aimDeg + (Math.random() * 2 - 1) * cfg.fanJitter;
-		var rad = deg * Math.PI / 180;
-		var jx = Math.cos(rad);
-		var jy = Math.sin(rad);
-		spawn(bx, by, jx, jy, deg, cfg.damage, Bullet.SHOT);
-		fx.sparksAt(bx + jx * MUZZLE, by + jy * MUZZLE);
-		FlxG.sound.play(Paths.sound("revolver"), 0.55);
-		if (onPellet != null)
-			onPellet(bx, by, deg);
-		rounds--;
-		if (rounds <= 0)
-		{
-			fanning = false;
-			beginReloadFrom(0);
-		}
+		fireTimer = 0;
+		bigTimer = 0;
+		endTwin();
 	}
 
 	public function update(elapsed:Float, bx:Float, by:Float, aimDeg:Float):Void
 	{
-		if (fanning)
-		{
-			fanTimer -= elapsed;
-			if (fanTimer <= 0)
-			{
-				fanTimer = cfg.fanInterval;
-				fanShot(bx, by, aimDeg);
-			}
-		}
+		if (fireTimer > 0)
+			fireTimer -= elapsed;
+		if (bigTimer > 0)
+			bigTimer -= elapsed;
+
+		if (twin && !status.drainSuper(elapsed / cfg.twinTime))
+			endTwin();
 
 		for (b in bullets.members)
 		{
 			if (b == null || !b.exists)
 				continue;
 
-			steer(b);
-
 			var cx = b.x + b.width / 2;
 			var cy = b.y + b.height / 2;
-			var px = cx + b.dirX * cfg.hitRadius;
-			var py = cy + b.dirY * cfg.hitRadius;
+			var px = cx + b.dirX * b.hitR;
+			var py = cy + b.dirY * b.hitR;
 			if (arena.wallAt(px, py) || PropBlock.at(px, py))
 			{
 				fx.breakAt(px, py, true);
@@ -230,25 +212,13 @@ class RevolverAttack
 				continue;
 			}
 
-			if (b.seek != null)
-			{
-				var tcx = b.seek.x + b.seek.width / 2;
-				var tcy = b.seek.y + b.seek.height / 2;
-				var dx = tcx - cx;
-				var dy = tcy - cy;
-				if (dx * dx + dy * dy <= cfg.hitRadius * cfg.hitRadius || b.seek.overlaps(b))
-				{
-					hits.damageN(b.seek, b.dirX * b.knock, b.dirY * b.knock, b.damage);
-					fx.impactAt(cx, cy);
-					b.kill();
-				}
-				continue;
-			}
-
-			var hit = director.firstInCircle(cx, cy, cfg.hitRadius);
+			var hit = director.firstInCircle(cx, cy, b.hitR);
 			if (hit != null)
 			{
-				hits.damageN(hit, b.dirX * b.knock, b.dirY * b.knock, b.damage);
+				if (b.fromSuper)
+					hits.damageSuper(hit, b.dirX * b.knock, b.dirY * b.knock, b.damage);
+				else
+					hits.damageN(hit, b.dirX * b.knock, b.dirY * b.knock, b.damage);
 				fx.impactAt(cx, cy);
 				b.kill();
 			}

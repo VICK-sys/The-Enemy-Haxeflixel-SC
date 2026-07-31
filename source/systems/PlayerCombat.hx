@@ -263,6 +263,16 @@ class PlayerCombat
 		superCd = data.superCooldown;
 	}
 
+	public function drainSuper(frac:Float):Bool
+	{
+		superMeter -= superMax * frac;
+		if (superMeter > 0)
+			return true;
+		superMeter = 0;
+		superCd = data.superCooldown;
+		return false;
+	}
+
 	public function rewardKill():Void
 		kills++;
 

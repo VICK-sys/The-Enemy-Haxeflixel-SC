@@ -118,6 +118,8 @@ class RemoteFx
 			case 0:
 				blades.hue = avatar.hue;
 				blades.activate();
+			case 1:
+				FlxG.sound.play(Paths.sound("power_up"), 0.5);
 			case 2:
 				storm.paint(avatar.hue);
 				dummyBow.loadGraphic(util.HuePalette.graphic("items/crossbow", avatar.hue));
@@ -172,9 +174,13 @@ class RemoteFx
 				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
 				FlxG.sound.play(Paths.sound("revolver"), 0.5);
 
-			case Fan:
+			case BigShot:
+				var bc = cfg.revolver;
+				var big = bullets.recycle(Bullet);
+				big.setSprite("bullets/shotgun_bullet_player");
+				big.fire(pmx + dx * 24, pmy + dy * 24, dx, dy, aimDeg, bc.bigDamage, bc.speed, bc.range, bc.knock, bc.bigRadius);
 				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
-				FlxG.sound.play(Paths.sound("enemies/shoot"), 0.5);
+				FlxG.sound.play(Paths.sound("revolver"), 0.6);
 
 			case Pellet:
 				var pc = cfg.revolver;
