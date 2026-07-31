@@ -84,6 +84,31 @@ class TutorialSubState extends FlxSubState
 		return t;
 	}
 
+	function bind(action:Int):String
+		return util.Controls.keyName(util.Controls.keyOf(action));
+
+	function moveKeys():String
+	{
+		var n = [
+			bind(util.Controls.UP), bind(util.Controls.LEFT),
+			bind(util.Controls.DOWN), bind(util.Controls.RIGHT)
+		];
+		for (s in n)
+			if (s.length != 1)
+				return n.join("/");
+		return n.join("");
+	}
+
+	function descArgs():Array<Dynamic>
+	{
+		return switch (page)
+		{
+			case 0: [moveKeys(), bind(util.Controls.DASH)];
+			case 1: [bind(util.Controls.ATTACK), bind(util.Controls.SECOND)];
+			default: null;
+		}
+	}
+
 	function buildPage():Void
 	{
 		if (demo != null)
@@ -93,7 +118,7 @@ class TutorialSubState extends FlxSubState
 		}
 
 		titleText.text = Lang.t("tutorial." + KEYS[page] + ".title");
-		descText.text = Lang.t("tutorial." + KEYS[page] + ".desc");
+		descText.text = Lang.t("tutorial." + KEYS[page] + ".desc", descArgs());
 		pageText.text = Lang.t(closeNav ? "onlineHelp.nav" : "tutorial.nav", [page + 1, PAGES]);
 
 		demo = switch (page)

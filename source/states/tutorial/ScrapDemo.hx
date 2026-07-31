@@ -13,6 +13,9 @@ class ScrapDemo extends TutorialDemo
 	static inline var ENEMY_X:Float = 870;
 	static inline var HOME_X:Float = 410;
 
+	static inline var COUNT_X:Float = 300;
+	static inline var COUNT_Y:Float = 452;
+
 	static var THROW_X:Array<Float> = [-52, 4, 56];
 	static var THROW_Y:Array<Float> = [26, 44, 20];
 
@@ -54,9 +57,11 @@ class ScrapDemo extends TutorialDemo
 		icon.loadGraphic(Paths.image("items/scrap"));
 		icon.scale.set(4, 4);
 		icon.updateHitbox();
-		icon.setPosition(TutorialDemo.CX - 64 - icon.width * 0.5, 196 - icon.height * 0.5);
+		icon.setPosition(COUNT_X, COUNT_Y - icon.height * 0.5);
 
-		count = label(182, 26, "0");
+		count = label(COUNT_Y - 18, 26, "0");
+		count.alignment = LEFT;
+		count.x = COUNT_X + icon.width + 14;
 
 		actor = player();
 		actor.animation.play("idle");
