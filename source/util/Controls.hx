@@ -18,7 +18,8 @@ class Controls
 	public static inline var RELOAD:Int = 8;
 	public static inline var ACCEPT:Int = 9;
 	public static inline var PAUSE:Int = 10;
-	public static inline var COUNT:Int = 11;
+	public static inline var INTERACT:Int = 11;
+	public static inline var COUNT:Int = 12;
 
 	public static inline var MOUSE_LEFT:Int = -101;
 	public static inline var MOUSE_RIGHT:Int = -102;
@@ -50,13 +51,16 @@ class Controls
 	static var gamePoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 
 	public static function defaultKeys():Array<Int>
-		return [FlxKey.W, FlxKey.S, FlxKey.A, FlxKey.D, FlxKey.SPACE, MOUSE_LEFT, MOUSE_RIGHT, FlxKey.Q, FlxKey.R, FlxKey.ENTER, FlxKey.ESCAPE];
+		return [
+			FlxKey.W, FlxKey.S, FlxKey.A, FlxKey.D, FlxKey.SPACE, MOUSE_LEFT, MOUSE_RIGHT, FlxKey.Q, FlxKey.R, FlxKey.ENTER,
+			FlxKey.ESCAPE, FlxKey.E
+		];
 
 	public static function defaultPads():Array<Int>
 		return [
 			FlxGamepadInputID.DPAD_UP, FlxGamepadInputID.DPAD_DOWN, FlxGamepadInputID.DPAD_LEFT, FlxGamepadInputID.DPAD_RIGHT,
 			FlxGamepadInputID.A, FlxGamepadInputID.RIGHT_TRIGGER, FlxGamepadInputID.LEFT_TRIGGER, FlxGamepadInputID.Y,
-			FlxGamepadInputID.X, FlxGamepadInputID.A, FlxGamepadInputID.START
+			FlxGamepadInputID.X, FlxGamepadInputID.A, FlxGamepadInputID.START, FlxGamepadInputID.B
 		];
 
 	public static function init():Void
@@ -65,8 +69,8 @@ class Controls
 			return;
 		inited = true;
 		var saved = SaveData.controls();
-		keys = saved != null && saved.keys != null && saved.keys.length == COUNT ? saved.keys.copy() : defaultKeys();
-		pads = saved != null && saved.pad != null && saved.pad.length == COUNT ? saved.pad.copy() : defaultPads();
+		keys = carry(saved == null ? null : saved.keys, defaultKeys());
+		pads = carry(saved == null ? null : saved.pad, defaultPads());
 		if (keys[ATTACK] == FlxKey.NONE)
 			keys[ATTACK] = MOUSE_LEFT;
 		if (keys[SECOND] == FlxKey.NONE)
@@ -74,8 +78,22 @@ class Controls
 		FlxG.signals.preUpdate.add(tick);
 	}
 
+	static function carry(saved:Array<Int>, defs:Array<Int>):Array<Int>
+	{
+		if (saved == null || saved.length == 0)
+			return defs;
+		var out = defs.copy();
+		var n = saved.length < COUNT ? saved.length : COUNT;
+		for (i in 0...n)
+			out[i] = saved[i];
+		return out;
+	}
+
 	public static function keyOf(action:Int):Int
 		return keys[action];
+
+	public static function bindName(action:Int):String
+		return padMode ? padName(pads[action]) : keyName(keys[action]);
 
 	public static function padOf(action:Int):Int
 		return pads[action];

@@ -191,7 +191,7 @@ Each takes the collaborators it needs and nothing else, so the wiring in `create
 
 The repair shop stands at the top of the arena for the whole run, greyed out and solid. Its counter blocks movement, so you walk up to it rather than through it.
 
-Clearing a round no longer offers a level. Every tenth round does: the shop lights up, a banner announces it, and the next wave holds while it is open. Walk into range and a prompt appears; ENTER or Z opens the screen that spends scrap, which is the same screen the stats allocator always used.
+Clearing a round no longer offers a level. Every tenth round does: the shop lights up, a banner announces it, and the next wave holds while it is open. Walk into range and a prompt appears; the interact key, E by default, opens the screen that spends scrap, which is the same screen the stats allocator always used. Interact is its own bind rather than sharing the ready key, so standing at the shop cannot confuse buying with starting the next wave. The prompt prints whatever the key is bound to, and shows the pad button instead while a pad is in use.
 
 Closing the menu never shuts the shop, spent or not. The shutter stays up until you press ready for the next round, so the shop and the breather share one commitment: readying up is what puts the counter away, and until then you can walk back in as often as you like. The shop still closes itself after a while as a backstop, so an idle player cannot strand a lobby.
 
@@ -205,7 +205,7 @@ Two things end the hold. Shopping ends it when the screen closes, and a forty fi
 
 The shop blocks. Its hitbox covers the standing structure and stops short of the roof, so the roof overhangs and you can walk behind its lip without walking through the building.
 
-The shop hides and returns with the rest of the decor, so the boss whiteout takes it away and the arena restoring brings it back. It stops answering the ENTER key while hidden, so it cannot be entered through a boss fight. The prop blockers switch off with the decor too, and `PropBlock` ignores a switched-off blocker, so nothing hidden can stop a body, a shot or a sight line in the boss void.
+The shop hides and returns with the rest of the decor, so the boss whiteout takes it away and the arena restoring brings it back. It stops answering the interact key while hidden, so it cannot be entered through a boss fight. The prop blockers switch off with the decor too, and `PropBlock` ignores a switched-off blocker, so nothing hidden can stop a body, a shot or a sight line in the boss void.
 
 In co-op the shop round is shared but the shopping is not. The host's tenth wave broadcasts the round, every peer's shutter rolls up, and each player walks to their own shop and spends alone while the others keep playing. A player in the menu wears the LEVELING note. The wave stays held until every peer reports done, by shopping or by letting the shop time out, and the host's sixty second cap backstops the lot.
 

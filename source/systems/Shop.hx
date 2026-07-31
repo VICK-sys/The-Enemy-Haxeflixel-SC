@@ -246,10 +246,10 @@ class Shop
 		prompt.visible = near;
 		if (near)
 		{
-			prompt.text = Lang.t("shop.enter");
+			prompt.text = Lang.t("shop.enter", [util.Controls.bindName(util.Controls.INTERACT)]);
 			prompt.x = SPOT_X - PROMPT_W * 0.5;
 			prompt.y = sprite.y + sprite.height + PROMPT_DROP;
-			if (util.Controls.acceptJustPressed())
+			if (util.Controls.justPressed(util.Controls.INTERACT))
 			{
 				if (onEnter != null)
 					onEnter();

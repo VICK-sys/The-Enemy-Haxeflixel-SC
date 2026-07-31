@@ -13,16 +13,21 @@ import util.Lang;
 
 class ControlsSubState extends FlxSubState
 {
-	static inline var ROWS:Int = 14;
+	static inline var ROWS:Int = 15;
 	static inline var ARM_TIME:Float = 0.15;
+	static inline var TOP:Float = 96;
+	static inline var STEP:Float = 36;
 
 	static var ACTION_KEYS:Array<String> = [
-		"up", "down", "left", "right", "dash", "attack", "second", "super", "reload", "accept", "pause"
+		"up", "down", "left", "right", "dash", "attack", "second", "super", "reload", "accept", "interact", "pause"
 	];
 	static var ACTIONS:Array<Int> = [
 		Controls.UP, Controls.DOWN, Controls.LEFT, Controls.RIGHT, Controls.DASH, Controls.ATTACK, Controls.SECOND,
-		Controls.SUPER, Controls.RELOAD, Controls.ACCEPT, Controls.PAUSE
+		Controls.SUPER, Controls.RELOAD, Controls.ACCEPT, Controls.INTERACT, Controls.PAUSE
 	];
+
+	static inline var RESET_ROW:Int = ROWS - 2;
+	static inline var BACK_ROW:Int = ROWS - 1;
 
 	private var cam:FlxCamera;
 	private var list:MenuList;
@@ -50,7 +55,7 @@ class ControlsSubState extends FlxSubState
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
 		add(title);
 
-		list = new MenuList([for (i in 0...ROWS) ""], 104, 38, 22);
+		list = new MenuList([for (i in 0...ROWS) ""], TOP, STEP, 22);
 		list.onChoose = choose;
 		list.onAdjust = adjust;
 		list.marker.scale.set(1.6, 1.6);
@@ -97,8 +102,8 @@ class ControlsSubState extends FlxSubState
 		list.setLabel(0, Lang.t("controls.device", [deviceName()]));
 		for (i in 0...ACTIONS.length)
 			list.setLabel(1 + i, Lang.t("controls." + ACTION_KEYS[i]) + "   -   " + bindLabel(i));
-		list.setLabel(12, Lang.t("controls.reset"));
-		list.setLabel(13, Lang.t("common.back"));
+		list.setLabel(RESET_ROW, Lang.t("controls.reset"));
+		list.setLabel(BACK_ROW, Lang.t("common.back"));
 		note.text = Lang.t(device == 0 ? "controls.mouseNote" : "controls.stickNote");
 	}
 
@@ -111,13 +116,13 @@ class ControlsSubState extends FlxSubState
 			adjust(0, 1);
 			return;
 		}
-		if (i == 12)
+		if (i == RESET_ROW)
 		{
 			Controls.resetBinds();
 			refreshLabels();
 			return;
 		}
-		if (i == 13)
+		if (i == BACK_ROW)
 		{
 			close();
 			return;
