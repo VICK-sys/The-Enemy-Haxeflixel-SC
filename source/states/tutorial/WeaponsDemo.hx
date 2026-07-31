@@ -20,11 +20,10 @@ class WeaponsDemo extends TutorialDemo
 	public function new(cam:FlxCamera)
 	{
 		super(cam);
-		var names = ["hammer", "revolver", "crossbow", "yoyo"];
-		for (i in 0...4)
+		for (i in 0...states.WeaponPickSubState.slots())
 		{
 			var s = sprite();
-			s.loadGraphic(Paths.image("items/" + names[i]));
+			s.loadGraphic(Paths.image(states.WeaponPickSubState.artInSlot(i)));
 			s.setGraphicSize(0, 130);
 			s.updateHitbox();
 			s.setPosition(TutorialDemo.CX + (i - 1.5) * 160 - s.width / 2, TutorialDemo.CY - s.height / 2);

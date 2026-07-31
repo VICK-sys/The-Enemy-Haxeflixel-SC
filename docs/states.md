@@ -72,6 +72,8 @@ The scrap page runs the whole economy in one loop: an enemy falls, the pieces bu
 
 The popup fades in on open. ENTER or ESC freezes the demo and fades it back out before the game starts. The wave timer stays frozen while the popup is open.
 
+The weapons page reads its line-up from the pick screen rather than listing the weapons itself, so the two cannot disagree about which weapon is number one. The super page animates the hammer's bounce, the leap and spin and the ring of the slam under it.
+
 Each page's demo is its own class under `states/tutorial/`: MoveDemo, AttackDemo, WeaponsDemo, SuperDemo, ScrapDemo, HealthDemo and ReadyDemo. All of them extend `TutorialDemo`. That group base holds the shared sprite, text and player factories, the demo clock, and a per-frame `step()` hook. The substate itself owns only the panel, the page texts and page flipping. Flipping destroys the old demo instance and builds the next.
 
 ## WeaponPickSubState

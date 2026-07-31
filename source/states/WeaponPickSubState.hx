@@ -74,6 +74,12 @@ class WeaponPickSubState extends FlxSubState
 	public static function artOf(i:Int):String
 		return i >= 0 && i < ART.length ? ART[i] : ART[0];
 
+	public static function slots():Int
+		return ORDER.length;
+
+	public static function artInSlot(slot:Int):String
+		return artOf(ORDER[slot >= 0 && slot < ORDER.length ? slot : 0]);
+
 	static var ART:Array<String> = ["items/hammer", "items/revolver", "items/crossbow", "items/yoyo"];
 
 	public var onPicked:Int->Void;
