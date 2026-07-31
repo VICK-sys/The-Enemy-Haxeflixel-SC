@@ -14,7 +14,7 @@ class Arrow extends FlxSprite
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
-	public var damage:Int = 1;
+	public var damage:Float = 1;
 	public var knock:Float = 1;
 	public var piercing:Bool = false;
 
@@ -39,7 +39,7 @@ class Arrow extends FlxSprite
 		scale.set(4, 4);
 	}
 
-	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, damage:Int = 1, speedMult:Float = 1,
+	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, damage:Float = 1, speedMult:Float = 1,
 			sizeMult:Float = 1, knock:Float = 1):Void
 	{
 		revive();

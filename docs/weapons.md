@@ -82,7 +82,7 @@ Running dry starts a reload, whichever trigger emptied the cylinder. R reloads e
 
 `fire` and `fireBig` both re-check their own gates rather than trusting the caller. Nothing can drive the cylinder negative and take the HUD readout with it.
 
-The super is the twin gun. It does not zero the meter. The meter drains across `twinTime` and the super ends when it runs out, then the normal cooldown starts. While it lasts, every trigger pull fires a second round offset beside the first, and a mirrored revolver rides the other hand. The extra round is marked as super damage, so a twin cannot wind its own meter back up.
+The super is the twin gun. It does not zero the meter. The meter drains across `twinTime` and the super ends when it runs out, then the normal cooldown starts. While it lasts, every trigger pull fires a second round offset beside the first at `twinScale` of the hand's damage, and a mirrored revolver rides the other hand. The whole meter locks while any super runs, so neither hand winds the next super while this one is out.
 
 Activating it forces both guns into a reload, whatever the cylinder held, and every reload while the twin is out runs at `TWIN_RELOAD` of the normal time since two hands spin two cylinders at once. The second gun keeps its own cylinder. It arrives empty, fills with the forced reload, and pays for its own copy of every shot, one round for a hand shot and `bigCost` for a big one. Both cylinders fill from the same reload, so they stay in step, and the HUD stacks a second pip column beside the first while the twin is out.
 
@@ -175,6 +175,8 @@ Only arena walls turn the outbound leg around. Buildings and the rest of the sce
 ## YoyoSpin
 
 The yoyo super. Q with the yoyo equipped and a full super meter drains the meter. The yoyo then circles the player for `turns` revolutions over `time`, starting at `radius` and reeling in as the super runs, so the circle it draws tightens toward the player. It drives the ordinary `YoyoFlight`, so the string, the sprite, the hue and the co-op stream all come along without their own code.
+
+The circle also bats enemy fire. Any shot the string or the yoyo crosses is deflected outward as super work, so against a boss that cannot be grabbed the spin still clears the air around you and turns the barrage back on it.
 
 Anything the circle touches gets taken. The pickup deals nothing. An enemy caught out near the tip banks `grabDamage`, one caught along the string banks `stringDamage`, and either way it is seized and rides the spin at the angle and string fraction it was caught, pulled inward with the shrinking line. Big enemies cannot be grabbed. Each takes one contact hit and stands its ground.
 

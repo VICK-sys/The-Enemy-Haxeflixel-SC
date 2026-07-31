@@ -11,7 +11,7 @@
 	"dashIframes": 0.38,
 	"dropLowHealthBonus": 2.5,
 	"healthMax": 2,
-	"superMax": 2,
+	"superMax": 3,
 	"superPerDamage": 0.04,
 	"superCooldown": 6,
 	"iframeTime": 0.4,

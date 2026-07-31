@@ -20,6 +20,7 @@ class EnemyShot extends FlxSprite
 	public var dirY:Float = 0;
 	public var damage:Float = 0.25;
 	public var friendly:Bool = false;
+	public var superTurned:Bool = false;
 	public var held:Bool = false;
 
 	private var life:Float = 0;
@@ -55,6 +56,7 @@ class EnemyShot extends FlxSprite
 		dirY = dy;
 		this.damage = damage;
 		friendly = false;
+		superTurned = false;
 		held = false;
 		angle = Math.atan2(dy, dx) * 180 / Math.PI + ART_TURN;
 		velocity.set(dx * speed, dy * speed);
@@ -62,8 +64,9 @@ class EnemyShot extends FlxSprite
 		life = fullLife;
 	}
 
-	public function deflect(aimX:Float, aimY:Float):Void
+	public function deflect(aimX:Float, aimY:Float, fromSuper:Bool = false):Void
 	{
+		superTurned = fromSuper;
 		var speed = Math.sqrt(velocity.x * velocity.x + velocity.y * velocity.y) * DEFLECT_BOOST;
 		var nx = aimX + dirX * DEFLECT_CARRY;
 		var ny = aimY + dirY * DEFLECT_CARRY;

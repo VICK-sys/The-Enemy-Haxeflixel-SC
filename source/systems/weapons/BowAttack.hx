@@ -133,7 +133,7 @@ class BowAttack
 
 	public function shoot(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, power:Float = 0, hot:Bool = false):Void
 	{
-		var damage = 1 + Math.floor(power * (cfg.maxDamage - 1)) + (hot ? cfg.sweetBonus : 0);
+		var damage = hot ? cfg.damage * cfg.sweetMult : cfg.damage * (1 + power * (cfg.fullMult - 1));
 		var arrow = arrows.recycle(Arrow);
 		arrow.paint(util.SaveData.playerHue());
 		arrow.fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,

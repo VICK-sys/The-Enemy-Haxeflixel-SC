@@ -28,6 +28,7 @@ class PlayerCombat
 	public var superMeter:Float = 0;
 	public var dead:Bool = false;
 	public var invincible:Bool = false;
+	public var meterLocked:Bool = false;
 	public var kills:Int = 0;
 	public var healthMax:Float = 0;
 	public var superMax:Float = 0;
@@ -315,7 +316,7 @@ class PlayerCombat
 
 	public function rewardDamage(amount:Float):Void
 	{
-		if (amount <= 0)
+		if (amount <= 0 || meterLocked)
 			return;
 		superMeter += amount * data.superPerDamage * util.Levels.superGainScale();
 		if (superMeter > superMax)

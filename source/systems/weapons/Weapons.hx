@@ -100,6 +100,7 @@ class Weapons
 
 	public function update(elapsed:Float):Void
 	{
+		status.meterLocked = superBusy || revolver.twinActive;
 		if (disabled)
 		{
 			held.sprite.visible = false;

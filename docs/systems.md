@@ -46,7 +46,7 @@ The shadow, entity and tag render groups. It sorts the entity layer every frame 
 
 ### PlayerCombat
 
-Player health and the super meter. Damage intake, invincibility frames and blink. Dash input, death and revive, and the run's kill counter. The HUD bars bind straight to its fields.
+Player health and the super meter. Damage intake, invincibility frames and blink. The meter is locked while any super is running, so no damage dealt during one, by the super or by the hands beside it, charges the next. Dash input, death and revive, and the run's kill counter. The HUD bars bind straight to its fields.
 
 The dash speaks twice. Launching one plays a random line from `dash/dash1` and `dash/dash2`, and the moment its cooldown runs out `dash/charged` sounds and a puff of steam vents from the player's back, so the dash announces itself as ready rather than leaving the player to count the seconds. The ready cue keys on the cooldown crossing zero rather than on it being zero, so it sounds once per dash instead of every frame afterwards, and it stays quiet for a player who died mid-cooldown.
 

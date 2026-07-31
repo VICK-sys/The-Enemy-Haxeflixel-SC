@@ -49,7 +49,8 @@ typedef RevolverConfig = {
 	bigDamage:Float,
 	bigCooldown:Float,
 	bigRadius:Float,
-	twinTime:Float
+	twinTime:Float,
+	twinScale:Float
 }
 
 typedef ThrownConfig = {
@@ -61,9 +62,10 @@ typedef ThrownConfig = {
 typedef BowChargeConfig = {
 	minTime:Float,
 	fullTime:Float,
-	maxDamage:Int,
+	damage:Float,
+	fullMult:Float,
 	sweetWindow:Float,
-	sweetBonus:Int,
+	sweetMult:Float,
 	speedBonus:Float,
 	sizeBonus:Float,
 	knockBonus:Float,

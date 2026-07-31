@@ -281,7 +281,7 @@ class RevolverAttack
 		var ty = twinHandY + pendDy * MUZZLE;
 		var t = bullets.recycle(Bullet);
 		t.setSprite(pendKey);
-		t.fire(tx, ty, pendDx, pendDy, pendDeg, pendDamage, cfg.speed, cfg.range, cfg.knock, pendRadius);
+		t.fire(tx, ty, pendDx, pendDy, pendDeg, pendDamage * cfg.twinScale, cfg.speed, cfg.range, cfg.knock, pendRadius);
 		t.fromSuper = true;
 		pendKey = null;
 		twinRounds -= pendCost;

@@ -29,6 +29,7 @@ class YoyoSpin
 	static inline var TIP_BAND:Float = 60;
 	static inline var SPIN_VISUAL:Float = 1900;
 	static inline var SHRINK:Float = 0.6;
+	static inline var DEFLECT_SOUND_GAP:Float = 0.09;
 
 	public var active(get, never):Bool;
 	public var onGrab:(Enemies, Bool) -> Void;
@@ -43,6 +44,7 @@ class YoyoSpin
 	private var baseAng:Float = 0;
 	private var caught:Array<Spun> = [];
 	private var bigTouched:Array<Enemies> = [];
+	private var deflectSoundIn:Float = 0;
 
 	public function new(player:Player, director:EnemyDirector, hits:HitPipeline, flight:YoyoFlight)
 	{
@@ -110,6 +112,7 @@ class YoyoSpin
 		flight.drive(yx, yy, t * cfg.turns * SPIN_VISUAL, hx, hy);
 
 		sweep(pcx, pcy, r);
+		deflectShots(pcx, pcy, r, elapsed);
 
 		for (s in caught)
 		{
@@ -123,6 +126,29 @@ class YoyoSpin
 
 		if (timer <= 0)
 			release(pcx, pcy);
+	}
+
+	function deflectShots(pcx:Float, pcy:Float, r:Float, elapsed:Float):Void
+	{
+		if (deflectSoundIn > 0)
+			deflectSoundIn -= elapsed;
+		for (shot in director.shots.members)
+		{
+			if (shot == null || !shot.exists || shot.friendly)
+				continue;
+			var dx = shot.x + shot.width * 0.5 - pcx;
+			var dy = shot.y + shot.height * 0.5 - pcy;
+			var dist = Math.sqrt(dx * dx + dy * dy);
+			if (dist > r + cfg.grabPad)
+				continue;
+			var len = dist <= 0 ? 1 : dist;
+			shot.deflect(dx / len, dy / len, true);
+			if (deflectSoundIn <= 0)
+			{
+				deflectSoundIn = DEFLECT_SOUND_GAP;
+				FlxG.sound.play(Paths.sound("weapon/catch"), 0.4);
+			}
+		}
 	}
 
 	function sweep(pcx:Float, pcy:Float, r:Float):Void
