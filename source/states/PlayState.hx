@@ -247,6 +247,7 @@ class PlayState extends FlxState
 		add(boxes.group);
 
 		hud = new Hud(this, status);
+		status.onHeal = hud.flashHeal;
 		round.wire(status, director, hud);
 		gate.wire(status, director, hud);
 		gate.blocked = round.shop.inReach;

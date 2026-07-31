@@ -282,6 +282,8 @@ class PlayerCombat
 			health = healthMax;
 	}
 
+	public var onHeal:Void->Void;
+
 	public function heal(amount:Float):Void
 	{
 		if (dead)
@@ -289,6 +291,8 @@ class PlayerCombat
 		health += amount;
 		if (health > healthMax)
 			health = healthMax;
+		if (onHeal != null)
+			onHeal();
 	}
 
 	public function canSuper():Bool

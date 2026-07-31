@@ -33,6 +33,9 @@ class Hud
 	static inline var SUPER_GLOW_WAVE:Float = 0.28;
 	static inline var SUPER_GLOW_SPEED:Float = 7.5;
 	static inline var SUPER_READY_VOL:Float = 0.7;
+	static inline var HEAL_FLASH:Float = 1.0;
+	static inline var HEAL_HUE:Float = 1 / 3;
+	static inline var HEAL_FADE:Float = 0.35;
 
 	static inline var UI_SCALE:Float = 4 * states.PlayState.BASE_ZOOM;
 	static inline var FRAME_X:Float = 16;
@@ -74,6 +77,8 @@ class Hud
 	private var superReady:Bool = false;
 	private var superGlow:Float = 0;
 	private var hpFill:FlxSprite;
+	private var hpFlash:FlxSprite;
+	private var healFlash:Float = 0;
 	private var hpClip:FlxRect;
 	private var hpShown:Float = -1;
 	private var bulletPips:Array<FlxSprite> = [];
@@ -112,8 +117,18 @@ class Hud
 		superFill = makeUiSprite(FRAME_X + SUPER_X * UI_SCALE, frameY + SUPER_Y * UI_SCALE, "super_bar");
 		superClip = FlxRect.get(0, 0, 0, superFill.frameHeight);
 
+		hpFlash = new FlxSprite(hpFill.x, hpFill.y);
+		hpFlash.loadGraphic(util.HuePalette.graphic("ui/hp_bar", HEAL_HUE));
+		hpFlash.antialiasing = false;
+		hpFlash.scale.set(UI_SCALE, UI_SCALE);
+		hpFlash.cameras = [camUI];
+		hpFlash.updateHitbox();
+		hpFlash.setPosition(hpFill.x, hpFill.y);
+		hpFlash.visible = false;
+
 		state.add(piece(frame));
 		state.add(piece(hpFill));
+		state.add(hpFlash);
 		state.add(piece(superFill));
 
 		capTop = makeUiSprite(0, 0, "ammo_indicator");
@@ -179,6 +194,7 @@ class Hud
 	public function dispose():Void
 	{
 		hpFill.clipRect = null;
+		hpFlash.clipRect = null;
 		superFill.clipRect = null;
 		hpClip.put();
 		hpClip = null;
@@ -228,6 +244,7 @@ class Hud
 			util.Controls.aimViewY(FlxG.camera) - customCursor.frameHeight * 0.5);
 
 		updateHealth();
+		updateHeal(elapsed);
 		updateSuper(elapsed);
 
 		if (stopTimerText.alpha != stopTimerTarget)
@@ -318,6 +335,29 @@ class Hud
 		hpShown = pct;
 		hpClip.width = hpFill.frameWidth * pct;
 		hpFill.clipRect = hpClip;
+	}
+
+	public function flashHeal():Void
+		healFlash = HEAL_FLASH;
+
+	function updateHeal(elapsed:Float):Void
+	{
+		if (healFlash <= 0)
+			return;
+
+		healFlash -= elapsed;
+		if (healFlash <= 0)
+		{
+			healFlash = 0;
+			hpFlash.visible = false;
+			hpFlash.alpha = 1;
+			return;
+		}
+
+		var u = 1 - healFlash / HEAL_FLASH;
+		hpFlash.clipRect = hpClip;
+		hpFlash.visible = hudOn;
+		hpFlash.alpha = u > 1 - HEAL_FADE ? flixel.tweens.FlxEase.quadOut((1 - u) / HEAL_FADE) : 1;
 	}
 
 	function updateSuper(elapsed:Float):Void
