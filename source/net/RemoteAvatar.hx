@@ -34,6 +34,8 @@ class RemoteAvatar
 	private var burst:systems.DeathBurst;
 	private var ghost:systems.CoopGhost;
 	private var gear:systems.BackGear;
+	private var ritual:systems.ReviveRitual;
+	private var wasReviving:Bool = false;
 
 	static inline var REVOLVER_INDEX:Int = 1;
 	static inline var BOW_INDEX:Int = 2;
@@ -71,6 +73,7 @@ class RemoteAvatar
 		gear = new systems.BackGear();
 		gear.sprite.visible = false;
 		layers.entityLayer.add(gear.sprite);
+		ritual = new systems.ReviveRitual(burst, ghost);
 
 		held = new FlxSprite();
 		held.antialiasing = false;
@@ -110,6 +113,8 @@ class RemoteAvatar
 	public function clearDeath():Void
 	{
 		wasDead = false;
+		wasReviving = false;
+		ritual.cancel();
 		burst.clear();
 		ghost.hide();
 	}
@@ -165,10 +170,18 @@ class RemoteAvatar
 		}
 		else if (!dead && wasDead)
 		{
+			ritual.cancel();
 			burst.clear();
 			ghost.hide();
 		}
 		wasDead = dead;
+
+		var rv:Bool = m.rv == true;
+		if (rv && !wasReviving && dead)
+			ritual.begin();
+		else if (!rv && wasReviving)
+			ritual.cancel();
+		wasReviving = rv;
 
 		sprite.visible = !dead;
 		sprite.flipX = m.fx;
@@ -220,6 +233,7 @@ class RemoteAvatar
 			ghost.track(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, sprite.flipX);
 		burst.update(elapsed);
 		ghost.update(elapsed);
+		ritual.update(elapsed, sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5);
 		gear.update(elapsed, sprite.x + sprite.width * 0.5, sprite.y - 21, sprite.flipX,
 			systems.BackGear.leanFor(sprite.animation.name), sprite.visible,
 			sprite.angle, sprite.offset.y - OFFSET_Y, sprite.y + sprite.height * 0.5);

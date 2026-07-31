@@ -563,6 +563,7 @@ class NetSync
 			ho: [r1(held.x - player.x), r1(held.y - player.y), r2(held.scale.x), r2(combat.held.charge)],
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
 			dd: status.dead && !status.throes,
+			rv: reviving,
 			hk: hookShot.exists ? [r1(hookShot.x), r1(hookShot.y), r1(hookShot.angle), r1(combat.held.handX()), r1(combat.held.handY())] : null,
 			yo: yo.active ? [r1(yo.cx), r1(yo.cy), r1(yo.yoyo.angle)] : null,
 			th: fly.exists ? [r1(fly.x), r1(fly.y), r1(fly.velocity.x), r1(fly.velocity.y)] : null
