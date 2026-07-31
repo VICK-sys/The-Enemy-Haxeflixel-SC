@@ -16,7 +16,7 @@ class HeldWeapon
 	static inline var THRUST_DIST:Float = 34;
 	static inline var THRUST_OUT:Float = 0.35;
 	static inline var SWING_SCALE:Float = 2.5;
-	static inline var REV_FRAMES:Int = 8;
+	static inline var REV_FRAMES:Int = 11;
 	static inline var REV_CELL:Int = 32;
 	static inline var REV_KICK:Float = 16;
 	static inline var REV_BACK:Float = 11;
