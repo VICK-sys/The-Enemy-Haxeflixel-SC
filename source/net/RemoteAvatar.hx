@@ -38,6 +38,9 @@ class RemoteAvatar
 	static inline var REVOLVER_INDEX:Int = 1;
 	static inline var BOW_INDEX:Int = 2;
 	static inline var OFFSET_Y:Float = 56;
+	static inline var BUBBLE_UP:Float = 67;
+	static inline var GHOST_ART_TOP:Float = 8;
+	static inline var BUBBLE_GAP:Float = 11;
 	static inline var TAG_UP:Float = 95;
 	static inline var TAG_WIDTH:Float = 320;
 	static inline var NOTE_UP:Float = 119;
@@ -243,8 +246,16 @@ class RemoteAvatar
 
 		if (bubble.visible)
 		{
-			bubble.x = sprite.x + sprite.width * 0.5 - bubble.width * 0.5;
-			bubble.y = sprite.y - bubble.height - 67;
+			if (!sprite.visible && ghost.sprite.exists)
+			{
+				bubble.x = ghost.sprite.x + ghost.sprite.width * 0.5 - bubble.width * 0.5;
+				bubble.y = ghost.sprite.y + GHOST_ART_TOP - bubble.height - BUBBLE_GAP;
+			}
+			else
+			{
+				bubble.x = sprite.x + sprite.width * 0.5 - bubble.width * 0.5;
+				bubble.y = sprite.y - bubble.height - BUBBLE_UP;
+			}
 		}
 	}
 }
