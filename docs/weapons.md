@@ -6,7 +6,7 @@ The combat coordinator. It owns the weapon for the run, which `equip` sets once 
 
 It splits the two buttons. Left click runs `primary`, right click runs `secondary`, and both key on the equipped weapon.
 
-It triggers the supers on Q at a full meter. The hammer launches SuperOrbit, the revolver DeadEye, the crossbow ArrowStorm, and the yoyo HookArms. `hasSuper` still gates the key. Dead Eye needs a round in the cylinder. The meter should not go on a super that cannot fire.
+It triggers the supers on Q at a full meter. The hammer launches HammerBounce, the revolver a twin gun, the crossbow ArrowStorm, and the yoyo YoyoSpin. `hasSuper` still gates the key, and the twin gun refuses while one is already out. Damage a super deals never charges the next super. The pipeline carries the source and skips the meter for it.
 
 It also handles attack input dispatch: super priority, the held-enemy throw intercept, and the aim math. It hides the held weapon while the grab or the yoyo is out. Everything else goes to the systems below.
 
@@ -68,17 +68,19 @@ The held sprite hides for as long as the yoyo is out, since the yoyo is the held
 
 ## RevolverAttack
 
-The revolver. Every shot it fires plays `revolver`, whether aimed, fanned or from Dead Eye. The boss keeps `enemies/pistol`, so the two guns no longer sound the same.
+The revolver. Every shot it fires plays `revolver`. The boss keeps `enemies/pistol`, so the two guns no longer sound the same.
 
 The cylinder holds six rounds. The primary fires one fast straight bullet per click. That bullet dies on the first enemy or wall it meets. There is no fire-rate timer, so the cylinder is the only limit.
 
-`fanFire` on the secondary arms a burst rather than firing anything itself. The update loop then looses one round every `fanInterval` until the cylinder is empty. Each round leaves the current aim by up to `fanJitter` degrees. That is what fanning a revolver is: the hammer slapped back over and over.
+The primary paces itself with `fireInterval` rather than click speed, so holding the trigger fires at a steady rate. The secondary is the big shot: it spends `bigCost` rounds on one heavy shell, the shotgun sprite, with `bigDamage` and its own `bigCooldown`. Its wider hit radius rides on the bullet itself, since two sizes of round share one pool.
 
 The rounds therefore leave one at a time. The burst tracks the cursor as it runs, instead of landing together like buckshot. Nothing can fire by hand while it runs, and it is worth more the fuller the cylinder.
 
-Running dry starts a reload, and so does fanning. R reloads early. Three cases refuse it: a full cylinder, a reload already running, or a fan mid-burst. It therefore cannot cut a burst short or stall one reload with another.
+Running dry starts a reload, whichever trigger emptied the cylinder. R reloads early. Two cases refuse it: a full cylinder or a reload already running.
 
-`fire` and `fanFire` both re-check their own gates rather than trusting the caller. Nothing can drive the cylinder negative and take the HUD readout with it.
+`fire` and `fireBig` both re-check their own gates rather than trusting the caller. Nothing can drive the cylinder negative and take the HUD readout with it.
+
+The super is the twin gun. It does not zero the meter. The meter drains across `twinTime` and the super ends when it runs out, then the normal cooldown starts. While it lasts, every trigger pull fires a second round offset beside the first, and a mirrored revolver rides the other hand. The extra round is marked as super damage, so a twin cannot wind its own meter back up.
 
 ### The ammo readout
 
@@ -150,7 +152,7 @@ On a miss it retracts to the hand, and it stays live on the way back. A returnin
 
 A held enemy is a shield. Enemy fire that reaches it stops there and wounds the enemy instead of the player, so you can walk a body into a firing line. Enough shots kill it, and a dead victim drops off the string the same way any other loss does.
 
-The grab cannot latch an enemy flagged not `grabbable`, which means the boss. It deals `snagDamage` instead, then retracts. The return trip snags the same way, so a throw that reaches the boss on the way home still hurts it. One throw lands one snag either way. Without that cap the returning line would bill the boss every frame it overlapped. That is much more than a normal hit, since it is the only thing the grab can do to them. The auto-grabbing arms are the yoyo's super, covered under `HookArms`.
+The grab cannot latch an enemy flagged not `grabbable`, which means anything big, and every boss is big. It deals `snagDamage` instead, then retracts. The return trip snags the same way, so a throw that reaches a big enemy on the way home still hurts it. One throw lands one snag either way. Without that cap the returning line would bill it every frame it overlapped. The hook flies at the same speed as the thrown yoyo, so the two clicks feel like one weapon.
 
 ## ThrowAttack
 
@@ -158,13 +160,13 @@ The boomerang throw. It covers the thrown hammer's flight: out leg, wall turnaro
 
 Only arena walls turn the outbound leg around. Buildings and the rest of the scenery stop every other projectile in the game, but the hammer sails over them, so a throw across a rooftop reaches what is behind it instead of bouncing back off the roof.
 
-## HookArms
+## YoyoSpin
 
-The yoyo super. Q with the yoyo equipped and a full super meter drains the meter. It then extends two mechanical grab-arms from the player's back, rendered behind them, for a few seconds.
+The yoyo super. Q with the yoyo equipped and a full super meter drains the meter. The yoyo then circles the player at `radius` for `turns` revolutions over `time`, drawing its string the whole way. It drives the ordinary `YoyoFlight`, so the string, the sprite, the hue and the co-op stream all come along without their own code.
 
-Each arm works alone. It picks whatever lies nearest the cursor rather than nearest the player, grabs it, reels it up, whips it in an arc and hurls it along the line to the cursor. Every part of that reads off the cursor, including which side the arms rest on and which way the whip sweeps. Those two used to key off which way the body happened to be facing, so the arms swung by the walk rather than by the aim. The arms rest tilted, and their curved ropes trail with inertia. They retract into the body when the super ends. The held yoyo hides, and the player can still move.
+Anything the circle touches gets taken. An enemy caught out near the tip takes `grabDamage`, one caught along the string takes `stringDamage`, and either way it is seized and rides the spin at the angle and distance it was caught. Big enemies cannot be grabbed. Each takes one contact hit and stands its ground.
 
-The arms also catch bullets, which the ordinary grab cannot do. With no enemy in reach an arm snatches the enemy shot nearest the cursor out of the air, holds it through the same whip, and hurls it back as a friendly round. A held shot harms nobody while it waits.
+When the spin ends, every rider is flung at once. Each leaves at `launchSpeed` in its own direction inside a 90 degree cone centred on the aim, with a launch hit behind it. Riders killed on release fly as corpses, since a corpse keeps the knockback of the hit that ended it.
 
 ## ArrowStorm
 
@@ -172,45 +174,11 @@ The crossbow super. Q with the crossbow equipped drains a full super meter. It f
 
 The storm proper starts once that arrow clears the top of the screen. The bow stays raised skyward while arrows carpet the whole visible arena for a few seconds. Drops spawn across the camera view on a fast cadence, reusing ArrowRain's drop, marker and landing machinery. The player can still move throughout.
 
-## DeadEye
+## HammerBounce
 
-The revolver super. Q whites the screen out, then settles into a sepia wash over a looping heartbeat. The wash is a `Veil`, a screen-locked sheet resized from the camera's own view every frame rather than to a written-down size. A fixed sheet only covers the screen at one zoom, and the camera does not hold one: it rests pulled back, pulls back further for the boss and further again in the quiet room. Sizing off the live view means the wash covers whatever the camera is showing, instead of leaving the arena bare around the edges of the fight it is supposed to be tinting. It stops the world dead. `superSlow` goes to 0, and the player cannot move. Only the cursor still moves.
+The hammer super. Q with the hammer equipped and a full super meter drains the meter. The player leaps and slams `strikes` times, spinning through each hop with the hammer swinging around them, invincible for the whole run of it.
 
-Sweeping the cursor over an enemy marks it, one mark per round left in the cylinder. A full cylinder therefore marks six, and a nearly spent one marks one. There is no timer, and it holds until you press fire. Marking nothing and firing cancels without spending anything.
-
-A second press of Q backs out. It answers only while you are still marking, so nothing can stop the volley once it starts. The world, the aim lock and the marks all reset through `cancel`, the same path a dead player takes. The meter does not come back. Without that cost, Q would be a free pause button that freezes the fight and shows you the whole arena.
-
-Releasing unfreezes the world and walks the marks in order at `shotInterval`, one round each, while the sepia fades out. The held revolver locks onto each target as it shoots it. A call to `HeldWeapon.lockAim` snaps the angle instead of easing toward the cursor. The same lock drives the hand offset. The gun therefore never points one way while reaching another.
-
-The rounds home, and each belongs to its mark. Every round remembers its target in `Bullet.seek`. Every frame, `RevolverAttack.steer` re-aims that round, so a mark that walks away is still hit. The hit test asks only about that one enemy, so the round passes through anything in the way.
-
-Without that, two marks in a line went wrong. The front one soaked both rounds, and nothing touched the one behind. Each mark already has a round of its own. A round spent on the wrong enemy is therefore a round lost. A wall still stops them, and a mark that dies before its round lands frees the shot for nothing.
-
-Ordinary revolver fire does not change, and still stops at the first enemy it meets. Only a round with a mark behind it ignores bystanders.
-
-The freeze is solo only. Online the flash, the sepia, the heartbeat, the marking and the volley all still happen. The clock is never touched and the player is never rooted. You paint targets while the fight carries on, and a three second timer releases the shots if you do not.
-
-Freezing would not have worked in either direction. The host owns the enemies, so a host freezing its own world streams still positions. That stops the guest's game with no warning and no end.
-
-A guest freezing its clock stops nothing at all. Enemies still move, because `PuppetMirror` lerps them toward streamed positions on raw elapsed. It never reads `WorldClock`. It would have rooted the guest in place while everything kept coming.
-
-Activation decides `froze` once, and every restore path keys off it.
-
-The freeze is not the super's to own. Every frame, `TimeStop` writes `WorldClock.scale` unconditionally. A second writer would therefore lose before the enemies ever read it. The clock now takes the two sources separately, inside `WorldClock`, and hands out whichever is slower.
-
-A cancel can happen part way through a frame, so `update` re-reads the phase after the marking step and stops there if it went to zero. Without that check, `updateOverlay` ran on behalf of a super that had already ended, and painted the full sepia back over the screen. The next frame then returned at the top, because the phase was zero, and nothing ever cleared it. The wash stayed for the rest of the run. Firing with nothing marked was the way in.
-
-The idle branch now also forces the overlay clear rather than only returning. A phase of zero means no wash, so any path that ends the super without tidying up heals itself on the next frame.
-
-The fade outlives the super. Ending the shots and running the overlay down are separate steps. A call to `letGo` returns the world, the player and the aim. A fourth phase then runs the overlay down on its own. Folded together, the last frame re-applied a fade the state machine had already stopped updating. That pinned a permanent sepia tint over the game.
-
-## SuperOrbit
-
-The hammer super. Q with the hammer equipped and a full super meter drains the meter. It then wraps the player in a pseudo-3D cylinder of weapon copies. It is an elliptical carousel, where blades pass in front of and behind the player and scale with depth.
-
-The player levitates for the duration. That is a visual offset only, and the hitbox and shadow stay grounded. The held weapon vanishes.
-
-Left click launches the blade nearest the aim. Launched blades spin, pierce enemies and die on walls. Everything leaves ghost trails. The player settles back down after the last blade goes, and the held weapon returns to hand.
+Every slam is a radial blast: `damage` and `force` out to `radius`, plus a catapult. The move keys steer each launch, and with none held the aim direction does. Two slams with a steered catapult between them is the whole move. It ends where the second slam lands, and the invincibility ends with it.
 
 ---
 

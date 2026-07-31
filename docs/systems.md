@@ -213,9 +213,8 @@ A dropped heart. It restores health on contact and expires after a few seconds.
 
 - `SlashEffect` - the pooled swing visual. It drifts forward briefly and fades out, and carries no hitbox.
 - `ThrownWeapon` - the airborne hammer. It spins, stretches on release, throbs in flight, and hits each enemy once per flight leg, out and return.
-- `Orbiter` - one orbiter. SuperOrbit positions it while it circles. Once launched it flies straight, pierces with one hit per enemy, and fades at range.
 - `Arrow` - the bow's projectile. It flies straight and fast, dies on the first enemy hit or a wall, and expires at range.
-- `Bullet` - the revolver's round. It draws from `assets/images/bullets/`, round for a hand shot and long for a Dead Eye one. It draws at the same 4x as the player, so a bullet matches the pixel size of everything else. It dies on its first hit or at the end of its range.
+- `Bullet` - the revolver's round. It draws from `assets/images/bullets/`, the normal round for a hand shot and the shotgun shell for a big one. It draws at the same 4x as the player, so a bullet matches the pixel size of everything else. It dies on its first hit or at the end of its range.
 - `HookShot` - the hook's projectile. It flies head-first. Once latched it sticks to the hooked enemy until the throw resolves.
 - `RainArrow` - an arrow rain volley member. It is either a fading skyward launch visual, or a falling arrow that lands at its assigned impact point.
 
@@ -318,7 +317,7 @@ A pooled afterimage trail. It fades its ghosts every tick. On a fixed cadence it
 
 The world time scale, at 1 normal and 0 frozen. World entities that update through the display list read it.
 
-It holds two sources rather than one value. One belongs to `TimeStop`, the other to Dead Eye. The `scale` field reports whichever is slower. A single field could not survive two writers. Assignment happens every frame inside `TimeStop`, which would overwrite anything else before the enemies read it.
+It holds two sources rather than one value. One belongs to `TimeStop`, the other is free for anything else that needs to slow the world. The `scale` field reports whichever is slower. A single field could not survive two writers. Assignment happens every frame inside `TimeStop`, which would overwrite anything else before the enemies read it.
 
 ### WarpShader
 

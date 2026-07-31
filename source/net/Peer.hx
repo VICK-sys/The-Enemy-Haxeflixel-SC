@@ -40,8 +40,6 @@ class Peer
 		fx.setYoyo(yo != null, yo != null ? yo[0] : 0, yo != null ? yo[1] : 0, yo != null ? yo[2] : 0);
 		fx.setThrown(th != null, th != null ? th[0] : 0, th != null ? th[1] : 0, th != null ? th[2] : 0,
 			th != null ? th[3] : 0);
-		fx.setArms(m.ar);
-		fx.setBladesActive(m.sb == true);
 	}
 
 	public function update(elapsed:Float):Void
@@ -69,8 +67,6 @@ class Peer
 			fx.setHook(false, 0, 0, 0, 0, 0);
 			fx.setYoyo(false, 0, 0, 0);
 			fx.setThrown(false, 0, 0, 0, 0);
-			fx.setArms(null);
-			fx.setBladesActive(false);
 		}
 	}
 

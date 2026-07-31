@@ -224,11 +224,6 @@ class PlayState extends FlxState
 		add(combat.arrowStorm.superArrow);
 		add(combat.hookAttack.rope);
 		add(combat.hookAttack.hook);
-		insert(members.indexOf(layers.entityLayer), combat.hookArms.backGroup);
-		add(combat.hookArms.frontGroup);
-		insert(members.indexOf(layers.entityLayer), combat.superOrbit.trail.group);
-		insert(members.indexOf(layers.entityLayer), combat.superOrbit.backLayer);
-		add(combat.superOrbit.frontLayer);
 		add(fx.sparks);
 		add(fx.pops);
 		add(fx.bursts);

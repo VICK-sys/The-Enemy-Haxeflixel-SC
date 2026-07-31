@@ -83,6 +83,7 @@ typedef ArrowRainConfig = {
 
 typedef HookConfig = {
 	range:Float,
+	speed:Float,
 	pullSpeed:Float,
 	pullTimeout:Float,
 	grabDist:Float,
@@ -95,9 +96,13 @@ typedef HookConfig = {
 	snagDamage:Int
 }
 
-typedef SuperOrbitConfig = {
-	count:Int,
-	fireGate:Float
+typedef BounceConfig = {
+	strikes:Int,
+	hopTime:Float,
+	radius:Float,
+	damage:Float,
+	force:Float,
+	catapultSpeed:Float
 }
 
 typedef ArrowStormConfig = {
@@ -107,17 +112,16 @@ typedef ArrowStormConfig = {
 	radius:Float
 }
 
-typedef HookArmsConfig = {
-	reach:Float,
-	reachSpeed:Float,
-	grabRadius:Float,
-	reelSpeed:Float,
-	grabDist:Float,
-	throwForce:Float,
-	damage:Int,
-	cooldown:Float,
-	whipTime:Float,
-	armsTime:Float
+typedef YoyoSpinConfig = {
+	radius:Float,
+	grabPad:Float,
+	time:Float,
+	turns:Float,
+	grabDamage:Float,
+	stringDamage:Float,
+	launchSpeed:Float,
+	launchPush:Float,
+	launchDamage:Float
 }
 
 typedef WeaponsData = {
@@ -128,9 +132,9 @@ typedef WeaponsData = {
 	bowCharge:BowChargeConfig,
 	arrowRain:ArrowRainConfig,
 	hook:HookConfig,
-	superOrbit:SuperOrbitConfig,
+	bounceStrike:BounceConfig,
 	arrowStorm:ArrowStormConfig,
-	hookArms:HookArmsConfig,
+	yoyoSpin:YoyoSpinConfig,
 	bash:SwingConfig
 }
 

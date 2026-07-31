@@ -186,7 +186,7 @@ class NetSync
 		};
 
 		combat.hookAttack.onGrab = sendGrab;
-		combat.hookArms.onGrab = sendGrab;
+		combat.yoyoSpin.onGrab = sendGrab;
 
 		pickups.onCollect = function(p)
 		{
@@ -428,7 +428,7 @@ class NetSync
 		{
 			var w = data.WeaponData.WeaponDataRegistry.get();
 			var top:Float = w.swing.damage;
-			for (v in [w.yoyo.damage, w.revolver.damage, w.bowCharge.maxDamage + w.bowCharge.sweetBonus, w.revolver.bigDamage, w.hook.snagDamage, w.hookArms.damage])
+			for (v in [w.yoyo.damage, w.revolver.damage, w.bowCharge.maxDamage + w.bowCharge.sweetBonus, w.revolver.bigDamage, w.hook.snagDamage, w.bounceStrike.damage, w.yoyoSpin.grabDamage])
 				if (v > top)
 					top = v;
 			hitCap = top + util.Levels.damageAt(9999);
@@ -478,8 +478,10 @@ class NetSync
 				rows.push([e.netId, r1(e.x), r1(e.y)]);
 		};
 		addRow(combat.hookAttack.heldEnemy);
-		for (arm in combat.hookArms.arms)
-			addRow(arm.target);
+		var spun:Array<Enemies> = [];
+		combat.yoyoSpin.captives(spun);
+		for (e in spun)
+			addRow(e);
 		if (rows.length > 0)
 			Net.send({t: "drag", g: rows});
 	}
@@ -525,19 +527,6 @@ class NetSync
 		Net.send({t: "snap", w: director.wave, en: en, pk: pk});
 	}
 
-	function armWire():Array<Dynamic>
-	{
-		if (!combat.hookArms.active)
-			return null;
-		var out:Array<Dynamic> = [];
-		for (a in combat.hookArms.arms)
-			out.push(a.claw.exists ? [
-				r1(a.cx), r1(a.cy), r1(a.claw.angle),
-				r1(a.handleX), r1(a.handleY), r1(a.ctrlX), r1(a.ctrlY)
-			] : null);
-		return out;
-	}
-
 	function sendAvatar():Void
 	{
 		var held = combat.held.sprite;
@@ -559,9 +548,7 @@ class NetSync
 			hg: held.flipY,
 			ho: [r1(held.x - player.x), r1(held.y - player.y), r2(held.scale.x), r2(combat.held.charge)],
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
-			sb: combat.superOrbit.active(),
 			dd: status.dead && !status.throes,
-			ar: armWire(),
 			hk: hookShot.exists ? [r1(hookShot.x), r1(hookShot.y), r1(hookShot.angle), r1(combat.held.handX()), r1(combat.held.handY())] : null,
 			yo: yo.active ? [r1(yo.cx), r1(yo.cy), r1(yo.yoyo.angle)] : null,
 			th: fly.exists ? [r1(fly.x), r1(fly.y), r1(fly.velocity.x), r1(fly.velocity.y)] : null

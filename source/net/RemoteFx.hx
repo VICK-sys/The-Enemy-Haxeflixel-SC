@@ -17,7 +17,6 @@ import systems.weapons.ArrowStorm;
 import systems.weapons.HitPipeline;
 import systems.weapons.Rope;
 import systems.weapons.HeldWeapon;
-import systems.weapons.SuperOrbit;
 import systems.weapons.WeaponMode;
 import systems.weapons.YoyoFlight;
 import data.WeaponData.WeaponDataRegistry;
@@ -42,9 +41,7 @@ class RemoteFx
 	private var avatar:RemoteAvatar;
 	private var dummyBow:FlxSprite;
 	private var stormPending:Bool = false;
-	private var blades:SuperOrbit;
 	private var storm:ArrowStorm;
-	private var arms:RemoteArms;
 
 	static inline var HOOK_LERP:Float = 22;
 	static inline var THROWN_CORRECT:Float = 6;
@@ -82,20 +79,12 @@ class RemoteFx
 		yoyo = new YoyoFlight();
 		thrownTrail = new GhostTrail("items/hammer", 0.45, 3, 0.035);
 
-		blades = SuperOrbit.decoration(avatar.sprite, fx);
 		dummyBow = new FlxSprite();
 		dummyBow.loadGraphic(Paths.image("items/crossbow"));
 		storm = new ArrowStorm(avatar.sprite, dummyBow, rain);
-		arms = new RemoteArms(avatar.sprite);
 
 		var below = state.members.indexOf(layers.entityLayer);
 		state.insert(below, rain.markers);
-		state.insert(below, blades.trail.group);
-		state.insert(below, blades.backLayer);
-		for (r in arms.ropes)
-			state.insert(below, r);
-		for (c in arms.claws)
-			state.insert(below, c);
 		state.add(arrows);
 		state.add(bullets);
 		state.add(rain.arrows);
@@ -106,7 +95,6 @@ class RemoteFx
 		state.add(yoyo.yoyo);
 		state.add(thrownTrail.group);
 		state.add(thrown);
-		state.add(blades.frontLayer);
 		state.add(storm.trail.group);
 		state.add(storm.superArrow);
 	}
@@ -116,8 +104,7 @@ class RemoteFx
 		switch (kind)
 		{
 			case 0:
-				blades.hue = avatar.hue;
-				blades.activate();
+				FlxG.sound.play(Paths.sound("hammer"), 0.35);
 			case 1:
 				FlxG.sound.play(Paths.sound("power_up"), 0.5);
 			case 2:
@@ -125,8 +112,7 @@ class RemoteFx
 				dummyBow.loadGraphic(util.HuePalette.graphic("items/crossbow", avatar.hue));
 				stormPending = true;
 			case 3:
-				util.Sfx.at("arms_deploy", avatar.sprite.x + avatar.sprite.width * 0.5,
-					avatar.sprite.y + systems.weapons.HookArms.ANCHOR_DOWN, 0.8);
+				util.Sfx.at("arms_deploy", avatar.sprite.x + avatar.sprite.width * 0.5, avatar.sprite.y, 0.8);
 			default:
 		}
 	}
@@ -139,17 +125,9 @@ class RemoteFx
 			storm.beginAt(tx, ty);
 			return;
 		}
-		blades.tryLaunch(tx, ty);
+		fx.sparksAt(tx, ty);
+		FlxG.sound.play(Paths.sound("hammer"), 0.6);
 	}
-
-	public function setBladesActive(on:Bool):Void
-	{
-		if (!on && blades.active())
-			blades.clear();
-	}
-
-	public function setArms(rows:Array<Dynamic>):Void
-		arms.set(rows);
 
 	public function attack(modeIndex:Int, pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, tx:Float, ty:Float, power:Float):Void
 	{
@@ -288,16 +266,13 @@ class RemoteFx
 
 	public function update(elapsed:Float):Void
 	{
-		arms.hue = avatar.hue;
 		rain.hue = avatar.hue;
 		yoyo.setHue(avatar.hue);
 		hook.paint(avatar.hue);
 		thrown.paint(avatar.hue);
 
 		rain.update(elapsed);
-		blades.update(elapsed);
 		storm.update(elapsed);
-		arms.update(elapsed);
 		if (yoyoOn)
 		{
 			var yk = Math.min(1, HOOK_LERP * elapsed);

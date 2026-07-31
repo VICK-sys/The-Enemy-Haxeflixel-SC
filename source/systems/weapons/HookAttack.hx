@@ -94,7 +94,7 @@ class HookAttack
 		fireX = pmx + dx * SPAWN_DIST;
 		fireY = pmy + dy * SPAWN_DIST;
 		hook.paint(util.SaveData.playerHue());
-		hook.fire(fireX, fireY, dx, dy, aimDeg);
+		hook.fire(fireX, fireY, dx, dy, aimDeg, cfg.speed);
 		phase = Flying;
 		FlxG.sound.play(Paths.sound("weapon/throw"), 0.6);
 	}

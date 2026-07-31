@@ -55,21 +55,17 @@ The thrown hammer spins and trails locally. The grab uses a plain position lerp.
 
 A guest's grab crosses the wire as a seize message, and the drag itself streams behind it. The grabber owns the enemy while it holds it: its own mirror leaves the seized puppet alone, and it sends the enemy's position on the avatar cadence. The host steers the real enemy toward each sample instead of teleporting it, so everyone watching sees the enemy reeled in, held at the cursor and whipped around, rather than freezing in place until the throw. The release still hands the host the enemy's final spot. The super's arms speak the same seize and drag protocol, so an arm's grab reads the same as the hook's.
 
-Fanning the hammer sends each pellet as its own event. The burst therefore draws every bullet on the other machines instead of only the muzzle flash.
+The big shot sends its own event, so the other machines draw the heavy shell rather than a normal round.
 
 The ready gate runs the same quorum shape as the shop hold. It arms at the run's first wave, after shop waves and after bosses, rather than at every clear. The host arms every machine, each player's ready crosses the wire so every machine can raise that player's bubble, and the host counts them against the roster it snapshotted at arming time. A guest who drops is removed from the count rather than waited on. Solo runs the same gate without the wire: one ready releases it.
 
 ## Supers
 
-Dead Eye replicates as its shots and nothing else. `superActivate` ignores it. Each round it fires emits an ordinary `Shoot`, so the remote draws the bullet. Online it gives up the part that cannot survive co-op.
-
-It does not stop the clock, and it does not root the player. The world is only one machine's to stop. Time stop is off online for that same reason. Dead Eye instead keeps everything except that one behaviour.
+The twin gun replicates as its shots and nothing else. Both rounds of every pull emit their own event, so the other machines draw the pair without knowing a super is on.
 
 What a remote machine can reproduce decides how each other super replicates.
 
-The blade ring and the arrow storm replay from their activation alone. A call to `SuperOrbit.decoration()` builds a copy with no player, arena, director or hit pipeline. That strips the damage and the writes to the body. Blade launches arrive as one event each. The storm scatters its drops at random, and nobody can tell the two machines picked different points.
-
-The grab arms stream their claws, because they grab enemies. Which enemy is nearest can differ between machines. The grabbed enemy is host-authoritative already, so it gets dragged around correctly on its own. String curves rebuild locally from the streamed control points. They anchor to the interpolated body, so they stay attached while it moves.
+The arrow storm replays from its activation alone: the drops scatter at random, and nobody can tell the two machines picked different points. The hammer bounce rides the avatar packet, since the hop, the spin and the squash already stream with the body, and each slam arrives as a launch event that pops sparks where it landed. The yoyo spin streams through the same yoyo channel as ordinary flight, so the circling yoyo and its string appear on every machine, and the enemies it seizes are dragged host-authoritatively like any other grab.
 
 Supers also lift, spin and squash the player's body. Those three ride along in the avatar packet, and no machine recomputes them. That is what keeps the decoration copies out of the body entirely.
 

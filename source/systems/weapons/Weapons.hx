@@ -22,9 +22,9 @@ class Weapons
 	public var bow:BowAttack;
 	public var throwAttack:ThrowAttack;
 	public var hookAttack:HookAttack;
-	public var superOrbit:SuperOrbit;
+	public var bounce:HammerBounce;
 	public var arrowStorm:ArrowStorm;
-	public var hookArms:HookArms;
+	public var yoyoSpin:YoyoSpin;
 	public var weapon:Int = 0;
 	public var disabled:Bool = false;
 	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float) -> Void;
@@ -34,7 +34,6 @@ class Weapons
 	private var player:Player;
 	private var status:PlayerCombat;
 	private var wasHookBusy:Bool = false;
-	private var wasArms:Bool = false;
 
 	public function new(player:Player, heldSprite:FlxSprite, arena:Arena, director:EnemyDirector, status:PlayerCombat, fx:Fx, pickups:Pickups, scraps:systems.Scraps)
 	{
@@ -53,8 +52,12 @@ class Weapons
 		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
 		throwAttack.onCaught = function() swing.coolFor(weaponCfg.thrown.catchCooldown);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
-		superOrbit = new SuperOrbit(player, heldSprite, arena, director, status, fx, hits);
-		superOrbit.hue = util.SaveData.playerHue();
+		bounce = new HammerBounce(player, status, fx, hits, heldSprite);
+		bounce.onSlam = function(cx, cy)
+		{
+			if (onSuperLaunch != null)
+				onSuperLaunch(cx, cy);
+		}
 		arrowStorm = new ArrowStorm(player, held.sprite, bow.rain);
 		arrowStorm.paint(util.SaveData.playerHue());
 		arrowStorm.onMarked = function(x, y)
@@ -62,7 +65,7 @@ class Weapons
 			if (onSuperLaunch != null)
 				onSuperLaunch(x, y);
 		}
-		hookArms = new HookArms(player, director, hits);
+		yoyoSpin = new YoyoSpin(player, director, hits, yoyoJab.flight);
 		bow.onFull = function()
 		{
 			var a = aimFrom(held.handX(), held.handY());
@@ -74,12 +77,12 @@ class Weapons
 	public var superBusy(get, never):Bool;
 
 	function get_superBusy():Bool
-		return superOrbit.activating || arrowStorm.busy || hookArms.active;
+		return bounce.active || arrowStorm.busy || yoyoSpin.active;
 
 	public var playerBusy(get, never):Bool;
 
 	function get_playerBusy():Bool
-		return superBusy || superOrbit.active();
+		return superBusy;
 
 	public function anchorHeld():Void
 	{
@@ -123,24 +126,16 @@ class Weapons
 			held.reloadPose(revolver.reloadProgress);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
-		superOrbit.update(elapsed);
+		if (status.dead && bounce.active)
+			bounce.cancel();
+		bounce.update(elapsed);
 		arrowStorm.update(elapsed);
-		if (status.dead && hookArms.active)
-			hookArms.deactivate();
+		if (status.dead && yoyoSpin.active)
+			yoyoSpin.cancel();
 		if (status.dead && arrowStorm.active)
 			arrowStorm.cancel();
-		hookArms.update(elapsed);
+		yoyoSpin.update(elapsed, handX(), handY());
 		updateHeldHook();
-		updateHeldArms();
-	}
-
-	function updateHeldArms():Void
-	{
-		if (hookArms.active)
-			held.sprite.visible = false;
-		else if (wasArms && !status.dead)
-			held.sprite.visible = true;
-		wasArms = hookArms.active;
 	}
 
 	public function hasSuper():Bool
@@ -150,7 +145,6 @@ class Weapons
 	{
 		held.repaint();
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
-		superOrbit.hue = util.SaveData.playerHue();
 		arrowStorm.paint(util.SaveData.playerHue());
 		bow.rain.hue = util.SaveData.playerHue();
 	}
@@ -287,7 +281,7 @@ class Weapons
 			return;
 		}
 
-		if (util.Controls.justPressed(util.Controls.SUPER) && hasSuper() && status.canSuper() && !superOrbit.active() && !throwAttack.airborne
+		if (util.Controls.justPressed(util.Controls.SUPER) && hasSuper() && status.canSuper() && !throwAttack.airborne
 			&& !hookAttack.busy)
 		{
 			yoyoJab.stop();
@@ -298,9 +292,9 @@ class Weapons
 				status.spendSuper();
 				switch (weapon)
 				{
-					case 0: superOrbit.activate();
+					case 0: bounce.activate();
 					case 2: arrowStorm.activate();
-					default: hookArms.activate();
+					default: yoyoSpin.activate(aimFromPlayer().deg);
 				}
 			}
 			if (onSuper != null)
@@ -337,16 +331,6 @@ class Weapons
 		var dx:Float = aim.dx;
 		var dy:Float = aim.dy;
 		var aimDeg:Float = aim.deg;
-
-		if (superOrbit.active())
-		{
-			if (!leftClick)
-				return;
-			superOrbit.tryLaunch(util.Controls.aimX(), util.Controls.aimY());
-			if (onSuperLaunch != null)
-				onSuperLaunch(util.Controls.aimX(), util.Controls.aimY());
-			return;
-		}
 
 		if (held.swinging)
 			return;

@@ -7,7 +7,6 @@ import util.Paths;
 class HookShot extends FlxSprite
 {
 	public static inline var RADIUS:Float = 40;
-	public static inline var SPEED:Float = 1200;
 
 	public var dirX:Float = 1;
 	public var dirY:Float = 0;
@@ -37,13 +36,13 @@ class HookShot extends FlxSprite
 		scale.set(4, 4);
 	}
 
-	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float):Void
+	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, speed:Float):Void
 	{
 		revive();
 		setPosition(cx - width / 2, cy - height / 2);
 		dirX = dx;
 		dirY = dy;
-		velocity.set(dx * SPEED, dy * SPEED);
+		velocity.set(dx * speed, dy * speed);
 		angle = angleDeg + 90;
 	}
 }
