@@ -84,7 +84,9 @@ The super is the twin gun. It does not zero the meter. The meter drains across `
 
 Activating it forces both guns into a reload, whatever the cylinder held, and every reload while the twin is out runs at `TWIN_RELOAD` of the normal time since two hands spin two cylinders at once. The second gun keeps its own cylinder. It arrives empty, fills with the forced reload, and pays for its own copy of every shot, one round for a hand shot and `bigCost` for a big one. Both cylinders fill from the same reload, so they stay in step, and the HUD stacks a second pip column beside the first while the twin is out.
 
-Reloading swaps the held revolver to the `revolver_reload` strip, eleven frames of the cylinder swinging out, spinning and seating again, and steps through them off reload progress. The twin mirrors the same frames. The progress drives the frame index directly, so the animation finishes exactly when the reload does at any reload speed.
+Reloading swaps the held revolver to the `revolver_reload` strip, eleven frames of the cylinder swinging out, spinning and seating again, and steps through them off reload progress.
+
+Two sounds ride that animation rather than the reload as a whole. `weapon/gunSpin` starts on the frame the cylinder first appears and `weapon/gunSpinEnd` on the frame it seats, both keyed to progress rather than to a delay, so they follow the art through a dexterity shortened reload and the faster twin one alike. `bulletLoad` still closes the reload out at the end. The twin mirrors the same frames. The progress drives the frame index directly, so the animation finishes exactly when the reload does at any reload speed.
 
 ### The ammo readout
 

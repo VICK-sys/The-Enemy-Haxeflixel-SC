@@ -23,6 +23,10 @@ class RevolverAttack
 	static inline var TWIN_KICK:Float = 16;
 	static inline var KICK_FADE:Float = 7;
 	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
+	static inline var SPIN_AT:Float = 2 / 11;
+	static inline var SPIN_END_AT:Float = 8 / 11;
+	static inline var SPIN_VOL:Float = 0.5;
+	static inline var SPIN_END_VOL:Float = 0.45;
 
 	public var bullets:FlxTypedGroup<Bullet>;
 	public var twinSprite:FlxSprite;
@@ -41,6 +45,10 @@ class RevolverAttack
 	private var reloadFrom:Int = 0;
 	private var twinReloadFrom:Int = 0;
 	private var reloadTotal:Float = 0;
+	private var spinSound:flixel.sound.FlxSound;
+	private var spinEndSound:flixel.sound.FlxSound;
+	private var spunStart:Bool = false;
+	private var spunEnd:Bool = false;
 	private var fireTimer:Float = 0;
 	private var bigTimer:Float = 0;
 	private var twin:Bool = false;
@@ -67,6 +75,11 @@ class RevolverAttack
 		this.status = status;
 		bullets = new FlxTypedGroup<Bullet>();
 		rounds = cfg.cylinder;
+
+		spinSound = FlxG.sound.create(Paths.sound("weapon/gunSpin"));
+		spinSound.volume = SPIN_VOL;
+		spinEndSound = FlxG.sound.create(Paths.sound("weapon/gunSpinEnd"));
+		spinEndSound.volume = SPIN_END_VOL;
 
 		twinSprite = new FlxSprite();
 		twinSprite.antialiasing = false;
@@ -111,6 +124,8 @@ class RevolverAttack
 		twinReloadFrom = twinRounds;
 		reloadTotal = cfg.reloadTime * (twin ? TWIN_RELOAD : 1) * util.Levels.actionScale();
 		reloading = reloadTotal;
+		spunStart = false;
+		spunEnd = false;
 	}
 
 	public function canFire():Bool
@@ -256,6 +271,12 @@ class RevolverAttack
 
 	public function reset():Void
 	{
+		if (spinSound.playing)
+			spinSound.stop();
+		if (spinEndSound.playing)
+			spinEndSound.stop();
+		spunStart = false;
+		spunEnd = false;
 		rounds = cfg.cylinder;
 		reloading = 0;
 		fireTimer = 0;
@@ -318,6 +339,17 @@ class RevolverAttack
 		if (reloading > 0)
 		{
 			reloading -= elapsed;
+			var at = reloadTotal > 0 ? 1 - reloading / reloadTotal : 1;
+			if (!spunStart && at >= SPIN_AT)
+			{
+				spunStart = true;
+				spinSound.play(true);
+			}
+			if (!spunEnd && at >= SPIN_END_AT)
+			{
+				spunEnd = true;
+				spinEndSound.play(true);
+			}
 			if (reloading <= 0)
 			{
 				rounds = cfg.cylinder;
