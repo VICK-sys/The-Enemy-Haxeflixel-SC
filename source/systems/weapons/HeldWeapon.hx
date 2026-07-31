@@ -16,8 +16,8 @@ class HeldWeapon
 	static inline var THRUST_DIST:Float = 34;
 	static inline var THRUST_OUT:Float = 0.35;
 	static inline var SWING_SCALE:Float = 2.5;
-	static inline var TOSS_ARC:Float = 90;
-	static inline var TOSS_SPIN:Float = 720;
+	static inline var REV_FRAMES:Int = 8;
+	static inline var REV_CELL:Int = 32;
 	static inline var REV_KICK:Float = 16;
 	static inline var REV_BACK:Float = 11;
 	static inline var REV_TIME:Float = 0.4;
@@ -74,9 +74,7 @@ class HeldWeapon
 	private var shakeClock:Float = 0;
 	private var shakeSign:Int = 1;
 	private var reloadP:Float = -1;
-	private var tossTurn:Float = 0;
-	private var tossSeen:Float = 0;
-	private var tossLift:Float = 0;
+	private var reloadGfx:Bool = false;
 
 	public function new(player:Player, sprite:FlxSprite)
 	{
@@ -110,9 +108,7 @@ class HeldWeapon
 		shakeClock = 0;
 		shakeSign = 1;
 		reloadP = -1;
-		tossTurn = 0;
-		tossSeen = 0;
-		tossLift = 0;
+		reloadGfx = false;
 		sprite.flipX = false;
 		sprite.flipY = false;
 		applyGraphic();
@@ -153,7 +149,7 @@ class HeldWeapon
 			}
 		}
 
-		updateToss(elapsed);
+		updateReload();
 		anchor();
 		updateSwing(elapsed);
 	}
@@ -164,31 +160,28 @@ class HeldWeapon
 			reloadP = p;
 	}
 
-	function updateToss(elapsed:Float):Void
+	function updateReload():Void
 	{
 		if (reloadP >= 0)
 		{
-			var want:Float = TOSS_SPIN * FlxEase.cubeOut(reloadP);
-			var step:Float = want - tossSeen;
-			tossSeen = want;
-			if (step > 0)
-				tossTurn += sprite.flipY ? -step : step;
-			tossLift = Math.sin(Math.PI * reloadP) * TOSS_ARC;
+			if (!reloadGfx)
+			{
+				reloadGfx = true;
+				applyGraphic();
+			}
+			var idx = Std.int(reloadP * REV_FRAMES);
+			if (idx > REV_FRAMES - 1)
+				idx = REV_FRAMES - 1;
+			sprite.animation.frameIndex = idx;
 			reloadP = -1;
 			return;
 		}
 
-		tossSeen = 0;
-		if (tossTurn == 0 && tossLift == 0)
-			return;
-
-		var decay:Float = Math.pow(1 - AIM_LERP, elapsed * 60);
-		tossTurn *= decay;
-		tossLift *= decay;
-		if (Math.abs(tossTurn) < 0.5)
-			tossTurn = 0;
-		if (tossLift < 0.5)
-			tossLift = 0;
+		if (reloadGfx)
+		{
+			reloadGfx = false;
+			applyGraphic();
+		}
 	}
 
 	public function loose(power:Float):Void
@@ -288,14 +281,19 @@ class HeldWeapon
 
 	function applyGraphic():Void
 	{
-		var img = switch (kind)
+		if (kind == REVOLVER && reloadGfx)
+			sprite.loadGraphic(util.HuePalette.graphic("items/revolver_reload", util.SaveData.playerHue()), true, REV_CELL, REV_CELL);
+		else
 		{
-			case 1: "items/revolver";
-			case 2: "items/crossbow";
-			case 3: "items/yoyo";
-			default: "items/hammer";
-		};
-		sprite.loadGraphic(util.HuePalette.graphic(img, util.SaveData.playerHue()));
+			var img = switch (kind)
+			{
+				case 1: "items/revolver";
+				case 2: "items/crossbow";
+				case 3: "items/yoyo";
+				default: "items/hammer";
+			};
+			sprite.loadGraphic(util.HuePalette.graphic(img, util.SaveData.playerHue()));
+		}
 		if (bowLike())
 			sprite.origin.set(sprite.width * 0.5, sprite.height * 0.5);
 		else
@@ -330,7 +328,6 @@ class HeldWeapon
 				dy = util.Controls.aimY() - pmy;
 				len = Math.sqrt(dx * dx + dy * dy);
 			}
-			sprite.y -= tossLift;
 			if (len > 0.001)
 			{
 				var reach = BOW_DIST - recoilBack + thrustReach();
@@ -379,7 +376,6 @@ class HeldWeapon
 		tiltShown = sprite.flipY ? recoilTilt : -recoilTilt;
 		if (charge > 0)
 			tiltShown += shakeSign * SHAKE_TILT * charge;
-		tiltShown += tossTurn;
 		sprite.angle += tiltShown;
 
 		applyTint(elapsed);

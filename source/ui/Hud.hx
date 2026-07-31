@@ -73,10 +73,14 @@ class Hud
 	private var hpShown:Float = -1;
 	private var bulletPips:Array<FlxSprite> = [];
 	private var bulletsShown:Int = -1;
+	private var twinPips:Array<FlxSprite> = [];
+	private var twinShown:Int = -1;
 	private var arrowPip:FlxSprite;
 	private var arrowShown:Bool = true;
 	private var capTop:FlxSprite;
 	private var capBottom:FlxSprite;
+	private var twinCapTop:FlxSprite;
+	private var twinCapBottom:FlxSprite;
 	private var cursorPoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 	private var pieces:Array<flixel.FlxBasic> = [];
 	private var hudOn:Bool = true;
@@ -112,6 +116,14 @@ class Hud
 		capBottom.visible = false;
 		state.add(piece(capTop));
 		state.add(piece(capBottom));
+
+		twinCapTop = makeUiSprite(0, 0, "ammo_indicator");
+		twinCapTop.flipY = true;
+		twinCapBottom = makeUiSprite(0, 0, "ammo_indicator");
+		twinCapTop.visible = false;
+		twinCapBottom.visible = false;
+		state.add(piece(twinCapTop));
+		state.add(piece(twinCapBottom));
 
 		arrowPip = makeUiSprite(0, 0, "ammo_arrow");
 		arrowPip.visible = false;
@@ -431,15 +443,17 @@ class Hud
 	}
 
 	function stackCaps(rows:Int, rowH:Float):Float
+		return stackColumn(AMMO_RIGHT - AMMO_MID, rows, rowH, capTop, capBottom);
+
+	function stackColumn(midX:Float, rows:Int, rowH:Float, top:FlxSprite, bottom:FlxSprite):Float
 	{
 		var span = rows * rowH + (rows - 1) * PIP_GAP;
-		var top = AMMO_BOTTOM - capTop.height * 2 - CAP_GAP * 2 - span;
-		var midX = AMMO_RIGHT - AMMO_MID;
-		capTop.setPosition(midX - capTop.width * 0.5, top);
-		capBottom.setPosition(midX - capBottom.width * 0.5, AMMO_BOTTOM - capBottom.height);
-		capTop.visible = true;
-		capBottom.visible = true;
-		return top + capTop.height + CAP_GAP;
+		var topY = AMMO_BOTTOM - top.height - bottom.height - CAP_GAP * 2 - span;
+		top.setPosition(midX - top.width * 0.5, topY);
+		bottom.setPosition(midX - bottom.width * 0.5, AMMO_BOTTOM - bottom.height);
+		top.visible = true;
+		bottom.visible = true;
+		return topY + top.height + CAP_GAP;
 	}
 
 	function hideAmmo():Void
@@ -450,6 +464,16 @@ class Hud
 		for (p in bulletPips)
 			p.visible = false;
 		bulletsShown = -1;
+		hideTwinAmmo();
+	}
+
+	function hideTwinAmmo():Void
+	{
+		twinCapTop.visible = false;
+		twinCapBottom.visible = false;
+		for (p in twinPips)
+			p.visible = false;
+		twinShown = -1;
 	}
 
 	public function setAmmo(cur:Int, max:Int, reloading:Bool, shown:Bool):Void
@@ -488,6 +512,40 @@ class Hud
 		for (i in 0...bulletPips.length)
 		{
 			var p = bulletPips[i];
+			var full = i >= max - cur;
+			reskin(p, full ? "ammo_bullet" : "ammo_bullet_empty");
+			p.setPosition(midX - p.width * 0.5, y + i * (pipH + PIP_GAP));
+			p.visible = i < max;
+		}
+	}
+
+	public function setTwinAmmo(cur:Int, max:Int, shown:Bool):Void
+	{
+		while (twinPips.length < max)
+		{
+			var p = makeUiSprite(0, 0, "ammo_bullet");
+			p.visible = false;
+			state.add(piece(p));
+			twinPips.push(p);
+		}
+
+		if (!shown || !hudOn)
+		{
+			if (twinShown != -1)
+				hideTwinAmmo();
+			return;
+		}
+
+		if (cur == twinShown)
+			return;
+		twinShown = cur;
+
+		var pipH = twinPips[0].height;
+		var midX = AMMO_RIGHT - AMMO_MID - twinCapTop.width - PIP_GAP * 2;
+		var y = stackColumn(midX, max, pipH, twinCapTop, twinCapBottom);
+		for (i in 0...twinPips.length)
+		{
+			var p = twinPips[i];
 			var full = i >= max - cur;
 			reskin(p, full ? "ammo_bullet" : "ammo_bullet_empty");
 			p.setPosition(midX - p.width * 0.5, y + i * (pipH + PIP_GAP));

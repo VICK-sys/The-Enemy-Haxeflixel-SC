@@ -19,6 +19,7 @@ class RevolverAttack
 	static inline var TWIN_FWD:Float = 28;
 	static inline var TWIN_SHADE:Int = 0xFF8A8A8A;
 	static inline var TWIN_STAGGER:Float = 0.09;
+	static inline var TWIN_RELOAD:Float = 0.75;
 	static inline var TWIN_KICK:Float = 16;
 	static inline var KICK_FADE:Float = 7;
 	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
@@ -26,6 +27,7 @@ class RevolverAttack
 	public var bullets:FlxTypedGroup<Bullet>;
 	public var twinSprite:FlxSprite;
 	public var rounds:Int;
+	public var twinRounds(default, null):Int = 0;
 	public var capacity(get, never):Int;
 	public var isReloading(get, never):Bool;
 
@@ -37,6 +39,7 @@ class RevolverAttack
 	private var status:PlayerCombat;
 	private var reloading:Float = 0;
 	private var reloadFrom:Int = 0;
+	private var twinReloadFrom:Int = 0;
 	private var reloadTotal:Float = 0;
 	private var fireTimer:Float = 0;
 	private var bigTimer:Float = 0;
@@ -47,6 +50,7 @@ class RevolverAttack
 	private var twinKick:Float = 0;
 	private var twinFlip:Bool = false;
 	private var pendDelay:Float = 0;
+	private var pendCost:Int = 1;
 	private var pendDx:Float = 1;
 	private var pendDy:Float = 0;
 	private var pendDeg:Float = 0;
@@ -82,6 +86,11 @@ class RevolverAttack
 	function get_displayRounds():Int
 		return reloading > 0 ? reloadFrom : rounds;
 
+	public var displayTwinRounds(get, never):Int;
+
+	function get_displayTwinRounds():Int
+		return reloading > 0 ? twinReloadFrom : twinRounds;
+
 	public var reloadProgress(get, never):Float;
 
 	function get_reloadProgress():Float
@@ -99,7 +108,8 @@ class RevolverAttack
 	function beginReloadFrom(n:Int):Void
 	{
 		reloadFrom = n;
-		reloadTotal = cfg.reloadTime * util.Levels.actionScale();
+		twinReloadFrom = twinRounds;
+		reloadTotal = cfg.reloadTime * (twin ? TWIN_RELOAD : 1) * util.Levels.actionScale();
 		reloading = reloadTotal;
 	}
 
@@ -115,7 +125,7 @@ class RevolverAttack
 			return;
 
 		fireTimer = cfg.fireInterval * util.Levels.actionScale();
-		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.SHOT, cfg.hitRadius);
+		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.SHOT, cfg.hitRadius, 1);
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		FlxG.sound.play(Paths.sound("revolver"), 0.7);
@@ -130,7 +140,7 @@ class RevolverAttack
 
 		bigTimer = cfg.bigCooldown * util.Levels.actionScale();
 		fireTimer = cfg.fireInterval * util.Levels.actionScale();
-		spawn(bx, by, dx, dy, aimDeg, cfg.bigDamage, BIG_SPRITE, cfg.bigRadius);
+		spawn(bx, by, dx, dy, aimDeg, cfg.bigDamage, BIG_SPRITE, cfg.bigRadius, cfg.bigCost);
 		rounds -= cfg.bigCost;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		systems.Fx.shake(0.005, 0.15);
@@ -144,9 +154,11 @@ class RevolverAttack
 	{
 		twin = true;
 		twinPlaced = false;
+		twinRounds = 0;
 		twinSprite.loadGraphic(util.HuePalette.graphic("items/revolver", util.SaveData.playerHue()));
 		twinSprite.origin.set(twinSprite.width * 0.5, twinSprite.height * 0.5);
 		twinSprite.color = TWIN_SHADE;
+		beginReloadFrom(reloading > 0 ? reloadFrom : rounds);
 		FlxG.sound.play(Paths.sound("power_up"), 0.7);
 	}
 
@@ -156,6 +168,7 @@ class RevolverAttack
 			return;
 		twin = false;
 		twinPlaced = false;
+		twinRounds = 0;
 		twinKick = 0;
 		pendDelay = 0;
 		pendKey = null;
@@ -177,6 +190,14 @@ class RevolverAttack
 		twinPlaced = true;
 		twinFlip = held.flipY;
 
+		if (held.frames != null && twinSprite.frames != held.frames)
+		{
+			twinSprite.frames = held.frames;
+			twinSprite.origin.set(twinSprite.width * 0.5, twinSprite.height * 0.5);
+			twinSprite.color = TWIN_SHADE;
+		}
+		twinSprite.animation.frameIndex = held.animation.frameIndex;
+
 		twinSprite.x = twinHandX - twinSprite.origin.x;
 		twinSprite.y = twinHandY - twinSprite.origin.y;
 		twinSprite.angle = held.angle + (twinFlip ? twinKick : -twinKick);
@@ -194,15 +215,16 @@ class RevolverAttack
 		return true;
 	}
 
-	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Float, key:String, radius:Float):Bullet
+	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Float, key:String, radius:Float, cost:Int):Bullet
 	{
 		var b = bullets.recycle(Bullet);
 		b.setSprite(key);
 		b.fire(bx + dx * MUZZLE, by + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock, radius);
 
-		if (twin)
+		if (twin && twinRounds >= cost)
 		{
 			pendDelay = TWIN_STAGGER;
+			pendCost = cost;
 			pendDx = dx;
 			pendDy = dy;
 			pendDeg = aimDeg;
@@ -224,6 +246,9 @@ class RevolverAttack
 		t.fire(tx, ty, pendDx, pendDy, pendDeg, pendDamage, cfg.speed, cfg.range, cfg.knock, pendRadius);
 		t.fromSuper = true;
 		pendKey = null;
+		twinRounds -= pendCost;
+		if (twinRounds < 0)
+			twinRounds = 0;
 		twinKick = TWIN_KICK;
 		fx.sparksAt(tx, ty);
 		FlxG.sound.play(Paths.sound("revolver"), 0.55);
@@ -296,6 +321,8 @@ class RevolverAttack
 			if (reloading <= 0)
 			{
 				rounds = cfg.cylinder;
+				if (twin)
+					twinRounds = cfg.cylinder;
 				FlxG.sound.play(Paths.sound("bulletLoad"), 0.55);
 				FlxG.sound.play(Paths.sound("weapon/catch"), 0.3);
 			}
