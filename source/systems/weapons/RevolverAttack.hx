@@ -15,7 +15,11 @@ import data.WeaponData.WeaponDataRegistry;
 class RevolverAttack
 {
 	static inline var MUZZLE:Float = 24;
-	static inline var TWIN_SEP:Float = 22;
+	static inline var TWIN_SIDE:Float = 24;
+	static inline var TWIN_BACK:Float = 26;
+	static inline var TWIN_STAGGER:Float = 0.09;
+	static inline var TWIN_KICK:Float = 16;
+	static inline var KICK_FADE:Float = 7;
 	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
 
 	public var bullets:FlxTypedGroup<Bullet>;
@@ -39,6 +43,15 @@ class RevolverAttack
 	private var twinHandX:Float = 0;
 	private var twinHandY:Float = 0;
 	private var twinPlaced:Bool = false;
+	private var twinKick:Float = 0;
+	private var twinFlip:Bool = false;
+	private var pendDelay:Float = 0;
+	private var pendDx:Float = 1;
+	private var pendDy:Float = 0;
+	private var pendDeg:Float = 0;
+	private var pendDamage:Float = 0;
+	private var pendRadius:Float = 0;
+	private var pendKey:String = null;
 
 	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline, status:PlayerCombat)
 	{
@@ -140,6 +153,9 @@ class RevolverAttack
 			return;
 		twin = false;
 		twinPlaced = false;
+		twinKick = 0;
+		pendDelay = 0;
+		pendKey = null;
 		twinSprite.visible = false;
 	}
 
@@ -152,15 +168,16 @@ class RevolverAttack
 		var perpX = -aimDy;
 		var perpY = aimDx;
 		var lat = (handX - pcx) * perpX + (handY - pcy) * perpY;
-		var shift = lat >= 0 ? -TWIN_SEP : TWIN_SEP;
+		var shift = lat >= 0 ? -TWIN_SIDE : TWIN_SIDE;
 
-		twinHandX = held.x + held.origin.x + perpX * shift;
-		twinHandY = held.y + held.origin.y + perpY * shift;
+		twinHandX = held.x + held.origin.x + perpX * shift - aimDx * TWIN_BACK;
+		twinHandY = held.y + held.origin.y + perpY * shift - aimDy * TWIN_BACK;
 		twinPlaced = true;
+		twinFlip = held.flipY;
 
 		twinSprite.x = twinHandX - twinSprite.origin.x;
 		twinSprite.y = twinHandY - twinSprite.origin.y;
-		twinSprite.angle = held.angle;
+		twinSprite.angle = held.angle + (twinFlip ? twinKick : -twinKick);
 		twinSprite.flipX = held.flipX;
 		twinSprite.flipY = held.flipY;
 		twinSprite.scale.set(held.scale.x, held.scale.y);
@@ -183,15 +200,31 @@ class RevolverAttack
 
 		if (twin)
 		{
-			var tx = twinPlaced ? twinHandX : bx - dy * TWIN_SEP * 2;
-			var ty = twinPlaced ? twinHandY : by + dx * TWIN_SEP * 2;
-			var t = bullets.recycle(Bullet);
-			t.setSprite(key);
-			t.fire(tx + dx * MUZZLE, ty + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock, radius);
-			t.fromSuper = true;
-			fx.sparksAt(tx + dx * MUZZLE, ty + dy * MUZZLE);
+			pendDelay = TWIN_STAGGER;
+			pendDx = dx;
+			pendDy = dy;
+			pendDeg = aimDeg;
+			pendDamage = damage;
+			pendRadius = radius;
+			pendKey = key;
 		}
 		return b;
+	}
+
+	function fireTwin():Void
+	{
+		if (pendKey == null)
+			return;
+		var tx = twinHandX + pendDx * MUZZLE;
+		var ty = twinHandY + pendDy * MUZZLE;
+		var t = bullets.recycle(Bullet);
+		t.setSprite(pendKey);
+		t.fire(tx, ty, pendDx, pendDy, pendDeg, pendDamage, cfg.speed, cfg.range, cfg.knock, pendRadius);
+		t.fromSuper = true;
+		pendKey = null;
+		twinKick = TWIN_KICK;
+		fx.sparksAt(tx, ty);
+		FlxG.sound.play(Paths.sound("revolver"), 0.55);
 	}
 
 	public function reset():Void
@@ -209,6 +242,20 @@ class RevolverAttack
 			fireTimer -= elapsed;
 		if (bigTimer > 0)
 			bigTimer -= elapsed;
+
+		if (twinKick > 0)
+		{
+			twinKick -= TWIN_KICK * KICK_FADE * elapsed;
+			if (twinKick < 0)
+				twinKick = 0;
+		}
+
+		if (pendDelay > 0)
+		{
+			pendDelay -= elapsed;
+			if (pendDelay <= 0)
+				fireTwin();
+		}
 
 		if (twin && !status.drainSuper(elapsed / cfg.twinTime))
 			endTwin();
