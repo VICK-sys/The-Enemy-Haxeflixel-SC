@@ -45,7 +45,10 @@ class Lang
 	}
 
 	public static function font():String
-		return code == EN ? null : Paths.font("DotGothic16-Regular");
+		return code == JA ? Paths.font("DotGothic16-Regular") : Paths.font("modernDos");
+
+	public static function display():String
+		return code == EN ? Paths.font("runescape_uf") : font();
 
 	public static function t(key:String, ?args:Array<Dynamic>):String
 	{

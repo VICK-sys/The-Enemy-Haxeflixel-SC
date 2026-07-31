@@ -10,6 +10,12 @@ Aiming is a device question, so `Controls` owns the answer. It watches which dev
 
 Fire is pinned whenever a panel over the game closes, and stays pinned until neither attack button is down. Every weapon fires on hold rather than on the press, so the click that picks a weapon or dismisses a menu was still held on the first frame of play and went straight into the gun. Requiring the button to come up first means the click that closed the panel can never be the click that fires.
 
+## Fonts
+
+`Lang.font` answers the font for body text and `Lang.display` the one for large names. Japanese keeps `DotGothic16`, which is the only face here carrying kana and kanji. Everything else takes `modernDos`, which covers Latin-1 and so serves English and Spanish alike.
+
+`runescape_uf` is ASCII only, ninety six glyphs with no accents at all, so it is kept to text that cannot be translated. The boss name is the one place that qualifies, being a hardcoded word. Putting it on anything from the language tables would show holes the moment someone played in Spanish. The seven segment `digital-7` still owns the time stop clock, which is a readout rather than writing.
+
 ## Systems (source/systems/)
 
 PlayState builds each system once and updates it once per frame. The exception is `MenuList`, which the menu states build.

@@ -8,6 +8,7 @@ import flixel.text.FlxText;
 import flixel.math.FlxRect;
 import flixel.util.FlxColor;
 import util.Paths;
+import util.Lang;
 import entities.enemy.Enemies;
 
 class BossHud
@@ -123,7 +124,7 @@ class BossHud
 		for (i in 0...word.length)
 		{
 			var t = new FlxText(0, NAME_Y, 0, word.charAt(i));
-			t.setFormat(null, 32, FlxColor.WHITE, LEFT);
+			t.setFormat(Lang.display(), 32, FlxColor.WHITE, LEFT);
 			t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 			t.cameras = [camUI];
 			t.alpha = 0;
