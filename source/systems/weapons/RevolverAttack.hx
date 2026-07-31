@@ -15,7 +15,7 @@ import data.WeaponData.WeaponDataRegistry;
 class RevolverAttack
 {
 	static inline var MUZZLE:Float = 24;
-	static inline var TWIN_SEP:Float = 34;
+	static inline var TWIN_SEP:Float = 22;
 	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
 
 	public var bullets:FlxTypedGroup<Bullet>;
@@ -152,9 +152,7 @@ class RevolverAttack
 		var perpX = -aimDy;
 		var perpY = aimDx;
 		var lat = (handX - pcx) * perpX + (handY - pcy) * perpY;
-		var shift = -2 * lat;
-		if (shift > -TWIN_SEP && shift < TWIN_SEP)
-			shift = shift >= 0 ? TWIN_SEP : -TWIN_SEP;
+		var shift = lat >= 0 ? -TWIN_SEP : TWIN_SEP;
 
 		twinHandX = held.x + held.origin.x + perpX * shift;
 		twinHandY = held.y + held.origin.y + perpY * shift;
