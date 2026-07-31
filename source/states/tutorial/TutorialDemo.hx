@@ -70,6 +70,9 @@ class TutorialDemo extends FlxGroup
 		s.setPosition(cx - s.width / 2, cy - s.height / 2);
 	}
 
+	function midX(s:FlxSprite):Float
+		return s.x - s.offset.x + s.origin.x;
+
 	function midY(s:FlxSprite):Float
 		return s.y - s.offset.y + s.origin.y;
 

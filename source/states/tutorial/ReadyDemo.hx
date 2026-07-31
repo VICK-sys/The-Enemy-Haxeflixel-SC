@@ -12,6 +12,7 @@ class ReadyDemo extends TutorialDemo
 	static inline var LOOP:Float = 3.8;
 	static inline var READY_AT:Float = 1.3;
 	static inline var WAVE_AT:Float = 2.5;
+	static inline var BUBBLE_GAP:Float = 14;
 	static inline var PROMPT_Y:Float = 196;
 	static inline var WAVE_Y:Float = 452;
 
@@ -34,8 +35,7 @@ class ReadyDemo extends TutorialDemo
 		bubble.loadGraphic(Paths.image("ui/speech_ready"));
 		bubble.scale.set(4, 4);
 		bubble.updateHitbox();
-		bubble.x = actor.x + actor.width * 0.5 - bubble.width * 0.5;
-		bubble.y = actor.y - bubble.height - 18;
+		placeMid(bubble, midX(actor), midY(actor) - halfH(actor) - BUBBLE_GAP - halfH(bubble));
 		bubble.visible = false;
 
 		prompt = label(PROMPT_Y, 22, Lang.t("ready.prompt"));
