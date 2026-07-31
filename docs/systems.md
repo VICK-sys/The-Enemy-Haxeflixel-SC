@@ -8,6 +8,8 @@ Every input in the game asks `util/Controls` instead of the keyboard or mouse di
 
 Aiming is a device question, so `Controls` owns the answer. It watches which device spoke last, real window coordinates for the mouse, so a drifting camera cannot be mistaken for a moving hand, and serves either the mouse's world position or a virtual cursor held a fixed reach from the player in the right stick's direction. Panels opened over the game reset only the keyboard, never the pad: keyboard state is event driven and stays quiet after a reset, but a pad is polled, so resetting it makes a still held button read as a fresh press one frame later, which closed the pause the same instant a controller opened it. The crosshair, every weapon, the camera lean and the co-op aim targets all read that one answer, which is what makes a controller work everywhere without any weapon knowing devices exist.
 
+Fire is pinned whenever a panel over the game closes, and stays pinned until neither attack button is down. Every weapon fires on hold rather than on the press, so the click that picks a weapon or dismisses a menu was still held on the first frame of play and went straight into the gun. Requiring the button to come up first means the click that closed the panel can never be the click that fires.
+
 ## Systems (source/systems/)
 
 PlayState builds each system once and updates it once per frame. The exception is `MenuList`, which the menu states build.

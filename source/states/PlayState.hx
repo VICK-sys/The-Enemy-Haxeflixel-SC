@@ -67,6 +67,7 @@ class PlayState extends FlxState
 	private var boxes:systems.HitboxView;
 	private var wipe:IrisWipe;
 	public var restarting(default, null):Bool = false;
+	private var hadSub:Bool = false;
 
 	function setRestarting():Void
 		restarting = true;
@@ -340,6 +341,11 @@ class PlayState extends FlxState
 		updateCameraLean();
 
 		super.update(elapsed);
+
+		var nowSub = subState != null;
+		if (hadSub && !nowSub)
+			util.Controls.pinFire();
+		hadSub = nowSub;
 
 		fx.update();
 		var step = elapsed * WorldClock.scale;
