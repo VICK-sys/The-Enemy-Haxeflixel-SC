@@ -27,6 +27,8 @@
 	"options.resolution": "ウィンドウの大きさ  < 画面の{0}% >",
 	"options.vsync": "垂直同期  {0}",
 	"options.framerate": "フレームレート  < {0} >",
+	"options.idleFps": "非アクティブ時のFPS  < {0} >",
+	"idleFps.same": "ゲームと同じ",
 	"options.aspect": "画面比率  < {0} >",
 	"options.camera": "カメラの寄り  < {0}% >",
 	"options.shake": "画面の揺れ  < {0}% >",

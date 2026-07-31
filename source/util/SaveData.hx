@@ -135,6 +135,30 @@ class SaveData
 		return null;
 	}
 
+	public static var IDLE_STEPS:Array<Int> = [5, 10, 15, 30, 60, 0];
+
+	public static function idleFps():Int
+	{
+		ensure();
+		var v:Int = save.data.idleFps != null ? save.data.idleFps : 10;
+		return IDLE_STEPS.indexOf(v) >= 0 ? v : 10;
+	}
+
+	public static function setIdleFps(v:Int):Void
+	{
+		ensure();
+		save.data.idleFps = v;
+		save.flush();
+	}
+
+	public static function idleFramerate():Int
+	{
+		var v = idleFps();
+		if (v <= 0)
+			return FlxG.updateFramerate;
+		return v > FlxG.updateFramerate ? FlxG.updateFramerate : v;
+	}
+
 	public static function aspect():String
 	{
 		ensure();

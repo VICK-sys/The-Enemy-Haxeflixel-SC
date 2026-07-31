@@ -53,13 +53,14 @@ class OptionsSubState extends FlxSubState
 	static inline var RESET:Int = 14;
 	static inline var VOICE:Int = 15;
 	static inline var RESOLUTION:Int = 16;
+	static inline var IDLE_FPS:Int = 17;
 
 	static inline var TAB:Int = -1;
 	static inline var BACK:Int = -2;
 	static inline var BLANK:Int = -3;
 
 	static var PAGES:Array<{key:String, items:Array<Int>}> = [
-		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE]},
+		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE, IDLE_FPS]},
 		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, HUD, FPS]},
 		{key: "options.page.sounds", items: [VOLUME, SOUND3D]},
 		{key: "options.page.custom", items: [COLOR, VOICE, LANGUAGE, CONTROLS, RESET]}
@@ -313,6 +314,7 @@ class OptionsSubState extends FlxSubState
 			case VOLUME: Lang.t("options.volume", [Math.round(shownVolume * 100)]);
 			case DISPLAY: Lang.t("options.display", [Lang.t("display." + SaveData.displayMode())]);
 			case RESOLUTION: Lang.t("options.resolution", [SaveData.windowFill()]);
+			case IDLE_FPS: Lang.t("options.idleFps", [idleLabel()]);
 			case VSYNC: Lang.t("options.vsync", [onOff(SaveData.vsync())]);
 			case FRAMERATE: Lang.t("options.framerate", [fpsLabel()]);
 			case ASPECT: Lang.t("options.aspect", [aspectLabel()]);
@@ -353,6 +355,12 @@ class OptionsSubState extends FlxSubState
 
 	static function windowed():Bool
 		return SaveData.displayMode() == "windowed";
+
+	function idleLabel():String
+	{
+		var v = SaveData.idleFps();
+		return v <= 0 ? Lang.t("idleFps.same") : Std.string(v);
+	}
 
 	function stepResolution(dir:Int):Void
 		SaveData.setWindowFill(cycled(SaveData.WINDOW_STEPS, SaveData.windowFill(), dir));
@@ -433,6 +441,8 @@ class OptionsSubState extends FlxSubState
 				if (!windowed())
 					return;
 				stepResolution(dir);
+			case IDLE_FPS:
+				SaveData.setIdleFps(cycled(SaveData.IDLE_STEPS, SaveData.idleFps(), dir));
 			case VSYNC:
 				SaveData.setVsync(!SaveData.vsync());
 			case FRAMERATE:

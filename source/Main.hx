@@ -28,8 +28,6 @@ class Main extends Sprite
 		addEventListener(Event.ENTER_FRAME, onFrame);
 	}
 
-	static inline var IDLE_FPS:Int = 10;
-
 	function fitCounter():Void
 	{
 		if (counter == null)
@@ -45,7 +43,7 @@ class Main extends Sprite
 		FlxG.signals.postGameReset.add(function() FlxG.autoPause = false);
 		FlxG.signals.postStateSwitch.add(snapPixels);
 		snapPixels();
-		FlxG.signals.focusLost.add(function() FlxG.drawFramerate = IDLE_FPS);
+		FlxG.signals.focusLost.add(function() FlxG.drawFramerate = util.SaveData.idleFramerate());
 		FlxG.signals.focusGained.add(function() FlxG.drawFramerate = FlxG.updateFramerate);
 	}
 
