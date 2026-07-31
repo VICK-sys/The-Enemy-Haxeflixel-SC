@@ -6,6 +6,8 @@ import util.Paths;
 
 class HealthDemo extends TutorialDemo
 {
+	static inline var BATTERY_DROP:Float = 24;
+
 	private var actor:FlxSprite;
 	private var heart:FlxSprite;
 	private var barFill:FlxSprite;
@@ -44,7 +46,7 @@ class HealthDemo extends TutorialDemo
 			actor.animation.play("walk");
 			heart.alpha = 1;
 			heart.scale.set(4, 4);
-			heart.y = midY(actor) - heart.height * 0.5 + Math.sin(time * 4) * 4;
+			heart.y = midY(actor) + BATTERY_DROP - heart.height * 0.5 + Math.sin(time * 4) * 4;
 			barFill.scale.x = 0.5;
 		}
 		else if (t < 1.8)
