@@ -56,8 +56,6 @@ The timing reward sits on the shine itself. The `charge_glow` pop from the cross
 
 The charge feeds a keep-alive each frame it is driven. Anything that stops driving it for a frame, such as death, a super, throwing the hammer, or the weapon leaving the hand, cancels it and silences the sound, so no path out of the state can leave the charge loop playing. Taking a hit cancels it too, through the combat's `onHurt` signal, which fires only when damage really lands: a hit swallowed by iframes or invincibility leaves the charge running. A player still holding the button after the hit starts a fresh charge from zero. The wind-back, tremble and shine all ride fields on the held weapon, and remote players see the giga swing as its own event with the giga slash and sound.
 
-The grab rests before it can be thrown again. Right click holds rather than taps, so the throw repeats as soon as the hook is idle, which is fine when it sails out to its full range and takes a moment to come home. Thrown at a wall it is not: the hook spawns a short way out, the wall check kills it on the first frame, and the retract catches it immediately, so the whole throw finished in a couple of frames and started over, stuttering the sound and the yoyo. A short rest is set when the hook comes home empty. A throw that actually caught something never touches it, so grabbing is unaffected. Dexterity shortens it like every other recovery.
-
 ## YoyoJab
 
 The yoyo's primary, held rather than tapped. Press left click and the yoyo is thrown out. Hold it and the yoyo stays out, spinning, chasing the cursor but never further from the hand than `reach`. Aim past that limit and it sits on the edge of the circle in the cursor's direction. Let go and it comes home.
@@ -177,6 +175,8 @@ On a miss it retracts to the hand, and it stays live on the way back. A returnin
 A held enemy is a shield. Enemy fire that reaches it stops there and wounds the enemy instead of the player, so you can walk a body into a firing line. Enough shots kill it, and a dead victim drops off the string the same way any other loss does.
 
 The grab cannot latch an enemy flagged not `grabbable`, which means anything big, and every boss is big. It deals `snagDamage` instead, then retracts. The return trip snags the same way, so a throw that reaches a big enemy on the way home still hurts it. One throw lands one snag either way. Without that cap the returning line would bill it every frame it overlapped. The hook flies at the same speed as the thrown yoyo, so the two clicks feel like one weapon.
+
+The grab rests before it can be thrown again. Right click holds rather than taps, so the throw repeats as soon as the hook is idle, which is fine when it sails out to its full range and takes a moment to come home. Thrown at a wall it is not: the hook spawns a short way out, the wall check kills it on the first frame, and the retract catches it immediately, so the whole throw finished in a couple of frames and started over, stuttering the sound and the yoyo. A short rest is set when the hook comes home empty. A throw that actually caught something never touches it, so grabbing is unaffected. Dexterity shortens it like every other recovery.
 
 ## ThrowAttack
 
