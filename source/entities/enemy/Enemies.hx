@@ -131,7 +131,15 @@ class Enemies extends FlxSprite
 		if (data.stunTime != null) stunTime = data.stunTime;
 		brain.wanderSpeed = (data.wanderSpeed != null ? data.wanderSpeed : 100) + FlxG.random.float() * 20;
 
-		if (data.attack == "boss")
+		if (data.attack == "knight")
+		{
+			bossBody = true;
+			attack = new KnightBoss(data.knight);
+			selfDriven = true;
+			grabbable = false;
+			explodes = true;
+		}
+		else if (data.attack == "boss")
 		{
 			bossBody = true;
 			gun = new FlxSprite();

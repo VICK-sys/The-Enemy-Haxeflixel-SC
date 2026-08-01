@@ -32,6 +32,20 @@ typedef BossData = {
 	guns:Array<GunData>
 }
 
+typedef KnightData = {
+	hoverSpeed:Float,
+	hoverTime:Float,
+	prefMin:Float,
+	prefMax:Float,
+	strafeWeight:Float,
+	windTime:Float,
+	flySpeed:Float,
+	flyTime:Float,
+	slashTime:Float,
+	slashScale:Float,
+	restTime:Float
+}
+
 typedef EnemyData = {
 	sprite:String,
 	width:Float,
@@ -47,6 +61,7 @@ typedef EnemyData = {
 	attack:String,
 	?big:Bool,
 	?boss:BossData,
+	?knight:KnightData,
 	contactDamage:Float,
 	?shotDamage:Float,
 	?shotSpeed:Float,

@@ -367,7 +367,11 @@ Boss waves pick a kind from the `bosses` list in `waves.json` rather than always
 
 The Roaring Knight is the second entry. Its art is cut from a rip of the Deltarune sheet: each frame sits in its own red box there, so the boxes are found as connected red regions, the interior of each is taken without its border, and every pixel is snapped to fully solid or fully clear, since the rip carried a hundred thousand part-transparent pixels that would have fringed at 4x. Frames of one animation are cropped to the union of their own bounds, which keeps the movement inside an animation, then centred on a shared canvas with their feet on the bottom edge, which keeps the animations lined up with each other. Grouping frames by gaps in the grid was not enough, because the sheet separates some animations by label alone: Ball and Ball Transition sit in one unbroken run of equally spaced boxes. The eighteen animations are therefore cut at the x positions of the sheet's own printed labels, which is the only thing that actually marks where one ends. Every prefix carries a trailing underscore, since flixel matches an animation by string prefix and would otherwise let Ball swallow every Ball Transition frame as well.
 
-The knight fights with the same `boss` behaviour Rofel uses, holding a sword where Rofel holds a gun, and firing shards, stars and thrown blades cut from the same sheet.
+The knight does not fight like Rofel. `KnightBoss` is a melee state machine: it hovers at a chosen distance with its sword out, winds up, flies at where the player stood when the wind ended, and slashes on arrival or when the dash runs out, then rests. The slash raises its contact damage for the length of that one animation. The restore is written as "any phase that is not the slash puts the damage back", rather than being handed back on the way out, because a reset carries no reference to the enemy and could otherwise leave the boost on for good.
+
+Being hit interrupts whatever it is doing with the static animation. The behaviour re-asserts its own animation every frame, so it would otherwise overwrite that within one frame: the stun is far shorter than the animation. It therefore holds off while a non-looping hurt is still running and takes the sprite back when that finishes.
+
+Rofel fights with the `boss` behaviour, holding a sword where Rofel holds a gun, and firing shards, stars and thrown blades cut from the same sheet.
 
 ### CustomArena
 
