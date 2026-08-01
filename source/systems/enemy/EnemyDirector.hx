@@ -255,11 +255,22 @@ class EnemyDirector
 			forcedBoss = null;
 			return data.EnemyData.EnemyDataRegistry.has(forced) ? forced : "rofel";
 		}
-		var roster = waveData.bosses;
-		if (roster == null || roster.length == 0)
+		var roster = bossRoster();
+		if (roster.length == 0)
 			return "rofel";
 		var pick = roster[FlxG.random.int(0, roster.length - 1)];
 		return data.EnemyData.EnemyDataRegistry.has(pick) ? pick : "rofel";
+	}
+
+	public function bossRoster():Array<String>
+	{
+		var roster = waveData.bosses != null ? waveData.bosses.copy() : [];
+		#if debug
+		if (waveData.debugBosses != null)
+			for (k in waveData.debugBosses)
+				roster.push(k);
+		#end
+		return roster;
 	}
 
 	function spawnBossPack(count:Int):Void
