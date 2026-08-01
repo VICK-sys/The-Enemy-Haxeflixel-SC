@@ -10,8 +10,8 @@
 		{ "name": "hurt", "prefix": "Hurt", "fps": 8, "loop": false },
 		{ "name": "death", "prefix": "Death", "fps": 8, "loop": false }
 	],
-	"hp": 40,
-	"speed": 385,
+	"hp": 160,
+	"speed": 300,
 	"aggroRange": 100000,
 	"stopThreshold": 0,
 	"attackRange": 0,
@@ -19,6 +19,9 @@
 	"big": true,
 	"domo": {
 		"farDist": 620,
+		"prefMin": 320,
+		"prefMax": 520,
+		"strafeWeight": 0.6,
 		"cooldown": 1.4,
 		"shotWindup": 0.55,
 		"shotBursts": 3,

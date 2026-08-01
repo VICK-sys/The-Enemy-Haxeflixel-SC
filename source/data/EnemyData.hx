@@ -63,6 +63,9 @@ typedef FlankData = {
 
 typedef DomoData = {
 	farDist:Float,
+	prefMin:Float,
+	prefMax:Float,
+	strafeWeight:Float,
 	cooldown:Float,
 	shotWindup:Float,
 	shotBursts:Int,
@@ -120,10 +123,6 @@ typedef EnemyData = {
 	?chargeSpeed:Float,
 	?chargeTime:Float,
 	?chargeRecover:Float,
-	?shootWindup:Float,
-	?shootStep:Float,
-	?shootGap:Float,
-	?shootDisengage:Float,
 	shadowOffX:Float,
 	shadowOffXFlip:Float,
 	shadowOffY:Float,

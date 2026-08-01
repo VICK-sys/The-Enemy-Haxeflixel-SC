@@ -11,7 +11,7 @@
 		{ "name": "death", "prefix": "Death", "fps": 10, "loop": true },
 		{ "name": "spin", "prefix": "Spin", "fps": 14, "loop": true }
 	],
-	"hp": 12,
+	"hp": 3,
 	"speed": 345,
 	"aggroRange": 100000,
 	"stopThreshold": 0,

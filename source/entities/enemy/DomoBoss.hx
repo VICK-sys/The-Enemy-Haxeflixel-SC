@@ -12,6 +12,8 @@ class DomoBoss implements AttackBehavior
 	static inline var DASH:Int = 4;
 
 	static inline var BRAKE:Float = 6;
+	static inline var STRAFE_HOLD:Float = 1.4;
+	static inline var STRAFE_VARY:Float = 1.3;
 
 	private var cfg:DomoData;
 	private var phase:Int = CHASE;
@@ -21,6 +23,8 @@ class DomoBoss implements AttackBehavior
 	private var dashesLeft:Int = 0;
 	private var dashX:Float = 1;
 	private var dashY:Float = 0;
+	private var strafeDir:Int = 1;
+	private var strafeTimer:Float = 0;
 
 	public function new(cfg:DomoData)
 	{
@@ -38,7 +42,7 @@ class DomoBoss implements AttackBehavior
 		{
 			case CHASE:
 				face(e, ax);
-				e.velocity.set(ax * e.speed, ay * e.speed);
+				hover(e, elapsed, ax, ay, distance);
 				cooldown -= elapsed;
 				if (cooldown <= 0)
 					pick(e, distance);
@@ -102,6 +106,42 @@ class DomoBoss implements AttackBehavior
 		e.poise = phase != CHASE;
 		e.ramming = phase == DASH;
 		return false;
+	}
+
+	function hover(e:Enemies, elapsed:Float, ax:Float, ay:Float, distance:Float):Void
+	{
+		strafeTimer -= elapsed;
+		if (strafeTimer <= 0)
+		{
+			strafeDir = -strafeDir;
+			strafeTimer = STRAFE_HOLD + FlxG.random.float() * STRAFE_VARY;
+		}
+		if (e.wasTouching != flixel.util.FlxDirectionFlags.NONE)
+			strafeDir = -strafeDir;
+
+		var mvx = 0.0;
+		var mvy = 0.0;
+		if (distance < cfg.prefMin)
+		{
+			mvx -= ax;
+			mvy -= ay;
+		}
+		else if (distance > cfg.prefMax)
+		{
+			mvx += ax;
+			mvy += ay;
+		}
+		mvx += -ay * strafeDir * cfg.strafeWeight;
+		mvy += ax * strafeDir * cfg.strafeWeight;
+
+		var ml = Math.sqrt(mvx * mvx + mvy * mvy);
+		if (ml > 0)
+			e.velocity.set(mvx / ml * e.speed, mvy / ml * e.speed);
+		else
+			e.velocity.set(0, 0);
+
+		if (e.animation.name != "hurt" || e.animation.finished)
+			e.animation.play(ml > 0 ? "walk" : "idle");
 	}
 
 	function crowded():Bool

@@ -169,15 +169,6 @@ class Enemies extends FlxSprite
 		{
 			attack = new FlankAttack(data.flank);
 		}
-		else if (data.attack == "shoot")
-		{
-			var shoot = new ShootAttack();
-			if (data.shootWindup != null) shoot.windupTime = data.shootWindup;
-			if (data.shootStep != null) shoot.stepTime = data.shootStep;
-			if (data.shootGap != null) shoot.gapTime = data.shootGap;
-			if (data.shootDisengage != null) shoot.disengageSlack = data.shootDisengage;
-			attack = shoot;
-		}
 		else
 		{
 			var charge = new ChargeAttack();
