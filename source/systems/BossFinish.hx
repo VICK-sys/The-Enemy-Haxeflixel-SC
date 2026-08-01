@@ -1,8 +1,10 @@
 package systems;
 
 import flixel.FlxG;
+import flixel.sound.FlxSound;
 import flixel.tweens.FlxEase;
 import entities.Player;
+import util.Paths;
 
 class BossFinish
 {
@@ -12,6 +14,8 @@ class BossFinish
 	static inline var EASE_IN:Float = 0.25;
 	static inline var HOLD:Float = 1.6;
 	static inline var EASE_OUT:Float = 1.15;
+	static inline var VOLUME:Float = 0.8;
+	static inline var FADE:Float = 0.35;
 
 	public var active(get, never):Bool;
 
@@ -23,6 +27,7 @@ class BossFinish
 	private var atY:Float = 0;
 	private var fromZoom:Float = 1;
 	private var toZoom:Float = 1;
+	private var whoosh:FlxSound;
 
 	public function new(player:Player, fx:Fx)
 	{
@@ -43,6 +48,10 @@ class BossFinish
 			running = true;
 			fromZoom = FlxG.camera.zoom;
 			toZoom = fromZoom * ZOOM_IN;
+			if (whoosh == null)
+				whoosh = FlxG.sound.load(Paths.sound("slowmo"), VOLUME, false, FlxG.sound.defaultSoundGroup);
+			whoosh.volume = VOLUME;
+			whoosh.play(true);
 		}
 	}
 
@@ -52,9 +61,17 @@ class BossFinish
 			return;
 		running = false;
 		clock = 0;
+		hush();
 		fx.slowFactor = 1;
 		FlxG.camera.zoom = fromZoom;
 		FlxG.camera.targetOffset.set(0, 0);
+	}
+
+	function hush():Void
+	{
+		if (whoosh == null || !whoosh.playing)
+			return;
+		whoosh.fadeOut(FADE, 0, function(_) whoosh.stop());
 	}
 
 	public function update(elapsed:Float):Void

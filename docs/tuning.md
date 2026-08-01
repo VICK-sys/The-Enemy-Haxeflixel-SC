@@ -31,7 +31,7 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `entities/enemy/EnemyBrain.hx` | wander and idle durations, walk-in lean and its slack |
 | `systems/EnemyShots.hx` | shot wall probe |
 | `systems/BossDeath.hx` | boss death shake duration and amplitude |
-| `systems/BossFinish.hx` | kill camera slow factor, zoom, lean and the three timings that make up its length |
+| `systems/BossFinish.hx` | kill camera slow factor, zoom, lean, whoosh volume, and the three timings that make up its length |
 | `systems/Fx.hx` | hitstop length, shake strengths, spark settings, dash line fade, dash steam frame rate and scale |
 | `systems/PlayerCombat.hx` | voice volume, death throes length and shake, hurt and death line counts, dash and dash-ready volumes, dash steam offset from the back |
 | `systems/TimeStop.hx` | trail tint, alpha, fade, cadence, and minimum speed. Overlay tint strength. Minimum music pitch |

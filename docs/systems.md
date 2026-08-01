@@ -58,6 +58,8 @@ The kill camera. The blow that kills a boss eases the world down to a third spee
 
 `PlayState` hands it the camera by skipping the cursor lean while it is running, so the two never fight over `targetOffset`. Opening a panel cancels it, which stops a paused menu inheriting the slow motion.
 
+It plays `slowmo` over the top, and owns that sound rather than firing and forgetting it. `FlxG.sound.play` hands back a pooled object, and the pool takes it again the moment it finishes. Holding that handle meant the fade on the way out could land on whatever unrelated sound had since been given the object. It loads its own instance instead, kept out of the pool, and replays it on each kill.
+
 `BossDeath` raises it on the frame it first sees a boss dead, which is the same frame the shake begins. The shake is paced by game time, so it stretches with the slow motion and the explosion lands after the camera has let go. The host relays the moment to clients, since a client never runs `BossDeath` itself.
 
 ### RenderLayers
