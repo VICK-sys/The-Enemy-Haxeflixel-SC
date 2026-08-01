@@ -684,8 +684,12 @@ class Hud
 		deadText.visible = false;
 	}
 
+	static var AS_DRAWN:Array<String> = [
+		"ammo_bullet", "ammo_bullet_empty", "ammo_arrow", "ammo_arrow_empty", "ammo_indicator"
+	];
+
 	function uiArt(name:String):flixel.graphics.FlxGraphic
-		return util.HuePalette.graphic("ui/" + name, hue);
+		return util.HuePalette.graphic("ui/" + name, AS_DRAWN.indexOf(name) >= 0 ? 0 : hue);
 
 	function skin(s:FlxSprite, name:String):Void
 	{
