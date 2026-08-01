@@ -54,6 +54,8 @@ The camera leans toward the cursor rather than sitting on the player. It feeds `
 
 ESC opens it. It freezes the game, pauses all audio, and dims the screen. ESC closes it again. The volume keys still work while it is open.
 
+It holds audio through `Music.hold` rather than pausing the sound front end directly, because pausing what is playing is only half the job. Timers and tweens live on global plugins, so they keep running while a substate is open even though the state itself does not update. Both of the boss show's music changes start from inside a timer, a beat after the boss arrives and a beat after it dies, so pausing on either of those beats let the new track start after the pause had already silenced the old one, and it played over the menu. While the hold is up `Music.play` still loads and swaps the track, then pauses it, so the resume on close picks it up where the player expects. The hold clears on close, on quit, and in `destroy`, since a track left held would follow the player into the next state as silence.
+
 A HELP row opens the same seven page popup the first run shows, so the controls are never more than a pause away. Opened from here its footer reads CLOSE rather than PLAY, since closing it lands back on the pause menu rather than into the game.
 
 QUIT TO MENU returns to the editor instead when the run came from a playtest. The editor sets that flag itself. The state does not infer it from the map being custom. The menu can start a custom map too, and those runs belong back at the menu.

@@ -9,6 +9,7 @@ import flixel.util.FlxColor;
 import ui.MenuList;
 import util.IrisWipe;
 import util.Lang;
+import util.Music;
 
 class PauseSubState extends FlxSubState
 {
@@ -44,7 +45,7 @@ class PauseSubState extends FlxSubState
 		add(list);
 
 		FlxG.mouse.visible = true;
-		FlxG.sound.pause();
+		Music.hold();
 
 		subStateClosed.add(function(_) relabel(title));
 
@@ -54,8 +55,14 @@ class PauseSubState extends FlxSubState
 	override public function close():Void
 	{
 		FlxG.mouse.visible = false;
-		FlxG.sound.resume();
+		Music.release();
 		super.close();
+	}
+
+	override public function destroy():Void
+	{
+		Music.release();
+		super.destroy();
 	}
 
 	function relabel(title:FlxText):Void
@@ -111,7 +118,7 @@ class PauseSubState extends FlxSubState
 				leaving = true;
 				list.enabled = false;
 				FlxG.mouse.visible = false;
-				FlxG.sound.resume();
+				Music.release();
 				net.Net.stop();
 				if (util.CustomArena.fromEditor)
 					new IrisWipe(this).close(function() FlxG.switchState(() -> new EditorState()));
