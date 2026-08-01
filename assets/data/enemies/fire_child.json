@@ -14,7 +14,7 @@
 	"hp": 3,
 	"speed": 300,
 	"aggroRange": 100000,
-	"stopThreshold": 170,
+	"stopThreshold": 0,
 	"attackRange": -1,
 	"attack": "charge",
 	"contactDamage": 0.25,
