@@ -12,11 +12,13 @@ class EnemyNav
 	static inline var FAR_DIST:Float = 950;
 	static inline var FAR_MULT:Float = 3;
 	static inline var MIN_PATH_AGE:Float = 0.4;
+	static inline var PROP_STEP:Float = 16;
 
 	static var pathBudget:Int = BUDGET_PER_FRAME;
 
 	public var map:FlxTilemap;
 	public var losClear:Bool = true;
+	public var fireClear:Bool = true;
 	public var bodyRadius:Float = 40;
 	public var repathInterval:Float = 0.35;
 	public var moveX:Float = 0;
@@ -66,8 +68,10 @@ class EnemyNav
 		if (map == null)
 		{
 			losClear = true;
+			fireClear = true;
 			return true;
 		}
+		fireClear = rayClear(fromX, fromY, toX, toY);
 		losClear = corridorClear(fromX, fromY, toX, toY);
 		if (losClear)
 			return true;
@@ -110,7 +114,20 @@ class EnemyNav
 		var clear = map.ray(a, b);
 		a.put();
 		b.put();
-		return clear;
+		if (!clear)
+			return false;
+
+		var dx = x2 - x1;
+		var dy = y2 - y1;
+		var len = Math.sqrt(dx * dx + dy * dy);
+		var steps = Math.ceil(len / PROP_STEP);
+		for (i in 1...steps)
+		{
+			var t = i / steps;
+			if (systems.world.PropBlock.at(x1 + dx * t, y1 + dy * t))
+				return false;
+		}
+		return true;
 	}
 
 	public function notifyBlocked():Void

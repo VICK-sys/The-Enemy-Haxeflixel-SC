@@ -370,6 +370,7 @@ class Enemies extends FlxSprite
 				var tmy:Float = target.y + target.height * 0.5;
 				var bdx = tmx - (x + width * 0.5);
 				var bdy = tmy - (y + height * 0.5);
+				pathing.tick(elapsed, x + width * 0.5, y + height * 0.5, tmx, tmy);
 				attack.update(this, elapsed, bdx, bdy, Math.sqrt(bdx * bdx + bdy * bdy));
 			}
 			else

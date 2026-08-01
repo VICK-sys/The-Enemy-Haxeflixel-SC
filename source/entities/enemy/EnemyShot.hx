@@ -22,6 +22,8 @@ class EnemyShot extends FlxSprite
 	public var friendly:Bool = false;
 	public var superTurned:Bool = false;
 	public var held:Bool = false;
+	public var lastX:Float = 0;
+	public var lastY:Float = 0;
 
 	private var life:Float = 0;
 	private var spriteKey:String = null;
@@ -52,6 +54,8 @@ class EnemyShot extends FlxSprite
 		if (want != spriteKey)
 			use(want);
 		setPosition(cx - width / 2, cy - height / 2);
+		lastX = cx;
+		lastY = cy;
 		dirX = dx;
 		dirY = dy;
 		this.damage = damage;
@@ -109,6 +113,8 @@ class EnemyShot extends FlxSprite
 	{
 		if (held)
 			return;
+		lastX = x + width / 2;
+		lastY = y + height / 2;
 		elapsed *= WorldClock.scale;
 		super.update(elapsed);
 		life -= elapsed;

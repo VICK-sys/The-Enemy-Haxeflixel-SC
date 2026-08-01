@@ -278,6 +278,12 @@ Wave-spawned enemies start off screen in an entering mode. That walks them throu
 
 The line-of-sight and pathfinding component. A few times per second it checks a body-width corridor toward the target, using two offset rays. When a wall blocks that corridor, it runs A* over the map. It simplifies the result with a body-sized box cast, then steers along the waypoints. Wall contact while chasing forces an immediate re-path.
 
+It answers two different questions and keeps them apart. `losClear` is the movement corridor, two rays offset by the body radius, and it decides when to path. `fireClear` is one centre ray, and it decides whether a bullet would get through. They disagree in both directions: a pillar thinner than the body passes both shoulder rays while sitting square on the bullet line, and a clipped shoulder blocks the corridor while the shot itself is fine. Every ranged decision reads `fireClear`, movement reads `losClear`.
+
+Both rays also step along their length checking prop solids, since props live outside the tilemap and `map.ray` cannot see them. A tree is cover the same as a pillar.
+
+The tile A* with the box cast and the corridor rays is the navigation model, and it fits a tile map. A navigation mesh would rebuild the same answers from triangles. The gap was never the mesh, it was that self driven bosses skipped the brain, which was the only thing that ticked this component, so they kited and fired with no cover awareness at all. The sprite now ticks pathing for them too.
+
 ### Attack behaviours
 
 `AttackBehavior`, `ChargeAttack`, `FlankAttack` and `RofelBoss` are the attack style interface and its implementations. A charge is a windup, a straight lunge and a recovery.
@@ -292,9 +298,13 @@ A slide ends early if it stalls. The behaviour sets a velocity but a wall decide
 
 `RofelBoss` is the boss brain, ported from the RofelShooter game. It kites the player, keeping a preferred distance band and strafing sideways, bouncing off walls. It cycles through Rofel's five guns: pistol, shotgun, sniper, revolver and laser. Each carries its own bullet sprite, speed, spread, damage and burst pattern. A held gun sprite rotates to aim at the player and swaps per weapon. Enemies with the `"boss"` attack are `selfDriven`, so they skip the normal FSM and run this brain directly.
 
+It only fights what it can hit. While `fireClear` is down it holds its fire mid pattern, volley and cooldown frozen where they stood, and drops the kite for a straight hunt along the path toward the player. The moment the line opens the pattern resumes from where it paused. Domo gates the same way: the hover hunts instead of holding the band, and the decision roll never picks the shotgun without a line, taking the dash or the summon instead.
+
 ### Shots
 
-`EnemyShot` is the pooled enemy projectile. It carries its damage, speed, range and optional sprite from the shot request, and sprite bullets rotate to face travel.
+`EnemyShot` is the pooled enemy projectile. It carries its damage, speed, range and optional sprite from the shot request, and sprite bullets rotate to face travel. It remembers where it was last frame, because the wall check needs the whole segment it travelled: the sniper round crosses 27 px a frame and a wall tile is 24, so a single probe point ahead of the bullet could land past a pillar it had passed through. The sweep from last position to next samples every step of the way.
+
+`EnemyShots` refuses to spawn a shot whose path from the shooter's centre to its muzzle origin crosses a wall or a prop. The sniper's origin sits 194 px out from Rofel's body, which used to poke through cover and hit a player standing safely behind it. A gun pressed against a wall now just does not fire.
 
 `ShotSpec` is one queued shot request: direction, damage, speed, range, sprite, sound, and an optional spawn origin. Behaviours push these onto the enemy's `pendingShots`, and the director drains and fires them. That lets the boss fire multi-bullet volleys with per-shot parameters.
 

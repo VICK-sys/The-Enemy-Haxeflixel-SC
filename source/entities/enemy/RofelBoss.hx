@@ -39,7 +39,8 @@ class RofelBoss implements AttackBehavior
 		var cx = e.x + e.width * 0.5;
 		var cy = e.y + e.height * 0.5;
 
-		move(e, elapsed, ax, ay, distance);
+		var hunting = !e.pathing.fireClear;
+		move(e, elapsed, ax, ay, distance, cx, cy, hunting);
 
 		if (curGun < 0)
 			selectGun(FlxG.random.int(0, guns.length - 1));
@@ -47,6 +48,12 @@ class RofelBoss implements AttackBehavior
 		var g = guns[curGun];
 		var handX = cx + ax * cfg.gunDist;
 		var handY = cy + ay * cfg.gunDist;
+
+		if (hunting)
+		{
+			updateGun(handX, handY, aimDeg);
+			return false;
+		}
 
 		if (shotsLeft > 0)
 		{
@@ -76,8 +83,20 @@ class RofelBoss implements AttackBehavior
 		return false;
 	}
 
-	function move(e:Enemies, elapsed:Float, ax:Float, ay:Float, distance:Float):Void
+	function move(e:Enemies, elapsed:Float, ax:Float, ay:Float, distance:Float, cx:Float, cy:Float, hunting:Bool):Void
 	{
+		if (hunting)
+		{
+			e.pathing.steer(cx, cy, ax, ay);
+			e.velocity.set(e.pathing.moveX * cfg.moveSpeed, e.pathing.moveY * cfg.moveSpeed);
+			if (e.pathing.moveX > 0.05)
+				e.flipX = false;
+			else if (e.pathing.moveX < -0.05)
+				e.flipX = true;
+			e.animation.play("walk");
+			return;
+		}
+
 		strafeTimer -= elapsed;
 		if (strafeTimer <= 0)
 		{

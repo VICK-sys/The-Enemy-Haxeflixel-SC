@@ -89,7 +89,7 @@ class FlankAttack implements AttackBehavior
 		if (phase != SLIDE && d < cfg.minDist)
 			repost(e, inX, inY);
 
-		if (distance > e.attackRange + cfg.disengage || !e.pathing.losClear)
+		if (distance > e.attackRange + cfg.disengage || !e.pathing.fireClear)
 		{
 			started = false;
 			return true;

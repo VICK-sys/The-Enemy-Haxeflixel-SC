@@ -110,6 +110,15 @@ class DomoBoss implements AttackBehavior
 
 	function hover(e:Enemies, elapsed:Float, ax:Float, ay:Float, distance:Float):Void
 	{
+		if (!e.pathing.fireClear)
+		{
+			e.pathing.steer(e.x + e.width * 0.5, e.y + e.height * 0.5, ax, ay);
+			e.velocity.set(e.pathing.moveX * e.speed, e.pathing.moveY * e.speed);
+			if (e.animation.name != "hurt" || e.animation.finished)
+				e.animation.play("walk");
+			return;
+		}
+
 		strafeTimer -= elapsed;
 		if (strafeTimer <= 0)
 		{
@@ -152,6 +161,14 @@ class DomoBoss implements AttackBehavior
 		if (distance > cfg.farDist)
 		{
 			if (!crowded() && FlxG.random.bool())
+				beginSummon(e);
+			else
+				beginDash(e);
+			return;
+		}
+		if (!e.pathing.fireClear)
+		{
+			if (!crowded() && FlxG.random.bool(35))
 				beginSummon(e);
 			else
 				beginDash(e);
