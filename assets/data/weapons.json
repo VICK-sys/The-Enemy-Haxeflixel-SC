@@ -109,10 +109,10 @@
 		"lunge": 260,
 		"swing": {
 			"spawnDist": 145,
-			"meleeRange": 245,
-			"meleeArcCos": -0.5,
-			"damage": 1,
-			"effectScale": 1.4,
+			"meleeRange": 310,
+			"meleeArcCos": -0.75,
+			"damage": 7,
+			"effectScale": 2.6,
 			"hitstop": 2,
 			"hitstopScale": 0.4,
 			"hitShake": 0.006,
@@ -122,16 +122,17 @@
 		},
 		"finisher": {
 			"spawnDist": 145,
-			"meleeRange": 300,
-			"meleeArcCos": -0.6,
-			"damage": 4,
-			"effectScale": 2.4,
+			"meleeRange": 310,
+			"meleeArcCos": -0.75,
+			"damage": 7,
+			"effectScale": 2.6,
 			"hitstop": 18,
 			"hitstopScale": 0.1,
 			"hitShake": 0.016,
 			"knock": 8,
 			"hitBrace": 10,
-			"sound": "weapon/gigaSwing"
+			"sound": "weapon/gigaSwing",
+			"shineMult": 1.5
 		}
 	},
 	"arrowStorm": {

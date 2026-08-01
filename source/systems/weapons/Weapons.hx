@@ -53,19 +53,7 @@ class Weapons
 		swing.onConnect = held.impactPose;
 		bash.onConnect = held.impactPose;
 		gigaSwing = new SwingAttack(director, hits, fx, weaponCfg.giga);
-		gigaSwing.onConnect = function()
-		{
-			held.impactPose();
-			if (gigaSwing.boosted)
-			{
-				var punch = FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 1.0);
-				if (punch != null)
-					punch.pitch = 0.82;
-				FlxG.sound.play(util.Paths.sound("hammer"), 0.5);
-			}
-			else
-				FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 0.9);
-		}
+		gigaSwing.onConnect = gigaHit(gigaSwing);
 		giga = new GigaCharge(held, fx, weaponCfg.giga);
 		status.onHurt = function() giga.letGo();
 		yoyoJab = new YoyoJab(director, hits, fx);
@@ -76,12 +64,12 @@ class Weapons
 		throwAttack.onCaught = function() swing.coolFor(weaponCfg.thrown.catchCooldown);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
 		flurrySwing = new SwingAttack(director, hits, fx, weaponCfg.flurry.swing);
-		flurrySwing.onConnect = held.impactPose;
+		flurrySwing.onConnect = gigaHit(flurrySwing);
 		flurryFinish = new SwingAttack(director, hits, fx, weaponCfg.flurry.finisher);
-		flurryFinish.onConnect = held.impactPose;
+		flurryFinish.onConnect = gigaHit(flurryFinish);
 		flurry = new HammerFlurry(player, status, held, flurrySwing, flurryFinish);
 		flurry.onSwing = function(pmx, pmy, dx, dy, deg, fin)
-			emitAttack(fin ? Giga : Bash, pmx, pmy, dx, dy, deg);
+			emitAttack(Giga, pmx, pmy, dx, dy, deg, 0, fin);
 		flurry.onFinisher = function(cx, cy)
 		{
 			if (onSuperLaunch != null)
@@ -101,6 +89,23 @@ class Weapons
 			fx.chargePop(held.handX() + a.dx * BOW_MUZZLE, held.handY() + a.dy * BOW_MUZZLE);
 			held.flash();
 		}
+	}
+
+	function gigaHit(atk:SwingAttack):Void->Void
+	{
+		return function()
+		{
+			held.impactPose();
+			if (atk.boosted)
+			{
+				var punch = FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 1.0);
+				if (punch != null)
+					punch.pitch = 0.82;
+				FlxG.sound.play(util.Paths.sound("hammer"), 0.5);
+			}
+			else
+				FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 0.9);
+		};
 	}
 
 	public var superBusy(get, never):Bool;

@@ -117,7 +117,7 @@ class HammerFlurry
 		var pmx = player.x + player.width * 0.5;
 		var pmy = player.y + player.height * 0.5;
 		var a = aim(pmx, pmy);
-		held.beginSwing(a.deg, Bash, rising);
+		held.beginSwing(a.deg, Giga, rising);
 		swingAtk.fire(pmx, pmy, a.dx, a.dy, a.deg, held.handX(), held.handY(), false, rising);
 		player.velocity.set(a.dx * cfg.lunge, a.dy * cfg.lunge);
 		if (onSwing != null)
@@ -133,7 +133,7 @@ class HammerFlurry
 		var pmy = player.y + player.height * 0.5;
 		var a = aim(pmx, pmy);
 		held.beginSwing(a.deg, Giga);
-		finishAtk.fire(pmx, pmy, a.dx, a.dy, a.deg, held.handX(), held.handY());
+		finishAtk.fire(pmx, pmy, a.dx, a.dy, a.deg, held.handX(), held.handY(), true);
 		player.velocity.set(a.dx * cfg.lunge * FINISH_LUNGE, a.dy * cfg.lunge * FINISH_LUNGE);
 		Fx.shake(0.012, 0.25);
 		if (onSwing != null)

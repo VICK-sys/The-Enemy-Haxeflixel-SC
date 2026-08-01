@@ -454,8 +454,9 @@ class NetSync
 		if (hitCap == 0)
 		{
 			var w = data.WeaponData.WeaponDataRegistry.get();
+			var fin = w.flurry.finisher;
 			var top:Float = w.swing.damage;
-			for (v in [w.yoyo.damage, w.revolver.damage, w.bowCharge.damage * w.bowCharge.sweetMult, w.revolver.bigDamage, w.hook.snagDamage, w.hook.slamDamage, w.flurry.swing.damage, w.flurry.finisher.damage,
+			for (v in [w.yoyo.damage, w.revolver.damage, w.bowCharge.damage * w.bowCharge.sweetMult, w.revolver.bigDamage, w.hook.snagDamage, w.hook.slamDamage, w.flurry.swing.damage, fin.damage * (fin.shineMult == null ? 1 : fin.shineMult),
 				w.yoyoSpin.grabDamage + w.yoyoSpin.launchDamage])
 				if (v > top)
 					top = v;
