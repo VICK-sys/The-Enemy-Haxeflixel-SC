@@ -586,6 +586,12 @@ class PlayState extends FlxState
 		if (FlxG.keys.justPressed.SIX)
 			boxes.toggle();
 
+		if (FlxG.keys.justPressed.SEVEN && !Net.isClient)
+			director.summonBoss("knight");
+
+		if (FlxG.keys.justPressed.EIGHT && !Net.isClient)
+			director.summonBoss("rofel");
+
 		if (FlxG.keys.justPressed.F4)
 		{
 			status.revive();

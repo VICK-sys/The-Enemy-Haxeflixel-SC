@@ -57,6 +57,8 @@ class EnemyDirector
 	private var bossPending:Bool = false;
 	private var bossTimer:Float = 0;
 	private var bossesFought:Int = 0;
+	private var forcedBoss:String = null;
+	private var forcedCount:Int = 0;
 
 	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat, fx:Fx)
 	{
@@ -211,10 +213,48 @@ class EnemyDirector
 	}
 
 	function bossCount():Int
+	{
+		if (forcedCount > 0)
+		{
+			var n = forcedCount;
+			forcedCount = 0;
+			return n;
+		}
 		return bossesFought > 0 && FlxG.random.float() < waveData.duoChance ? 2 : 1;
+	}
+
+	public function bossAlive():Bool
+	{
+		for (rig in rigs)
+			if (rig.enemy.bossBody && rig.enemy.exists && !rig.enemy.isDead)
+				return true;
+		return false;
+	}
+
+	public function summonBoss(kind:String, count:Int = 1):Bool
+	{
+		if (bossPending || bossAlive() || !spawning)
+			return false;
+		forcedBoss = kind;
+		forcedCount = count;
+		queued.resize(0);
+		betweenWaves = 0;
+		waveClock = 0;
+		if (onBoss != null)
+			onBoss();
+		bossPending = true;
+		bossTimer = BOSS_INTRO_TIME;
+		return true;
+	}
 
 	function bossKind():String
 	{
+		if (forcedBoss != null)
+		{
+			var forced = forcedBoss;
+			forcedBoss = null;
+			return data.EnemyData.EnemyDataRegistry.has(forced) ? forced : "rofel";
+		}
 		var roster = waveData.bosses;
 		if (roster == null || roster.length == 0)
 			return "rofel";
