@@ -8,6 +8,8 @@
 	"bossWaveMin": 4,
 	"bossWaveRange": 4,
 	"bossRepeat": 6,
+
+	"bosses": ["rofel", "knight"],
 	"duoChance": 0.5,
 	"scaling": {
 		"hpPerWave": 0.1,

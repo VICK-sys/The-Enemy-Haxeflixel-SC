@@ -1,0 +1,44 @@
+{
+	"sprite": "enemies/knight",
+	"width": 150,
+	"height": 210,
+	"offsetX": -80,
+	"offsetY": -110,
+	"animations": [
+		{ "name": "idle", "prefix": "Idle", "fps": 6, "loop": true },
+		{ "name": "walk", "prefix": "Walk", "fps": 14, "loop": true },
+		{ "name": "hurt", "prefix": "Hurt", "fps": 12, "loop": false },
+		{ "name": "death", "prefix": "Death", "fps": 9, "loop": false }
+	],
+	"hp": 46,
+	"speed": 300,
+	"aggroRange": 100000,
+	"stopThreshold": 380,
+	"attackRange": 620,
+	"attack": "boss",
+	"big": true,
+	"boss": {
+		"moveSpeed": 300,
+		"prefMin": 400,
+		"prefMax": 720,
+		"strafeWeight": 0.9,
+		"gunDist": 96,
+		"guns": [
+			{ "image": "enemies/guns/knight_blade", "bullet": "bullets/knight_shard", "speed": 820, "count": 1, "spread": 3, "damage": 0.25, "burst": 6, "burstInterval": 0.12, "cooldown": 0.85, "range": 99999, "muzzle": 190 },
+			{ "image": "enemies/guns/knight_blade", "bullet": "bullets/knight_star", "speed": 600, "count": 7, "spread": 26, "damage": 0.2, "burst": 1, "burstInterval": 0, "cooldown": 1.15, "range": 99999, "muzzle": 190 },
+			{ "image": "enemies/guns/knight_short", "bullet": "bullets/knight_thrown", "speed": 1500, "count": 1, "spread": 0, "damage": 0.5, "burst": 2, "burstInterval": 0.22, "cooldown": 1.3, "range": 99999, "muzzle": 150 },
+			{ "image": "enemies/guns/knight_short", "bullet": "bullets/knight_shard", "speed": 700, "count": 3, "spread": 9, "damage": 0.2, "burst": 3, "burstInterval": 0.18, "cooldown": 1.0, "range": 99999, "muzzle": 150 }
+		]
+	},
+	"contactDamage": 0.5,
+	"dropChance": 1,
+	"knockback": 90,
+	"stunTime": 0.06,
+	"shadowOffX": 70,
+	"shadowOffXFlip": 70,
+	"shadowOffY": 196,
+	"shadowScaleX": 11,
+	"hitOffX": 52,
+	"hitOffY": 70,
+	"hitOffXFlip": 52
+}

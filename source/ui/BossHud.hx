@@ -102,6 +102,15 @@ class BossHud
 		letters = [];
 	}
 
+	static var BOSS_NAMES:Map<String, String> = ["rofel" => "Rofel", "knight" => "The Roaring Knight"];
+
+	function bossName():String
+	{
+		var kind = bosses.length > 0 && bosses[0] != null ? bosses[0].kind : "rofel";
+		var word = BOSS_NAMES.exists(kind) ? BOSS_NAMES.get(kind) : "Rofel";
+		return bosses.length > 1 ? word + " Duo" : word;
+	}
+
 	public function showBar(pack:Array<Enemies>):Void
 	{
 		dropBar();
@@ -118,7 +127,7 @@ class BossHud
 		state.add(barFrame);
 		state.add(barFill);
 
-		var word = bosses.length > 1 ? "Rofel Duo" : "Rofel";
+		var word = bossName();
 		var total = 0.0;
 		var built = [];
 		for (i in 0...word.length)

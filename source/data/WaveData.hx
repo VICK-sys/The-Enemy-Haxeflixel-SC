@@ -27,6 +27,7 @@ typedef WaveData = {
 	bossWaveMin:Int,
 	bossWaveRange:Int,
 	bossRepeat:Int,
+	?bosses:Array<String>,
 	duoChance:Float,
 	scaling:WaveScaling,
 	waves:Array<WavePool>

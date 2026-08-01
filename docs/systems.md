@@ -361,6 +361,12 @@ A GLSL fragment shader that distorts a sprite's texture coordinates with time-dr
 
 The persistent save: best wave reached, the settings, the last joined IP, and the online player name. The settings are the master, music and sound effect volumes, display mode, V-Sync, framerate, aspect ratio, screenshake and freeze-frame amounts, HUD visibility, 3D sound, FPS counter visibility, and language. A call to `applySettings()` pushes them into the engine. It runs at boot and whenever an option changes. The master volume sets `FlxG.sound.volume`, and the music and sound volumes set the two default flixel sound groups, so the final level of any sound is its own volume times its group times the master.
 
+### Boss roster
+
+Boss waves pick a kind from the `bosses` list in `waves.json` rather than always spawning the same one. An unknown name falls back to Rofel, and an absent list keeps the old behaviour, so the roster is safe to edit. A pack spawns one kind for all its members, so a duo is two of the same boss rather than a mixed pair. The boss bar names whichever kind turned up, and adds "Duo" when there is more than one.
+
+The Roaring Knight is the second entry. Its art is cut from a rip of the Deltarune sheet: each frame sits in its own red box there, so the boxes are found as connected red regions, the interior of each is taken without its border, and every pixel is snapped to fully solid or fully clear, since the rip carried a hundred thousand part-transparent pixels that would have fringed at 4x. Frames of one animation are cropped to the union of their own bounds, which keeps the movement inside an animation, then centred on a shared canvas with their feet on the bottom edge, which keeps the animations lined up with each other. The knight fights with the same `boss` behaviour Rofel uses, holding a sword where Rofel holds a gun, and firing shards, stars and thrown blades cut from the same sheet.
+
 ### CustomArena
 
 The map the editor asked the next run to use, as raw CSV plus a spawn point. Null means the stock arena. The main menu clears it.

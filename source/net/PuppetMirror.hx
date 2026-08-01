@@ -159,7 +159,7 @@ class PuppetMirror
 				bossPack.push(e);
 				hud.showBossBar(bossPack);
 			}
-			if (e.kind == "rofel")
+			if (e.bossBody)
 			{
 				lastBossX = e.x + e.width / 2;
 				lastBossY = e.y + e.height / 2;

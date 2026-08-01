@@ -213,14 +213,24 @@ class EnemyDirector
 	function bossCount():Int
 		return bossesFought > 0 && FlxG.random.float() < waveData.duoChance ? 2 : 1;
 
+	function bossKind():String
+	{
+		var roster = waveData.bosses;
+		if (roster == null || roster.length == 0)
+			return "rofel";
+		var pick = roster[FlxG.random.int(0, roster.length - 1)];
+		return data.EnemyData.EnemyDataRegistry.has(pick) ? pick : "rofel";
+	}
+
 	function spawnBossPack(count:Int):Void
 	{
 		bossesFought++;
 		var pack = [];
 		var s = waveData.scaling;
+		var kind = bossKind();
 		for (i in 0...count)
 		{
-			var boss = new Enemies("rofel");
+			var boss = new Enemies(kind);
 			boss.applyScale(ramp(s.bossHpPerWave), ramp(s.bossSpeedPerWave), ramp(s.bossDamagePerWave));
 			spawner.placeAtEdge(boss);
 			register(boss);
