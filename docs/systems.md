@@ -268,7 +268,15 @@ The line-of-sight and pathfinding component. A few times per second it checks a 
 
 ### Attack behaviours
 
-`AttackBehavior`, `ChargeAttack`, `ShootAttack` and `RofelBoss` are the attack style interface and its implementations. A charge is a windup, a straight lunge and a recovery. A shooter holds position, cycles its shoot animation, and requests a projectile on the loop frame.
+`AttackBehavior`, `ChargeAttack`, `ShootAttack`, `FlankAttack` and `RofelBoss` are the attack style interface and its implementations. A charge is a windup, a straight lunge and a recovery. A shooter holds position, cycles its shoot animation, and requests a projectile on the loop frame.
+
+`FlankAttack` is the woodster's behaviour. A shooter that holds position walks in with the melee pack and stands where it stopped, so the woodster instead works its way round to the side and fires from there. It picks a post: a bearing 55 to 125 degrees round the target from wherever it stands, at the `standoff` radius. It travels there on an arc, blending a sideways push round the target with a pull toward the standoff radius, so it circles rather than closing. On arrival it plants, plays the start frame, fires two shots off the loop frame, plays the end frame, then picks a fresh post and slides again. It also flips its orbit direction a quarter of the time, so it does not always circle the same way.
+
+Posts are claimed in a shared list, so a second woodster on the same target will not choose a bearing within about 50 degrees of one already taken. It tries four bearings, alternating sides, before settling for a crowded one. Dead and killed claimants are pruned on each claim.
+
+Three things break a post. A target that closes inside `minDist` sends the woodster to a new one, so it backs out rather than standing there to be hit. A hit calls `reset()`, which also sends it to a new post. Losing the corridor to the target, or the target leaving attack range plus `disengage`, hands control back to the brain, which paths in the normal way until the shot is clear again.
+
+A slide ends early if it stalls. The behaviour sets a velocity but a wall decides whether the body moves, and in the corridor the standoff circle does not fit. If half a second passes with neither the bearing nor the radius improving, the woodster plants and fires from where it is. Without that, a woodster pinned on a wall would grind against it for the whole `slideMax` before it took a shot.
 
 `RofelBoss` is the boss brain, ported from the RofelShooter game. It kites the player, keeping a preferred distance band and strafing sideways, bouncing off walls. It cycles through Rofel's five guns: pistol, shotgun, sniper, revolver and laser. Each carries its own bullet sprite, speed, spread, damage and burst pattern. A held gun sprite rotates to aim at the player and swaps per weapon. Enemies with the `"boss"` attack are `selfDriven`, so they skip the normal FSM and run this brain directly.
 

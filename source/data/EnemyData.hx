@@ -46,6 +46,21 @@ typedef KnightData = {
 	restTime:Float
 }
 
+typedef FlankData = {
+	standoff:Float,
+	minDist:Float,
+	arcMin:Float,
+	arcMax:Float,
+	slideMax:Float,
+	windup:Float,
+	startTime:Float,
+	shots:Int,
+	shotGap:Float,
+	endTime:Float,
+	rest:Float,
+	disengage:Float
+}
+
 typedef DomoData = {
 	farDist:Float,
 	cooldown:Float,
@@ -88,6 +103,7 @@ typedef EnemyData = {
 	?boss:BossData,
 	?knight:KnightData,
 	?domo:DomoData,
+	?flank:FlankData,
 	?chargeAnim:String,
 	contactDamage:Float,
 	?shotDamage:Float,

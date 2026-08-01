@@ -165,6 +165,10 @@ class Enemies extends FlxSprite
 			grabbable = false;
 			explodes = true;
 		}
+		else if (data.attack == "flank")
+		{
+			attack = new FlankAttack(data.flank);
+		}
 		else if (data.attack == "shoot")
 		{
 			var shoot = new ShootAttack();
