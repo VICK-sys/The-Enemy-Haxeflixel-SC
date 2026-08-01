@@ -99,7 +99,7 @@ class DomoBoss implements AttackBehavior
 		}
 
 		sign(e, phase == SHOT);
-		e.poise = phase == SHOT;
+		e.poise = phase != CHASE;
 		e.ramming = phase == DASH;
 		return false;
 	}
@@ -109,44 +109,48 @@ class DomoBoss implements AttackBehavior
 		if (distance > cfg.farDist)
 		{
 			if (FlxG.random.bool())
-				beginSummon();
+				beginSummon(e);
 			else
-				beginDash();
+				beginDash(e);
 			return;
 		}
 		var r = FlxG.random.float();
 		if (r < 0.55)
-			beginShot();
+			beginShot(e);
 		else if (r < 0.8)
-			beginDash();
+			beginDash(e);
 		else
-			beginSummon();
+			beginSummon(e);
 	}
 
-	function beginShot():Void
+	function beginShot(e:Enemies):Void
 	{
 		phase = SHOT;
 		timer = cfg.shotWindup;
 		burstsLeft = cfg.shotBursts;
+		e.poise = true;
 	}
 
-	function beginSummon():Void
+	function beginSummon(e:Enemies):Void
 	{
 		phase = SUMMON;
 		timer = cfg.summonTime;
+		e.poise = true;
 	}
 
-	function beginDash():Void
+	function beginDash(e:Enemies):Void
 	{
 		phase = DASH_WIND;
 		timer = cfg.dashWindup;
 		dashesLeft = cfg.dashCount;
+		e.poise = true;
 	}
 
 	function rest(e:Enemies):Void
 	{
 		phase = CHASE;
 		cooldown = cfg.cooldown;
+		e.poise = false;
 	}
 
 	function volley(e:Enemies, ax:Float, ay:Float):Void
