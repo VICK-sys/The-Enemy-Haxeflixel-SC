@@ -122,6 +122,8 @@ Spawned enemies pass through walls and prop footprints while entering. They turn
 
 The health pickup pool. The player collects one on contact, unless health is full.
 
+Contact carries a `GRAB` margin around the battery. The art is the smallest pickup in the game and the player's body box is only 42 by 44, so a plain overlap of the two meant clipping the corner of a small box against a small box, and a run past one often failed to take it. Scraps never had that problem because they magnet in. The margin widens the catch to 72 px from the player's centre, up from 43, without touching the art, the shadow or the drop maths.
+
 ### TimeStop
 
 The time-stop ability on E, with a cooldown from player.json. It ramps a world-time factor from 1 to 0 over the slow phase. It holds the world frozen for the stop duration, then ramps back.
@@ -250,6 +252,8 @@ The field `baseOffsetY` is public here for the supers. They ride the player's dr
 ### HealthPickup
 
 A dropped heart. It restores health on contact and expires after a few seconds.
+
+It is drawn from a baked white outline rather than the raw art, and it hovers: the graphic rides a sine on its draw offset while the body stays put, so the hitbox never moves with the bob. Its shadow shrinks and thins as it rises, which is what sells the hover. A white shine pulses over it on a slower sine than the bob, set through the colour transform after the expiry blink has written alpha, since writing alpha rebuilds the transform and would drop the shine. Each battery starts its cycle at a random phase so a scattered drop does not pulse in lockstep.
 
 ## Weapon projectiles (source/entities/weapon/)
 

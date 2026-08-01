@@ -8,6 +8,8 @@ import util.Paths;
 
 class Pickups
 {
+	static inline var GRAB:Float = 26;
+
 	public var group:FlxTypedGroup<HealthPickup>;
 	public var onCollect:HealthPickup->Void;
 
@@ -60,8 +62,8 @@ class Pickups
 				continue;
 			if (status.health >= status.healthMax)
 				return;
-			if (p.x + p.width <= player.x || player.x + player.width <= p.x
-				|| p.y + p.height <= player.y || player.y + player.height <= p.y)
+			if (p.x + p.width + GRAB <= player.x || player.x + player.width <= p.x - GRAB
+				|| p.y + p.height + GRAB <= player.y || player.y + player.height <= p.y - GRAB)
 				continue;
 			status.heal(HealthPickup.HEAL);
 			FlxG.sound.play(Paths.sound("power_up"), 0.6);
