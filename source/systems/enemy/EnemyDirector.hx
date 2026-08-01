@@ -404,8 +404,21 @@ class EnemyDirector
 		dripTimer = waveData.spawnEvery;
 	}
 
+	function retally():Void
+	{
+		Enemies.census.clear();
+		for (rig in rigs)
+		{
+			var e = rig.enemy;
+			if (!e.exists || e.isDead)
+				continue;
+			Enemies.census.set(e.kind, Enemies.countOf(e.kind) + 1);
+		}
+	}
+
 	function updateRigs(elapsed:Float):Void
 	{
+		retally();
 		var i = rigs.length;
 		while (i-- > 0)
 		{
@@ -421,10 +434,8 @@ class EnemyDirector
 			e.target = pickTarget(e);
 			var alive = !e.isDead;
 
-			if (e.gun != null && e.gunAuto)
+			if (e.gun != null)
 				e.gun.visible = alive;
-			else if (e.gun != null && !alive)
-				e.gun.visible = false;
 
 			if (e.entering && inBounds(e) && spawner.spotClear(e, e.x, e.y))
 			{

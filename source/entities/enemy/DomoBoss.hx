@@ -12,7 +12,6 @@ class DomoBoss implements AttackBehavior
 	static inline var DASH:Int = 4;
 
 	static inline var BRAKE:Float = 6;
-	static inline var SIGN_LIFT:Float = 26;
 
 	private var cfg:DomoData;
 	private var phase:Int = CHASE;
@@ -59,7 +58,8 @@ class DomoBoss implements AttackBehavior
 				brake(e, elapsed);
 				if (timer <= 0)
 				{
-					ring(e);
+					if (!crowded())
+						ring(e);
 					rest(e);
 				}
 			case DASH_WIND:
@@ -98,17 +98,20 @@ class DomoBoss implements AttackBehavior
 				}
 		}
 
-		sign(e, phase == SHOT);
+		holdGun(e, ax, ay);
 		e.poise = phase != CHASE;
 		e.ramming = phase == DASH;
 		return false;
 	}
 
+	function crowded():Bool
+		return Enemies.countOf(cfg.summonKind) > cfg.summonCap;
+
 	function pick(e:Enemies, distance:Float):Void
 	{
 		if (distance > cfg.farDist)
 		{
-			if (FlxG.random.bool())
+			if (!crowded() && FlxG.random.bool())
 				beginSummon(e);
 			else
 				beginDash(e);
@@ -117,7 +120,7 @@ class DomoBoss implements AttackBehavior
 		var r = FlxG.random.float();
 		if (r < 0.55)
 			beginShot(e);
-		else if (r < 0.8)
+		else if (r < 0.8 || crowded())
 			beginDash(e);
 		else
 			beginSummon(e);
@@ -178,16 +181,17 @@ class DomoBoss implements AttackBehavior
 		util.Sfx.at("power_up", cx, cy, 0.6);
 	}
 
-	function sign(e:Enemies, on:Bool):Void
+	function holdGun(e:Enemies, ax:Float, ay:Float):Void
 	{
 		if (e.gun == null)
 			return;
-		e.gun.visible = on && !e.isDead;
-		if (on)
-		{
-			e.gun.x = e.x + e.width * 0.5 - e.gun.width * 0.5;
-			e.gun.y = e.y - e.offset.y - e.gun.height - SIGN_LIFT;
-		}
+		var hx = e.x + e.width * 0.5 + ax * cfg.gunDist;
+		var hy = e.y + e.height * 0.5 + ay * cfg.gunDist;
+		e.gun.x = hx - e.gun.frameWidth * 0.5;
+		e.gun.y = hy - e.gun.frameHeight * 0.5;
+		var deg = Math.atan2(ay, ax) * 180 / Math.PI;
+		e.gun.angle = deg;
+		e.gun.flipY = Math.abs(deg) > 90;
 	}
 
 	inline function face(e:Enemies, ax:Float):Void

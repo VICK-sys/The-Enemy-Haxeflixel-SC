@@ -51,7 +51,6 @@ class Enemies extends FlxSprite
 	public var grabbable:Bool = true;
 	public var explodes:Bool = false;
 	public var gun:FlxSprite = null;
-	public var gunAuto:Bool = true;
 	public var ramming:Bool = false;
 	public var poise:Bool = false;
 	public var pendingSummons:Array<{kind:String, x:Float, y:Float}> = [];
@@ -141,10 +140,8 @@ class Enemies extends FlxSprite
 			gun = new FlxSprite();
 			gun.loadGraphic(Paths.image("enemies/domos_shotgun"));
 			gun.antialiasing = false;
+			gun.origin.set(gun.frameWidth * 0.5, gun.frameHeight * 0.5);
 			gun.scale.set(4, 4);
-			gun.updateHitbox();
-			gun.visible = false;
-			gunAuto = false;
 			attack = new DomoBoss(data.domo);
 			selfDriven = true;
 			grabbable = false;
@@ -401,6 +398,11 @@ class Enemies extends FlxSprite
 		}
 		throwGrace = 0.35;
 	}
+
+	public static var census:Map<String, Int> = new Map();
+
+	public static function countOf(kind:String):Int
+		return census.exists(kind) ? census.get(kind) : 0;
 
 	public function summon(kind:String, cx:Float, cy:Float):Void
 		pendingSummons.push({kind: kind, x: cx, y: cy});
