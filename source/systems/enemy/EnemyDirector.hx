@@ -253,13 +253,13 @@ class EnemyDirector
 		{
 			var forced = forcedBoss;
 			forcedBoss = null;
-			return data.EnemyData.EnemyDataRegistry.has(forced) ? forced : "rofel";
+			return data.EnemyData.EnemyDataRegistry.has(forced) ? forced : "domo";
 		}
 		var roster = bossRoster();
 		if (roster.length == 0)
-			return "rofel";
+			return "domo";
 		var pick = roster[FlxG.random.int(0, roster.length - 1)];
-		return data.EnemyData.EnemyDataRegistry.has(pick) ? pick : "rofel";
+		return data.EnemyData.EnemyDataRegistry.has(pick) ? pick : "domo";
 	}
 
 	public function bossRoster():Array<String>
@@ -421,8 +421,10 @@ class EnemyDirector
 			e.target = pickTarget(e);
 			var alive = !e.isDead;
 
-			if (e.gun != null)
+			if (e.gun != null && e.gunAuto)
 				e.gun.visible = alive;
+			else if (e.gun != null && !alive)
+				e.gun.visible = false;
 
 			if (e.entering && inBounds(e) && spawner.spotClear(e, e.x, e.y))
 			{
@@ -450,6 +452,62 @@ class EnemyDirector
 				status.hurtPlayer(rig.hitbox, e.contactDamage, e.feetY);
 
 			gunfire.emit(e);
+			if (e.pendingSummons.length > 0)
+				drainSummons(e);
+		}
+
+		ramFling();
+	}
+
+	static inline var FLING_SPEED:Float = 1000;
+	static inline var FLING_STUN:Float = 0.7;
+	static inline var FLING_DRAG:Float = 600;
+
+	function drainSummons(e:Enemies):Void
+	{
+		while (e.pendingSummons.length > 0)
+		{
+			var s = e.pendingSummons.pop();
+			if (!data.EnemyData.EnemyDataRegistry.has(s.kind))
+				continue;
+			var add = new Enemies(s.kind);
+			add.setPosition(s.x - add.width * 0.5, s.y - add.height * 0.5);
+			applyWaveScale(add);
+			add.throwGrace = 0.5;
+			register(add);
+		}
+	}
+
+	function ramFling():Void
+	{
+		for (rig in rigs)
+		{
+			var d = rig.enemy;
+			if (!d.ramming || d.isDead || !d.exists)
+				continue;
+			var t = d.target;
+			if (t == null)
+				continue;
+			for (o in rigs)
+			{
+				var f = o.enemy;
+				if (f == d || f.isDead || !f.exists || f.bossBody || f.stun > 0 || f.seized || f.entering)
+					continue;
+				if (f.x + f.width <= d.x || d.x + d.width <= f.x
+					|| f.y + f.height <= d.y || d.y + d.height <= f.y)
+					continue;
+				var vx = t.x + t.width * 0.5 - (f.x + f.width * 0.5);
+				var vy = t.y + t.height * 0.5 - (f.y + f.height * 0.5);
+				var l = Math.sqrt(vx * vx + vy * vy);
+				if (l <= 0)
+					continue;
+				f.velocity.set(vx / l * FLING_SPEED, vy / l * FLING_SPEED);
+				f.drag.set(FLING_DRAG, FLING_DRAG);
+				f.stun = FLING_STUN;
+				if (f.animation.getByName("spin") != null)
+					f.animation.play("spin", true);
+				util.Sfx.at("weapon/throw", f.x + f.width * 0.5, f.y + f.height * 0.5, 0.6);
+			}
 		}
 	}
 

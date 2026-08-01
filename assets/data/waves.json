@@ -9,8 +9,8 @@
 	"bossWaveRange": 4,
 	"bossRepeat": 6,
 
-	"bosses": ["rofel"],
-	"debugBosses": ["knight"],
+	"bosses": ["domo"],
+	"debugBosses": ["knight", "rofel"],
 	"duoChance": 0.5,
 	"scaling": {
 		"hpPerWave": 0.1,
@@ -23,8 +23,8 @@
 		"breatherMin": 1.0
 	},
 	"waves": [
-		{ "types": ["enemy"] },
-		{ "types": ["enemy", "woodster", "woodster"] },
-		{ "types": ["enemy", "woodster", "likwid"] }
+		{ "types": ["fire_child"] },
+		{ "types": ["fire_child", "woodster", "woodster"] },
+		{ "types": ["fire_child", "woodster", "likwid", "fire_child_champion"] }
 	]
 }

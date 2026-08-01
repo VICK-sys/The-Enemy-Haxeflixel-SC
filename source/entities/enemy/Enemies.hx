@@ -51,6 +51,9 @@ class Enemies extends FlxSprite
 	public var grabbable:Bool = true;
 	public var explodes:Bool = false;
 	public var gun:FlxSprite = null;
+	public var gunAuto:Bool = true;
+	public var ramming:Bool = false;
+	public var pendingSummons:Array<{kind:String, x:Float, y:Float}> = [];
 	public var pathing:EnemyNav = new EnemyNav();
 	public var attack:AttackBehavior;
 	public var pendingShots:Array<ShotSpec> = [];
@@ -131,7 +134,22 @@ class Enemies extends FlxSprite
 		if (data.stunTime != null) stunTime = data.stunTime;
 		brain.wanderSpeed = (data.wanderSpeed != null ? data.wanderSpeed : 100) + FlxG.random.float() * 20;
 
-		if (data.attack == "knight")
+		if (data.attack == "domo")
+		{
+			bossBody = true;
+			gun = new FlxSprite();
+			gun.loadGraphic(Paths.image("enemies/domos_shotgun"));
+			gun.antialiasing = false;
+			gun.scale.set(4, 4);
+			gun.updateHitbox();
+			gun.visible = false;
+			gunAuto = false;
+			attack = new DomoBoss(data.domo);
+			selfDriven = true;
+			grabbable = false;
+			explodes = true;
+		}
+		else if (data.attack == "knight")
 		{
 			bossBody = true;
 			attack = new KnightBoss(data.knight);
@@ -161,6 +179,7 @@ class Enemies extends FlxSprite
 		else
 		{
 			var charge = new ChargeAttack();
+			if (data.chargeAnim != null) charge.chargeAnim = data.chargeAnim;
 			if (data.chargeWindup != null) charge.windupTime = data.chargeWindup;
 			if (data.chargeSpeed != null) charge.chargeSpeed = data.chargeSpeed;
 			if (data.chargeTime != null) charge.chargeTime = data.chargeTime;
@@ -378,6 +397,9 @@ class Enemies extends FlxSprite
 		}
 		throwGrace = 0.35;
 	}
+
+	public function summon(kind:String, cx:Float, cy:Float):Void
+		pendingSummons.push({kind: kind, x: cx, y: cy});
 
 	public function requestShot(dirX:Float, dirY:Float, damage:Float, speed:Float, range:Float, sprite:String, sound:String):ShotSpec
 	{

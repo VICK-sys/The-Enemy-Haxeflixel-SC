@@ -46,6 +46,29 @@ typedef KnightData = {
 	restTime:Float
 }
 
+typedef DomoData = {
+	farDist:Float,
+	cooldown:Float,
+	shotWindup:Float,
+	shotBursts:Int,
+	shotGap:Float,
+	shotCount:Int,
+	shotSpread:Float,
+	shotSpeed:Float,
+	shotDamage:Float,
+	shotRange:Float,
+	muzzle:Float,
+	summonTime:Float,
+	summonKind:String,
+	summonDist:Float,
+	dashCount:Int,
+	dashWindup:Float,
+	dashSpeed:Float,
+	dashTime:Float,
+	dashGap:Float,
+	dashTurn:Float
+}
+
 typedef EnemyData = {
 	sprite:String,
 	width:Float,
@@ -62,6 +85,8 @@ typedef EnemyData = {
 	?big:Bool,
 	?boss:BossData,
 	?knight:KnightData,
+	?domo:DomoData,
+	?chargeAnim:String,
 	contactDamage:Float,
 	?shotDamage:Float,
 	?shotSpeed:Float,

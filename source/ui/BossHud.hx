@@ -102,12 +102,12 @@ class BossHud
 		letters = [];
 	}
 
-	static var BOSS_NAMES:Map<String, String> = ["rofel" => "Rofel", "knight" => "The Roaring Knight"];
+	static var BOSS_NAMES:Map<String, String> = ["rofel" => "Rofel", "knight" => "The Roaring Knight", "domo" => "Domo"];
 
 	function bossName():String
 	{
-		var kind = bosses.length > 0 && bosses[0] != null ? bosses[0].kind : "rofel";
-		var word = BOSS_NAMES.exists(kind) ? BOSS_NAMES.get(kind) : "Rofel";
+		var kind = bosses.length > 0 && bosses[0] != null ? bosses[0].kind : "domo";
+		var word = BOSS_NAMES.exists(kind) ? BOSS_NAMES.get(kind) : "Domo";
 		return bosses.length > 1 ? word + " Duo" : word;
 	}
 

@@ -17,6 +17,7 @@ class BossShow
 	static inline var BOSS_PULL:Float = 0.8;
 	static inline var MUSIC:String = "batallon_de_las_velas";
 	static inline var WARN_HOLD:Float = 1.1;
+	static inline var ARRIVE_AT:Float = 2.6;
 
 	public var fighting(default, null):Bool = false;
 
@@ -39,35 +40,32 @@ class BossShow
 		this.scraps = scraps;
 		this.pickups = pickups;
 		this.floor = floor;
-		arena.onNormal = normal;
 	}
 
 	public function begin():Void
 	{
 		fighting = true;
-		arena.beginBossTransition();
-		arena.onWhiteout = whiteout;
 		hud.showBoss();
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.fadeOut(2.4, 0);
 		alarm = FlxG.sound.play(Paths.sound("boss_alarm"), 0.7);
-	}
-
-	function whiteout():Void
-	{
-		showDecor(false);
-		hud.fadeBanner();
-		if (alarm != null)
-			alarm.fadeOut(0.8, 0, function(_)
-			{
-				if (alarm != null)
+		new flixel.util.FlxTimer().start(ARRIVE_AT, function(_)
+		{
+			if (!fighting)
+				return;
+			hud.fadeBanner();
+			if (alarm != null)
+				alarm.fadeOut(0.8, 0, function(_)
 				{
-					alarm.stop();
-					alarm = null;
-				}
-			});
-		Music.play(MUSIC, 0.5);
-		FlxTween.tween(FlxG.camera, {zoom: PlayState.BASE_ZOOM * BOSS_PULL}, 1.2);
+					if (alarm != null)
+					{
+						alarm.stop();
+						alarm = null;
+					}
+				});
+			Music.play(MUSIC, 0.5);
+			FlxTween.tween(FlxG.camera, {zoom: PlayState.BASE_ZOOM * BOSS_PULL}, 1.2);
+		});
 	}
 
 	public function warn(onPeak:Void->Void):Void
@@ -101,9 +99,14 @@ class BossShow
 	public function defeated():Void
 	{
 		fighting = false;
-		arena.endBossTransition();
 		if (FlxG.sound.music != null)
 			FlxG.sound.music.fadeOut(0.6, 0);
+		new flixel.util.FlxTimer().start(0.8, function(_)
+		{
+			if (fighting)
+				return;
+			normal();
+		});
 	}
 
 	function normal():Void

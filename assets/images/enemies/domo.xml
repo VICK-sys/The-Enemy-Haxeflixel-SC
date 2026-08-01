@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextureAtlas imagePath="domo.png">
+	<SubTexture name="Idle00000" x="0" y="0" width="48" height="48"/>
+	<SubTexture name="Walk00000" x="0" y="0" width="48" height="48"/>
+	<SubTexture name="Hurt00000" x="0" y="0" width="48" height="48"/>
+	<SubTexture name="Death00000" x="0" y="0" width="48" height="48"/>
+</TextureAtlas>

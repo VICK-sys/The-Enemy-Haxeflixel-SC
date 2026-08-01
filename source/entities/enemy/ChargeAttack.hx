@@ -9,6 +9,7 @@ class ChargeAttack implements AttackBehavior
 	public var chargeSpeed:Float = 950;
 	public var chargeTime:Float = 0.45;
 	public var recoverTime:Float = 0.4;
+	public var chargeAnim:String = "walk";
 
 	private var started:Bool = false;
 	private var phase:Int = 0;
@@ -39,7 +40,7 @@ class ChargeAttack implements AttackBehavior
 					e.velocity.set(dirX / len * chargeSpeed, dirY / len * chargeSpeed);
 					if (dirX > 0) { e.flipX = false; }
 					else if (dirX < 0) { e.flipX = true; }
-					e.animation.play("walk");
+					e.animation.play(chargeAnim);
 					phase = 1;
 					timer = chargeTime;
 				}
