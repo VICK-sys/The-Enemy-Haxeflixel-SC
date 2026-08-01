@@ -29,6 +29,7 @@ class HammerFlurry
 	private var wound:Bool = false;
 	private var lastDx:Float = 1;
 	private var lastDy:Float = 0;
+	private var rising:Bool = false;
 
 	public function new(player:Player, status:PlayerCombat, held:HeldWeapon, swingAtk:SwingAttack, finishAtk:SwingAttack)
 	{
@@ -46,6 +47,7 @@ class HammerFlurry
 	{
 		running = true;
 		wound = false;
+		rising = false;
 		swingsLeft = cfg.swings;
 		var pmx = player.x + player.width * 0.5;
 		var pmy = player.y + player.height * 0.5;
@@ -115,11 +117,12 @@ class HammerFlurry
 		var pmx = player.x + player.width * 0.5;
 		var pmy = player.y + player.height * 0.5;
 		var a = aim(pmx, pmy);
-		held.beginSwing(a.deg, Bash);
-		swingAtk.fire(pmx, pmy, a.dx, a.dy, a.deg, held.handX(), held.handY());
+		held.beginSwing(a.deg, Bash, rising);
+		swingAtk.fire(pmx, pmy, a.dx, a.dy, a.deg, held.handX(), held.handY(), false, rising);
 		player.velocity.set(a.dx * cfg.lunge, a.dy * cfg.lunge);
 		if (onSwing != null)
 			onSwing(pmx, pmy, a.dx, a.dy, a.deg, false);
+		rising = !rising;
 		swingsLeft--;
 		timer = cfg.gap;
 	}

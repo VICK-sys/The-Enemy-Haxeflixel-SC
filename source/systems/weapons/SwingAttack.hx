@@ -76,15 +76,18 @@ class SwingAttack
 		slashes = new FlxTypedGroup<SlashEffect>();
 	}
 
-	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, ?ox:Float, ?oy:Float, boost:Bool = false):Void
+	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float, ?ox:Float, ?oy:Float, boost:Bool = false,
+			mirror:Bool = false):Void
 	{
 		if (cfg.cooldown != null)
 			coolFor(cfg.cooldown);
 		var ex = ox == null ? pmx : ox;
 		var ey = oy == null ? pmy : oy;
 		boosted = boost && cfg.shineMult != null;
-		slashes.recycle(SlashEffect).fire(ex + dx * cfg.spawnDist, ey + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale,
+		var slash = slashes.recycle(SlashEffect);
+		slash.fire(ex + dx * cfg.spawnDist, ey + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale,
 			cfg.effect == null ? "sword" : cfg.effect);
+		slash.flipY = mirror;
 		strike(pmx, pmy, dx, dy, boosted ? cfg.shineMult : 1);
 		guardTimer = GUARD_TIME;
 		guardX = dx;

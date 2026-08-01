@@ -204,6 +204,8 @@ The storm proper starts once that arrow clears the top of the screen. The bow st
 
 The hammer super. Q with the hammer equipped and a full super meter drains the meter. The player plants, goes invincible, and unleashes `swings` rapid hammer sweeps at `gap` seconds apart, each a step into the aim, then holds for `windup` and lands one wide heavy finisher. The meter builds through normal hammer hits, so the super rewards staying on the attack.
 
+The sweeps alternate their pivot. The first comes down the way a normal swing does, the next comes back up, and so on down the string. `beginSwing` takes a rising flag that negates the sweep direction, and the slash effect mirrors with it. Because a rising swing starts where the falling one finished, the hammer carries straight on across each handover rather than resetting between blows. The eighth sweep ends on the up, so the finisher comes down again. It winds back over the pause first, which is the beat the windup buys.
+
 The rapid sweeps use one arc config and the finisher another, both the same shape as a normal swing block. The sweeps cover a narrow front arc with a small lunge and a light hitstop, so the string flows. The finisher covers most of a circle at triple the reach with the heavy stop and the giga swing sound. The sweeps also deflect enemy fire, so the string clears the air in front while it grinds.
 
 Each sweep aims at the cursor, so the string can be steered mid flurry. The turn rate is capped per swing, and inside a short radius of the cursor the direction holds instead of recomputing. Without those two guards the lunges converge on the cursor point and the aim flips wildly once the player reaches it.

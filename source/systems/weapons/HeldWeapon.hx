@@ -216,14 +216,14 @@ class HeldWeapon
 		boltTimer = boltSpan;
 	}
 
-	public function beginSwing(aimDeg:Float, mode:WeaponMode):Void
+	public function beginSwing(aimDeg:Float, mode:WeaponMode, rising:Bool = false):Void
 	{
 		attack = mode;
 		swingSweep = !bowLike();
 		if (swingSweep)
 		{
 			updateFlip(aimDeg);
-			swingDir = sprite.flipX ? -1 : 1;
+			swingDir = (sprite.flipX ? -1 : 1) * (rising ? -1 : 1);
 			swingBaseAngle = sprite.flipX ? aimDeg - 180 : aimDeg;
 		}
 		activeSwingTime = switch (mode)
