@@ -85,6 +85,7 @@ class PlayState extends FlxState
 				hud.applyLanguage(director.wave);
 			_player.setHue(SaveData.playerHue());
 			combat.repaint();
+			hud.repaint();
 			backGear.paint(SaveData.playerHue());
 		};
 		openPanel(pause);

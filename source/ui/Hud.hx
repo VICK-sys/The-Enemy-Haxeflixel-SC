@@ -98,12 +98,15 @@ class Hud
 	private var hpTop:Float = 0;
 	private var cursorPoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 	private var pieces:Array<flixel.FlxBasic> = [];
+	private var art:Map<FlxSprite, String> = new Map();
+	private var hue:Float = 0;
 	private var hudOn:Bool = true;
 
 	public function new(state:FlxState, status:PlayerCombat)
 	{
 		this.state = state;
 		this.status = status;
+		hue = util.SaveData.playerHue();
 
 		camUI = new FlxCamera();
 		FlxG.cameras.add(camUI, false);
@@ -681,9 +684,19 @@ class Hud
 		deadText.visible = false;
 	}
 
+	function uiArt(name:String):flixel.graphics.FlxGraphic
+		return util.HuePalette.graphic("ui/" + name, hue);
+
+	function skin(s:FlxSprite, name:String):Void
+	{
+		art.set(s, name);
+		s.loadGraphic(uiArt(name));
+	}
+
 	function makeSprite(x:Float, y:Float, name:String):FlxSprite
 	{
-		var s = new FlxSprite(x, y, Paths.image("ui/" + name));
+		var s = new FlxSprite(x, y);
+		skin(s, name);
 		s.antialiasing = false;
 		s.scale.set(UI_SCALE, UI_SCALE);
 		s.cameras = [camUI];
@@ -700,10 +713,28 @@ class Hud
 
 	function reskin(s:FlxSprite, name:String):Void
 	{
-		s.loadGraphic(Paths.image("ui/" + name));
+		skin(s, name);
 		s.antialiasing = false;
 		s.scale.set(UI_SCALE, UI_SCALE);
 		s.updateHitbox();
+	}
+
+	public function repaint():Void
+	{
+		var h = util.SaveData.playerHue();
+		if (h == hue)
+			return;
+		hue = h;
+		for (s in art.keys())
+		{
+			var at = flixel.math.FlxPoint.get(s.x, s.y);
+			s.loadGraphic(uiArt(art.get(s)));
+			s.updateHitbox();
+			s.setPosition(at.x, at.y);
+			at.put();
+		}
+		hpWidth = -1;
+		superWidth = -1;
 	}
 
 	public function applyLanguage(wave:Int):Void
