@@ -53,6 +53,7 @@ class Enemies extends FlxSprite
 	public var gun:FlxSprite = null;
 	public var gunAuto:Bool = true;
 	public var ramming:Bool = false;
+	public var poise:Bool = false;
 	public var pendingSummons:Array<{kind:String, x:Float, y:Float}> = [];
 	public var pathing:EnemyNav = new EnemyNav();
 	public var attack:AttackBehavior;
@@ -206,8 +207,11 @@ class Enemies extends FlxSprite
 		if (isDead)
 			return;
 
-		brain.interrupt();
-		attack.reset();
+		if (!poise)
+		{
+			brain.interrupt();
+			attack.reset();
+		}
 
 		hp -= damage;
 		flashTimer = FLASH_TIME;
@@ -224,7 +228,7 @@ class Enemies extends FlxSprite
 			if (!explodes)
 				FlxTween.tween(this, {alpha: 0}, 0.6, {startDelay: 1.2, onComplete: function(t:FlxTween) kill()});
 		}
-		else
+		else if (!poise)
 		{
 			this.animation.play("hurt", true);
 			velocity.set(pushX * knockbackTaken * knockScale(), pushY * knockbackTaken * knockScale());

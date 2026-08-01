@@ -71,7 +71,6 @@ class DomoBoss implements AttackBehavior
 				{
 					phase = DASH;
 					timer = cfg.dashTime;
-					e.ramming = true;
 					e.velocity.set(dashX * cfg.dashSpeed, dashY * cfg.dashSpeed);
 					util.Sfx.at("enemies/charge", e.x + e.width * 0.5, e.y + e.height * 0.5, 0.6);
 				}
@@ -88,7 +87,6 @@ class DomoBoss implements AttackBehavior
 				e.velocity.set(dashX * cfg.dashSpeed, dashY * cfg.dashSpeed);
 				if (timer <= 0)
 				{
-					e.ramming = false;
 					dashesLeft--;
 					if (dashesLeft > 0)
 					{
@@ -101,6 +99,8 @@ class DomoBoss implements AttackBehavior
 		}
 
 		sign(e, phase == SHOT);
+		e.poise = phase == SHOT;
+		e.ramming = phase == DASH;
 		return false;
 	}
 
@@ -145,7 +145,6 @@ class DomoBoss implements AttackBehavior
 
 	function rest(e:Enemies):Void
 	{
-		e.ramming = false;
 		phase = CHASE;
 		cooldown = cfg.cooldown;
 	}
