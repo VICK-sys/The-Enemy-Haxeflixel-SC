@@ -33,11 +33,11 @@
 		"summonKind": "fire_child",
 		"summonDist": 170,
 		"dashCount": 3,
-		"dashWindup": 0.3,
-		"dashSpeed": 780,
-		"dashTime": 0.55,
-		"dashGap": 0.3,
-		"dashTurn": 2.0
+		"dashWindup": 0.45,
+		"dashSpeed": 1050,
+		"dashTime": 0.95,
+		"dashGap": 0.45,
+		"dashTurn": 0.35
 	},
 	"contactDamage": 0.5,
 	"dropChance": 1,
