@@ -99,7 +99,8 @@
 		"throwHitRadius": 60,
 		"releaseStun": 0.35,
 		"snagDamage": 3,
-		"slamDamage": 3
+		"slamDamage": 3,
+		"cooldown": 0.35
 	},
 	"bounceStrike": {
 		"strikes": 2,

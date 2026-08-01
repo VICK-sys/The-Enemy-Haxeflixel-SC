@@ -56,6 +56,7 @@ class HookAttack
 	private var fireX:Float = 0;
 	private var fireY:Float = 0;
 	private var snagged:Bool = false;
+	private var cooldown:Float = 0;
 
 	public function new(player:Player, arena:Arena, director:EnemyDirector, status:PlayerCombat, hits:HitPipeline)
 	{
@@ -86,9 +87,14 @@ class HookAttack
 	function get_heldEnemy():Enemies
 		return victim != null ? victim : flight.passenger;
 
+	public var ready(get, never):Bool;
+
+	function get_ready():Bool
+		return phase == Idle && cooldown <= 0;
+
 	public function fire(pmx:Float, pmy:Float, dx:Float, dy:Float, aimDeg:Float):Void
 	{
-		if (phase != Idle)
+		if (!ready)
 			return;
 		snagged = false;
 		fireX = pmx + dx * SPAWN_DIST;
@@ -114,6 +120,9 @@ class HookAttack
 
 	public function update(elapsed:Float):Void
 	{
+		if (cooldown > 0)
+			cooldown -= elapsed;
+
 		if (status.dead)
 		{
 			if (phase != Idle || flight.active)
@@ -140,6 +149,7 @@ class HookAttack
 		if (!hook.exists)
 		{
 			phase = Idle;
+			cooldown = restTime();
 			return;
 		}
 
@@ -293,6 +303,7 @@ class HookAttack
 		if (!hook.exists)
 		{
 			phase = Idle;
+			cooldown = restTime();
 			return;
 		}
 
@@ -315,6 +326,7 @@ class HookAttack
 		{
 			hook.kill();
 			phase = Idle;
+			cooldown = restTime();
 			FlxG.sound.play(Paths.sound("weapon/catch"), 0.35);
 			return;
 		}
@@ -322,6 +334,9 @@ class HookAttack
 		hook.velocity.set(dx / len * RETRACT_SPEED, dy / len * RETRACT_SPEED);
 		hook.angle = Math.atan2(dy, dx) * 180 / Math.PI + 270;
 	}
+
+	function restTime():Float
+		return (cfg.cooldown == null ? 0 : cfg.cooldown) * util.Levels.actionScale();
 
 	function beginRetract():Void
 		phase = Retracting;

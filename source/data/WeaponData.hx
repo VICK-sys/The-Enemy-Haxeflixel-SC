@@ -99,7 +99,8 @@ typedef HookConfig = {
 	throwHitRadius:Float,
 	releaseStun:Float,
 	snagDamage:Int,
-	slamDamage:Float
+	slamDamage:Float,
+	?cooldown:Float
 }
 
 typedef BounceConfig = {
