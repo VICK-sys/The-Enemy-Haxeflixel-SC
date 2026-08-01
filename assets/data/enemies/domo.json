@@ -42,7 +42,8 @@
 		"dashSpeed": 1050,
 		"dashTime": 0.95,
 		"dashGap": 0.45,
-		"dashTurn": 0.35
+		"dashTurn": 0.35,
+		"dashShots": [3, 4, 5]
 	},
 	"contactDamage": 0.5,
 	"dropChance": 1,

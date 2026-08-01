@@ -51,7 +51,7 @@ class DomoBoss implements AttackBehavior
 				brake(e, elapsed);
 				if (timer <= 0)
 				{
-					volley(e, ax, ay);
+					volley(e, ax, ay, cfg.shotCount);
 					burstsLeft--;
 					if (burstsLeft <= 0)
 						rest(e);
@@ -91,6 +91,7 @@ class DomoBoss implements AttackBehavior
 				e.velocity.set(dashX * cfg.dashSpeed, dashY * cfg.dashSpeed);
 				if (timer <= 0)
 				{
+					spray(e, ax, ay, cfg.dashCount - dashesLeft);
 					dashesLeft--;
 					if (dashesLeft > 0)
 					{
@@ -213,14 +214,24 @@ class DomoBoss implements AttackBehavior
 		e.poise = false;
 	}
 
-	function volley(e:Enemies, ax:Float, ay:Float):Void
+	function spray(e:Enemies, ax:Float, ay:Float, index:Int):Void
+	{
+		var list = cfg.dashShots;
+		if (list == null || list.length == 0)
+			return;
+		var n = index < list.length ? list[index] : list[list.length - 1];
+		if (n > 0)
+			volley(e, ax, ay, n);
+	}
+
+	function volley(e:Enemies, ax:Float, ay:Float, count:Int):Void
 	{
 		var cx = e.x + e.width * 0.5;
 		var cy = e.y + e.height * 0.5;
 		var aimDeg = Math.atan2(ay, ax) * 180 / Math.PI;
-		for (i in 0...cfg.shotCount)
+		for (i in 0...count)
 		{
-			var offset = (i - (cfg.shotCount - 1) * 0.5) * cfg.shotSpread + (FlxG.random.float() - 0.5) * 3;
+			var offset = (i - (count - 1) * 0.5) * cfg.shotSpread + (FlxG.random.float() - 0.5) * 3;
 			var rad = (aimDeg + offset) * Math.PI / 180;
 			e.requestShot(Math.cos(rad), Math.sin(rad), cfg.shotDamage, cfg.shotSpeed, cfg.shotRange,
 				"bullets/shotgun_bullet_enemy", "enemies/shoot").at(cx + ax * cfg.muzzle, cy + ay * cfg.muzzle);

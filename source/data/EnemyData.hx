@@ -86,7 +86,8 @@ typedef DomoData = {
 	dashSpeed:Float,
 	dashTime:Float,
 	dashGap:Float,
-	dashTurn:Float
+	dashTurn:Float,
+	dashShots:Array<Int>
 }
 
 typedef EnemyData = {
