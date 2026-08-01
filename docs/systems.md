@@ -50,6 +50,16 @@ It cuts each prop out of its sheet once and keeps it in flixel's cache under its
 
 Hitstop, which drops the time scale for a few frames on kills. Camera shakes, hit spark bursts, and the dash speed-line trail. It also holds `bossBlast`, the boss death explosion. One place builds it, so the host's real death and a client's mirrored one cannot drift apart.
 
+`Fx` owns the time scale outright, through `slowFactor`. Hitstop drops below it and returns to it rather than to full speed, so a hit landing during a slow-motion effect still bites and then hands the world back to the slow rather than snapping it back to normal.
+
+### BossFinish
+
+The kill camera. The blow that kills a boss eases the world down to a third speed, zooms the camera to just under twice the fight framing, and leans it most of the way onto the spot the boss died, holds all three, then eases everything back. It runs about three seconds and paces itself in real time, dividing out the time scale it is itself imposing.
+
+`PlayState` hands it the camera by skipping the cursor lean while it is running, so the two never fight over `targetOffset`. Opening a panel cancels it, which stops a paused menu inheriting the slow motion.
+
+`BossDeath` raises it on the frame it first sees a boss dead, which is the same frame the shake begins. The shake is paced by game time, so it stretches with the slow motion and the explosion lands after the camera has let go. The host relays the moment to clients, since a client never runs `BossDeath` itself.
+
 ### RenderLayers
 
 The shadow, entity and tag render groups. It sorts the entity layer every frame by feet position, so characters, pillars and decorations overlap correctly. The tag layer sits above that sort, so a name is never hidden by whoever stands behind it.

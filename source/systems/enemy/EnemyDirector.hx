@@ -151,6 +151,17 @@ class EnemyDirector
 		return f;
 	}
 
+	public var onBossKill(get, set):(Float, Float) -> Void;
+
+	function get_onBossKill()
+		return bossDeath.onKill;
+
+	function set_onBossKill(f:(Float, Float) -> Void)
+	{
+		bossDeath.onKill = f;
+		return f;
+	}
+
 	public var onBossDefeated(get, set):Void->Void;
 
 	function get_onBossDefeated()

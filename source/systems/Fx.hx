@@ -70,6 +70,16 @@ class Fx
 	private var hitstopFrames:Int = 0;
 	private var meleeHeld:Bool = false;
 
+	public var slowFactor(default, set):Float = 1;
+
+	function set_slowFactor(v:Float):Float
+	{
+		slowFactor = v;
+		if (hitstopFrames <= 0)
+			FlxG.timeScale = v;
+		return v;
+	}
+
 	public static function shake(intensity:Float, duration:Float):Void
 	{
 		var v = intensity * shakeScale;
@@ -137,7 +147,7 @@ class Fx
 		{
 			hitstopFrames--;
 			if (hitstopFrames <= 0)
-				FlxG.timeScale = 1;
+				FlxG.timeScale = slowFactor;
 		}
 
 		for (b in bursts.members)
@@ -210,6 +220,7 @@ class Fx
 	public function clearHitstop():Void
 	{
 		hitstopFrames = 0;
+		slowFactor = 1;
 		FlxG.timeScale = 1;
 	}
 

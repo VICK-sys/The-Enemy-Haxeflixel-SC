@@ -29,6 +29,7 @@ class NetSync
 	public var onWaveEvt:Int->Void;
 	public var onBossEvt:Void->Void;
 	public var onBossDefeatedEvt:Void->Void;
+	public var onBossKillEvt:(Float, Float) -> Void;
 	public var onDropped:Void->Void;
 	public var onRestart:Void->Void;
 	public var runFailed(default, null):Bool = false;
@@ -167,6 +168,14 @@ class NetSync
 				Net.send({t: "bossFall", x: r1(x), y: r1(y)});
 			if (oldFall != null)
 				oldFall(x, y, last);
+		};
+
+		var oldKill = director.onBossKill;
+		director.onBossKill = function(x, y)
+		{
+			Net.send({t: "bossKill", x: r1(x), y: r1(y)});
+			if (oldKill != null)
+				oldKill(x, y);
 		};
 
 		var oldDead = director.onBossDefeated;
@@ -415,6 +424,10 @@ class NetSync
 			case "bossSpawn" if (Net.isClient):
 				bossDown = false;
 				mirror.expectBoss(msg.id);
+
+			case "bossKill" if (Net.isClient):
+				if (onBossKillEvt != null)
+					onBossKillEvt(msg.x, msg.y);
 
 			case "bossFall" if (Net.isClient):
 				mirror.blastAt(msg.x, msg.y);

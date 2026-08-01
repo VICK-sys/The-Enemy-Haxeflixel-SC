@@ -64,6 +64,7 @@ class PlayState extends FlxState
 	private var ghost:systems.CoopGhost;
 	private var ritual:systems.ReviveRitual;
 	private var backGear:systems.BackGear;
+	private var bossFinish:systems.BossFinish;
 	private var boxes:systems.HitboxView;
 	private var wipe:IrisWipe;
 	public var restarting(default, null):Bool = false;
@@ -101,6 +102,8 @@ class PlayState extends FlxState
 	public function openPanel(sub:flixel.FlxSubState):Void
 	{
 		fx.clearHitstop();
+		if (bossFinish != null)
+			bossFinish.cancel();
 		FlxG.keys.reset();
 		openSubState(sub);
 	}
@@ -264,6 +267,8 @@ class PlayState extends FlxState
 		director.onBossPack = hud.showBossBar;
 		director.onBossDefeated = boss.defeated;
 		director.onBossDrops = boss.dropLoot;
+		bossFinish = new systems.BossFinish(_player, fx);
+		director.onBossKill = bossFinish.trigger;
 		director.onFriendlyShot = onDeflectedShot;
 		director.onShieldShot = onShieldedShot;
 		director.bossVeto = function(w) return quiet.tryDetour(w, director, status, combat);
@@ -282,6 +287,7 @@ class PlayState extends FlxState
 			netSync.onWaveEvt = onWaveStarted;
 			netSync.onBossEvt = boss.begin;
 			netSync.onBossDefeatedEvt = boss.defeated;
+			netSync.onBossKillEvt = bossFinish.trigger;
 			netSync.onDropped = onNetDropped;
 			netSync.startRevive = ritual.begin;
 			netSync.reviveDone = function() return ritual.done;
@@ -343,7 +349,9 @@ class PlayState extends FlxState
 		var inputLocked = Net.active && subState != null;
 
 		util.Controls.setAimAnchor(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5);
-		updateCameraLean();
+		bossFinish.update(elapsed);
+		if (!bossFinish.active)
+			updateCameraLean();
 
 		super.update(elapsed);
 

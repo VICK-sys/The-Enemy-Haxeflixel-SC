@@ -25,6 +25,7 @@ class BossDeath
 	public var onDefeated:Void->Void;
 	public var onDrops:(Float, Float) -> Void;
 	public var onFall:(Float, Float, Bool) -> Void;
+	public var onKill:(Float, Float) -> Void;
 
 	private var layers:RenderLayers;
 	private var watched:Array<BossFall> = [];
@@ -66,6 +67,8 @@ class BossDeath
 		w.baseY = w.boss.y;
 		w.boss.velocity.set(0, 0);
 		w.boss.allowCollisions = NONE;
+		if (onKill != null)
+			onKill(w.baseX + w.boss.width * 0.5, w.baseY + w.boss.height * 0.5);
 	}
 
 	function updateShake(w:BossFall, elapsed:Float):Void
