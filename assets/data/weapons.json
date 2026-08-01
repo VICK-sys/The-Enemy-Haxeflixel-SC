@@ -102,13 +102,40 @@
 		"slamDamage": 3,
 		"cooldown": 0.35
 	},
-	"bounceStrike": {
-		"strikes": 2,
-		"hopTime": 0.55,
-		"radius": 300,
-		"damage": 2,
-		"force": 4,
-		"catapultSpeed": 850
+	"flurry": {
+		"swings": 8,
+		"gap": 0.16,
+		"windup": 0.22,
+		"lunge": 260,
+		"swing": {
+			"spawnDist": 142,
+			"meleeRange": 200,
+			"meleeArcCos": -0.1,
+			"damage": 1,
+			"effectScale": 0.8,
+			"hitstop": 2,
+			"hitstopScale": 0.4,
+			"hitShake": 0.006,
+			"knock": 0.6,
+			"hitBrace": 4,
+			"deflects": true,
+			"effect": "spear",
+			"hitLift": 15,
+			"hitPush": -30
+		},
+		"finisher": {
+			"spawnDist": 145,
+			"meleeRange": 300,
+			"meleeArcCos": -0.6,
+			"damage": 4,
+			"effectScale": 2.4,
+			"hitstop": 18,
+			"hitstopScale": 0.1,
+			"hitShake": 0.016,
+			"knock": 8,
+			"hitBrace": 10,
+			"sound": "weapon/gigaSwing"
+		}
 	},
 	"arrowStorm": {
 		"stormTime": 3.0,

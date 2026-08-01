@@ -6,7 +6,7 @@ The combat coordinator. It owns the weapon for the run, which `equip` sets once 
 
 It splits the two buttons. Left click runs `primary`, right click runs `secondary`, and both key on the equipped weapon.
 
-It triggers the supers on Q at a full meter. The hammer launches HammerBounce, the revolver a twin gun, the crossbow ArrowStorm, and the yoyo YoyoSpin. `hasSuper` still gates the key, and the twin gun refuses while one is already out. Damage a super deals never charges the next super. The pipeline carries the source and skips the meter for it.
+It triggers the supers on Q at a full meter. The hammer launches HammerFlurry, the revolver a twin gun, the crossbow ArrowStorm, and the yoyo YoyoSpin. `hasSuper` still gates the key, and the twin gun refuses while one is already out. Damage a super deals never charges the next super. The pipeline carries the source and skips the meter for it.
 
 It also handles attack input dispatch: super priority, the held-enemy throw intercept, and the aim math. It hides the held weapon while the grab or the yoyo is out. Everything else goes to the systems below.
 
@@ -200,11 +200,17 @@ The crossbow super. Q with the crossbow equipped drains a full super meter. It f
 
 The storm proper starts once that arrow clears the top of the screen. The bow stays raised skyward while arrows carpet the whole visible arena for a few seconds. Drops spawn across the camera view on a fast cadence, reusing ArrowRain's drop, marker and landing machinery. The player can still move throughout.
 
-## HammerBounce
+## HammerFlurry
 
-The hammer super. Q with the hammer equipped and a full super meter drains the meter. The player leaps and slams `strikes` times, spinning through each hop with the hammer swinging around them, invincible for the whole run of it.
+The hammer super. Q with the hammer equipped and a full super meter drains the meter. The player plants, goes invincible, and unleashes `swings` rapid hammer sweeps at `gap` seconds apart, each a step into the aim, then holds for `windup` and lands one wide heavy finisher. The meter builds through normal hammer hits, so the super rewards staying on the attack.
 
-Every slam is a radial blast: `damage` and `force` out to `radius`, plus a catapult. The move keys steer each launch, and with none held the aim direction does. Two slams with a steered catapult between them is the whole move. It ends where the second slam lands, and the invincibility ends with it.
+The rapid sweeps use one arc config and the finisher another, both the same shape as a normal swing block. The sweeps cover a narrow front arc with a small lunge and a light hitstop, so the string flows. The finisher covers most of a circle at triple the reach with the heavy stop and the giga swing sound. The sweeps also deflect enemy fire, so the string clears the air in front while it grinds.
+
+Each sweep aims at the cursor, so the string can be steered mid flurry. The turn rate is capped per swing, and inside a short radius of the cursor the direction holds instead of recomputing. Without those two guards the lunges converge on the cursor point and the aim flips wildly once the player reaches it.
+
+The meter is locked from the very first sweep. The lock the weapon loop sets each frame comes too late for the opening hit, and the old bounce never noticed because its blasts used the no-meter hit path, while the flurry rides the normal swing pipeline.
+
+Getting the player killed mid string cancels it and restores movement, the guard and the meter lock. Remote players see the sweeps as bash slashes and the finisher as a giga slash through the attack events the normal swings already send.
 
 ---
 

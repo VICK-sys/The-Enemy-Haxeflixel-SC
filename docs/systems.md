@@ -349,7 +349,7 @@ A language change writes to the save and raises a flag. The main menu reads that
 
 ### BackGear
 
-The spinning gear on the player's back, drawn as its own sprite so it can turn freely behind the body. It anchors to the player each frame with a lean that tucks it in while walking or dashing. The anchor rides the visual body, not just the hitbox: the update takes the sprite's spin angle, its lift off the ground and the point it spins about, so during the hammer bounce the gear orbits the somersault and rises with the hop instead of sitting at ground level. `PlayState` updates it after combat so those values are current-frame, and `RemoteAvatar` feeds the same three values off the wire for remote players.
+The spinning gear on the player's back, drawn as its own sprite so it can turn freely behind the body. It anchors to the player each frame with a lean that tucks it in while walking or dashing. The anchor rides the visual body, not just the hitbox: the update takes the sprite's spin angle, its lift off the ground and the point it spins about, so any move that spins or lifts the body carries the gear with it instead of leaving it at ground level. `PlayState` updates it after combat so those values are current-frame, and `RemoteAvatar` feeds the same three values off the wire for remote players.
 
 ### GhostTrail
 

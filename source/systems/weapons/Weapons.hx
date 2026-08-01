@@ -25,7 +25,9 @@ class Weapons
 	public var bow:BowAttack;
 	public var throwAttack:ThrowAttack;
 	public var hookAttack:HookAttack;
-	public var bounce:HammerBounce;
+	public var flurry:HammerFlurry;
+	public var flurrySwing:SwingAttack;
+	public var flurryFinish:SwingAttack;
 	public var arrowStorm:ArrowStorm;
 	public var yoyoSpin:YoyoSpin;
 	public var weapon:Int = 0;
@@ -73,8 +75,14 @@ class Weapons
 		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
 		throwAttack.onCaught = function() swing.coolFor(weaponCfg.thrown.catchCooldown);
 		hookAttack = new HookAttack(player, arena, director, status, hits);
-		bounce = new HammerBounce(player, status, fx, hits, heldSprite);
-		bounce.onSlam = function(cx, cy)
+		flurrySwing = new SwingAttack(director, hits, fx, weaponCfg.flurry.swing);
+		flurrySwing.onConnect = held.impactPose;
+		flurryFinish = new SwingAttack(director, hits, fx, weaponCfg.flurry.finisher);
+		flurryFinish.onConnect = held.impactPose;
+		flurry = new HammerFlurry(player, status, held, flurrySwing, flurryFinish);
+		flurry.onSwing = function(pmx, pmy, dx, dy, deg, fin)
+			emitAttack(fin ? Giga : Bash, pmx, pmy, dx, dy, deg);
+		flurry.onFinisher = function(cx, cy)
 		{
 			if (onSuperLaunch != null)
 				onSuperLaunch(cx, cy);
@@ -98,7 +106,7 @@ class Weapons
 	public var superBusy(get, never):Bool;
 
 	function get_superBusy():Bool
-		return bounce.active || arrowStorm.busy || yoyoSpin.active;
+		return flurry.active || arrowStorm.busy || yoyoSpin.active;
 
 	public var playerBusy(get, never):Bool;
 
@@ -128,12 +136,14 @@ class Weapons
 		}
 
 		held.charge = bow.charging ? bow.charge : (giga.engaged ? giga.progress : 0);
-		if (!superBusy)
+		if (!superBusy || flurry.active)
 			held.update(elapsed);
 		updateAttackInput();
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		bash.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		gigaSwing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
+		flurrySwing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
+		flurryFinish.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		if (status.dead && yoyoJab.active)
 			yoyoJab.stop();
 		yoyoJab.update(elapsed, handX(), handY(), util.Controls.aimX(), util.Controls.aimY());
@@ -150,9 +160,9 @@ class Weapons
 			held.reloadPose(revolver.reloadProgress);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
-		if (status.dead && bounce.active)
-			bounce.cancel();
-		bounce.update(elapsed);
+		if (status.dead && flurry.active)
+			flurry.cancel();
+		flurry.update(elapsed);
 		arrowStorm.update(elapsed);
 		if (status.dead && yoyoSpin.active)
 			yoyoSpin.cancel();
@@ -317,7 +327,7 @@ class Weapons
 				status.spendSuper();
 				switch (weapon)
 				{
-					case 0: bounce.activate();
+					case 0: flurry.activate();
 					case 2: arrowStorm.activate();
 					default: yoyoSpin.activate(aimFromPlayer().deg);
 				}

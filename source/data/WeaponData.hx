@@ -103,13 +103,13 @@ typedef HookConfig = {
 	?cooldown:Float
 }
 
-typedef BounceConfig = {
-	strikes:Int,
-	hopTime:Float,
-	radius:Float,
-	damage:Float,
-	force:Float,
-	catapultSpeed:Float
+typedef FlurryConfig = {
+	swings:Int,
+	gap:Float,
+	windup:Float,
+	lunge:Float,
+	swing:SwingConfig,
+	finisher:SwingConfig
 }
 
 typedef ArrowStormConfig = {
@@ -139,7 +139,7 @@ typedef WeaponsData = {
 	bowCharge:BowChargeConfig,
 	arrowRain:ArrowRainConfig,
 	hook:HookConfig,
-	bounceStrike:BounceConfig,
+	flurry:FlurryConfig,
 	arrowStorm:ArrowStormConfig,
 	yoyoSpin:YoyoSpinConfig,
 	bash:SwingConfig,

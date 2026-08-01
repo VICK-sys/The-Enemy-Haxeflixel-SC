@@ -12,7 +12,7 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `systems/weapons/HookAttack.hx` | spawn distance, wall probe, retract speed, catch radius, rope handle length |
 | `systems/weapons/YoyoSpin.hx` | inner dead band, tip band width, visual spin rate, string shrink fraction |
 | `systems/weapons/ArrowRain.hx` | drop height, launch visual count and speed |
-| `systems/weapons/HammerBounce.hx` | hop apex, spin, hammer pivot geometry |
+| `systems/weapons/HammerFlurry.hx` | lunge damping, finisher lunge boost, aim hold radius and turn cap |
 | `systems/weapons/ArrowStorm.hx` | bow raise, launch arrow speed and scale, charge tint, trail settings |
 | `entities/weapon/ThrownWeapon.hx` | throw speed, spin rate, hit radius (the thrown hammer) |
 | `entities/HealthPickup.hx` | heal amount, lifetime |
