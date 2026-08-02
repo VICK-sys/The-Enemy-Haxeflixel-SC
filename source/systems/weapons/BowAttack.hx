@@ -44,7 +44,7 @@ class BowAttack
 		rain = new ArrowRain(fx, hits);
 		rain.hue = util.SaveData.playerHue();
 		drawSound = FlxG.sound.create(Paths.sound("bow/loading")).setup(0.4, true);
-		reloadSound = FlxG.sound.create(Paths.sound("weapon/crossbowReload")).setup(0.55);
+		reloadSound = FlxG.sound.create(Paths.sound("bow/loading")).setup(0.55);
 	}
 
 	function get_charge():Float
