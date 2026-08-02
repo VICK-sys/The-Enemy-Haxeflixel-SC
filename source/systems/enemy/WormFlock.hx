@@ -35,6 +35,8 @@ class WormFlock
 	static inline var EDGE_TURN:Float = 460;
 	static inline var AIM_TIME:Float = 0.35;
 	static inline var AIM_HOLD:Float = 0.45;
+	static inline var GLOW_TIME:Float = 0.35;
+	static inline var GLOW_HOLD:Float = 0.6;
 	static inline var PUFF_LIFE:Float = 0.4;
 	static inline var PUFF_GROW:Float = 2.2;
 	static inline var SURFACE_MARK:Float = 0.04;
@@ -50,6 +52,7 @@ class WormFlock
 	private var backs:Map<Enemies, FlxSprite> = new Map();
 	private var fills:Map<Enemies, FlxSprite> = new Map();
 	private var hpMax:Map<Enemies, Float> = new Map();
+	private var glow:Map<Enemies, Float> = new Map();
 	private var puffs:Array<WormPuff> = [];
 	private var layers:RenderLayers;
 	private var fx:Fx;
@@ -132,6 +135,7 @@ class WormFlock
 		backs.remove(s);
 		fills.remove(s);
 		hpMax.remove(s);
+		glow.remove(s);
 	}
 
 	public function update(elapsed:Float):Void
@@ -320,10 +324,10 @@ class WormFlock
 		shoot(c, elapsed, tx, ty);
 
 		for (idx in 0...c.segs.length)
-			place(c, idx, hx, hy, lift);
+			place(c, idx, elapsed, hx, hy, lift);
 	}
 
-	function place(c:WormChain, idx:Int, hx:Float, hy:Float, headHigh:Float):Void
+	function place(c:WormChain, idx:Int, elapsed:Float, hx:Float, hy:Float, headHigh:Float):Void
 	{
 		var s = c.segs[idx];
 		var px = hx;
@@ -374,12 +378,20 @@ class WormFlock
 		s.velocity.set(0, 0);
 
 		var up = lift > SURFACE_MARK;
+		var lit = glow.exists(s) ? glow.get(s) : 0;
 		if (up != !s.buried)
 		{
 			s.buried = !up;
-			if (idx > 0 && up)
-				breach(px, s.feetY);
+			if (up)
+			{
+				lit = GLOW_TIME;
+				if (idx > 0)
+					breach(px, s.feetY);
+			}
 		}
+		if (lit > 0)
+			lit = lit > elapsed ? lit - elapsed : 0;
+		glow.set(s, lit);
 
 		var baseOff = s.kind == "worm" ? headOffY : bodyOffY;
 		s.offset.y = baseOff + lift;
@@ -392,7 +404,12 @@ class WormFlock
 		if (up)
 		{
 			if (s.flashTimer <= 0)
+			{
 				s.color = 0xFFFFFF;
+				var t = lit / GLOW_TIME;
+				var add = t >= GLOW_HOLD ? 255 : Std.int(t / GLOW_HOLD * 255);
+				s.setColorTransform(1, 1, 1, s.alpha, add, add, add, 0);
+			}
 			if (idx == 0)
 			{
 				var deg = c.aimHold > 0 ? c.aimDeg : Math.atan2(py - c.trail[STRIDE + 1], px - c.trail[STRIDE]) * 180 / Math.PI;
