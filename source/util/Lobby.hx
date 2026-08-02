@@ -30,7 +30,7 @@ class Lobby
 		}
 		return {
 			sx: width() * 0.5,
-			sy: height() * 0.74,
+			sy: height() * 0.39,
 			csv: lines.join("\n"),
 			props: []
 		};
