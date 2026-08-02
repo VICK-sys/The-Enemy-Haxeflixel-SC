@@ -316,11 +316,19 @@ class LobbyState extends FlxState
 		openSubState(new WeaponPickSubState(camUI));
 	}
 
+	function repaint():Void
+	{
+		var hue = SaveData.playerHue();
+		player.setHue(hue);
+		backGear.paint(hue);
+		cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", hue));
+	}
+
 	function dressUp():Void
 	{
 		prompt.text = "";
 		var panel = new DressUpSubState(camUI);
-		panel.onDone = function() player.setHue(SaveData.playerHue());
+		panel.onDone = repaint;
 		FlxG.keys.reset();
 		openSubState(panel);
 	}
@@ -357,12 +365,7 @@ class LobbyState extends FlxState
 		prompt.text = "";
 		FlxG.keys.reset();
 		var pause = new PauseSubState(camUI, true);
-		pause.closeCallback = function()
-		{
-			player.setHue(SaveData.playerHue());
-			backGear.paint(SaveData.playerHue());
-			cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", SaveData.playerHue()));
-		};
+		pause.closeCallback = repaint;
 		openSubState(pause);
 	}
 }
