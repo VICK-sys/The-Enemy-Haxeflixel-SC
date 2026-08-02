@@ -560,6 +560,16 @@ class NetSync
 		Net.send({t: "snap", w: director.wave, en: en, pk: pk});
 	}
 
+	static inline var REVOLVER_WEAPON:Int = 1;
+
+	function twinState(player:entities.Player):Array<Float>
+	{
+		var t = combat.revolver.twinSprite;
+		if (!combat.revolver.twinActive || !t.visible)
+			return null;
+		return [r1(t.x - player.x), r1(t.y - player.y), r1(t.angle)];
+	}
+
 	function sendAvatar():Void
 	{
 		var held = combat.held.sprite;
@@ -582,6 +592,8 @@ class NetSync
 			hf: held.flipX,
 			hg: held.flipY,
 			ho: [r1(held.x - player.x), r1(held.y - player.y), r2(held.scale.x), r2(combat.held.charge)],
+			rl: combat.weapon == REVOLVER_WEAPON && combat.revolver.isReloading ? r2(combat.revolver.reloadProgress) : -1,
+			tw: twinState(player),
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
 			dd: status.dead && !status.throes,
 			rv: reviving,

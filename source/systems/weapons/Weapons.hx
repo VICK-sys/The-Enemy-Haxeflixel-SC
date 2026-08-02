@@ -59,6 +59,8 @@ class Weapons
 		yoyoJab = new YoyoJab(director, hits, fx);
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		revolver = new RevolverAttack(arena, director, fx, hits, status);
+		revolver.onTwinShot = function(tx:Float, ty:Float, dx:Float, dy:Float, deg:Float, big:Bool)
+			emitAttack(big ? BigShot : Shoot, tx, ty, dx, dy, deg);
 		bow = new BowAttack(arena, director, fx, hits);
 		throwAttack = new ThrowAttack(player, heldSprite, arena, director, status, hits);
 		throwAttack.onCaught = function() swing.coolFor(weaponCfg.thrown.catchCooldown);

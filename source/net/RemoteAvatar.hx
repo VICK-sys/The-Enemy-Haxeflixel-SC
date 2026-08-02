@@ -27,6 +27,10 @@ class RemoteAvatar
 	private var haveTarget:Bool = false;
 	private var weaponIdx:Int = -1;
 	private var heldOX:Float = 10;
+	private var twinOX:Float = 0;
+	private var twinOY:Float = 0;
+	private var reloadGfx:Bool = false;
+	private var twinHeld:FlxSprite;
 	private var heldOY:Float = 1;
 	private var leveling:Bool = false;
 	public var hue(default, null):Float = 0;
@@ -40,6 +44,9 @@ class RemoteAvatar
 	private var wasReviving:Bool = false;
 
 	static inline var REVOLVER_INDEX:Int = 1;
+	static inline var REV_FRAMES:Int = 11;
+	static inline var REV_CELL:Int = 32;
+	static inline var TWIN_SHADE:Int = 0xFF8A8A8A;
 	static inline var BOW_INDEX:Int = 2;
 	static inline var OFFSET_Y:Float = 56;
 	static inline var BUBBLE_UP:Float = 67;
@@ -82,6 +89,13 @@ class RemoteAvatar
 		held.scale.set(4, 4);
 		held.visible = false;
 		layers.entityLayer.add(held);
+
+		twinHeld = new FlxSprite();
+		twinHeld.antialiasing = false;
+		twinHeld.scale.set(4, 4);
+		twinHeld.color = TWIN_SHADE;
+		twinHeld.visible = false;
+		layers.entityLayer.add(twinHeld);
 
 		shadow = new FlxSprite(0, 0, Paths.image("effects/shadow"));
 		shadow.scale.set(4, 4);
@@ -135,7 +149,10 @@ class RemoteAvatar
 		gearIdx = gr;
 		gear.paint(h, sk, gr);
 		if (weaponIdx >= 0)
+		{
+			reloadGfx = false;
 			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
+		}
 		var was = sprite.animation.name;
 		sprite.frames = util.HuePalette.sparrow(util.Skins.of(sk), h);
 		sprite.animation.addByPrefix("idle", "Idle", 9, true);
@@ -148,6 +165,18 @@ class RemoteAvatar
 		sprite.height = 44;
 		sprite.offset.set(2, 56);
 		sprite.scale.set(4, 4);
+	}
+
+	function setReloadArt(on:Bool):Void
+	{
+		if (on == reloadGfx)
+			return;
+		reloadGfx = on;
+		if (on)
+			held.loadGraphic(util.HuePalette.graphic("items/revolver_reload", hue), true, REV_CELL, REV_CELL);
+		else
+			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
+		held.origin.set(held.width * 0.5, held.height * 0.5);
 	}
 
 	public function setLeveling(on:Bool):Void
@@ -203,12 +232,23 @@ class RemoteAvatar
 		if (wi != weaponIdx && wi >= 0 && wi < WEAPON_IMAGES.length)
 		{
 			weaponIdx = wi;
+			reloadGfx = false;
 			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[wi], hue));
 
 			if (wi == REVOLVER_INDEX || wi == BOW_INDEX)
 				held.origin.set(held.width * 0.5, held.height * 0.5);
 			else
 				held.origin.set(held.width * 0.5, held.height);
+		}
+
+		var rl:Float = m.rl == null ? -1 : m.rl;
+		setReloadArt(weaponIdx == REVOLVER_INDEX && rl >= 0);
+		if (reloadGfx)
+		{
+			var idx = Std.int(rl * REV_FRAMES);
+			if (idx > REV_FRAMES - 1)
+				idx = REV_FRAMES - 1;
+			held.animation.frameIndex = idx;
 		}
 		held.visible = m.hv;
 		held.angle = m.ha;
@@ -224,6 +264,27 @@ class RemoteAvatar
 			held.scale.set(hs, hs);
 			held.color = FlxColor.WHITE;
 		}
+
+		var tw:Array<Dynamic> = m.tw;
+		if (tw != null && held.visible)
+		{
+			twinOX = tw[0];
+			twinOY = tw[1];
+			twinHeld.angle = tw[2];
+			twinHeld.visible = true;
+			if (twinHeld.frames != held.frames)
+			{
+				twinHeld.frames = held.frames;
+				twinHeld.color = TWIN_SHADE;
+			}
+			twinHeld.origin.set(held.origin.x, held.origin.y);
+			twinHeld.animation.frameIndex = held.animation.frameIndex;
+			twinHeld.flipX = held.flipX;
+			twinHeld.flipY = held.flipY;
+			twinHeld.scale.set(held.scale.x, held.scale.y);
+		}
+		else
+			twinHeld.visible = false;
 
 		var bd:Array<Dynamic> = m.bd;
 		if (bd != null)
@@ -255,6 +316,9 @@ class RemoteAvatar
 
 		held.x = sprite.x + heldOX;
 		held.y = sprite.y + heldOY;
+
+		twinHeld.x = sprite.x + twinOX;
+		twinHeld.y = sprite.y + twinOY;
 
 		shadow.x = sprite.x + 10;
 		shadow.y = sprite.y + entities.Player.FEET;

@@ -34,6 +34,7 @@ class RevolverAttack
 
 	public var bullets:FlxTypedGroup<Bullet>;
 	public var twinSprite:FlxSprite;
+	public var onTwinShot:(Float, Float, Float, Float, Float, Bool) -> Void;
 	public var rounds:Int;
 	public var twinRounds(default, null):Int = 0;
 	public var capacity(get, never):Int;
@@ -298,6 +299,8 @@ class RevolverAttack
 		t.setSprite(pendKey);
 		t.fire(tx, ty, pendDx, pendDy, pendDeg, pendDamage * cfg.twinScale, cfg.speed, cfg.range, cfg.knock, pendRadius, pendTargets);
 		t.fromSuper = true;
+		if (onTwinShot != null)
+			onTwinShot(twinHandX, twinHandY, pendDx, pendDy, pendDeg, pendKey == BIG_SPRITE);
 		pendKey = null;
 		twinRounds -= pendCost;
 		if (twinRounds < 0)
