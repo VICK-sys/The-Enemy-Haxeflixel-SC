@@ -127,6 +127,7 @@ typedef EnemyData = {
 	?knockback:Float,
 	?knockbackDrag:Float,
 	?stunTime:Float,
+	?hitRecover:Float,
 	?wanderSpeed:Float,
 	?chargeWindup:Float,
 	?chargeSpeed:Float,

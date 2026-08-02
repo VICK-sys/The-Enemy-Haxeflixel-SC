@@ -526,13 +526,20 @@ class EnemyDirector
 				continue;
 			}
 
-			if (!e.seized && !e.selfDriven && !e.puppet && !status.dead)
+			if (!e.seized && !e.selfDriven && !e.puppet && !status.dead && e.stun <= 0)
 				spawner.checkStuck(rig, elapsed, touchingOther(e));
 
 			rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 			rig.hitbox.y = e.y + e.hitOffY;
-			if (!e.seized && !e.buried && e.throwGrace <= 0 && WorldClock.scale > 0.05)
-				status.hurtPlayer(rig.hitbox, e.contactDamage, e.feetY, e.contactPush);
+			if (!e.seized && !e.buried && e.throwGrace <= 0 && WorldClock.scale > 0.05
+				&& status.hurtPlayer(rig.hitbox, e.contactDamage, e.feetY, e.contactPush)
+				&& e.hitRecover > 0)
+			{
+				e.stun = e.hitRecover;
+				e.throwGrace = e.hitRecover;
+				e.velocity.set(0, 0);
+				e.drag.set(0, 0);
+			}
 
 			gunfire.emit(e);
 			if (e.pendingSummons.length > 0)
