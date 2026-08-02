@@ -25,7 +25,16 @@ private class Card
 
 class WeaponPickSubState extends FlxSubState
 {
-	public static var lastPick:Int = 0;
+	public static var lastPick(get, set):Int;
+
+	static function get_lastPick():Int
+		return util.SaveData.playerWeapon();
+
+	static function set_lastPick(i:Int):Int
+	{
+		util.SaveData.setPlayerWeapon(i);
+		return i;
+	}
 
 	static inline var ACCENT:Int = 0xFFB2273A;
 	static inline var CARD:Int = 0xFF4A4550;

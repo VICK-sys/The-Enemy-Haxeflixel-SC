@@ -24,6 +24,12 @@ class AckQuorum
 			acks.set(id, true);
 	}
 
+	public function unack(id:Int):Void
+	{
+		if (armed)
+			acks.remove(id);
+	}
+
 	public function drop(id:Int):Void
 	{
 		if (!armed)

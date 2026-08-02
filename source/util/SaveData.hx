@@ -350,6 +350,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function playerWeapon():Int
+	{
+		ensure();
+		return save.data.playerWeapon != null ? save.data.playerWeapon : 0;
+	}
+
+	public static function setPlayerWeapon(i:Int):Void
+	{
+		ensure();
+		save.data.playerWeapon = i;
+		save.flush();
+	}
+
 	public static function lastIp():String
 	{
 		ensure();

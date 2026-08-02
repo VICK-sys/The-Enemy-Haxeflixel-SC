@@ -71,6 +71,7 @@ class ReadyGate
 	{
 		netSync = sync;
 		sync.onReady = noteReady;
+		sync.onUnready = noteUnready;
 		sync.onReadyGo = release;
 		sync.onReadyArm = arm;
 	}
@@ -127,7 +128,11 @@ class ReadyGate
 		prompt.text = ready ? waitLabel() : Lang.t("ready.prompt");
 
 		if (ready)
+		{
+			if (Net.active && !status.dead && util.Controls.acceptJustPressed())
+				unready();
 			return;
+		}
 
 		if (Net.active && status.dead)
 		{
@@ -167,6 +172,25 @@ class ReadyGate
 		Net.send({t: "rdy"});
 		if (Net.isHost)
 			noteReady(Net.selfId);
+	}
+
+	function unready():Void
+	{
+		ready = false;
+		bubble.visible = false;
+		FlxG.sound.play(Paths.sound("weapon/catch"), 0.35);
+
+		Net.send({t: "unrdy"});
+		if (Net.isHost)
+			noteUnready(Net.selfId);
+	}
+
+	function noteUnready(id:Int):Void
+	{
+		if (netSync != null)
+			netSync.setReady(id, false);
+		if (Net.isHost && armed)
+			quorum.unack(id);
 	}
 
 	function noteReady(id:Int):Void

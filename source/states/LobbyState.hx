@@ -37,6 +37,7 @@ class LobbyState extends FlxState
 	static inline var SEND_FRAMES:Int = 3;
 	static inline var STALE:Float = 5;
 	static inline var ZOOM:Float = 0.75;
+	static inline var CURSOR_SCALE:Float = 3;
 
 	private var arena:Arena;
 	private var player:Player;
@@ -52,6 +53,9 @@ class LobbyState extends FlxState
 
 	private var frame:Int = 0;
 
+	private var cursor:FlxSprite;
+	private var backGear:systems.BackGear;
+
 	private var peers:Map<Int, RemoteAvatar> = new Map();
 	private var seen:Map<Int, Float> = new Map();
 
@@ -64,11 +68,16 @@ class LobbyState extends FlxState
 		arena = new Arena(this);
 		arena.tileBackground("stages/rock_tile");
 		player = new Player(arena.spawnX, arena.spawnY);
+		player.setHue(SaveData.playerHue());
 
 		heldSprite = new FlxSprite();
 		heldSprite.visible = false;
 
 		layers = new RenderLayers(this, player, heldSprite);
+
+		backGear = new systems.BackGear();
+		backGear.paint(SaveData.playerHue());
+		layers.entityLayer.add(backGear.sprite);
 
 		camUI = new FlxCamera();
 		camUI.bgColor = 0;
@@ -78,6 +87,14 @@ class LobbyState extends FlxState
 		addSign(Lobby.width() * 0.55, Lobby.height() * 0.28, "lobby.host", hostGame);
 		addSign(Lobby.width() * 0.75, Lobby.height() * 0.33, "lobby.join", askIp);
 		addSign(Lobby.width() * 0.40, Lobby.height() * 0.58, "lobby.player", dressUp);
+		addSign(Lobby.width() * 0.62, Lobby.height() * 0.58, "lobby.weapon", pickWeapon);
+
+		cursor = new FlxSprite();
+		cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", SaveData.playerHue()));
+		cursor.antialiasing = false;
+		cursor.scale.set(CURSOR_SCALE, CURSOR_SCALE);
+		cursor.cameras = [camUI];
+		add(cursor);
 
 		prompt = new FlxText(0, 0, FlxG.width, "");
 		prompt.setFormat(Lang.font(), 20, FlxColor.WHITE, CENTER);
@@ -153,6 +170,17 @@ class LobbyState extends FlxState
 		frame++;
 		pump();
 
+		backGear.update(elapsed, player.x + player.width * 0.5, player.y - 21, player.flipX,
+			systems.BackGear.leanFor(player.animation.name), player.visible, player.angle,
+			player.offset.y - player.baseOffsetY, player.y + player.height * 0.5);
+
+		for (av in peers)
+			av.update(elapsed);
+
+		cursor.setPosition(util.Controls.aimViewX(FlxG.camera) - cursor.frameWidth * 0.5,
+			util.Controls.aimViewY(FlxG.camera) - cursor.frameHeight * 0.5);
+		cursor.visible = subState == null;
+
 		status.visible = subState == null;
 		prompt.visible = subState == null;
 
@@ -192,7 +220,11 @@ class LobbyState extends FlxState
 				fx: player.flipX,
 				an: player.animation.name,
 				hu: SaveData.playerHue(),
-				nm: SaveData.playerName()
+				nm: SaveData.playerName(),
+				wi: WeaponPickSubState.lastPick,
+				hv: false,
+				ha: 0,
+				hf: false
 			});
 
 		for (msg in Net.poll())
@@ -238,14 +270,8 @@ class LobbyState extends FlxState
 		}
 		seen.set(id, haxe.Timer.stamp());
 
-		av.setHue(m.hu == null ? 0 : m.hu);
 		av.setName(m.nm == null || m.nm == "" ? Lang.t("online.defaultName") : m.nm);
-		av.sprite.x = m.x;
-		av.sprite.y = m.y;
-		av.sprite.flipX = m.fx == true;
-		av.sprite.visible = true;
-		if (m.an != null && av.sprite.animation.getByName(m.an) != null)
-			av.sprite.animation.play(m.an);
+		av.apply(m);
 	}
 
 	function drop(id:Int):Void
@@ -258,6 +284,9 @@ class LobbyState extends FlxState
 			av.sprite.visible = false;
 			av.held.visible = false;
 			av.shadow.visible = false;
+			av.tag.visible = false;
+			av.note.visible = false;
+			av.update(0);
 		}
 		peers.remove(id);
 		seen.remove(id);
@@ -278,6 +307,13 @@ class LobbyState extends FlxState
 	{
 		for (id in [for (k in peers.keys()) k])
 			drop(id);
+	}
+
+	function pickWeapon():Void
+	{
+		prompt.text = "";
+		FlxG.keys.reset();
+		openSubState(new WeaponPickSubState(camUI));
 	}
 
 	function dressUp():Void

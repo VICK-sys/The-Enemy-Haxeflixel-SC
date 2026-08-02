@@ -55,6 +55,7 @@ class NetSync
 	public var onLevelAck:Int->Void;
 	public var onLevelGo:Void->Void;
 	public var onReady:Int->Void;
+	public var onUnready:Int->Void;
 	public var onReadyGo:Void->Void;
 	public var onReadyArm:Void->Void;
 
@@ -330,6 +331,9 @@ class NetSync
 			case "rdy":
 				if (onReady != null)
 					onReady(msg.f);
+			case "unrdy":
+				if (onUnready != null)
+					onUnready(msg.f);
 
 			case "rdyarm" if (Net.isClient):
 				if (onReadyArm != null)
