@@ -48,6 +48,7 @@
 		"shotGap": 0.24,
 		"shotCount": 5,
 		"shotSpread": 13,
+		"shotMin": 300,
 		"shotSpeed": 720,
 		"shotDamage": 0.25,
 		"shotRange": 99999,

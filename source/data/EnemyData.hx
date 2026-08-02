@@ -72,6 +72,7 @@ typedef DomoData = {
 	shotGap:Float,
 	shotCount:Int,
 	shotSpread:Float,
+	shotMin:Float,
 	shotSpeed:Float,
 	shotDamage:Float,
 	shotRange:Float,

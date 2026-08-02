@@ -106,7 +106,7 @@ class DomoBoss implements AttackBehavior
 				e.velocity.set(dashX * cfg.dashSpeed, dashY * cfg.dashSpeed);
 				if (timer <= 0)
 				{
-					spray(e, ax, ay, cfg.dashCount - dashesLeft);
+					spray(e, ax, ay, cfg.dashCount - dashesLeft, distance);
 					dashesLeft--;
 					phase = DASH_REST;
 					timer = cfg.dashRest;
@@ -185,6 +185,14 @@ class DomoBoss implements AttackBehavior
 				beginDash(e);
 			return;
 		}
+		if (distance < cfg.shotMin)
+		{
+			if (!crowded() && FlxG.random.bool(25))
+				beginSummon(e);
+			else
+				beginDash(e);
+			return;
+		}
 		var r = FlxG.random.float();
 		if (r < 0.55)
 			beginShot(e);
@@ -224,10 +232,10 @@ class DomoBoss implements AttackBehavior
 		e.poise = false;
 	}
 
-	function spray(e:Enemies, ax:Float, ay:Float, index:Int):Void
+	function spray(e:Enemies, ax:Float, ay:Float, index:Int, distance:Float):Void
 	{
 		var list = cfg.dashShots;
-		if (list == null || list.length == 0)
+		if (list == null || list.length == 0 || distance < cfg.shotMin)
 			return;
 		var n = index < list.length ? list[index] : list[list.length - 1];
 		if (n > 0)
