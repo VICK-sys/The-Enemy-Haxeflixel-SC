@@ -1,81 +1,149 @@
 package states.tutorial;
 
 import flixel.FlxCamera;
+import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.util.FlxColor;
+import flixel.tweens.FlxEase;
 import util.Paths;
 
 class SuperDemo extends TutorialDemo
 {
-	static inline var HOP_TIME:Float = 0.8;
-	static inline var APEX:Float = 55;
-	static inline var SPIN:Float = 360;
-	static inline var GROUND:Float = 72;
-	static inline var SCALE:Float = 2.5;
-	static inline var POP:Float = 1.4;
-	static inline var POP_TIME:Float = 0.25;
-	static inline var RING_TIME:Float = 0.4;
-	static inline var RING_W:Float = 300;
-	static inline var RING_H:Float = 74;
+	static inline var SWINGS:Int = 8;
+	static inline var WINDUP:Float = 0.22;
+	static inline var GAP:Float = 0.16;
+	static inline var FINISH_TIME:Float = 0.34;
+	static inline var REST:Float = 0.9;
+	static inline var ARC:Float = 180;
+	static inline var BASE:Float = -60;
+	static inline var HELD_SCALE:Float = 4;
+	static inline var LUNGE:Float = 26;
+	static inline var DEMO:Float = 0.62;
 
 	private var actor:FlxSprite;
-	private var hammer:FlxSprite;
-	private var ring:FlxSprite;
+	private var held:FlxSprite;
+	private var slash:FlxSprite;
+	private var finishSlash:FlxSprite;
+	private var lastSwing:Int = -1;
+	private var finished:Bool = false;
+	private var pendingCut:Int = 0;
+	private var reach:Float;
 
 	public function new(cam:FlxCamera)
 	{
 		super(cam);
 
-		ring = sprite();
-		ring.loadGraphic(Paths.image("effects/shadow"));
-		ring.color = FlxColor.WHITE;
-		ring.alpha = 0;
+		var cfg = data.WeaponData.WeaponDataRegistry.get().flurry;
+		var hit = 4 * cfg.swing.effectScale * DEMO;
+		reach = cfg.swing.spawnDist * DEMO;
 
 		actor = player();
 		actor.animation.play("idle");
+		actor.scale.set(4 * DEMO, 4 * DEMO);
 
-		hammer = sprite();
-		hammer.loadGraphic(Paths.image("items/hammer"));
-		hammer.scale.set(SCALE, SCALE);
-		hammer.origin.set(hammer.width * 0.5, hammer.height);
+		slash = sprite();
+		slash.frames = Paths.sparrow("effects/attacks_gfx");
+		slash.animation.addByPrefix("slash", "Sword", 12, false);
+		slash.scale.set(hit, hit);
+		slash.kill();
+
+		finishSlash = sprite();
+		finishSlash.frames = Paths.sparrow("effects/attacks_gfx");
+		finishSlash.animation.addByPrefix("slash", "Sword", 12, false);
+		finishSlash.scale.set(hit, hit);
+		finishSlash.kill();
+
+		held = sprite();
+		held.loadGraphic(Paths.image("items/hammer"));
+		held.scale.set(HELD_SCALE * DEMO, HELD_SCALE * DEMO);
+		held.origin.set(held.width * 0.5, held.height);
 
 		step(0);
 	}
 
+	inline function cycle():Float
+		return WINDUP + SWINGS * GAP + FINISH_TIME + REST;
+
+	function cut(rising:Bool, big:Bool):Void
+	{
+		var s = big ? finishSlash : slash;
+		var hx = held.x + held.origin.x + reach;
+		var hy = held.y + held.origin.y;
+		s.revive();
+		s.animation.play("slash", true);
+		s.alpha = 1;
+		s.flipY = rising;
+		s.angle = 0;
+		s.setPosition(hx - s.width * 0.5, hy - s.height * 0.5);
+		FlxG.sound.play(Paths.sound(big ? "weapon/gigaSwing" : "weapon/gigaHit"), big ? 0.35 : 0.16);
+	}
+
 	override function step(elapsed:Float):Void
 	{
-		var cycle = time % HOP_TIME;
-		var t = cycle / HOP_TIME;
-		var groundY = TutorialDemo.CY + GROUND;
-		var bodyY = groundY - APEX * Math.sin(Math.PI * t);
-		var turn = SPIN * t;
+		var t = time % cycle();
+		var swingsEnd = WINDUP + SWINGS * GAP;
+		var lunge = 0.0;
+		var angle = BASE;
+		var scale = HELD_SCALE * DEMO;
 
-		center(actor, TutorialDemo.CX, bodyY);
-		actor.angle = turn;
-
-		var pivotX = actor.x - actor.offset.x + actor.origin.x;
-		var pivotY = actor.y - actor.offset.y + actor.origin.y;
-		var rad = turn * Math.PI / 180;
-		var cos = Math.cos(rad);
-		var sin = Math.sin(rad);
-		var relX = actor.x + systems.weapons.HeldWeapon.HAND_DX - pivotX;
-		var relY = actor.y + systems.weapons.HeldWeapon.HAND_DY - pivotY;
-		hammer.x = pivotX + (relX * cos - relY * sin) - hammer.origin.x;
-		hammer.y = pivotY + (relX * sin + relY * cos) - hammer.origin.y;
-		hammer.angle = turn + 180;
-
-		var pop = cycle < POP_TIME ? POP * (1 - cycle / POP_TIME) : 0;
-		hammer.scale.set(SCALE + pop, SCALE + pop);
-
-		if (cycle < RING_TIME)
+		if (t < WINDUP)
 		{
-			var k = cycle / RING_TIME;
-			ring.setGraphicSize(Std.int(RING_W * k), Std.int(RING_H * k));
-			ring.updateHitbox();
-			center(ring, TutorialDemo.CX, groundY + 34);
-			ring.alpha = 0.55 * (1 - k);
+			var p = t / WINDUP;
+			angle = BASE - 90 * FlxEase.quadOut(p);
+			scale = (HELD_SCALE + 0.5 * p) * DEMO;
+			lastSwing = -1;
+			finished = false;
 		}
-		else
-			ring.alpha = 0;
+		else if (t < swingsEnd)
+		{
+			var i = Std.int((t - WINDUP) / GAP);
+			var p = ((t - WINDUP) % GAP) / GAP;
+			var rising = i % 2 == 1;
+			var dir = rising ? -1 : 1;
+			angle = BASE + dir * ARC * (FlxEase.quintOut(p) - 0.5);
+			scale = (HELD_SCALE + 0.7 * Math.sin(Math.PI * p)) * DEMO;
+			lunge = LUNGE * DEMO * Math.sin(Math.PI * p);
+			if (i != lastSwing)
+			{
+				lastSwing = i;
+				pendingCut = rising ? 1 : 2;
+			}
+		}
+		else if (t < swingsEnd + FINISH_TIME)
+		{
+			var p = (t - swingsEnd) / FINISH_TIME;
+			angle = BASE + ARC * (FlxEase.quintOut(p) - 0.5);
+			scale = (HELD_SCALE + 1.3 * Math.sin(Math.PI * p)) * DEMO;
+			lunge = LUNGE * 2 * DEMO * Math.sin(Math.PI * p);
+			if (!finished)
+			{
+				finished = true;
+				pendingCut = 3;
+			}
+		}
+
+		center(actor, TutorialDemo.CX - 40 + lunge, TutorialDemo.CY);
+
+		held.scale.set(scale, scale);
+		held.angle = angle;
+		held.x = actor.x - held.origin.x + systems.weapons.HeldWeapon.HAND_DX * DEMO;
+		held.y = actor.y - held.origin.y + systems.weapons.HeldWeapon.HAND_DY * DEMO;
+
+		if (pendingCut > 0)
+		{
+			cut(pendingCut == 1, pendingCut == 3);
+			pendingCut = 0;
+		}
+
+		fade(slash, 5, elapsed);
+		fade(finishSlash, 2.5, elapsed);
+	}
+
+	function fade(s:FlxSprite, rate:Float, elapsed:Float):Void
+	{
+		if (!s.exists)
+			return;
+		s.alpha -= rate * elapsed;
+		if (s.alpha <= 0)
+			s.kill();
 	}
 }

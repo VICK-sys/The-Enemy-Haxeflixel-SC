@@ -24,7 +24,7 @@ class TutorialSubState extends FlxSubState
 	static inline var FADE_TIME:Float = 0.35;
 	static inline var OPEN_TIME:Float = 0.2;
 
-	static var KEYS:Array<String> = ["move", "attack", "weapons", "super", "scrap", "health", "ready"];
+	static var KEYS:Array<String> = ["move", "attack", "super", "scrap", "health", "ready"];
 
 	private var camUI:FlxCamera;
 	private var closeNav:Bool;
@@ -104,6 +104,7 @@ class TutorialSubState extends FlxSubState
 		{
 			case 0: [moveKeys(), bind(util.Controls.DASH)];
 			case 1: [bind(util.Controls.ATTACK), bind(util.Controls.SECOND)];
+			case 2: [bind(util.Controls.SUPER)];
 			default: null;
 		}
 	}

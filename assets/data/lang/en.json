@@ -144,7 +144,7 @@
 	"tutorial.attack.title": "ATTACK",
 	"tutorial.attack.desc": "Aim with the mouse\n{0} - primary attack        {1} - secondary attack\nHold either one to keep attacking",
 	"tutorial.super.title": "SUPER",
-	"tutorial.super.desc": "Q - super on a full meter - every weapon has its own",
+	"tutorial.super.desc": "{0} - super on a full meter - every weapon has its own",
 	"tutorial.scrap.title": "SCRAP",
 	"tutorial.scrap.desc": "Enemies drop scrap - walk over it to collect\nSpend it at the REPAIR SHOP every 10th wave",
 	"tutorial.ready.title": "READY UP",
