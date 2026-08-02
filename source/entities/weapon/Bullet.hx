@@ -18,9 +18,12 @@ class Bullet extends FlxSprite
 	public var knock:Float = 1;
 	public var hitR:Float = 48;
 	public var fromSuper:Bool = false;
+	public var hitsLeft:Int = 1;
+	public var pierces:Bool = false;
 
 	private var life:Float = 0;
 	private var spriteKey:String = null;
+	private var struck:Array<entities.enemy.Enemies> = [];
 
 	public function new()
 	{
@@ -42,7 +45,7 @@ class Bullet extends FlxSprite
 	}
 
 	public function fire(cx:Float, cy:Float, dx:Float, dy:Float, angleDeg:Float, damage:Float, speed:Float, range:Float,
-			knock:Float, hitRadius:Float = 48):Void
+			knock:Float, hitRadius:Float = 48, targets:Int = 1):Void
 	{
 		revive();
 		alpha = 1;
@@ -50,6 +53,9 @@ class Bullet extends FlxSprite
 		this.knock = knock;
 		hitR = hitRadius;
 		fromSuper = false;
+		hitsLeft = targets < 1 ? 1 : targets;
+		pierces = hitsLeft > 1;
+		struck.resize(0);
 		setPosition(cx - width / 2, cy - height / 2);
 		dirX = dx;
 		dirY = dy;
@@ -57,6 +63,12 @@ class Bullet extends FlxSprite
 		angle = angleDeg + ART_TURN;
 		life = range / speed;
 	}
+
+	public function hasStruck(e:entities.enemy.Enemies):Bool
+		return struck.indexOf(e) >= 0;
+
+	public function markStruck(e:entities.enemy.Enemies):Void
+		struck.push(e);
 
 	override public function update(elapsed:Float):Void
 	{

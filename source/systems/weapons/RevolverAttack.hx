@@ -23,6 +23,7 @@ class RevolverAttack
 	static inline var TWIN_KICK:Float = 16;
 	static inline var KICK_FADE:Float = 7;
 	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
+	static inline var BIG_TARGETS:Int = 2;
 	static inline var SPIN_AT:Float = 2 / 11;
 	static inline var SPIN_END_AT:Float = 8 / 11;
 	static inline var SPIN_VOL:Float = 0.5;
@@ -71,6 +72,7 @@ class RevolverAttack
 	private var pendDeg:Float = 0;
 	private var pendDamage:Float = 0;
 	private var pendRadius:Float = 0;
+	private var pendTargets:Int = 1;
 	private var pendKey:String = null;
 
 	public function new(arena:Arena, director:EnemyDirector, fx:Fx, hits:HitPipeline, status:PlayerCombat)
@@ -176,7 +178,7 @@ class RevolverAttack
 
 		bigTimer = cfg.bigCooldown * util.Levels.actionScale();
 		fireTimer = cfg.fireInterval * util.Levels.actionScale();
-		spawn(bx, by, dx, dy, aimDeg, cfg.bigDamage, BIG_SPRITE, cfg.bigRadius, cfg.bigCost);
+		spawn(bx, by, dx, dy, aimDeg, cfg.bigDamage, BIG_SPRITE, cfg.bigRadius, cfg.bigCost, BIG_TARGETS);
 		rounds -= cfg.bigCost;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		systems.Fx.shake(0.005, 0.15);
@@ -253,11 +255,23 @@ class RevolverAttack
 		return true;
 	}
 
-	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Float, key:String, radius:Float, cost:Int):Bullet
+	function freshTarget(b:Bullet, cx:Float, cy:Float):entities.enemy.Enemies
+	{
+		var found:entities.enemy.Enemies = null;
+		director.eachInCircle(cx, cy, b.hitR, function(e)
+		{
+			if (found == null && !b.hasStruck(e))
+				found = e;
+		});
+		return found;
+	}
+
+	function spawn(bx:Float, by:Float, dx:Float, dy:Float, aimDeg:Float, damage:Float, key:String, radius:Float, cost:Int,
+			targets:Int = 1):Bullet
 	{
 		var b = bullets.recycle(Bullet);
 		b.setSprite(key);
-		b.fire(bx + dx * MUZZLE, by + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock, radius);
+		b.fire(bx + dx * MUZZLE, by + dy * MUZZLE, dx, dy, aimDeg, damage, cfg.speed, cfg.range, cfg.knock, radius, targets);
 
 		if (twin && twinRounds >= cost)
 		{
@@ -268,6 +282,7 @@ class RevolverAttack
 			pendDeg = aimDeg;
 			pendDamage = damage;
 			pendRadius = radius;
+			pendTargets = targets;
 			pendKey = key;
 		}
 		return b;
@@ -281,7 +296,7 @@ class RevolverAttack
 		var ty = twinHandY + pendDy * MUZZLE;
 		var t = bullets.recycle(Bullet);
 		t.setSprite(pendKey);
-		t.fire(tx, ty, pendDx, pendDy, pendDeg, pendDamage * cfg.twinScale, cfg.speed, cfg.range, cfg.knock, pendRadius);
+		t.fire(tx, ty, pendDx, pendDy, pendDeg, pendDamage * cfg.twinScale, cfg.speed, cfg.range, cfg.knock, pendRadius, pendTargets);
 		t.fromSuper = true;
 		pendKey = null;
 		twinRounds -= pendCost;
@@ -367,15 +382,18 @@ class RevolverAttack
 				continue;
 			}
 
-			var hit = director.firstInCircle(cx, cy, b.hitR);
+			var hit = b.pierces ? freshTarget(b, cx, cy) : director.firstInCircle(cx, cy, b.hitR);
 			if (hit != null)
 			{
+				b.markStruck(hit);
 				if (b.fromSuper)
 					hits.damageSuper(hit, b.dirX * b.knock, b.dirY * b.knock, b.damage);
 				else
 					hits.damageN(hit, b.dirX * b.knock, b.dirY * b.knock, b.damage);
 				fx.impactAt(cx, cy);
-				b.kill();
+				b.hitsLeft--;
+				if (b.hitsLeft <= 0)
+					b.kill();
 			}
 		}
 

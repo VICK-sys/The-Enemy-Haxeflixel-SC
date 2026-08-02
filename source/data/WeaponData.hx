@@ -62,7 +62,8 @@ typedef ThrownConfig = {
 	returnSpeed:Float,
 	catchCooldown:Float,
 	?damage:Float,
-	?knock:Float
+	?knock:Float,
+	?returnKnock:Float
 }
 
 typedef BowChargeConfig = {

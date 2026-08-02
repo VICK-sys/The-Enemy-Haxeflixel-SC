@@ -53,7 +53,7 @@
 		"hitRadius": 26,
 		"knock": 1.2,
 		"bigCost": 3,
-		"bigDamage": 7.875,
+		"bigDamage": 6.75,
 		"bigCooldown": 0.77,
 		"bigRadius": 50,
 		"twinTime": 6.0,
@@ -64,7 +64,8 @@
 		"returnSpeed": 1250,
 		"catchCooldown": 0.45,
 		"damage": 2,
-		"knock": 2.4
+		"knock": 2.4,
+		"returnKnock": 0.7
 	},
 	"bowCharge": {
 		"minTime": 0.15,

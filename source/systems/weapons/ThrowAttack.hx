@@ -130,6 +130,8 @@ class ThrowAttack
 		}
 
 		var knock = cfg.knock == null ? 1 : cfg.knock;
+		if (thrown.returning && cfg.returnKnock != null)
+			knock = cfg.returnKnock;
 		var pushX = vx * knock;
 		var pushY = vy * knock;
 		director.eachInCircle(cx, cy, ThrownWeapon.RADIUS, function(e)
