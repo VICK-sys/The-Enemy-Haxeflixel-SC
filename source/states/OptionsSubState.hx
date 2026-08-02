@@ -91,6 +91,7 @@ class OptionsSubState extends FlxSubState
 	private var skinClock:Float = 0;
 	private var settleClock:Float = 0;
 	private var sample:FlxSound;
+	private var samples:Map<String, FlxSound> = new Map();
 
 	public function new(?cam:FlxCamera)
 	{
@@ -348,9 +349,15 @@ class OptionsSubState extends FlxSubState
 		if (sample != null && sample.playing)
 			sample.stop();
 		var line = "voice/hurt" + (1 + Std.random(systems.PlayerCombat.HURT_LINES));
-		sample = FlxG.sound.play(util.Paths.sound(line), systems.PlayerCombat.VOICE);
-		if (sample != null)
-			sample.pitch = SaveData.voicePitch();
+		sample = samples.get(line);
+		if (sample == null)
+		{
+			sample = FlxG.sound.load(util.Paths.sound(line), systems.PlayerCombat.VOICE, false, FlxG.sound.defaultSoundGroup);
+			samples.set(line, sample);
+		}
+		sample.volume = systems.PlayerCombat.VOICE;
+		sample.pitch = SaveData.voicePitch();
+		sample.play(true);
 	}
 
 	function gyroLabel():String

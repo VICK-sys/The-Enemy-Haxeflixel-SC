@@ -51,6 +51,7 @@ class PlayerCombat
 	private var throeX:Float = 0;
 	private var throeY:Float = 0;
 	private var voice:FlxSound;
+	private var voices:Map<String, FlxSound> = new Map();
 	private var hitSound:FlxSound;
 	private var steamPuff:flixel.FlxSprite;
 
@@ -201,9 +202,18 @@ class PlayerCombat
 	{
 		if (voice != null && voice.playing)
 			voice.stop();
-		voice = FlxG.sound.play(Paths.sound(name), VOICE);
-		if (voice != null)
-			voice.pitch = util.SaveData.voicePitch();
+
+		var line = voices.get(name);
+		if (line == null)
+		{
+			line = FlxG.sound.load(Paths.sound(name), VOICE, false, FlxG.sound.defaultSoundGroup);
+			voices.set(name, line);
+		}
+
+		voice = line;
+		voice.volume = VOICE;
+		voice.pitch = util.SaveData.voicePitch();
+		voice.play(true);
 	}
 
 
