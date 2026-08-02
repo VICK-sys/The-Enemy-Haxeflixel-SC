@@ -309,6 +309,19 @@ class Controls
 	public static function pausePressed():Bool
 		return justPressed(PAUSE) || padJust(FlxGamepadInputID.START);
 
+	public static function pauseHeld():Bool
+		return pressed(PAUSE) || padPressed(FlxGamepadInputID.START);
+
+	public static function anyPadHeld():Bool
+	{
+		var p = pad();
+		return p != null && p.anyPressed([
+			FlxGamepadInputID.A, FlxGamepadInputID.B, FlxGamepadInputID.X, FlxGamepadInputID.Y, FlxGamepadInputID.START,
+			FlxGamepadInputID.BACK, FlxGamepadInputID.DPAD_UP, FlxGamepadInputID.DPAD_DOWN, FlxGamepadInputID.DPAD_LEFT,
+			FlxGamepadInputID.DPAD_RIGHT, FlxGamepadInputID.LEFT_SHOULDER, FlxGamepadInputID.RIGHT_SHOULDER
+		]);
+	}
+
 	static function tick():Void
 	{
 		if (firePinned && !pressed(ATTACK) && !pressed(SECOND))

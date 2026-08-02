@@ -64,7 +64,6 @@ class WeaponPickSubState extends FlxSubState
 	static inline var FLOAT_AMP:Float = 7;
 	static inline var FLOAT_SPEED:Float = 3.2;
 	static inline var FLOAT_EASE:Float = 12;
-	static inline var ARM_TIME:Float = 0.2;
 
 	static var OUTLINE_DIRS:Array<Array<Int>> = [
 		[-1, 0], [1, 0], [0, -1], [0, 1],
@@ -109,7 +108,6 @@ class WeaponPickSubState extends FlxSubState
 	private var bob:Float = 0;
 	private var pick:Int = 0;
 	private var done:Bool = false;
-	private var arm:Float = ARM_TIME;
 	private var lastMouseX:Float = -99999;
 	private var lastMouseY:Float = -99999;
 
@@ -265,11 +263,6 @@ class WeaponPickSubState extends FlxSubState
 
 		updateFloat(elapsed);
 
-		if (arm > 0)
-		{
-			arm -= elapsed;
-			return;
-		}
 		updateInput();
 	}
 

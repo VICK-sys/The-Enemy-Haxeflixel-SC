@@ -10,7 +10,6 @@ import util.Lang;
 
 class LobbyPanel extends FlxSubState
 {
-	static inline var ARM:Float = 0.14;
 	static inline var DEL_FIRST:Float = 0.35;
 	static inline var DEL_NEXT:Float = 0.045;
 
@@ -26,7 +25,6 @@ class LobbyPanel extends FlxSubState
 	private var panelH:Int;
 	private var px:Float = 0;
 	private var py:Float = 0;
-	private var arm:Float = ARM;
 	private var delHold:Float = 0;
 
 	public function new(camUI:FlxCamera, panelW:Int, panelH:Int)
@@ -101,11 +99,7 @@ class LobbyPanel extends FlxSubState
 	}
 
 	function armed():Bool
-		return arm <= 0;
+		return true;
 
-	function tickArm(elapsed:Float):Void
-	{
-		if (arm > 0)
-			arm -= elapsed;
-	}
+	function tickArm(elapsed:Float):Void {}
 }

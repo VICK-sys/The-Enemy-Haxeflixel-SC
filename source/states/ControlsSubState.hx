@@ -14,7 +14,6 @@ import util.Lang;
 class ControlsSubState extends FlxSubState
 {
 	static inline var ROWS:Int = 15;
-	static inline var ARM_TIME:Float = 0.15;
 	static inline var TOP:Float = 96;
 	static inline var STEP:Float = 36;
 
@@ -36,7 +35,7 @@ class ControlsSubState extends FlxSubState
 	private var prompt:FlxText;
 	private var device:Int = 0;
 	private var capturing:Int = -1;
-	private var arm:Float = 0;
+	private var holding:Bool = false;
 
 	public function new(?cam:FlxCamera)
 	{
@@ -128,7 +127,7 @@ class ControlsSubState extends FlxSubState
 			return;
 		}
 		capturing = i - 1;
-		arm = ARM_TIME;
+		holding = true;
 		list.enabled = false;
 		prompt.text = Lang.t(device == 0 ? "controls.pressKey" : "controls.pressPad");
 	}
@@ -155,10 +154,11 @@ class ControlsSubState extends FlxSubState
 			return;
 		}
 
-		if (arm > 0)
+		if (holding)
 		{
-			arm -= elapsed;
-			return;
+			if (FlxG.keys.pressed.ANY || Controls.anyPadHeld())
+				return;
+			holding = false;
 		}
 
 		if (FlxG.keys.justPressed.ESCAPE)

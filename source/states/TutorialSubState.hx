@@ -151,7 +151,6 @@ class TutorialSubState extends FlxSubState
 			}
 			else
 				applyFade(1 - (1 - fade) * (1 - fade));
-			return;
 		}
 
 		if (closing)
