@@ -19,12 +19,17 @@ class PauseSubState extends FlxSubState
 	private var list:MenuList;
 	private var leaving:Bool = false;
 	private var arm:Float = ARM_TIME;
+	private var inLobby:Bool;
 
-	public function new(camUI:FlxCamera)
+	public function new(camUI:FlxCamera, inLobby:Bool = false)
 	{
 		super();
 		this.camUI = camUI;
+		this.inLobby = inLobby;
 	}
+
+	function exitKey():String
+		return inLobby ? "pause.quit" : "pause.lobby";
 
 	override public function create():Void
 	{
@@ -39,7 +44,7 @@ class PauseSubState extends FlxSubState
 		title.cameras = [camUI];
 		add(title);
 
-		list = new MenuList([Lang.t("pause.resume"), Lang.t("pause.help"), Lang.t("pause.options"), Lang.t("pause.quit")], 300, 66, 32);
+		list = new MenuList([Lang.t("pause.resume"), Lang.t("pause.help"), Lang.t("pause.options"), Lang.t(exitKey())], 300, 66, 32);
 		list.onChoose = choose;
 		list.cameras = [camUI];
 		add(list);
@@ -70,7 +75,7 @@ class PauseSubState extends FlxSubState
 		title.text = Lang.t("pause.title");
 		title.font = Lang.font();
 
-		var keys = ["pause.resume", "pause.help", "pause.options", "pause.quit"];
+		var keys = ["pause.resume", "pause.help", "pause.options", exitKey()];
 		for (i in 0...keys.length)
 		{
 			list.rowAt(i).font = Lang.font();
@@ -122,8 +127,13 @@ class PauseSubState extends FlxSubState
 				net.Net.stop();
 				if (util.CustomArena.fromEditor)
 					new IrisWipe(this).close(function() FlxG.switchState(() -> new EditorState()));
-				else
+				else if (inLobby)
+				{
+					util.Lobby.leave();
 					new IrisWipe(this).close(function() FlxG.switchState(() -> new MainMenuState()));
+				}
+				else
+					new IrisWipe(this).close(function() FlxG.switchState(() -> new LobbyState()));
 		}
 	}
 }

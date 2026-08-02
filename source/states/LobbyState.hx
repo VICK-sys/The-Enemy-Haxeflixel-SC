@@ -192,8 +192,8 @@ class LobbyState extends FlxState
 		if (near != null && util.Controls.justPressed(util.Controls.INTERACT))
 			near.act();
 
-		if (FlxG.keys.justPressed.ESCAPE)
-			quit();
+		if (util.Controls.pausePressed())
+			openPause();
 	}
 
 	function statusLine():String
@@ -352,13 +352,17 @@ class LobbyState extends FlxState
 		wipe.close(function() FlxG.switchState(() -> new PlayState()));
 	}
 
-	function quit():Void
+	function openPause():Void
 	{
-		if (leaving)
-			return;
-		leaving = true;
-		Net.stop();
-		Lobby.leave();
-		wipe.close(function() FlxG.switchState(() -> new MainMenuState()));
+		prompt.text = "";
+		FlxG.keys.reset();
+		var pause = new PauseSubState(camUI, true);
+		pause.closeCallback = function()
+		{
+			player.setHue(SaveData.playerHue());
+			backGear.paint(SaveData.playerHue());
+			cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", SaveData.playerHue()));
+		};
+		openSubState(pause);
 	}
 }

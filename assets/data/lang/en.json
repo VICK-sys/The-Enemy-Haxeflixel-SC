@@ -48,6 +48,7 @@
 	"pause.help": "HELP",
 	"pause.options": "OPTIONS",
 	"pause.quit": "QUIT TO MENU",
+	"pause.lobby": "BACK TO LOBBY",
 	"options.page": "< {0} >    {1}/{2}",
 	"options.page.graphics": "GRAPHICS",
 	"options.page.visual": "VISUAL",
