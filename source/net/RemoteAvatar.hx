@@ -30,6 +30,7 @@ class RemoteAvatar
 	private var heldOY:Float = 1;
 	private var leveling:Bool = false;
 	public var hue(default, null):Float = 0;
+	public var skin(default, null):Int = 0;
 	private var wasDead:Bool = false;
 	private var burst:systems.DeathBurst;
 	private var ghost:systems.CoopGhost;
@@ -51,7 +52,7 @@ class RemoteAvatar
 	public function new(layers:RenderLayers)
 	{
 		sprite = new FlxSprite();
-		sprite.frames = Paths.sparrow("characters/mufu");
+		sprite.frames = Paths.sparrow(util.Skins.of(skin));
 		sprite.animation.addByPrefix("idle", "Idle", 9, true);
 		sprite.animation.addByPrefix("walk", "Run", 12, true);
 		sprite.animation.addByPrefix("dash", "Dash", 12, false);
@@ -120,15 +121,20 @@ class RemoteAvatar
 	}
 
 	public function setHue(h:Float):Void
+		setLook(h, skin);
+
+	public function setLook(h:Float, sk:Int):Void
 	{
-		if (h == hue)
+		sk = util.Skins.clamp(sk);
+		if (h == hue && sk == skin)
 			return;
 		hue = h;
-		gear.paint(h);
+		skin = sk;
+		gear.paint(h, util.Skins.of(sk));
 		if (weaponIdx >= 0)
 			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
 		var was = sprite.animation.name;
-		sprite.frames = util.HuePalette.sparrow("characters/mufu", h);
+		sprite.frames = util.HuePalette.sparrow(util.Skins.of(sk), h);
 		sprite.animation.addByPrefix("idle", "Idle", 9, true);
 		sprite.animation.addByPrefix("walk", "Run", 12, true);
 		sprite.animation.addByPrefix("dash", "Dash", 12, false);
@@ -165,7 +171,7 @@ class RemoteAvatar
 		var dead:Bool = m.dd == true;
 		if (dead && !wasDead)
 		{
-			burst.burst(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue, sprite.flipX);
+			burst.burst(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue, sprite.flipX, util.Skins.of(skin));
 			ghost.show(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue);
 		}
 		else if (!dead && wasDead)
@@ -186,7 +192,7 @@ class RemoteAvatar
 		sprite.visible = !dead;
 		sprite.flipX = m.fx;
 		if (m.hu != null)
-			setHue(m.hu);
+			setLook(m.hu, m.sk == null ? skin : m.sk);
 		if (m.an != null && sprite.animation.name != m.an && sprite.animation.getByName(m.an) != null)
 			sprite.animation.play(m.an);
 

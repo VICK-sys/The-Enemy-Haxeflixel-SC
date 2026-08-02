@@ -215,13 +215,13 @@ class OnlineState extends FlxState
 
 	function reskin():Void
 	{
-		util.HuePalette.live("characters/mufu", SaveData.playerHue());
+		util.HuePalette.live(util.Skins.sheet(), SaveData.playerHue());
 		refreshWeapon();
 	}
 
 	function buildPreview():Void
 	{
-		preview.frames = util.HuePalette.liveFrames("characters/mufu", SaveData.playerHue());
+		preview.frames = util.HuePalette.liveFrames(util.Skins.sheet(), SaveData.playerHue());
 		preview.animation.addByPrefix("idle", "Idle", 9, true);
 		preview.animation.play("idle");
 		preview.scale.set(PREVIEW_SCALE, PREVIEW_SCALE);

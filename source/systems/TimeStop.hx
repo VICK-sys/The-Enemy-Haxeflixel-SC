@@ -56,7 +56,7 @@ class TimeStop
 		recoverTime = d.timestopRecover;
 		cooldownTime = d.timestopCooldown;
 
-		trail = new GhostTrail("characters/mufu", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
+		trail = new GhostTrail(util.Skins.sheet(), TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
 		shadowTrail = new GhostTrail("effects/shadow", TRAIL_ALPHA, TRAIL_FADE, TRAIL_INTERVAL);
 
 		overlay = util.Veil.make(0xFF2B4E70);

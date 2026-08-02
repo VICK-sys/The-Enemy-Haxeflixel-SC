@@ -219,6 +219,12 @@ class Controls
 	public static function padRightHeld():Bool
 		return padPressed(FlxGamepadInputID.DPAD_RIGHT) || stickX() > STICK_MOVE;
 
+	public static function padUpJust():Bool
+		return padJust(FlxGamepadInputID.DPAD_UP);
+
+	public static function padDownJust():Bool
+		return padJust(FlxGamepadInputID.DPAD_DOWN);
+
 	static var firePinned:Bool = false;
 	static var fireLock:Float = 0;
 

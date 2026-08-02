@@ -331,6 +331,20 @@ class SaveData
 			save.flush();
 	}
 
+	public static function playerSkin():Int
+	{
+		ensure();
+		return save.data.playerSkin != null ? save.data.playerSkin : 0;
+	}
+
+	public static function setPlayerSkin(i:Int, store:Bool = true):Void
+	{
+		ensure();
+		save.data.playerSkin = Skins.clamp(i);
+		if (store)
+			save.flush();
+	}
+
 	public static function commit():Void
 	{
 		ensure();

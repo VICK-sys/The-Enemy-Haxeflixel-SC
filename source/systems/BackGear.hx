@@ -17,6 +17,7 @@ class BackGear
 	public var sprite:FlxSprite;
 
 	private var hue:Float = -1;
+	private var skin:String = null;
 
 	public function new()
 	{
@@ -28,12 +29,14 @@ class BackGear
 		sprite.height = 1;
 	}
 
-	public function paint(h:Float):Void
+	public function paint(h:Float, ?sheet:String):Void
 	{
-		if (h == hue)
+		var use = sheet != null ? sheet : util.Skins.sheet();
+		if (h == hue && use == skin)
 			return;
 		hue = h;
-		sprite.frames = util.HuePalette.sparrow("characters/mufu", h);
+		skin = use;
+		sprite.frames = util.HuePalette.sparrow(use, h);
 		sprite.frame = sprite.frames.getByName("Part00000");
 		sprite.origin.set(PIVOT_X, PIVOT_Y);
 	}

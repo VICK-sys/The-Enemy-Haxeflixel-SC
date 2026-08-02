@@ -54,7 +54,7 @@ class TutorialDemo extends FlxGroup
 	function player():FlxSprite
 	{
 		var p = sprite();
-		p.frames = Paths.sparrow("characters/mufu");
+		p.frames = Paths.sparrow(util.Skins.sheet());
 		p.animation.addByPrefix("idle", "Idle", 9, true);
 		p.animation.addByPrefix("walk", "Run", 12, true);
 		p.scale.set(4, 4);

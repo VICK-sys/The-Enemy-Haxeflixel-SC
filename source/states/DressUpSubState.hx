@@ -24,7 +24,7 @@ class DressUpSubState extends LobbyPanel
 	static inline var REPEAT_FIRST:Float = 0.30;
 	static inline var REPEAT_NEXT:Float = 0.09;
 	static inline var CARET_RATE:Float = 3.4;
-
+	static inline var SKIN_H:Int = 52;
 
 	public var onDone:Void->Void;
 
@@ -33,10 +33,12 @@ class DressUpSubState extends LobbyPanel
 	private var ghostText:FlxText;
 	private var caret:FlxSprite;
 	private var counter:FlxText;
+	private var skinText:FlxText;
 	private var ringBars:Array<FlxSprite> = [];
 	private var chips:Array<FlxSprite> = [];
 
 	private var pick:Int = 0;
+	private var skin:Int = 0;
 	private var held:Float = 0;
 	private var lastTurn:Int = 0;
 	private var blink:Float = 0;
@@ -81,6 +83,13 @@ class DressUpSubState extends LobbyPanel
 
 		counter = label(colX, fieldY + 20, FIELD_W - 16, "", 18, LobbyPanel.DIM, RIGHT);
 
+		var skinY = fieldY + 106;
+		label(colX, skinY - 30, FIELD_W, Lang.t("lobby.skinLabel"), 20, LobbyPanel.DIM, LEFT);
+		well(colX, skinY, FIELD_W, SKIN_H);
+		label(colX + 16, skinY + 12, 0, "<", 26, LobbyPanel.DIM, LEFT);
+		label(colX + FIELD_W - 32, skinY + 12, 0, ">", 26, LobbyPanel.DIM, LEFT);
+		skinText = label(colX, skinY + 12, FIELD_W, "", 26, FlxColor.WHITE, CENTER);
+
 		stripX = px + (panelW - STEPS * CHIP_W) * 0.5;
 		stripY = py + 352;
 		label(stripX, py + 320, STEPS * CHIP_W, Lang.t("lobby.colorLabel"), 20, LobbyPanel.DIM, LEFT);
@@ -103,6 +112,9 @@ class DressUpSubState extends LobbyPanel
 
 		hints(Lang.t("lobby.dressHints"), py + 432);
 
+		skin = SaveData.playerSkin();
+		refreshSkin();
+
 		pick = Math.round(SaveData.playerHue() * STEPS) % STEPS;
 		if (pick < 0)
 			pick += STEPS;
@@ -114,11 +126,31 @@ class DressUpSubState extends LobbyPanel
 
 	function dressPreview():Void
 	{
-		preview.frames = HuePalette.sparrow("characters/mufu", SaveData.playerHue());
+		preview.frames = HuePalette.sparrow(util.Skins.of(skin), SaveData.playerHue());
 		preview.animation.addByPrefix("idle", "Idle", 9, true);
 		preview.animation.play("idle", true);
 		preview.scale.set(5, 5);
 		preview.setPosition(previewCx - preview.frameWidth * 0.5, previewCy - preview.frameHeight * 0.5);
+	}
+
+	function refreshSkin():Void
+		skinText.text = util.Skins.nameOf(skin);
+
+	function skinInput():Void
+	{
+		var turn = 0;
+		if (FlxG.keys.justPressed.UP || util.Controls.padUpJust())
+			turn = -1;
+		else if (FlxG.keys.justPressed.DOWN || util.Controls.padDownJust())
+			turn = 1;
+		if (turn == 0)
+			return;
+
+		skin = (skin + turn + util.Skins.count()) % util.Skins.count();
+		SaveData.setPlayerSkin(skin);
+		refreshSkin();
+		dressPreview();
+		util.MenuSfx.hover();
 	}
 
 	function placeRing():Void
@@ -154,6 +186,8 @@ class DressUpSubState extends LobbyPanel
 				|| util.Controls.justPressed(util.Controls.ACCEPT));
 
 		colourInput(elapsed);
+		if (!closing)
+			skinInput();
 		if (!closing)
 			nameInput(elapsed);
 

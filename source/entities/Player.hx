@@ -66,7 +66,7 @@ class Player extends FlxSprite
 		var wasAnim = animation.name;
 		var wasFlip = flipX;
 
-		frames = util.HuePalette.sparrow("characters/mufu", hue);
+		frames = util.HuePalette.sparrow(util.Skins.sheet(), hue);
 		animation.addByPrefix("idle", "Idle", 9, true);
 		animation.addByPrefix("walk", "Run", 12, true);
 		animation.addByPrefix("dash", "Dash", 12, false);

@@ -31,7 +31,7 @@ class DeathBurst
 	public function new()
 		group = new FlxTypedGroup<FlxSprite>();
 
-	public function burst(cx:Float, cy:Float, hue:Float, faceLeft:Bool = false):Void
+	public function burst(cx:Float, cy:Float, hue:Float, faceLeft:Bool = false, ?sheet:String):Void
 	{
 		var side = faceLeft ? -1 : 1;
 		life = 0;
@@ -40,7 +40,7 @@ class DeathBurst
 		{
 			var row = LAYOUT[i];
 			var p = group.recycle(FlxSprite);
-			p.frames = util.HuePalette.sparrow("characters/mufu", hue);
+			p.frames = util.HuePalette.sparrow(sheet != null ? sheet : util.Skins.sheet(), hue);
 			p.frame = p.frames.getByName("Part0000" + i);
 			p.antialiasing = false;
 			p.scale.set(4, 4);

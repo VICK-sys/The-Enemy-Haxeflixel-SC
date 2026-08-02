@@ -255,6 +255,7 @@ class LobbyState extends FlxState
 				fx: player.flipX,
 				an: player.animation.name,
 				hu: SaveData.playerHue(),
+				sk: SaveData.playerSkin(),
 				nm: SaveData.playerName(),
 				wi: WeaponPickSubState.lastPick,
 				hv: false,
@@ -355,6 +356,7 @@ class LobbyState extends FlxState
 	{
 		var hue = SaveData.playerHue();
 		player.setHue(hue);
+		player.applySkin();
 		backGear.paint(hue);
 		cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", hue));
 	}
