@@ -120,6 +120,12 @@ class LobbyState extends FlxState
 		wipe.open();
 		Music.play(states.play.QuietRoom.track(), 0.3);
 		super.create();
+
+		if (!LobbyHelpSubState.shown)
+		{
+			LobbyHelpSubState.shown = true;
+			openSubState(new LobbyHelpSubState(camUI));
+		}
 	}
 
 	function addSign(x:Float, y:Float, key:String, act:Void->Void):Void

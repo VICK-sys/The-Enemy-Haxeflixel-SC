@@ -10,7 +10,6 @@ import flixel.util.FlxColor;
 import states.tutorial.TutorialDemo;
 import states.tutorial.MoveDemo;
 import states.tutorial.AttackDemo;
-import states.tutorial.WeaponsDemo;
 import states.tutorial.SuperDemo;
 import states.tutorial.ScrapDemo;
 import states.tutorial.HealthDemo;
@@ -21,7 +20,7 @@ class TutorialSubState extends FlxSubState
 {
 	public static var shown:Bool = false;
 
-	static inline var PAGES:Int = 7;
+	static inline var PAGES:Int = 6;
 	static inline var FADE_TIME:Float = 0.35;
 	static inline var OPEN_TIME:Float = 0.2;
 
@@ -119,16 +118,15 @@ class TutorialSubState extends FlxSubState
 
 		titleText.text = Lang.t("tutorial." + KEYS[page] + ".title");
 		descText.text = Lang.t("tutorial." + KEYS[page] + ".desc", descArgs());
-		pageText.text = Lang.t(closeNav ? "onlineHelp.nav" : "tutorial.nav", [page + 1, PAGES]);
+		pageText.text = Lang.t(closeNav ? "lobbyHelp.nav" : "tutorial.nav", [page + 1, PAGES]);
 
 		demo = switch (page)
 		{
 			case 0: new MoveDemo(camUI);
 			case 1: new AttackDemo(camUI);
-			case 2: new WeaponsDemo(camUI);
-			case 3: new SuperDemo(camUI);
-			case 4: new ScrapDemo(camUI);
-			case 5: new HealthDemo(camUI);
+			case 2: new SuperDemo(camUI);
+			case 3: new ScrapDemo(camUI);
+			case 4: new HealthDemo(camUI);
 			default: new ReadyDemo(camUI);
 		}
 		add(demo);

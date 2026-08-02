@@ -108,9 +108,9 @@ class OnlineState extends FlxState
 		wipe = new IrisWipe(this);
 		wipe.open();
 
-		if (!OnlineHelpSubState.shown)
+		if (!LobbyHelpSubState.shown)
 		{
-			OnlineHelpSubState.shown = true;
+			LobbyHelpSubState.shown = true;
 			openHelp();
 		}
 
@@ -120,7 +120,7 @@ class OnlineState extends FlxState
 	function openHelp():Void
 	{
 		list.enabled = false;
-		openSubState(new OnlineHelpSubState());
+		openSubState(new LobbyHelpSubState());
 	}
 
 	function choose(i:Int):Void

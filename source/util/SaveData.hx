@@ -391,6 +391,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function lobbyHelpSeen():Bool
+	{
+		ensure();
+		return save.data.lobbyHelpSeen == true;
+	}
+
+	public static function setLobbyHelpSeen(b:Bool):Void
+	{
+		ensure();
+		save.data.lobbyHelpSeen = b;
+		save.flush();
+	}
+
 	public static function playerWeapon():Int
 	{
 		ensure();

@@ -1,6 +1,7 @@
 package states;
 
 import flixel.FlxBasic;
+import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
@@ -9,16 +10,26 @@ import flixel.util.FlxColor;
 import net.Net;
 import util.Lang;
 
-class OnlineHelpSubState extends FlxSubState
+class LobbyHelpSubState extends FlxSubState
 {
-	public static var shown:Bool = false;
+	public static var shown(get, set):Bool;
 
-	static inline var PAGES:Int = 3;
+	static function get_shown():Bool
+		return util.SaveData.lobbyHelpSeen();
+
+	static function set_shown(v:Bool):Bool
+	{
+		util.SaveData.setLobbyHelpSeen(v);
+		return v;
+	}
+
+	static inline var PAGES:Int = 4;
 	static inline var FADE_TIME:Float = 0.3;
 	static inline var OPEN_TIME:Float = 0.2;
 
-	static var KEYS:Array<String> = ["p1", "p2", "p3"];
+	static var KEYS:Array<String> = ["p1", "p2", "p3", "p4"];
 
+	private var cam:FlxCamera;
 	private var titleText:FlxText;
 	private var bodyText:FlxText;
 	private var pageText:FlxText;
@@ -29,8 +40,17 @@ class OnlineHelpSubState extends FlxSubState
 	private var closing:Bool = false;
 	private var opening:Bool = false;
 
+	public function new(?cam:FlxCamera)
+	{
+		super();
+		this.cam = cam;
+	}
+
 	override public function create():Void
 	{
+		if (cam != null)
+			cameras = [cam];
+
 		var overlay = new FlxSprite(0, 0);
 		overlay.makeGraphic(FlxG.width, FlxG.height, 0xAA000000);
 		add(overlay);
@@ -67,19 +87,21 @@ class OnlineHelpSubState extends FlxSubState
 		return switch (i)
 		{
 			case 0:
-				Lang.t("onlineHelp.p1.body", [Net.MAX_GUESTS + 1]);
+				Lang.t("lobbyHelp.p1.body", [util.Controls.bindName(util.Controls.INTERACT)]);
 			case 1:
-				Lang.t("onlineHelp.p2.body", [Net.PORT]);
+				Lang.t("lobbyHelp.p2.body", [Net.MAX_GUESTS + 1]);
+			case 2:
+				Lang.t("lobbyHelp.p3.body", [Net.PORT]);
 			default:
-				Lang.t("onlineHelp.p3.body");
+				Lang.t("lobbyHelp.p4.body");
 		}
 	}
 
 	function buildPage():Void
 	{
-		titleText.text = Lang.t("onlineHelp." + KEYS[page] + ".title");
+		titleText.text = Lang.t("lobbyHelp." + KEYS[page] + ".title");
 		bodyText.text = body(page);
-		pageText.text = Lang.t("onlineHelp.nav", [page + 1, PAGES]);
+		pageText.text = Lang.t("lobbyHelp.nav", [page + 1, PAGES]);
 	}
 
 	override public function update(elapsed:Float):Void
