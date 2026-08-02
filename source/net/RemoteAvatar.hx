@@ -130,7 +130,7 @@ class RemoteAvatar
 			return;
 		hue = h;
 		skin = sk;
-		gear.paint(h, util.Skins.of(sk));
+		gear.paint(h, sk);
 		if (weaponIdx >= 0)
 			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
 		var was = sprite.animation.name;
@@ -242,7 +242,8 @@ class RemoteAvatar
 		ritual.update(elapsed, sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5);
 		gear.update(elapsed, sprite.x + sprite.width * 0.5, sprite.y - 21, sprite.flipX,
 			systems.BackGear.leanFor(sprite.animation.name), sprite.visible,
-			sprite.angle, sprite.offset.y - OFFSET_Y, sprite.y + sprite.height * 0.5);
+			sprite.angle, sprite.offset.y - OFFSET_Y, sprite.y + sprite.height * 0.5,
+			sprite.animation.name);
 		if (!haveTarget)
 			return;
 		var k = Math.min(1, LERP * elapsed);

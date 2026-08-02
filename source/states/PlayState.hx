@@ -343,7 +343,6 @@ class PlayState extends FlxState
 	{
 		EnemyNav.resetBudget();
 
-
 		var inputLocked = Net.active && subState != null;
 
 		util.Controls.setAimAnchor(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5);
@@ -428,7 +427,8 @@ class PlayState extends FlxState
 			combat.update(elapsed);
 		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y - 21, _player.flipX,
 			systems.BackGear.leanFor(_player.animation.name), _player.visible,
-			_player.angle, _player.offset.y - _player.baseOffsetY, _player.y + _player.height * 0.5);
+			_player.angle, _player.offset.y - _player.baseOffsetY, _player.y + _player.height * 0.5,
+			_player.animation.name);
 		director.updateShots();
 		if (netSync != null)
 			netSync.update(elapsed);

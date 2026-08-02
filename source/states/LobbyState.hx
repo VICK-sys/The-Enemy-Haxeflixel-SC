@@ -200,7 +200,8 @@ class LobbyState extends FlxState
 
 		backGear.update(elapsed, player.x + player.width * 0.5, player.y - 21, player.flipX,
 			systems.BackGear.leanFor(player.animation.name), player.visible, player.angle,
-			player.offset.y - player.baseOffsetY, player.y + player.height * 0.5);
+			player.offset.y - player.baseOffsetY, player.y + player.height * 0.5,
+			player.animation.name);
 
 		for (av in peers)
 			av.update(elapsed);
