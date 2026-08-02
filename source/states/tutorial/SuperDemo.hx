@@ -14,7 +14,7 @@ class SuperDemo extends TutorialDemo
 	static inline var FINISH_TIME:Float = 0.34;
 	static inline var REST:Float = 0.9;
 	static inline var ARC:Float = 180;
-	static inline var BASE:Float = -60;
+	static inline var BASE:Float = 65;
 	static inline var HELD_SCALE:Float = 4;
 	static inline var LUNGE:Float = 26;
 	static inline var DEMO:Float = 0.62;
