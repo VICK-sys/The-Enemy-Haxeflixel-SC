@@ -92,6 +92,12 @@ The screen remembers the last choice, so a repeat run or a map playtest is one k
 
 Online, the lobby opens this screen instead. A substate over PlayState would freeze the sim while the network kept feeding it packets. The lobby runs the same card screen through `OnlineState`, while nobody is in the game yet. Both routes write the same `lastPick` that PlayState equips.
 
+## PlayState debug keys
+
+CONTROL with a number summons a boss straight into the run, whatever the build: 0 the magma wyrm, 9 Domo, 8 Rofel, 7 the knight. It goes through the same `summonBoss` a real boss wave uses, so the banner, the alarm and the music all play and it is refused while a boss is already out.
+
+They answer to CONTROL rather than the bare number because they are not behind `#if debug` any more. The summons used to sit in that block with the rest of the debug row, which meant they did nothing at all in the build you actually play, and the row is the only way to reach a boss without grinding waves. The genuinely destructive keys, killing yourself, reviving and the hitbox overlay, are still debug only and still bare.
+
 ## LobbyState
 
 The room you stand in before a run, reached from PLAY. It is a plain walled room built the way any custom map is, through `CustomArena`, so it gets collision, camera bounds and a background from the same code a real stage does. Its floor is a rock tile repeated over the room rather than the stage art, which `Arena.tileBackground` fills in: a stage background is one image stretched to the map, which on a room this size read as a blown up logo. The tile is scaled before it repeats, by the same four the rest of the art uses, so the rock sits at the size of everything else. Combat, waves and the HUD are simply absent rather than switched off, since nothing here builds them.

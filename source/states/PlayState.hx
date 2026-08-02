@@ -580,8 +580,35 @@ class PlayState extends FlxState
 				boxes.box(s.x, s.y, s.width, s.height, systems.HitboxView.LOOT);
 	}
 
+	static var SUMMONS:Array<String> = ["worm", "domo", "knight", "rofel"];
+
+	function summonKeys():Void
+	{
+		if (!FlxG.keys.pressed.CONTROL || Net.isClient || restarting)
+			return;
+
+		var pick = -1;
+		if (FlxG.keys.justPressed.ZERO)
+			pick = 0;
+		else if (FlxG.keys.justPressed.NINE)
+			pick = 1;
+		else if (FlxG.keys.justPressed.EIGHT)
+			pick = 2;
+		else if (FlxG.keys.justPressed.SEVEN)
+			pick = 3;
+		if (pick < 0)
+			return;
+
+		var kind = SUMMONS[pick];
+		if (!data.EnemyData.EnemyDataRegistry.has(kind))
+			return;
+		director.summonBoss(kind);
+	}
+
 	function debugKeys():Void
 	{
+		summonKeys();
+
 		if (FlxG.keys.justPressed.MINUS)
 			FlxG.sound.changeVolume(-0.1);
 
@@ -597,18 +624,6 @@ class PlayState extends FlxState
 
 		if (FlxG.keys.justPressed.SIX)
 			boxes.toggle();
-
-		if (FlxG.keys.justPressed.SEVEN && !Net.isClient)
-			director.summonBoss("knight");
-
-		if (FlxG.keys.justPressed.EIGHT && !Net.isClient)
-			director.summonBoss("rofel");
-
-		if (FlxG.keys.justPressed.NINE && !Net.isClient)
-			director.summonBoss("domo");
-
-		if (FlxG.keys.justPressed.ZERO && !Net.isClient)
-			director.summonBoss("worm");
 
 		if (FlxG.keys.justPressed.F4)
 		{
