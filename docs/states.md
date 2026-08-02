@@ -92,6 +92,16 @@ The screen remembers the last choice, so a repeat run or a map playtest is one k
 
 Online, the lobby opens this screen instead. A substate over PlayState would freeze the sim while the network kept feeding it packets. The lobby runs the same card screen through `OnlineState`, while nobody is in the game yet. Both routes write the same `lastPick` that PlayState equips.
 
+## LobbyState
+
+The room you stand in before a run, reached from PLAY. It is a plain walled room built the way any custom map is, through `CustomArena`, so it gets collision, camera bounds and a background from the same code a real stage does. Combat, waves and the HUD are simply absent rather than switched off, since nothing here builds them.
+
+Three signs stand in it, START, HOST and JOIN, each a spot with a label. Walking within reach of one offers it on the interact key, the same key the shop uses. START begins the run. HOST opens the port and shows how many have joined. JOIN takes an address typed in and connects.
+
+Presence is its own small thing rather than the game's netcode. `NetSync` is built around a running fight and wants a director, a HUD and a weapon set, none of which exist here, so the lobby sends its own `lob` message a few times a second carrying position, facing, animation, colour and name, and renders whoever answers with `RemoteAvatar`, which is the same body the fight uses. A peer that stops speaking for five seconds is dropped, which is what a guest closing its window looks like from the host's side.
+
+Starting is the host's call. It sends `go`, and every peer walks into `PlayState` with the connection still open, where the real netcode takes over. That is the same handover the old online screen did, moved into a room you can walk around.
+
 ## EditorState
 
 The map editor's coordinator. See [editor.md](editor.md).

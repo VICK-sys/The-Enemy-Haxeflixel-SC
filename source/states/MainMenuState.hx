@@ -80,12 +80,8 @@ class MainMenuState extends FlxState
 
 		findMaps();
 
-		var labels = [playLabel()];
+		var labels = [Lang.t("menu.play")];
 		actions = ["play"];
-		#if desktop
-		labels.push(Lang.t("menu.online"));
-		actions.push("online");
-		#end
 		labels.push(Lang.t("menu.options"));
 		actions.push("options");
 		#if !html5
@@ -305,10 +301,8 @@ class MainMenuState extends FlxState
 		switch (actions[i])
 		{
 			case "play":
-				startGame();
-			case "online":
 				leaving = true;
-				wipe.close(function() FlxG.switchState(() -> new OnlineState()));
+				wipe.close(function() FlxG.switchState(() -> new LobbyState()));
 			case "options":
 				FlxG.inputs.reset();
 				openSubState(new OptionsSubState());

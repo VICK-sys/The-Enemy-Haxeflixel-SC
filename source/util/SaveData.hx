@@ -410,10 +410,46 @@ class SaveData
 
 	static inline var BORDERLESS_BLEED:Int = 1;
 
+	public static function tileSlot():Int
+	{
+		#if sys
+		var args = Sys.args();
+		for (i in 0...args.length)
+		{
+			if (args[i] != "--tile" && args[i] != "-w")
+				continue;
+			if (i + 1 >= args.length)
+				continue;
+			var n = Std.parseInt(args[i + 1]);
+			if (n != null && n >= 0)
+				return n;
+		}
+		#end
+		return -1;
+	}
+
 	static function applyDisplay():Void
 	{
 		#if desktop
 		var win = lime.app.Application.current.window;
+
+		var slot = tileSlot();
+		if (slot >= 0)
+		{
+			win.fullscreen = false;
+			win.borderless = false;
+			var d = win.display;
+			if (d != null)
+			{
+				var half = Std.int(d.bounds.width / 2);
+				var tall = Std.int(half * 9 / 16);
+				win.resize(half, tall);
+				win.move(Std.int(d.bounds.x + (slot % 2) * half),
+					Std.int(d.bounds.y + (d.bounds.height - tall) / 2));
+			}
+			return;
+		}
+
 		switch (displayMode())
 		{
 			case "fullscreen":
