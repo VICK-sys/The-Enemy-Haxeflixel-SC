@@ -13,8 +13,8 @@
 		{ "name": "hurt", "prefix": "Body", "fps": 8, "loop": false },
 		{ "name": "death", "prefix": "Body", "fps": 8, "loop": false }
 	],
-	"hp": 5,
-	"speed": 330,
+	"hp": 9,
+	"speed": 430,
 	"aggroRange": 100000,
 	"stopThreshold": 0,
 	"attackRange": 0,

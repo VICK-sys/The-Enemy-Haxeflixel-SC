@@ -35,7 +35,8 @@ class WormFlock
 	static inline var STRIDE:Int = 3;
 	static inline var TRAIL_SLACK:Float = 1.5;
 	static inline var EDGE_PAD:Float = 120;
-	static inline var EDGE_TURN:Float = 460;
+	static inline var EDGE_TURN:Float = 600;
+	static inline var EDGE_SHARE:Float = 0.22;
 	static inline var TRACK:Float = 1.4;
 	static inline var JOSTLE:Float = 2.2;
 	static inline var AIM_TIME:Float = 0.35;
@@ -68,6 +69,7 @@ class WormFlock
 	private var bodyOffY:Float;
 	private var roomW:Float;
 	private var roomH:Float;
+	private var edgeTurn:Float;
 
 	public function new(layers:RenderLayers, fx:Fx, roomW:Float, roomH:Float)
 	{
@@ -75,6 +77,7 @@ class WormFlock
 		this.fx = fx;
 		this.roomW = roomW;
 		this.roomH = roomH;
+		edgeTurn = Math.min(EDGE_TURN, Math.min(roomW, roomH) * EDGE_SHARE);
 		cfg = EnemyDataRegistry.get("worm").worm;
 		headOffY = EnemyDataRegistry.get("worm").offsetY;
 		bodyOffY = EnemyDataRegistry.get("worm_body").offsetY;
@@ -384,14 +387,14 @@ class WormFlock
 			wy /= wl;
 		}
 
-		if (hx < EDGE_TURN)
-			wx += (EDGE_TURN - hx) / EDGE_TURN * 3;
-		else if (hx > roomW - EDGE_TURN)
-			wx -= (hx - (roomW - EDGE_TURN)) / EDGE_TURN * 3;
-		if (hy < EDGE_TURN)
-			wy += (EDGE_TURN - hy) / EDGE_TURN * 3;
-		else if (hy > roomH - EDGE_TURN)
-			wy -= (hy - (roomH - EDGE_TURN)) / EDGE_TURN * 3;
+		if (hx < edgeTurn)
+			wx += (edgeTurn - hx) / edgeTurn * 3;
+		else if (hx > roomW - edgeTurn)
+			wx -= (hx - (roomW - edgeTurn)) / edgeTurn * 3;
+		if (hy < edgeTurn)
+			wy += (edgeTurn - hy) / edgeTurn * 3;
+		else if (hy > roomH - edgeTurn)
+			wy -= (hy - (roomH - edgeTurn)) / edgeTurn * 3;
 		var el = Math.sqrt(wx * wx + wy * wy);
 		if (el > 0)
 		{

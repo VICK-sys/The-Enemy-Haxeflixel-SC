@@ -16,8 +16,8 @@ class Shop
 {
 	public static inline var EVERY:Int = 10;
 
-	static inline var SPOT_X:Float = 2560;
-	static inline var SPOT_Y:Float = 680;
+	static inline var SPOT_X:Float = 1280;
+	static inline var SPOT_Y:Float = 340;
 
 	public static function spotX():Float
 		return util.CustomArena.shopSet ? util.CustomArena.shopX : SPOT_X;
