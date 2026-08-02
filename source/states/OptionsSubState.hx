@@ -65,7 +65,7 @@ class OptionsSubState extends FlxSubState
 		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE, IDLE_FPS]},
 		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, HUD, FPS]},
 		{key: "options.page.sounds", items: [VOLUME, MUSIC, SFX, SOUND3D]},
-		{key: "options.page.custom", items: [COLOR, VOICE, LANGUAGE, CONTROLS, RESET]}
+		{key: "options.page.custom", items: [VOICE, LANGUAGE, CONTROLS, RESET]}
 	];
 
 	static var FPS_STEPS:Array<Int> = [60, 120, 144, 165, 240];
@@ -165,7 +165,7 @@ class OptionsSubState extends FlxSubState
 			refreshLabels();
 
 		updateSkin(elapsed);
-		showPreview(ids[list.index] == COLOR);
+		showPreview(false);
 
 		if (util.Controls.menuBack())
 		{

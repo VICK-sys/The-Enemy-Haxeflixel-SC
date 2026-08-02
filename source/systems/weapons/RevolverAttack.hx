@@ -19,7 +19,7 @@ class RevolverAttack
 	static inline var TWIN_FWD:Float = 28;
 	static inline var TWIN_SHADE:Int = 0xFF8A8A8A;
 	static inline var TWIN_STAGGER:Float = 0.09;
-	static inline var TWIN_RELOAD:Float = 0.75;
+	static inline var TWIN_RELOAD:Float = 0.3;
 	static inline var TWIN_KICK:Float = 16;
 	static inline var KICK_FADE:Float = 7;
 	static inline var BIG_SPRITE:String = "bullets/shotgun_bullet_player";
