@@ -376,6 +376,21 @@ class SaveData
 		save.flush();
 	}
 
+	public static var GYRO_STEPS:Array<Float> = [0, 200, 400, 800];
+
+	public static function gyroAim():Float
+	{
+		ensure();
+		return save.data.gyroAim != null ? save.data.gyroAim : 0.0;
+	}
+
+	public static function setGyroAim(v:Float):Void
+	{
+		ensure();
+		save.data.gyroAim = v;
+		save.flush();
+	}
+
 	public static function playerWeapon():Int
 	{
 		ensure();

@@ -31,6 +31,9 @@ class Controls
 	static inline var TRIGGER_ON:Float = 0.3;
 	static inline var AIM_NEAR:Float = 150;
 	static inline var AIM_FAR:Float = 620;
+	static inline var GYRO_CLAIM:Float = 0.25;
+	static inline var GYRO_RANGE:Float = 380;
+	static inline var GYRO_STILL:Float = 0.05;
 
 	public static var padMode(default, null):Bool = false;
 
@@ -44,6 +47,10 @@ class Controls
 	static var menuXNow:Int = 0;
 	static var menuYNow:Int = 0;
 	static var aimReach:Float = AIM_NEAR;
+	static var gyroOffX:Float = 0;
+	static var gyroOffY:Float = 0;
+	static var gyroBiasP:Float = 0;
+	static var gyroBiasY:Float = 0;
 	static var aimDirX:Float = 1;
 	static var aimDirY:Float = 0;
 	static var anchorX:Float = 0;
@@ -253,10 +260,10 @@ class Controls
 	}
 
 	public static function aimX():Float
-		return padMode ? anchorX + aimDirX * aimReach : FlxG.mouse.x;
+		return padMode ? anchorX + aimDirX * aimReach + gyroOffX : FlxG.mouse.x;
 
 	public static function aimY():Float
-		return padMode ? anchorY + aimDirY * aimReach : FlxG.mouse.y;
+		return padMode ? anchorY + aimDirY * aimReach + gyroOffY : FlxG.mouse.y;
 
 	public static function aimViewX(cam:flixel.FlxCamera):Float
 		return (aimX() - cam.scroll.x - cam.viewMarginLeft) * cam.zoom;
@@ -336,6 +343,39 @@ class Controls
 			}
 		}
 
+		#if (cpp && windows)
+		var gyroSens = SaveData.gyroAim();
+		if (gyroSens > 0)
+		{
+			if (Gyro.poll())
+			{
+				var rp = Gyro.pitchRate();
+				var ry = Gyro.yawRate();
+				if (Math.abs(rp - gyroBiasP) < GYRO_STILL && Math.abs(ry - gyroBiasY) < GYRO_STILL)
+				{
+					gyroBiasP += (rp - gyroBiasP) * 0.02;
+					gyroBiasY += (ry - gyroBiasY) * 0.02;
+				}
+				applyGyro(rp - gyroBiasP, ry - gyroBiasY, FlxG.elapsed);
+			}
+			if (p != null)
+			{
+				var fx = p.analog.value.RIGHT_STICK_X;
+				var fy = p.analog.value.RIGHT_STICK_Y;
+				if (fx * fx + fy * fy > 0.81)
+				{
+					gyroOffX *= 0.82;
+					gyroOffY *= 0.82;
+				}
+			}
+		}
+		else if (gyroOffX != 0 || gyroOffY != 0)
+		{
+			gyroOffX = 0;
+			gyroOffY = 0;
+		}
+		#end
+
 		FlxG.mouse.getGamePosition(gamePoint);
 		var mdx = gamePoint.x - lastMouseX;
 		var mdy = gamePoint.y - lastMouseY;
@@ -343,6 +383,23 @@ class Controls
 			padMode = false;
 		lastMouseX = gamePoint.x;
 		lastMouseY = gamePoint.y;
+	}
+
+	static function applyGyro(pitch:Float, yaw:Float, elapsed:Float):Void
+	{
+		if (Math.abs(yaw) > GYRO_CLAIM || Math.abs(pitch) > GYRO_CLAIM)
+			padMode = true;
+		if (!padMode)
+			return;
+		var s = SaveData.gyroAim();
+		gyroOffX += -yaw * s * elapsed;
+		gyroOffY += -pitch * s * elapsed;
+		var len = Math.sqrt(gyroOffX * gyroOffX + gyroOffY * gyroOffY);
+		if (len > GYRO_RANGE)
+		{
+			gyroOffX *= GYRO_RANGE / len;
+			gyroOffY *= GYRO_RANGE / len;
+		}
 	}
 
 	public static function keyName(k:Int):String

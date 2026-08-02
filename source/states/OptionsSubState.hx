@@ -58,6 +58,7 @@ class OptionsSubState extends FlxSubState
 	static inline var SFX:Int = 19;
 	static inline var AIMDEAD:Int = 20;
 	static inline var PADICONS:Int = 21;
+	static inline var GYRO:Int = 22;
 
 	static inline var TAB:Int = -1;
 	static inline var BACK:Int = -2;
@@ -67,7 +68,7 @@ class OptionsSubState extends FlxSubState
 		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE, IDLE_FPS]},
 		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, HUD, FPS]},
 		{key: "options.page.sounds", items: [VOLUME, MUSIC, SFX, SOUND3D]},
-		{key: "options.page.custom", items: [VOICE, LANGUAGE, CONTROLS, AIMDEAD, PADICONS, RESET]}
+		{key: "options.page.custom", items: [VOICE, LANGUAGE, CONTROLS, AIMDEAD, PADICONS, GYRO, RESET]}
 	];
 
 	static var FPS_STEPS:Array<Int> = [60, 120, 144, 165, 240];
@@ -333,6 +334,7 @@ class OptionsSubState extends FlxSubState
 			case SOUND3D: Lang.t("options.sound3d", [onOff(SaveData.sound3d())]);
 			case AIMDEAD: Lang.t("options.aimdead", [SaveData.aimDeadzone() <= 0 ? Lang.t("common.off") : Std.string(Math.round(SaveData.aimDeadzone() * 100)) + "%"]);
 			case PADICONS: Lang.t("options.padicons", [Lang.t("padicons." + SaveData.padIcons())]);
+			case GYRO: Lang.t("options.gyro", [gyroLabel()]);
 			case FPS: Lang.t("options.fps", [onOff(SaveData.showFps())]);
 			case LANGUAGE: Lang.t("options.language", [Lang.t("lang.name")]);
 			case CONTROLS: Lang.t("options.controls");
@@ -349,6 +351,18 @@ class OptionsSubState extends FlxSubState
 		sample = FlxG.sound.play(util.Paths.sound(line), systems.PlayerCombat.VOICE);
 		if (sample != null)
 			sample.pitch = SaveData.voicePitch();
+	}
+
+	function gyroLabel():String
+	{
+		var v = SaveData.gyroAim();
+		if (v <= 0)
+			return Lang.t("common.off");
+		if (v <= 200)
+			return Lang.t("gyro.low");
+		if (v <= 400)
+			return Lang.t("gyro.medium");
+		return Lang.t("gyro.high");
 	}
 
 	function onOff(b:Bool):String
@@ -482,6 +496,8 @@ class OptionsSubState extends FlxSubState
 				SaveData.setAimDeadzone(SaveData.aimDeadzone() + dir * 0.05);
 			case PADICONS:
 				SaveData.setPadIcons(cycled(util.Controls.ICON_SETS, SaveData.padIcons(), dir));
+			case GYRO:
+				SaveData.setGyroAim(cycled(SaveData.GYRO_STEPS, SaveData.gyroAim(), dir));
 			case FPS:
 				SaveData.setShowFps(!SaveData.showFps());
 			case LANGUAGE:
