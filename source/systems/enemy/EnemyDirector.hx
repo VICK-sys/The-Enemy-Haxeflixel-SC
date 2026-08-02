@@ -350,6 +350,7 @@ class EnemyDirector
 	{
 		var wasX = worm.lastX;
 		var wasY = worm.lastY;
+		worm.hush();
 		worm = null;
 		if (onBossKill != null)
 			onBossKill(wasX, wasY);

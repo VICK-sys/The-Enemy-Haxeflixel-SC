@@ -1,5 +1,6 @@
 package systems.enemy;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.enemy.Enemies;
@@ -32,12 +33,14 @@ class WormFlock
 	static inline var BAR_H:Int = 5;
 	static inline var TRAIL_STEP:Float = 6;
 	static inline var STRIDE:Int = 3;
+	static inline var TRAIL_SLACK:Float = 1.5;
 	static inline var EDGE_PAD:Float = 120;
 	static inline var EDGE_TURN:Float = 460;
 	static inline var TRACK:Float = 1.4;
 	static inline var JOSTLE:Float = 2.2;
 	static inline var AIM_TIME:Float = 0.35;
 	static inline var AIM_HOLD:Float = 0.45;
+	static inline var DIG_VOL:Float = 0.55;
 	static inline var GLOW_TIME:Float = 0.35;
 	static inline var GLOW_HOLD:Float = 0.6;
 	static inline var PUFF_LIFE:Float = 0.4;
@@ -58,6 +61,7 @@ class WormFlock
 	private var glow:Map<Enemies, Float> = new Map();
 	private var puffs:Array<WormPuff> = [];
 	private var volleyGap:Float = 0;
+	private var digLoop:flixel.sound.FlxSound;
 	private var layers:RenderLayers;
 	private var fx:Fx;
 	private var headOffY:Float;
@@ -171,12 +175,54 @@ class WormFlock
 		if (chains.length == 0)
 		{
 			done = true;
+			hush();
 			return;
 		}
 
 		jostle(elapsed);
 		for (c in chains)
 			advance(c, elapsed);
+		tunnelHum();
+	}
+
+	public function hush():Void
+	{
+		if (digLoop != null && digLoop.playing)
+			digLoop.stop();
+	}
+
+	function tunnelHum():Void
+	{
+		var bx:Float = 0;
+		var by:Float = 0;
+		var best:Float = -1;
+		for (c in chains)
+		{
+			var h = c.segs[0];
+			if (!h.buried)
+				continue;
+			var hx = h.x + h.width * 0.5;
+			var hy = h.y + h.height * 0.5;
+			var d = h.target == null ? 0 : Math.pow(hx - h.target.x, 2) + Math.pow(hy - h.target.y, 2);
+			if (best < 0 || d < best)
+			{
+				best = d;
+				bx = hx;
+				by = hy;
+			}
+		}
+
+		if (best < 0)
+		{
+			hush();
+			return;
+		}
+
+		if (digLoop == null)
+			digLoop = FlxG.sound.load(Paths.sound("wyrm_dig"), DIG_VOL, true, FlxG.sound.defaultSoundGroup);
+		if (!digLoop.playing)
+			digLoop.play(true);
+		util.Sfx.tune(digLoop, bx, by, DIG_VOL);
 	}
 
 	function angleOf(c:WormChain):Float
@@ -403,7 +449,7 @@ class WormFlock
 			c.trail.unshift(lift);
 			c.trail.unshift(hy);
 			c.trail.unshift(hx);
-			var cap = Std.int((c.segs.length + 3) * cfg.spacing / TRAIL_STEP) * STRIDE + STRIDE * 4;
+			var cap = Std.int(c.segs.length * cfg.spacing * TRAIL_SLACK / TRAIL_STEP) * STRIDE + STRIDE * 4;
 			if (c.trail.length > cap)
 				c.trail.resize(cap);
 		}

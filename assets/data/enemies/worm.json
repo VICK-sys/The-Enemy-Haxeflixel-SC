@@ -22,10 +22,10 @@
 	"big": true,
 	"worm": {
 		"parts": 21,
-		"spacing": 78,
+		"spacing": 58,
 		"lift": 90,
-		"underTime": 1.85,
-		"overTime": 3.1,
+		"underTime": 3.0,
+		"overTime": 1.95,
 		"turn": 1.8,
 		"flankDist": 340,
 		"orbit": 0.45,
