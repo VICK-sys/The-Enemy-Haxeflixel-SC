@@ -9,7 +9,7 @@
 	"bossWaveRange": 4,
 	"bossRepeat": 6,
 
-	"bosses": ["domo"],
+	"bosses": ["domo", "worm"],
 	"debugBosses": ["knight", "rofel"],
 	"duoChance": 0.5,
 	"scaling": {

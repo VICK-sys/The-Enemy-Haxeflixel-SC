@@ -61,6 +61,20 @@ typedef FlankData = {
 	disengage:Float
 }
 
+typedef WormData = {
+	parts:Int,
+	spacing:Float,
+	lift:Float,
+	waveStep:Float,
+	waveSpeed:Float,
+	turn:Float,
+	shotCooldown:Float,
+	shotMinParts:Int,
+	shotSpeed:Float,
+	shotDamage:Float,
+	shotRange:Float
+}
+
 typedef DomoData = {
 	farDist:Float,
 	prefMin:Float,
@@ -110,6 +124,7 @@ typedef EnemyData = {
 	?knight:KnightData,
 	?domo:DomoData,
 	?flank:FlankData,
+	?worm:WormData,
 	?chargeAnim:String,
 	contactDamage:Float,
 	?contactPush:Float,

@@ -367,6 +367,18 @@ class Arena
 		bg.updateHitbox();
 	}
 
+	public function floorColorAt(px:Float, py:Float):Int
+	{
+		var bmp = bg.graphic != null ? bg.graphic.bitmap : null;
+		if (bmp == null)
+			return 0xFF808080;
+		var u = Std.int(px / map.width * bmp.width);
+		var v = Std.int(py / map.height * bmp.height);
+		u = u < 0 ? 0 : (u >= bmp.width ? bmp.width - 1 : u);
+		v = v < 0 ? 0 : (v >= bmp.height ? bmp.height - 1 : v);
+		return bmp.getPixel(u, v) | 0xFF000000;
+	}
+
 	public function wallAt(px:Float, py:Float):Bool
 	{
 		return map.getTileIndexAt(px, py) > 0;

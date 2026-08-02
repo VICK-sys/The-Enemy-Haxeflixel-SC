@@ -54,6 +54,8 @@ class Enemies extends FlxSprite
 	public var gun:FlxSprite = null;
 	public var ramming:Bool = false;
 	public var poise:Bool = false;
+	public var buried:Bool = false;
+	public var railed:Bool = false;
 	public var pendingSummons:Array<{kind:String, x:Float, y:Float}> = [];
 	public var pathing:EnemyNav = new EnemyNav();
 	public var attack:AttackBehavior;
@@ -171,6 +173,16 @@ class Enemies extends FlxSprite
 		{
 			attack = new FlankAttack(data.flank);
 		}
+		else if (data.attack == "worm")
+		{
+			bossBody = true;
+			selfDriven = true;
+			grabbable = false;
+			explodes = true;
+			railed = true;
+			poise = true;
+			attack = new WormPart();
+		}
 		else
 		{
 			var charge = new ChargeAttack();
@@ -198,7 +210,7 @@ class Enemies extends FlxSprite
 
 	public function takeHit(pushX:Float, pushY:Float, damage:Float = 1):Void
 	{
-		if (isDead)
+		if (isDead || buried)
 			return;
 
 		if (!poise)

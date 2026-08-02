@@ -45,6 +45,8 @@ class EnemyDirector
 	private var status:PlayerCombat;
 
 	private var spawner:EnemySpawner;
+	private var worm:WormFlock = null;
+	private var fx:Fx;
 	private var gunfire:EnemyShots;
 	private var bossDeath:BossDeath;
 
@@ -72,6 +74,7 @@ class EnemyDirector
 		betweenWaves = waveData.firstDelay;
 		bossWave = waveData.bossWaveMin + FlxG.random.int(0, waveData.bossWaveRange);
 
+		this.fx = fx;
 		spawner = new EnemySpawner(arena);
 		spawner.anchor = anchorBody;
 		gunfire = new EnemyShots(arena, status, fx);
@@ -177,7 +180,7 @@ class EnemyDirector
 	{
 		bodies.forEachAlive(function(e:Enemies)
 		{
-			if (!e.entering || inBounds(e))
+			if (!e.railed && (!e.entering || inBounds(e)))
 				systems.world.CircleCollide.resolve(e, e.hitRadius, arena.map, solids);
 		});
 		FlxG.overlap(bodies, bodies, null, separateLive);
@@ -191,7 +194,7 @@ class EnemyDirector
 
 	function separateLive(a:Enemies, b:Enemies):Bool
 	{
-		if (a.isDead || b.isDead || a.seized || b.seized || a.entering || b.entering)
+		if (a.isDead || b.isDead || a.seized || b.seized || a.entering || b.entering || a.railed || b.railed)
 			return false;
 		return systems.world.CircleCollide.separate(a, a.hitRadius, b, b.hitRadius);
 	}
@@ -290,6 +293,11 @@ class EnemyDirector
 		var pack = [];
 		var s = waveData.scaling;
 		var kind = bossKind();
+		if (data.EnemyData.EnemyDataRegistry.get(kind).worm != null)
+		{
+			spawnWorm(kind);
+			return;
+		}
 		for (i in 0...count)
 		{
 			var boss = new Enemies(kind);
@@ -303,6 +311,50 @@ class EnemyDirector
 		}
 		if (onBossPack != null)
 			onBossPack(pack);
+	}
+
+	function spawnWorm(kind:String):Void
+	{
+		var wcfg = data.EnemyData.EnemyDataRegistry.get(kind).worm;
+		var s = waveData.scaling;
+		var a = anchorBody();
+		var hx = a.x + a.width * 0.5;
+		if (hx < 200)
+			hx = 200;
+		if (hx > arena.width - 200)
+			hx = arena.width - 200;
+		var hy = arena.height + 60;
+
+		var segs:Array<Enemies> = [];
+		for (i in 0...wcfg.parts)
+		{
+			var e = new Enemies(i == 0 ? kind : kind + "_body");
+			e.x = hx - e.width * 0.5;
+			e.y = hy + i * wcfg.spacing - e.height * 0.5;
+			e.buried = true;
+			e.shadowScaleX = 0;
+			e.applyScale(ramp(s.bossHpPerWave), ramp(s.bossSpeedPerWave), ramp(s.bossDamagePerWave));
+			register(e);
+			segs.push(e);
+			if (i == 0 && onBossSpawn != null)
+				onBossSpawn(e);
+		}
+		worm = new WormFlock(layers.tagLayer, fx, arena.width, arena.height);
+		worm.floorAt = arena.floorColorAt;
+		worm.adopt(segs);
+	}
+
+	function wormDown():Void
+	{
+		var wasX = worm.lastX;
+		var wasY = worm.lastY;
+		worm = null;
+		if (onBossKill != null)
+			onBossKill(wasX, wasY);
+		if (onBossDrops != null)
+			onBossDrops(wasX, wasY);
+		if (onBossDefeated != null)
+			onBossDefeated();
 	}
 
 	function updateWaves(elapsed:Float):Void
@@ -430,6 +482,12 @@ class EnemyDirector
 	function updateRigs(elapsed:Float):Void
 	{
 		retally();
+		if (worm != null)
+		{
+			worm.update(elapsed);
+			if (worm.done)
+				wormDown();
+		}
 		var i = rigs.length;
 		while (i-- > 0)
 		{
@@ -470,7 +528,7 @@ class EnemyDirector
 
 			rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 			rig.hitbox.y = e.y + e.hitOffY;
-			if (!e.seized && e.throwGrace <= 0 && WorldClock.scale > 0.05)
+			if (!e.seized && !e.buried && e.throwGrace <= 0 && WorldClock.scale > 0.05)
 				status.hurtPlayer(rig.hitbox, e.contactDamage, e.feetY, e.contactPush);
 
 			gunfire.emit(e);
