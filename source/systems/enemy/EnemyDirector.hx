@@ -342,6 +342,8 @@ class EnemyDirector
 		worm = new WormFlock(layers, fx, arena.width, arena.height);
 		worm.floorAt = arena.floorColorAt;
 		worm.adopt(segs);
+		if (onBossPack != null)
+			onBossPack(segs);
 	}
 
 	function wormDown():Void
