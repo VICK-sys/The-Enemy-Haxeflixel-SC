@@ -36,6 +36,9 @@ class LobbyState extends FlxState
 	static inline var SIGN_H:Int = 116;
 	static inline var SEND_FRAMES:Int = 3;
 	static inline var STALE:Float = 5;
+	static inline var DASH_LINES:Int = 2;
+	static inline var DASH_VOL:Float = 0.55;
+	static inline var DASH_READY_VOL:Float = 0.4;
 	static inline var ZOOM:Float = 0.75;
 	static inline var CURSOR_SCALE:Float = 3;
 
@@ -54,6 +57,7 @@ class LobbyState extends FlxState
 	private var frame:Int = 0;
 
 	private var cursor:FlxSprite;
+	private var dashCooldown:Float = 0;
 	private var backGear:systems.BackGear;
 
 	private var peers:Map<Int, RemoteAvatar> = new Map();
@@ -163,6 +167,24 @@ class LobbyState extends FlxState
 		return best;
 	}
 
+	function dashTick(elapsed:Float):Void
+	{
+		if (dashCooldown > 0)
+		{
+			dashCooldown -= elapsed;
+			if (dashCooldown <= 0)
+				FlxG.sound.play(util.Paths.sound("dash/charged"), DASH_READY_VOL);
+		}
+
+		if (!util.Controls.justPressed(util.Controls.DASH) || dashCooldown > 0
+			|| player.blockMovement || player.dashTimer > 0)
+			return;
+
+		dashCooldown = data.PlayerData.PlayerDataRegistry.get().dashCooldown;
+		player.dash();
+		FlxG.sound.play(util.Paths.sound("dash/dash" + (1 + Std.random(DASH_LINES))), DASH_VOL);
+	}
+
 	override public function update(elapsed:Float):Void
 	{
 		util.Controls.setAimAnchor(player.x + player.width * 0.5, player.y + player.height * 0.5);
@@ -197,6 +219,8 @@ class LobbyState extends FlxState
 				player.animation.play("idle");
 			return;
 		}
+
+		dashTick(elapsed);
 
 		var near = nearest();
 		prompt.text = near == null ? "" : Lang.t("lobby.prompt", [util.Controls.bindName(util.Controls.INTERACT), Lang.t(near.key)]);
