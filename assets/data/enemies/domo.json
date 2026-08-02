@@ -5,10 +5,30 @@
 	"offsetX": -40,
 	"offsetY": -45,
 	"animations": [
-		{ "name": "idle", "prefix": "Idle", "fps": 8, "loop": true },
-		{ "name": "walk", "prefix": "Walk", "fps": 8, "loop": true },
-		{ "name": "hurt", "prefix": "Hurt", "fps": 8, "loop": false },
-		{ "name": "death", "prefix": "Death", "fps": 8, "loop": false }
+		{
+			"name": "idle",
+			"prefix": "Idle",
+			"fps": 8,
+			"loop": true
+		},
+		{
+			"name": "walk",
+			"prefix": "Walk",
+			"fps": 8,
+			"loop": true
+		},
+		{
+			"name": "hurt",
+			"prefix": "Hurt",
+			"fps": 8,
+			"loop": false
+		},
+		{
+			"name": "death",
+			"prefix": "Death",
+			"fps": 8,
+			"loop": false
+		}
 	],
 	"hp": 160,
 	"speed": 300,
@@ -41,9 +61,14 @@
 		"dashWindup": 0.45,
 		"dashSpeed": 1050,
 		"dashTime": 0.95,
-		"dashGap": 0.45,
+		"dashGap": 0.2,
+		"dashRest": 0.5,
 		"dashTurn": 0.35,
-		"dashShots": [3, 4, 5]
+		"dashShots": [
+			3,
+			4,
+			5
+		]
 	},
 	"contactDamage": 0.5,
 	"dropChance": 1,

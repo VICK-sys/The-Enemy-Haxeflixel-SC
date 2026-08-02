@@ -86,6 +86,7 @@ typedef DomoData = {
 	dashSpeed:Float,
 	dashTime:Float,
 	dashGap:Float,
+	dashRest:Float,
 	dashTurn:Float,
 	dashShots:Array<Int>
 }

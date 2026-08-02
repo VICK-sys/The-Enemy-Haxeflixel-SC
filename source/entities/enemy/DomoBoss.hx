@@ -10,8 +10,10 @@ class DomoBoss implements AttackBehavior
 	static inline var SUMMON:Int = 2;
 	static inline var DASH_WIND:Int = 3;
 	static inline var DASH:Int = 4;
+	static inline var DASH_REST:Int = 5;
 
 	static inline var BRAKE:Float = 6;
+	static inline var PLANT:Float = 18;
 	static inline var STRAFE_HOLD:Float = 1.4;
 	static inline var STRAFE_VARY:Float = 1.3;
 
@@ -78,6 +80,19 @@ class DomoBoss implements AttackBehavior
 					e.velocity.set(dashX * cfg.dashSpeed, dashY * cfg.dashSpeed);
 					util.Sfx.at("enemies/charge", e.x + e.width * 0.5, e.y + e.height * 0.5, 0.6);
 				}
+			case DASH_REST:
+				face(e, ax);
+				brakeAt(e, elapsed, PLANT);
+				if (timer <= 0)
+				{
+					if (dashesLeft > 0)
+					{
+						phase = DASH_WIND;
+						timer = cfg.dashGap;
+					}
+					else
+						rest(e);
+				}
 			default:
 				var turn = Math.min(1, cfg.dashTurn * elapsed);
 				dashX += (ax - dashX) * turn;
@@ -93,13 +108,8 @@ class DomoBoss implements AttackBehavior
 				{
 					spray(e, ax, ay, cfg.dashCount - dashesLeft);
 					dashesLeft--;
-					if (dashesLeft > 0)
-					{
-						phase = DASH_WIND;
-						timer = cfg.dashGap;
-					}
-					else
-						rest(e);
+					phase = DASH_REST;
+					timer = cfg.dashRest;
 				}
 		}
 
@@ -271,8 +281,11 @@ class DomoBoss implements AttackBehavior
 	}
 
 	inline function brake(e:Enemies, elapsed:Float):Void
+		brakeAt(e, elapsed, BRAKE);
+
+	inline function brakeAt(e:Enemies, elapsed:Float, rate:Float):Void
 	{
-		var k = Math.min(1, BRAKE * elapsed);
+		var k = Math.min(1, rate * elapsed);
 		e.velocity.x += (0 - e.velocity.x) * k;
 		e.velocity.y += (0 - e.velocity.y) * k;
 	}
