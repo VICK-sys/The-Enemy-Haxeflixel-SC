@@ -9,6 +9,9 @@ class EnemyShot extends FlxSprite
 	public static inline var DEFAULT_SPRITE:String = "bullets/round_bullet_enemy";
 	public static inline var TURNED_SPRITE:String = "bullets/round_bullet_player";
 
+	static inline var ENEMY_TAIL:String = "_enemy";
+	static inline var PLAYER_TAIL:String = "_player";
+
 	static inline var ART_TURN:Float = 90;
 	static inline var DEFLECT_BOOST:Float = 1.35;
 	static inline var DEFLECT_CARRY:Float = 0.4;
@@ -34,6 +37,22 @@ class EnemyShot extends FlxSprite
 		super();
 		antialiasing = false;
 		use(DEFAULT_SPRITE);
+	}
+
+	static function turnedKey(key:String):String
+	{
+		if (key == null)
+			return TURNED_SPRITE;
+		if (StringTools.endsWith(key, ENEMY_TAIL))
+			return key.substr(0, key.length - ENEMY_TAIL.length) + PLAYER_TAIL;
+		return key;
+	}
+
+	function turnArt():Void
+	{
+		var want = turnedKey(spriteKey);
+		if (want != spriteKey)
+			use(want);
 	}
 
 	function use(key:String):Void
@@ -88,6 +107,7 @@ class EnemyShot extends FlxSprite
 		life = fullLife;
 		alpha = 1;
 		friendly = true;
+		turnArt();
 	}
 
 	public function seize():Void
@@ -106,7 +126,7 @@ class EnemyShot extends FlxSprite
 		life = fullLife;
 		alpha = 1;
 		friendly = true;
-		use(TURNED_SPRITE);
+		turnArt();
 	}
 
 	override public function update(elapsed:Float):Void
