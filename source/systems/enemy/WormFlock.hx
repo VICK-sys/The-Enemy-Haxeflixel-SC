@@ -12,6 +12,7 @@ typedef WormChain =
 	segs:Array<Enemies>,
 	trail:Array<Float>,
 	clock:Float,
+	bearing:Float,
 	shot:Float,
 	aiming:Float,
 	aimDeg:Float,
@@ -33,6 +34,8 @@ class WormFlock
 	static inline var STRIDE:Int = 3;
 	static inline var EDGE_PAD:Float = 120;
 	static inline var EDGE_TURN:Float = 460;
+	static inline var TRACK:Float = 1.4;
+	static inline var JOSTLE:Float = 2.2;
 	static inline var AIM_TIME:Float = 0.35;
 	static inline var AIM_HOLD:Float = 0.45;
 	static inline var GLOW_TIME:Float = 0.35;
@@ -54,6 +57,7 @@ class WormFlock
 	private var hpMax:Map<Enemies, Float> = new Map();
 	private var glow:Map<Enemies, Float> = new Map();
 	private var puffs:Array<WormPuff> = [];
+	private var volleyGap:Float = 0;
 	private var layers:RenderLayers;
 	private var fx:Fx;
 	private var headOffY:Float;
@@ -94,6 +98,7 @@ class WormFlock
 			segs: segs,
 			trail: trail,
 			clock: 0,
+			bearing: 0,
 			shot: cfg.shotCooldown,
 			aiming: 0,
 			aimDeg: 0,
@@ -145,6 +150,9 @@ class WormFlock
 		if (done)
 			return;
 
+		if (volleyGap > 0)
+			volleyGap -= elapsed;
+
 		var splits:Array<WormChain> = [];
 		var i = chains.length;
 		while (i-- > 0)
@@ -152,18 +160,88 @@ class WormFlock
 			var c = chains[i];
 			reap(c, splits);
 			if (c.segs.length == 0)
-			{
 				chains.splice(i, 1);
-				continue;
-			}
-			advance(c, elapsed);
 		}
 		for (s in splits)
+		{
+			s.bearing = angleOf(s);
 			chains.push(s);
+		}
 
 		if (chains.length == 0)
+		{
 			done = true;
+			return;
+		}
+
+		jostle(elapsed);
+		for (c in chains)
+			advance(c, elapsed);
 	}
+
+	function angleOf(c:WormChain):Float
+	{
+		var h = c.segs[0];
+		var hx = h.x + h.width * 0.5;
+		var hy = h.y + h.height * 0.5;
+		if (h.target == null)
+			return 0;
+		return Math.atan2(hy - (h.target.y + h.target.height * 0.5), hx - (h.target.x + h.target.width * 0.5));
+	}
+
+	function jostle(elapsed:Float):Void
+	{
+		if (chains.length < 2)
+			return;
+
+		for (c in chains)
+		{
+			var d = angleOf(c) - c.bearing;
+			while (d > Math.PI)
+				d -= Math.PI * 2;
+			while (d < -Math.PI)
+				d += Math.PI * 2;
+			c.bearing += d * Math.min(1, TRACK * elapsed) + cfg.orbit * elapsed;
+		}
+
+		var arc = Math.PI * 2 / chains.length;
+		for (i in 0...chains.length)
+			for (j in i + 1...chains.length)
+			{
+				var d = chains[j].bearing - chains[i].bearing;
+				while (d > Math.PI)
+					d -= Math.PI * 2;
+				while (d < -Math.PI)
+					d += Math.PI * 2;
+				var gap = d < 0 ? -d : d;
+				if (gap >= arc)
+					continue;
+				var push = (arc - gap) * JOSTLE * elapsed;
+				if (d >= 0)
+				{
+					chains[j].bearing += push;
+					chains[i].bearing -= push;
+				}
+				else
+				{
+					chains[j].bearing -= push;
+					chains[i].bearing += push;
+				}
+			}
+	}
+
+	function clockFor(lift:Float):Float
+	{
+		if (lift <= SURFACE_MARK)
+			return cfg.underTime * 0.5;
+		var r = lift / cfg.lift;
+		if (r > 1)
+			r = 1;
+		return cfg.underTime + (1 - Math.asin(r) / Math.PI) * cfg.overTime;
+	}
+
+	inline function liftOf(s:Enemies):Float
+		return s.offset.y - (s.kind == "worm" ? headOffY : bodyOffY);
 
 	function reap(c:WormChain, splits:Array<WormChain>):Void
 	{
@@ -194,7 +272,7 @@ class WormFlock
 				{
 					trail.push(r.x + r.width * 0.5);
 					trail.push(r.y + r.height * 0.5);
-					trail.push(r.buried ? 0 : cfg.lift);
+					trail.push(liftOf(r));
 				}
 				var last = right[right.length - 1];
 				trail.push(last.x + last.width * 0.5);
@@ -203,12 +281,13 @@ class WormFlock
 				splits.push({
 					segs: right,
 					trail: trail,
-					clock: c.clock,
+					clock: clockFor(liftOf(right[0])),
+					bearing: 0,
 					shot: cfg.shotCooldown,
 					aiming: 0,
 					aimDeg: 0,
 					aimHold: 0,
-					headUp: false
+					headUp: !right[0].buried
 				});
 			}
 			return;
@@ -242,8 +321,16 @@ class WormFlock
 			ty = head.target.y + head.target.height * 0.5;
 		}
 
-		var wx = tx - hx;
-		var wy = ty - hy;
+		var sx = tx;
+		var sy = ty;
+		if (chains.length > 1)
+		{
+			sx += Math.cos(c.bearing) * cfg.flankDist;
+			sy += Math.sin(c.bearing) * cfg.flankDist;
+		}
+
+		var wx = sx - hx;
+		var wy = sy - hy;
 		var wl = Math.sqrt(wx * wx + wy * wy);
 		if (wl > 0)
 		{
@@ -534,6 +621,12 @@ class WormFlock
 
 		if (c.shot > 0 || !head.pathing.fireClear)
 			return;
+		if (chains.length > 1)
+		{
+			if (volleyGap > 0)
+				return;
+			volleyGap = cfg.volleyGap;
+		}
 		c.aiming = AIM_TIME;
 		c.aimHold = AIM_HOLD;
 	}
