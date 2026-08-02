@@ -1,12 +1,10 @@
 {
-	"cols": 160,
-	"rows": 90,
+	"cols": 320,
+	"rows": 180,
 	"tileSize": 16,
-
 	"background": "stages/theEnemy",
 	"map": "default_auto.txt",
 	"tiles": "auto_tiles.png",
-
-	"spawnX": 1200,
-	"spawnY": 800
+	"spawnX": 2400,
+	"spawnY": 1600
 }
