@@ -36,6 +36,7 @@ class Controls
 	static inline var GYRO_STILL:Float = 0.05;
 
 	public static var padMode(default, null):Bool = false;
+	public static var padLabels(default, null):Bool = false;
 
 	static var inited:Bool = false;
 	static var keys:Array<Int> = [];
@@ -85,6 +86,7 @@ class Controls
 		if (keys[SECOND] == FlxKey.NONE)
 			keys[SECOND] = MOUSE_RIGHT;
 		FlxG.gamepads.globalDeadZone = SaveData.aimDeadzone();
+		FlxG.signals.focusGained.add(resetDevices);
 		FlxG.signals.preUpdate.add(tick);
 	}
 
@@ -103,7 +105,7 @@ class Controls
 		return keys[action];
 
 	public static function bindName(action:Int):String
-		return padMode ? padName(pads[action]) : keyName(keys[action]);
+		return padLabels ? padName(pads[action]) : keyName(keys[action]);
 
 	public static function padOf(action:Int):Int
 		return pads[action];
@@ -341,6 +343,13 @@ class Controls
 				aimReach = AIM_NEAR + (AIM_FAR - AIM_NEAR) * Math.min(1, (len - STICK_AIM) / (1 - STICK_AIM));
 				padMode = true;
 			}
+			if (p.anyJustPressed([
+				FlxGamepadInputID.A, FlxGamepadInputID.B, FlxGamepadInputID.X, FlxGamepadInputID.Y, FlxGamepadInputID.START,
+				FlxGamepadInputID.DPAD_UP, FlxGamepadInputID.DPAD_DOWN, FlxGamepadInputID.DPAD_LEFT, FlxGamepadInputID.DPAD_RIGHT,
+				FlxGamepadInputID.LEFT_SHOULDER, FlxGamepadInputID.RIGHT_SHOULDER
+			]) || (trigNow[0] && !trigPrev[0]) || (trigNow[1] && !trigPrev[1]) || len > STICK_AIM
+				|| Math.abs(stickX()) > STICK_MOVE || Math.abs(stickY()) > STICK_MOVE)
+				padLabels = true;
 		}
 
 		#if (cpp && windows)
@@ -383,6 +392,20 @@ class Controls
 			padMode = false;
 		lastMouseX = gamePoint.x;
 		lastMouseY = gamePoint.y;
+
+		if (FlxG.mouse.justPressed || FlxG.mouse.justPressedRight || FlxG.mouse.justPressedMiddle
+			|| FlxG.keys.justPressed.ANY)
+			padLabels = false;
+	}
+
+	public static function resetDevices():Void
+	{
+		FlxG.keys.reset();
+		FlxG.gamepads.reset();
+		trigPrev[0] = trigPrev[1] = false;
+		trigNow[0] = trigNow[1] = false;
+		menuXPrev = menuYPrev = 0;
+		menuXNow = menuYNow = 0;
 	}
 
 	static function applyGyro(pitch:Float, yaw:Float, elapsed:Float):Void

@@ -61,6 +61,7 @@ class PauseSubState extends FlxSubState
 	{
 		FlxG.mouse.visible = false;
 		Music.release();
+		util.Controls.resetDevices();
 		super.close();
 	}
 

@@ -104,7 +104,7 @@ class PlayState extends FlxState
 		fx.clearHitstop();
 		if (bossFinish != null)
 			bossFinish.cancel();
-		FlxG.keys.reset();
+		util.Controls.resetDevices();
 		openSubState(sub);
 	}
 

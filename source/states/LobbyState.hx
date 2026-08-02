@@ -191,7 +191,12 @@ class LobbyState extends FlxState
 		prompt.visible = subState == null;
 
 		if (subState != null)
+		{
+			player.velocity.set(0, 0);
+			if (player.animation.name == "walk")
+				player.animation.play("idle");
 			return;
+		}
 
 		var near = nearest();
 		prompt.text = near == null ? "" : Lang.t("lobby.prompt", [util.Controls.bindName(util.Controls.INTERACT), Lang.t(near.key)]);
@@ -303,7 +308,7 @@ class LobbyState extends FlxState
 		if (Net.isClient)
 			return;
 		prompt.text = "";
-		FlxG.keys.reset();
+		util.Controls.resetDevices();
 		var panel = new HostSubState(camUI);
 		panel.onStopped = clearPeers;
 		openSubState(panel);
@@ -318,7 +323,7 @@ class LobbyState extends FlxState
 	function pickWeapon():Void
 	{
 		prompt.text = "";
-		FlxG.keys.reset();
+		util.Controls.resetDevices();
 		openSubState(new WeaponPickSubState(camUI));
 	}
 
@@ -335,7 +340,7 @@ class LobbyState extends FlxState
 		prompt.text = "";
 		var panel = new DressUpSubState(camUI);
 		panel.onDone = repaint;
-		FlxG.keys.reset();
+		util.Controls.resetDevices();
 		openSubState(panel);
 	}
 
@@ -344,7 +349,7 @@ class LobbyState extends FlxState
 		if (Net.mode != Off)
 			return;
 		prompt.text = "";
-		FlxG.keys.reset();
+		util.Controls.resetDevices();
 		openSubState(new JoinSubState(camUI));
 	}
 
@@ -369,7 +374,7 @@ class LobbyState extends FlxState
 	function openPause():Void
 	{
 		prompt.text = "";
-		FlxG.keys.reset();
+		util.Controls.resetDevices();
 		var pause = new PauseSubState(camUI, true);
 		pause.closeCallback = repaint;
 		openSubState(pause);
