@@ -5,14 +5,24 @@ import flixel.group.FlxGroup.FlxTypedGroup;
 import entities.enemy.Enemies;
 import data.EnemyData.EnemyDataRegistry;
 import data.EnemyData.WormData;
+import util.Paths;
 
 typedef WormChain =
 {
 	segs:Array<Enemies>,
 	trail:Array<Float>,
-	phase:Float,
+	clock:Float,
 	shot:Float,
+	aiming:Float,
+	aimDeg:Float,
+	aimHold:Float,
 	headUp:Bool
+}
+
+typedef WormPuff =
+{
+	sprite:FlxSprite,
+	life:Float
 }
 
 class WormFlock
@@ -20,8 +30,14 @@ class WormFlock
 	static inline var BAR_W:Int = 46;
 	static inline var BAR_H:Int = 5;
 	static inline var TRAIL_STEP:Float = 6;
-	static inline var EMERGE:Float = 0.25;
+	static inline var STRIDE:Int = 3;
 	static inline var EDGE_PAD:Float = 120;
+	static inline var EDGE_TURN:Float = 460;
+	static inline var AIM_TIME:Float = 0.35;
+	static inline var AIM_HOLD:Float = 0.45;
+	static inline var PUFF_LIFE:Float = 0.4;
+	static inline var PUFF_GROW:Float = 2.2;
+	static inline var SURFACE_MARK:Float = 0.04;
 
 	public var done(default, null):Bool = false;
 	public var lastX(default, null):Float = 0;
@@ -34,16 +50,17 @@ class WormFlock
 	private var backs:Map<Enemies, FlxSprite> = new Map();
 	private var fills:Map<Enemies, FlxSprite> = new Map();
 	private var hpMax:Map<Enemies, Float> = new Map();
-	private var tagLayer:FlxTypedGroup<FlxSprite>;
+	private var puffs:Array<WormPuff> = [];
+	private var layers:RenderLayers;
 	private var fx:Fx;
 	private var headOffY:Float;
 	private var bodyOffY:Float;
 	private var roomW:Float;
 	private var roomH:Float;
 
-	public function new(tagLayer:FlxTypedGroup<FlxSprite>, fx:Fx, roomW:Float, roomH:Float)
+	public function new(layers:RenderLayers, fx:Fx, roomW:Float, roomH:Float)
 	{
-		this.tagLayer = tagLayer;
+		this.layers = layers;
 		this.fx = fx;
 		this.roomW = roomW;
 		this.roomH = roomH;
@@ -64,12 +81,22 @@ class WormFlock
 		{
 			trail.push(s.x + s.width * 0.5);
 			trail.push(s.y + s.height * 0.5);
+			trail.push(0);
 		}
-		var tx = segs[segs.length - 1].x + segs[segs.length - 1].width * 0.5;
-		var ty = segs[segs.length - 1].y + segs[segs.length - 1].height * 0.5;
-		trail.push(tx);
-		trail.push(ty + cfg.spacing * 3);
-		chains.push({segs: segs, trail: trail, phase: 0.4, shot: cfg.shotCooldown, headUp: false});
+		var last = segs[segs.length - 1];
+		trail.push(last.x + last.width * 0.5);
+		trail.push(last.y + last.height * 0.5 + cfg.spacing * 3);
+		trail.push(0);
+		chains.push({
+			segs: segs,
+			trail: trail,
+			clock: 0,
+			shot: cfg.shotCooldown,
+			aiming: 0,
+			aimDeg: 0,
+			aimHold: 0,
+			headUp: false
+		});
 	}
 
 	function makeBar(s:Enemies):Void
@@ -77,14 +104,14 @@ class WormFlock
 		var back = new FlxSprite();
 		back.makeGraphic(BAR_W, BAR_H, 0xC0161616);
 		back.visible = false;
-		tagLayer.add(back);
+		layers.tagLayer.add(back);
 		backs.set(s, back);
 
 		var fill = new FlxSprite();
 		fill.makeGraphic(BAR_W - 2, BAR_H - 2, 0xFF9BE24A);
 		fill.origin.set(0, 0);
 		fill.visible = false;
-		tagLayer.add(fill);
+		layers.tagLayer.add(fill);
 		fills.set(s, fill);
 	}
 
@@ -93,13 +120,13 @@ class WormFlock
 		var back = backs.get(s);
 		if (back != null)
 		{
-			tagLayer.remove(back, true);
+			layers.tagLayer.remove(back, true);
 			back.destroy();
 		}
 		var fill = fills.get(s);
 		if (fill != null)
 		{
-			tagLayer.remove(fill, true);
+			layers.tagLayer.remove(fill, true);
 			fill.destroy();
 		}
 		backs.remove(s);
@@ -109,6 +136,8 @@ class WormFlock
 
 	public function update(elapsed:Float):Void
 	{
+		updatePuffs(elapsed);
+
 		if (done)
 			return;
 
@@ -161,15 +190,20 @@ class WormFlock
 				{
 					trail.push(r.x + r.width * 0.5);
 					trail.push(r.y + r.height * 0.5);
+					trail.push(r.buried ? 0 : cfg.lift);
 				}
 				var last = right[right.length - 1];
 				trail.push(last.x + last.width * 0.5);
 				trail.push(last.y + last.height * 0.5 + cfg.spacing * 2);
+				trail.push(0);
 				splits.push({
 					segs: right,
 					trail: trail,
-					phase: c.phase - (k + 1) * cfg.waveStep,
+					clock: c.clock,
 					shot: cfg.shotCooldown,
+					aiming: 0,
+					aimDeg: 0,
+					aimHold: 0,
 					headUp: false
 				});
 			}
@@ -177,9 +211,19 @@ class WormFlock
 		}
 	}
 
+	function headLift(clock:Float):Float
+	{
+		var cycle = cfg.underTime + cfg.overTime;
+		var t = clock % cycle;
+		if (t < cfg.underTime)
+			return 0;
+		var u = (t - cfg.underTime) / cfg.overTime;
+		return Math.sin(u * Math.PI) * cfg.lift;
+	}
+
 	function advance(c:WormChain, elapsed:Float):Void
 	{
-		c.phase += cfg.waveSpeed * elapsed;
+		c.clock += elapsed;
 		c.shot -= elapsed;
 
 		var head = c.segs[0];
@@ -203,72 +247,110 @@ class WormFlock
 			wy /= wl;
 		}
 
-		var ox = c.trail.length >= 4 ? hx - c.trail[2] : 1;
-		var oy = c.trail.length >= 4 ? hy - c.trail[3] : 0;
+		if (hx < EDGE_TURN)
+			wx += (EDGE_TURN - hx) / EDGE_TURN * 3;
+		else if (hx > roomW - EDGE_TURN)
+			wx -= (hx - (roomW - EDGE_TURN)) / EDGE_TURN * 3;
+		if (hy < EDGE_TURN)
+			wy += (EDGE_TURN - hy) / EDGE_TURN * 3;
+		else if (hy > roomH - EDGE_TURN)
+			wy -= (hy - (roomH - EDGE_TURN)) / EDGE_TURN * 3;
+		var el = Math.sqrt(wx * wx + wy * wy);
+		if (el > 0)
+		{
+			wx /= el;
+			wy /= el;
+		}
+
+		var ox = c.trail.length >= STRIDE * 2 ? hx - c.trail[STRIDE] : 1;
+		var oy = c.trail.length >= STRIDE * 2 ? hy - c.trail[STRIDE + 1] : 0;
 		var ol = Math.sqrt(ox * ox + oy * oy);
 		if (ol > 0)
 		{
 			ox /= ol;
 			oy /= ol;
 		}
-		var blend = Math.min(1, cfg.turn * elapsed);
-		var dx = ox + (wx - ox) * blend;
-		var dy = oy + (wy - oy) * blend;
-		var dl = Math.sqrt(dx * dx + dy * dy);
-		if (dl < 0.001)
-		{
-			dx = wx;
-			dy = wy;
-			dl = 1;
-		}
-		dx /= dl;
-		dy /= dl;
+		var heading = ol > 0 ? Math.atan2(oy, ox) : Math.atan2(wy, wx);
+		var turn = Math.atan2(wy, wx) - heading;
+		while (turn > Math.PI)
+			turn -= Math.PI * 2;
+		while (turn < -Math.PI)
+			turn += Math.PI * 2;
+		var cap = cfg.turn * elapsed;
+		if (turn > cap)
+			turn = cap;
+		else if (turn < -cap)
+			turn = -cap;
+		heading += turn;
+		var dx = Math.cos(heading);
+		var dy = Math.sin(heading);
 
 		hx += dx * head.speed * elapsed;
 		hy += dy * head.speed * elapsed;
 		hx = hx < EDGE_PAD ? EDGE_PAD : (hx > roomW - EDGE_PAD ? roomW - EDGE_PAD : hx);
 		hy = hy < EDGE_PAD ? EDGE_PAD : (hy > roomH - EDGE_PAD ? roomH - EDGE_PAD : hy);
 
+		var lift = headLift(c.clock);
+		var up = lift > SURFACE_MARK;
+		if (up != c.headUp)
+		{
+			c.headUp = up;
+			util.Sfx.at("digging", hx, hy, 0.5);
+			if (up)
+				breach(hx, hy + head.shadowOffY - head.height * 0.5);
+		}
+
 		var lx = c.trail[0];
 		var ly = c.trail[1];
 		var moved = Math.sqrt((hx - lx) * (hx - lx) + (hy - ly) * (hy - ly));
 		if (moved >= TRAIL_STEP)
 		{
+			c.trail.unshift(lift);
 			c.trail.unshift(hy);
 			c.trail.unshift(hx);
-			var cap = Std.int((c.segs.length + 3) * cfg.spacing / TRAIL_STEP) * 2 + 8;
+			var cap = Std.int((c.segs.length + 3) * cfg.spacing / TRAIL_STEP) * STRIDE + STRIDE * 4;
 			if (c.trail.length > cap)
 				c.trail.resize(cap);
 		}
+		else
+		{
+			c.trail[2] = lift;
+		}
+
+		shoot(c, elapsed, tx, ty);
 
 		for (idx in 0...c.segs.length)
-			place(c, idx, hx, hy);
-
-		shoot(c, tx, ty);
+			place(c, idx, hx, hy, lift);
 	}
 
-	function place(c:WormChain, idx:Int, hx:Float, hy:Float):Void
+	function place(c:WormChain, idx:Int, hx:Float, hy:Float, headHigh:Float):Void
 	{
 		var s = c.segs[idx];
 		var px = hx;
 		var py = hy;
+		var lift = headHigh;
+
 		if (idx > 0)
 		{
 			var want = idx * cfg.spacing;
 			var run = Math.sqrt((hx - c.trail[0]) * (hx - c.trail[0]) + (hy - c.trail[1]) * (hy - c.trail[1]));
 			var ax = hx;
 			var ay = hy;
+			var aLift = headHigh;
 			var bx = c.trail[0];
 			var by = c.trail[1];
+			var bLift = c.trail[2];
 			var j = 0;
-			while (run < want && j + 3 < c.trail.length)
+			while (run < want && j + STRIDE + 2 < c.trail.length)
 			{
 				ax = c.trail[j];
 				ay = c.trail[j + 1];
-				bx = c.trail[j + 2];
-				by = c.trail[j + 3];
+				aLift = c.trail[j + 2];
+				bx = c.trail[j + STRIDE];
+				by = c.trail[j + STRIDE + 1];
+				bLift = c.trail[j + STRIDE + 2];
 				run += Math.sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
-				j += 2;
+				j += STRIDE;
 			}
 			if (run >= want)
 			{
@@ -277,11 +359,13 @@ class WormFlock
 				var t = segLen > 0 ? back / segLen : 0;
 				px = bx + (ax - bx) * t;
 				py = by + (ay - by) * t;
+				lift = bLift + (aLift - bLift) * t;
 			}
 			else
 			{
 				px = bx;
 				py = by;
+				lift = bLift;
 			}
 		}
 
@@ -289,18 +373,12 @@ class WormFlock
 		s.y = py - s.height * 0.5;
 		s.velocity.set(0, 0);
 
-		var raw = Math.sin(c.phase - idx * cfg.waveStep);
-		var up = raw > EMERGE;
-		var lift = up ? (raw - EMERGE) / (1 - EMERGE) * cfg.lift : 0;
-
+		var up = lift > SURFACE_MARK;
 		if (up != !s.buried)
 		{
 			s.buried = !up;
-			if (idx == 0)
-			{
-				util.Sfx.at("digging", px, py, 0.5);
-				c.headUp = up;
-			}
+			if (idx > 0 && up)
+				breach(px, s.feetY);
 		}
 
 		var baseOff = s.kind == "worm" ? headOffY : bodyOffY;
@@ -315,11 +393,26 @@ class WormFlock
 		{
 			if (s.flashTimer <= 0)
 				s.color = 0xFFFFFF;
-			if (idx == 0 && c.trail.length >= 4)
-				s.flipX = hx - c.trail[2] < 0;
+			if (idx == 0)
+			{
+				var deg = c.aimHold > 0 ? c.aimDeg : Math.atan2(py - c.trail[STRIDE + 1], px - c.trail[STRIDE]) * 180 / Math.PI;
+				if (deg > 90 || deg < -90)
+				{
+					s.flipX = true;
+					deg = deg > 0 ? deg - 180 : deg + 180;
+				}
+				else
+					s.flipX = false;
+				s.angle = deg;
+			}
 		}
-		else if (floorAt != null)
-			s.color = floorAt(px, s.feetY);
+		else
+		{
+			if (idx == 0)
+				s.angle = 0;
+			if (floorAt != null)
+				s.color = floorAt(px, s.feetY);
+		}
 
 		var back = backs.get(s);
 		var fill = fills.get(s);
@@ -336,24 +429,96 @@ class WormFlock
 		}
 	}
 
-	function shoot(c:WormChain, tx:Float, ty:Float):Void
+	function breach(px:Float, py:Float):Void
+	{
+		var s:FlxSprite = null;
+		for (p in puffs)
+			if (p.life <= 0 && !p.sprite.visible)
+			{
+				s = p.sprite;
+				p.life = PUFF_LIFE;
+				break;
+			}
+		if (s == null)
+		{
+			s = new FlxSprite();
+			s.frames = Paths.sparrow("enemies/worm");
+			s.animation.addByPrefix("puff", "Mound", 8, false);
+			s.antialiasing = false;
+			layers.shadowLayer.add(s);
+			puffs.push({sprite: s, life: PUFF_LIFE});
+		}
+		s.animation.play("puff", true);
+		s.color = 0xFFFFFF;
+		s.alpha = 0.85;
+		s.scale.set(4, 4);
+		s.updateHitbox();
+		s.setPosition(px - s.width * 0.5, py - s.height * 0.5);
+		s.visible = true;
+	}
+
+	function updatePuffs(elapsed:Float):Void
+	{
+		for (p in puffs)
+		{
+			if (p.life <= 0)
+				continue;
+			p.life -= elapsed;
+			var t = p.life / PUFF_LIFE;
+			if (t <= 0)
+			{
+				p.sprite.visible = false;
+				p.life = 0;
+				continue;
+			}
+			p.sprite.alpha = t * 0.85;
+			var k = 4 + (1 - t) * PUFF_GROW;
+			var cx = p.sprite.x + p.sprite.width * 0.5;
+			var cy = p.sprite.y + p.sprite.height * 0.5;
+			p.sprite.scale.set(k, k);
+			p.sprite.updateHitbox();
+			p.sprite.setPosition(cx - p.sprite.width * 0.5, cy - p.sprite.height * 0.5);
+		}
+	}
+
+	function shoot(c:WormChain, elapsed:Float, tx:Float, ty:Float):Void
 	{
 		var head = c.segs[0];
-		if (c.segs.length - 1 < cfg.shotMinParts)
-			return;
-		if (head.buried || !head.pathing.fireClear || c.shot > 0)
-			return;
-
-		c.shot = cfg.shotCooldown;
 		var hx = head.x + head.width * 0.5;
 		var hy = head.y + head.height * 0.5;
-		var dx = tx - hx;
-		var dy = ty - hy;
-		var len = Math.sqrt(dx * dx + dy * dy);
-		if (len <= 0)
+
+		if (c.aimHold > 0)
+			c.aimHold -= elapsed;
+
+		if (head.buried || c.segs.length - 1 < cfg.shotMinParts)
+		{
+			c.aiming = 0;
 			return;
-		head.requestShot(dx / len, dy / len, cfg.shotDamage, cfg.shotSpeed, cfg.shotRange,
-			"bullets/round_bullet_enemy", "enemies/shoot");
+		}
+
+		c.aimDeg = Math.atan2(ty - hy, tx - hx) * 180 / Math.PI;
+
+		if (c.aiming > 0)
+		{
+			c.aimHold = AIM_HOLD;
+			c.aiming -= elapsed;
+			if (c.aiming > 0)
+				return;
+			c.shot = cfg.shotCooldown;
+			for (i in 0...cfg.shotCount)
+			{
+				var off = (i - (cfg.shotCount - 1) * 0.5) * cfg.shotSpread;
+				var rad = (c.aimDeg + off) * Math.PI / 180;
+				head.requestShot(Math.cos(rad), Math.sin(rad), cfg.shotDamage, cfg.shotSpeed, cfg.shotRange,
+					"bullets/round_bullet_enemy", "enemies/shoot");
+			}
+			return;
+		}
+
+		if (c.shot > 0 || !head.pathing.fireClear)
+			return;
+		c.aiming = AIM_TIME;
+		c.aimHold = AIM_HOLD;
 	}
 
 	public function chainCount():Int

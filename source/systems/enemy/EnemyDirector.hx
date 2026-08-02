@@ -339,7 +339,7 @@ class EnemyDirector
 			if (i == 0 && onBossSpawn != null)
 				onBossSpawn(e);
 		}
-		worm = new WormFlock(layers.tagLayer, fx, arena.width, arena.height);
+		worm = new WormFlock(layers, fx, arena.width, arena.height);
 		worm.floorAt = arena.floorColorAt;
 		worm.adopt(segs);
 	}
