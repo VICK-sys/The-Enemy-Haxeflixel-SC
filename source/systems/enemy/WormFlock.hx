@@ -386,9 +386,13 @@ class WormFlock
 		if (up != c.headUp)
 		{
 			c.headUp = up;
-			util.Sfx.at("digging", hx, hy, 0.5);
 			if (up)
+			{
+				util.Sfx.at("wyrm_surface", hx, hy, 0.85);
 				breach(hx, hy + head.shadowOffY - head.height * 0.5);
+			}
+			else
+				util.Sfx.at("digging", hx, hy, 0.5);
 		}
 
 		var lx = c.trail[0];
