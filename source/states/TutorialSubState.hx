@@ -19,7 +19,16 @@ import util.Lang;
 
 class TutorialSubState extends FlxSubState
 {
-	public static var shown:Bool = false;
+	public static var shown(get, set):Bool;
+
+	static function get_shown():Bool
+		return util.SaveData.tutorialSeen();
+
+	static function set_shown(v:Bool):Bool
+	{
+		util.SaveData.setTutorialSeen(v);
+		return v;
+	}
 
 	static inline var PAGES:Int = 7;
 	static inline var FADE_TIME:Float = 0.35;

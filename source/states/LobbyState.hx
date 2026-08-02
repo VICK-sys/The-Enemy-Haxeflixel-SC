@@ -120,6 +120,13 @@ class LobbyState extends FlxState
 		wipe.open();
 		Music.play(states.play.QuietRoom.track(), 0.3);
 		super.create();
+
+		if (!TutorialSubState.shown)
+		{
+			TutorialSubState.shown = true;
+			openSubState(new TutorialSubState(camUI));
+			util.DiscordPresence.tutorial();
+		}
 	}
 
 	function addSign(x:Float, y:Float, key:String, act:Void->Void):Void

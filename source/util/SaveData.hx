@@ -391,6 +391,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function tutorialSeen():Bool
+	{
+		ensure();
+		return save.data.tutorialSeen == true;
+	}
+
+	public static function setTutorialSeen(b:Bool):Void
+	{
+		ensure();
+		save.data.tutorialSeen = b;
+		save.flush();
+	}
+
 	public static function playerWeapon():Int
 	{
 		ensure();

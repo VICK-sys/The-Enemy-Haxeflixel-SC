@@ -1,10 +1,8 @@
 package states.play;
 
-import net.Net;
 import systems.weapons.Weapons;
 import ui.Hud;
 import ui.WeaponFlyIn;
-import util.DiscordPresence;
 
 class RunIntro
 {
@@ -32,21 +30,7 @@ class RunIntro
 		pick = WeaponPickSubState.lastPick;
 		fromX = flixel.FlxG.width * 0.5;
 		fromY = flixel.FlxG.height * 0.95;
-		openTutorialIfNew();
-	}
-
-	public function openTutorialIfNew():Void
-	{
-		if (TutorialSubState.shown || Net.active)
-		{
-			throwIn();
-			return;
-		}
-		TutorialSubState.shown = true;
-		var tutorial = new TutorialSubState(hud.camUI);
-		tutorial.closeCallback = throwIn;
-		host.openPanel(tutorial);
-		DiscordPresence.tutorial();
+		throwIn();
 	}
 
 	function throwIn():Void
