@@ -164,7 +164,7 @@ class RevolverAttack
 		spawn(bx, by, dx, dy, aimDeg, cfg.damage, Bullet.SHOT, cfg.hitRadius, 1);
 		rounds--;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
-		FlxG.sound.play(Paths.sound("revolver"), 0.7);
+		FlxG.sound.play(Paths.sound("revolver/shot" + (1 + Std.random(3))), 0.7);
 		if (rounds <= 0)
 			beginReloadFrom(0);
 	}
@@ -180,7 +180,7 @@ class RevolverAttack
 		rounds -= cfg.bigCost;
 		fx.sparksAt(bx + dx * MUZZLE, by + dy * MUZZLE);
 		systems.Fx.shake(0.005, 0.15);
-		FlxG.sound.play(Paths.sound("revolver"), 0.85);
+		FlxG.sound.play(Paths.sound("revolver/rclick" + (1 + Std.random(2))), 0.85);
 		FlxG.sound.play(Paths.sound("hammer"), 0.4);
 		if (rounds <= 0)
 			beginReloadFrom(0);
@@ -289,7 +289,7 @@ class RevolverAttack
 			twinRounds = 0;
 		twinKick = TWIN_KICK;
 		fx.sparksAt(tx, ty);
-		FlxG.sound.play(Paths.sound("revolver"), 0.55);
+		FlxG.sound.play(Paths.sound("revolver/shot" + (1 + Std.random(3))), 0.55);
 	}
 
 	public function reset():Void
@@ -402,7 +402,7 @@ class RevolverAttack
 				rounds = cfg.cylinder;
 				if (twin)
 					twinRounds = cfg.cylinder;
-				FlxG.sound.play(Paths.sound("bulletLoad"), 0.55);
+				FlxG.sound.play(Paths.sound("revolver/reload"), 0.6);
 				FlxG.sound.play(Paths.sound("weapon/catch"), 0.3);
 			}
 		}

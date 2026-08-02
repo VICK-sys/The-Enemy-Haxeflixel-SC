@@ -11,6 +11,13 @@ class Sfx
 	static inline var FLOOR:Float = 0.3;
 	static inline var PAN_SPAN:Float = 780;
 
+	public static function bowShot(perfect:Bool, power:Float):String
+	{
+		if (perfect)
+			return "bow/perfect";
+		return power >= 1 ? "bow/charged" : "bow/basic";
+	}
+
 	public static function at(name:String, x:Float, y:Float, volume:Float = 1):Void
 	{
 		if (!positional)

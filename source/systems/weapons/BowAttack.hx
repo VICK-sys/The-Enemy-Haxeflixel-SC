@@ -43,7 +43,7 @@ class BowAttack
 		arrows = new FlxTypedGroup<Arrow>();
 		rain = new ArrowRain(fx, hits);
 		rain.hue = util.SaveData.playerHue();
-		drawSound = FlxG.sound.create(Paths.sound("weapon/spin")).setup(0.4, true);
+		drawSound = FlxG.sound.create(Paths.sound("bow/loading")).setup(0.4, true);
 		reloadSound = FlxG.sound.create(Paths.sound("weapon/crossbowReload")).setup(0.55);
 	}
 
@@ -115,7 +115,7 @@ class BowAttack
 		{
 			fullNoted = true;
 			sweetTimer = cfg.sweetWindow;
-			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
+			FlxG.sound.play(Paths.sound("bow/loaded"), 0.6);
 			if (onFull != null)
 				onFull();
 		}
@@ -139,7 +139,7 @@ class BowAttack
 		arrow.paint(util.SaveData.playerHue(), hot);
 		arrow.fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,
 			1 + power * cfg.sizeBonus, 1 + power * cfg.knockBonus);
-		FlxG.sound.play(Paths.sound("crossbow_fire"), 0.7 + power * 0.3);
+		FlxG.sound.play(Paths.sound(util.Sfx.bowShot(hot, power)), 0.7 + power * 0.3);
 		if (power >= 1)
 		{
 			arrow.piercing = true;

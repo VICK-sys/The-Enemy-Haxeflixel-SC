@@ -157,7 +157,7 @@ class RemoteFx
 				var rc = cfg.revolver;
 				bullets.recycle(Bullet).fire(pmx + dx * 24, pmy + dy * 24, dx, dy, aimDeg, rc.damage, rc.speed, rc.range, rc.knock);
 				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
-				FlxG.sound.play(Paths.sound("revolver"), 0.5);
+				FlxG.sound.play(Paths.sound("revolver/shot" + (1 + Std.random(3))), 0.5);
 
 			case BigShot:
 				var bc = cfg.revolver;
@@ -165,12 +165,12 @@ class RemoteFx
 				big.setSprite("bullets/shotgun_bullet_player");
 				big.fire(pmx + dx * 24, pmy + dy * 24, dx, dy, aimDeg, bc.bigDamage, bc.speed, bc.range, bc.knock, bc.bigRadius);
 				fx.sparksAt(pmx + dx * 24, pmy + dy * 24);
-				FlxG.sound.play(Paths.sound("revolver"), 0.6);
+				FlxG.sound.play(Paths.sound("revolver/rclick" + (1 + Std.random(2))), 0.6);
 
 			case Pellet:
 				var pc = cfg.revolver;
 				bullets.recycle(Bullet).fire(pmx + dx * 24, pmy + dy * 24, dx, dy, aimDeg, pc.damage, pc.speed, pc.range, pc.knock);
-				FlxG.sound.play(Paths.sound("revolver"), 0.45);
+				FlxG.sound.play(Paths.sound("revolver/shot" + (1 + Std.random(3))), 0.45);
 
 			case Bow:
 				var bc = cfg.bowCharge;
@@ -178,7 +178,7 @@ class RemoteFx
 				arrow.paint(avatar.hue, perfect);
 				arrow.fire(pmx + dx * 10, pmy + dy * 10, dx, dy, aimDeg, 1, 1 + power * bc.speedBonus,
 					1 + power * bc.sizeBonus, 1);
-				FlxG.sound.play(Paths.sound("crossbow_fire"), 0.7 + power * 0.3);
+				FlxG.sound.play(Paths.sound(util.Sfx.bowShot(perfect, power)), 0.7 + power * 0.3);
 				if (power >= 1)
 					fx.sparksAt(pmx + dx * 30, pmy + dy * 30);
 

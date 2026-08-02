@@ -89,7 +89,7 @@ class Scraps
 
 		pickTimer = PICK_GAP;
 		util.Levels.award(util.Levels.scrapValue());
-		FlxG.sound.play(Paths.sound("bulletLoad"), 0.5);
+		FlxG.sound.play(Paths.sound("scrap/pick" + (1 + Std.random(4))), 0.5);
 		take.kill();
 	}
 }
