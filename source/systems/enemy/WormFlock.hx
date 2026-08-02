@@ -29,8 +29,6 @@ typedef WormPuff =
 
 class WormFlock
 {
-	static inline var BAR_W:Int = 46;
-	static inline var BAR_H:Int = 5;
 	static inline var TRAIL_STEP:Float = 6;
 	static inline var STRIDE:Int = 3;
 	static inline var TRAIL_SLACK:Float = 1.5;
@@ -56,9 +54,6 @@ class WormFlock
 
 	private var cfg:WormData;
 	private var chains:Array<WormChain> = [];
-	private var backs:Map<Enemies, FlxSprite> = new Map();
-	private var fills:Map<Enemies, FlxSprite> = new Map();
-	private var hpMax:Map<Enemies, Float> = new Map();
 	private var glow:Map<Enemies, Float> = new Map();
 	private var puffs:Array<WormPuff> = [];
 	private var volleyGap:Float = 0;
@@ -85,11 +80,6 @@ class WormFlock
 
 	public function adopt(segs:Array<Enemies>):Void
 	{
-		for (s in segs)
-		{
-			hpMax.set(s, s.hp);
-			makeBar(s);
-		}
 		var trail:Array<Float> = [];
 		for (s in segs)
 		{
@@ -114,41 +104,8 @@ class WormFlock
 		});
 	}
 
-	function makeBar(s:Enemies):Void
-	{
-		var back = new FlxSprite();
-		back.makeGraphic(BAR_W, BAR_H, 0xC0161616);
-		back.visible = false;
-		layers.tagLayer.add(back);
-		backs.set(s, back);
-
-		var fill = new FlxSprite();
-		fill.makeGraphic(BAR_W - 2, BAR_H - 2, 0xFF9BE24A);
-		fill.origin.set(0, 0);
-		fill.visible = false;
-		layers.tagLayer.add(fill);
-		fills.set(s, fill);
-	}
-
-	function dropBar(s:Enemies):Void
-	{
-		var back = backs.get(s);
-		if (back != null)
-		{
-			layers.tagLayer.remove(back, true);
-			back.destroy();
-		}
-		var fill = fills.get(s);
-		if (fill != null)
-		{
-			layers.tagLayer.remove(fill, true);
-			fill.destroy();
-		}
-		backs.remove(s);
-		fills.remove(s);
-		hpMax.remove(s);
+	function dropPart(s:Enemies):Void
 		glow.remove(s);
-	}
 
 	public function update(elapsed:Float):Void
 	{
@@ -307,7 +264,7 @@ class WormFlock
 			lastX = s.x + s.width * 0.5;
 			lastY = s.y + s.height * 0.5;
 			fx.sparksAt(lastX, lastY);
-			dropBar(s);
+			dropPart(s);
 			if (s.exists)
 				s.kill();
 
@@ -571,19 +528,6 @@ class WormFlock
 				s.color = floorAt(px, s.feetY);
 		}
 
-		var back = backs.get(s);
-		var fill = fills.get(s);
-		if (back != null && fill != null)
-		{
-			back.visible = up;
-			fill.visible = up;
-			back.x = px - BAR_W * 0.5;
-			back.y = s.y - lift - 18;
-			fill.x = back.x + 1;
-			fill.y = back.y + 1;
-			var max = hpMax.exists(s) ? hpMax.get(s) : s.hp;
-			fill.scale.x = max > 0 ? Math.max(0, s.hp / max) : 0;
-		}
 	}
 
 	function breach(px:Float, py:Float):Void
