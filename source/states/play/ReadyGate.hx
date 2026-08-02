@@ -125,7 +125,7 @@ class ReadyGate
 		}
 
 		prompt.visible = true;
-		prompt.text = ready ? waitLabel() : Lang.t("ready.prompt");
+		prompt.text = ready ? waitLabel() : Lang.t("ready.prompt", [util.Controls.bindName(util.Controls.ACCEPT)]);
 
 		if (ready)
 		{

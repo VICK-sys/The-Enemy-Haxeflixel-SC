@@ -29,7 +29,8 @@ class Controls
 	static inline var STICK_AIM:Float = 0.25;
 	static inline var STICK_MENU:Float = 0.5;
 	static inline var TRIGGER_ON:Float = 0.3;
-	static inline var AIM_RADIUS:Float = 360;
+	static inline var AIM_NEAR:Float = 150;
+	static inline var AIM_FAR:Float = 620;
 
 	public static var padMode(default, null):Bool = false;
 
@@ -42,6 +43,7 @@ class Controls
 	static var menuYPrev:Int = 0;
 	static var menuXNow:Int = 0;
 	static var menuYNow:Int = 0;
+	static var aimReach:Float = AIM_NEAR;
 	static var aimDirX:Float = 1;
 	static var aimDirY:Float = 0;
 	static var anchorX:Float = 0;
@@ -75,6 +77,7 @@ class Controls
 			keys[ATTACK] = MOUSE_LEFT;
 		if (keys[SECOND] == FlxKey.NONE)
 			keys[SECOND] = MOUSE_RIGHT;
+		FlxG.gamepads.globalDeadZone = SaveData.aimDeadzone();
 		FlxG.signals.preUpdate.add(tick);
 	}
 
@@ -250,10 +253,10 @@ class Controls
 	}
 
 	public static function aimX():Float
-		return padMode ? anchorX + aimDirX * AIM_RADIUS : FlxG.mouse.x;
+		return padMode ? anchorX + aimDirX * aimReach : FlxG.mouse.x;
 
 	public static function aimY():Float
-		return padMode ? anchorY + aimDirY * AIM_RADIUS : FlxG.mouse.y;
+		return padMode ? anchorY + aimDirY * aimReach : FlxG.mouse.y;
 
 	public static function aimViewX(cam:flixel.FlxCamera):Float
 		return (aimX() - cam.scroll.x - cam.viewMarginLeft) * cam.zoom;
@@ -317,6 +320,10 @@ class Controls
 
 		if (p != null)
 		{
+			p.deadZoneMode = CIRCULAR;
+			if (p.deadZone != SaveData.aimDeadzone())
+				p.deadZone = SaveData.aimDeadzone();
+
 			var rx = p.analog.value.RIGHT_STICK_X;
 			var ry = p.analog.value.RIGHT_STICK_Y;
 			var len = Math.sqrt(rx * rx + ry * ry);
@@ -324,15 +331,9 @@ class Controls
 			{
 				aimDirX = rx / len;
 				aimDirY = ry / len;
+				aimReach = AIM_NEAR + (AIM_FAR - AIM_NEAR) * Math.min(1, (len - STICK_AIM) / (1 - STICK_AIM));
 				padMode = true;
 			}
-			if (p.anyJustPressed([
-				FlxGamepadInputID.A, FlxGamepadInputID.B, FlxGamepadInputID.X, FlxGamepadInputID.Y, FlxGamepadInputID.START,
-				FlxGamepadInputID.DPAD_UP, FlxGamepadInputID.DPAD_DOWN, FlxGamepadInputID.DPAD_LEFT, FlxGamepadInputID.DPAD_RIGHT,
-				FlxGamepadInputID.LEFT_SHOULDER, FlxGamepadInputID.RIGHT_SHOULDER
-			]) || (trigNow[0] && !trigPrev[0]) || (trigNow[1] && !trigPrev[1]) || Math.abs(stickX()) > STICK_MOVE
-				|| Math.abs(stickY()) > STICK_MOVE)
-				padMode = true;
 		}
 
 		FlxG.mouse.getGamePosition(gamePoint);
@@ -355,8 +356,58 @@ class Controls
 		return k == FlxKey.NONE ? "-" : (k : FlxKey).toString();
 	}
 
+	static var PAD_LABELS:Array<Array<Dynamic>> = [
+		[FlxGamepadInputID.A, "A", "CROSS", "B"],
+		[FlxGamepadInputID.B, "B", "CIRCLE", "A"],
+		[FlxGamepadInputID.X, "X", "SQUARE", "Y"],
+		[FlxGamepadInputID.Y, "Y", "TRIANGLE", "X"],
+		[FlxGamepadInputID.LEFT_SHOULDER, "LB", "L1", "L"],
+		[FlxGamepadInputID.RIGHT_SHOULDER, "RB", "R1", "R"],
+		[FlxGamepadInputID.LEFT_TRIGGER, "LT", "L2", "ZL"],
+		[FlxGamepadInputID.RIGHT_TRIGGER, "RT", "R2", "ZR"],
+		[FlxGamepadInputID.START, "START", "OPTIONS", "PLUS"],
+		[FlxGamepadInputID.BACK, "BACK", "SHARE", "MINUS"],
+		[FlxGamepadInputID.LEFT_STICK_CLICK, "LS", "L3", "LS"],
+		[FlxGamepadInputID.RIGHT_STICK_CLICK, "RS", "R3", "RS"],
+		[FlxGamepadInputID.DPAD_UP, "D-UP", "D-UP", "D-UP"],
+		[FlxGamepadInputID.DPAD_DOWN, "D-DOWN", "D-DOWN", "D-DOWN"],
+		[FlxGamepadInputID.DPAD_LEFT, "D-LEFT", "D-LEFT", "D-LEFT"],
+		[FlxGamepadInputID.DPAD_RIGHT, "D-RIGHT", "D-RIGHT", "D-RIGHT"]
+	];
+
+	public static var ICON_SETS:Array<String> = ["auto", "xinput", "dualshock", "switch"];
+
+	public static function iconSet():String
+	{
+		var pick = SaveData.padIcons();
+		if (pick != "auto")
+			return pick;
+		var p = pad();
+		if (p == null)
+			return "xinput";
+		return switch (p.detectedModel)
+		{
+			case PS4, PS5, PSVITA: "dualshock";
+			case SWITCH_PRO, SWITCH_JOYCON_LEFT, SWITCH_JOYCON_RIGHT: "switch";
+			default: "xinput";
+		}
+	}
+
 	public static function padName(id:Int):String
-		return id == FlxGamepadInputID.NONE ? "-" : (id : FlxGamepadInputID).toString();
+	{
+		if (id == FlxGamepadInputID.NONE)
+			return "-";
+		var col = switch (iconSet())
+		{
+			case "dualshock": 2;
+			case "switch": 3;
+			default: 1;
+		}
+		for (row in PAD_LABELS)
+			if (row[0] == id)
+				return row[col];
+		return (id : FlxGamepadInputID).toString();
+	}
 
 	public static function capturedKey():Int
 	{

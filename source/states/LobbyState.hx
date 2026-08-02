@@ -188,7 +188,7 @@ class LobbyState extends FlxState
 			return;
 
 		var near = nearest();
-		prompt.text = near == null ? "" : Lang.t("lobby.prompt", [Lang.t(near.key)]);
+		prompt.text = near == null ? "" : Lang.t("lobby.prompt", [util.Controls.bindName(util.Controls.INTERACT), Lang.t(near.key)]);
 		if (near != null && util.Controls.justPressed(util.Controls.INTERACT))
 			near.act();
 

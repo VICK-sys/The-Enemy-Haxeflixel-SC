@@ -350,6 +350,32 @@ class SaveData
 		save.flush();
 	}
 
+	public static function aimDeadzone():Float
+	{
+		ensure();
+		return save.data.aimDeadzone != null ? save.data.aimDeadzone : 0.0;
+	}
+
+	public static function setAimDeadzone(v:Float):Void
+	{
+		ensure();
+		save.data.aimDeadzone = v < 0 ? 0 : (v > 0.3 ? 0.3 : v);
+		save.flush();
+	}
+
+	public static function padIcons():String
+	{
+		ensure();
+		return save.data.padIcons != null ? save.data.padIcons : "auto";
+	}
+
+	public static function setPadIcons(v:String):Void
+	{
+		ensure();
+		save.data.padIcons = v;
+		save.flush();
+	}
+
 	public static function playerWeapon():Int
 	{
 		ensure();

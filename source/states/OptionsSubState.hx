@@ -56,6 +56,8 @@ class OptionsSubState extends FlxSubState
 	static inline var IDLE_FPS:Int = 17;
 	static inline var MUSIC:Int = 18;
 	static inline var SFX:Int = 19;
+	static inline var AIMDEAD:Int = 20;
+	static inline var PADICONS:Int = 21;
 
 	static inline var TAB:Int = -1;
 	static inline var BACK:Int = -2;
@@ -65,7 +67,7 @@ class OptionsSubState extends FlxSubState
 		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE, IDLE_FPS]},
 		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, HUD, FPS]},
 		{key: "options.page.sounds", items: [VOLUME, MUSIC, SFX, SOUND3D]},
-		{key: "options.page.custom", items: [VOICE, LANGUAGE, CONTROLS, RESET]}
+		{key: "options.page.custom", items: [VOICE, LANGUAGE, CONTROLS, AIMDEAD, PADICONS, RESET]}
 	];
 
 	static var FPS_STEPS:Array<Int> = [60, 120, 144, 165, 240];
@@ -302,7 +304,7 @@ class OptionsSubState extends FlxSubState
 	{
 		return switch (ids[row])
 		{
-			case COLOR, VOLUME, MUSIC, SFX, CAMERA, SHAKE, FREEZE, VOICE: true;
+			case COLOR, VOLUME, MUSIC, SFX, CAMERA, SHAKE, FREEZE, VOICE, AIMDEAD: true;
 			default: false;
 		}
 	}
@@ -329,6 +331,8 @@ class OptionsSubState extends FlxSubState
 			case VOICE: Lang.t("options.voice", [pitchLabel()]);
 			case HUD: Lang.t("options.hud", [onOff(SaveData.showHud())]);
 			case SOUND3D: Lang.t("options.sound3d", [onOff(SaveData.sound3d())]);
+			case AIMDEAD: Lang.t("options.aimdead", [SaveData.aimDeadzone() <= 0 ? Lang.t("common.off") : Std.string(Math.round(SaveData.aimDeadzone() * 100)) + "%"]);
+			case PADICONS: Lang.t("options.padicons", [Lang.t("padicons." + SaveData.padIcons())]);
 			case FPS: Lang.t("options.fps", [onOff(SaveData.showFps())]);
 			case LANGUAGE: Lang.t("options.language", [Lang.t("lang.name")]);
 			case CONTROLS: Lang.t("options.controls");
@@ -474,6 +478,10 @@ class OptionsSubState extends FlxSubState
 				SaveData.setShowHud(!SaveData.showHud());
 			case SOUND3D:
 				SaveData.setSound3d(!SaveData.sound3d());
+			case AIMDEAD:
+				SaveData.setAimDeadzone(SaveData.aimDeadzone() + dir * 0.05);
+			case PADICONS:
+				SaveData.setPadIcons(cycled(util.Controls.ICON_SETS, SaveData.padIcons(), dir));
 			case FPS:
 				SaveData.setShowFps(!SaveData.showFps());
 			case LANGUAGE:

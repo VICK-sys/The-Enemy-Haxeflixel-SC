@@ -85,7 +85,7 @@ class TutorialSubState extends FlxSubState
 	}
 
 	function bind(action:Int):String
-		return util.Controls.keyName(util.Controls.keyOf(action));
+		return util.Controls.bindName(action);
 
 	function moveKeys():String
 	{
