@@ -50,8 +50,6 @@ class LobbyState extends FlxState
 	private var wipe:IrisWipe;
 	private var leaving:Bool = false;
 
-	private var typing:Bool = false;
-	private var ip:String = "";
 	private var frame:Int = 0;
 
 	private var peers:Map<Int, RemoteAvatar> = new Map();
@@ -145,7 +143,7 @@ class LobbyState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		util.Controls.setAimAnchor(player.x + player.width * 0.5, player.y + player.height * 0.5);
-		player.blockMovement = typing || leaving || subState != null;
+		player.blockMovement = leaving || subState != null;
 
 		super.update(elapsed);
 
@@ -155,14 +153,11 @@ class LobbyState extends FlxState
 		frame++;
 		pump();
 
+		status.visible = subState == null;
+		prompt.visible = subState == null;
+
 		if (subState != null)
 			return;
-
-		if (typing)
-		{
-			typeIp();
-			return;
-		}
 
 		var near = nearest();
 		prompt.text = near == null ? "" : Lang.t("lobby.prompt", [Lang.t(near.key)]);
@@ -270,10 +265,9 @@ class LobbyState extends FlxState
 
 	function hostGame():Void
 	{
-		if (Net.mode != Off)
-			return;
-		if (Net.host())
-			Net.inGame = false;
+		prompt.text = "";
+		FlxG.keys.reset();
+		openSubState(new HostSubState(camUI));
 	}
 
 	function dressUp():Void
@@ -289,38 +283,9 @@ class LobbyState extends FlxState
 	{
 		if (Net.mode != Off)
 			return;
-		typing = true;
-		ip = "";
 		prompt.text = "";
-	}
-
-	function typeIp():Void
-	{
-		status.text = Lang.t("online.typeIp") + "\n" + ip;
-
-		for (i in 0...10)
-			if (FlxG.keys.checkStatus(48 + i, JUST_PRESSED) || FlxG.keys.checkStatus(96 + i, JUST_PRESSED))
-				if (ip.length < 21)
-					ip += Std.string(i);
-		if ((FlxG.keys.justPressed.PERIOD || FlxG.keys.justPressed.NUMPADPERIOD) && ip.length < 21)
-			ip += ".";
-		if (FlxG.keys.justPressed.SEMICOLON && ip.length < 21)
-			ip += ":";
-		if (FlxG.keys.justPressed.BACKSPACE && ip.length > 0)
-			ip = ip.substr(0, ip.length - 1);
-
-		if (FlxG.keys.justPressed.ESCAPE)
-		{
-			typing = false;
-			status.text = "";
-			return;
-		}
-		if (FlxG.keys.justPressed.ENTER && ip.length >= 7)
-		{
-			typing = false;
-			if (Net.join(ip))
-				Net.inGame = false;
-		}
+		FlxG.keys.reset();
+		openSubState(new JoinSubState(camUI));
 	}
 
 	function startRun():Void

@@ -3,20 +3,17 @@ package states;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.FlxSubState;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import util.HuePalette;
 import util.Lang;
 import util.SaveData;
 
-class DressUpSubState extends FlxSubState
+class DressUpSubState extends LobbyPanel
 {
 	public static inline var STEPS:Int = 24;
 
 	static inline var NAME_MAX:Int = 12;
-	static inline var PANEL_W:Int = 940;
-	static inline var PANEL_H:Int = 490;
 	static inline var CHIP_W:Int = 30;
 	static inline var CHIP_H:Int = 46;
 	static inline var RING:Int = 4;
@@ -27,16 +24,10 @@ class DressUpSubState extends FlxSubState
 	static inline var REPEAT_FIRST:Float = 0.30;
 	static inline var REPEAT_NEXT:Float = 0.09;
 	static inline var CARET_RATE:Float = 3.4;
-	static inline var ARM:Float = 0.14;
 
-	static inline var INK:Int = 0xFF12141A;
-	static inline var EDGE:Int = 0xFF3C4356;
-	static inline var WELL:Int = 0xFF090A0E;
-	static inline var DIM:Int = 0xFF7C8497;
 
 	public var onDone:Void->Void;
 
-	private var camUI:FlxCamera;
 	private var preview:FlxSprite;
 	private var nameText:FlxText;
 	private var ghostText:FlxText;
@@ -49,7 +40,6 @@ class DressUpSubState extends FlxSubState
 	private var held:Float = 0;
 	private var lastTurn:Int = 0;
 	private var blink:Float = 0;
-	private var arm:Float = ARM;
 	private var stripX:Float = 0;
 	private var stripY:Float = 0;
 	private var previewCx:Float = 0;
@@ -57,26 +47,16 @@ class DressUpSubState extends FlxSubState
 
 	public function new(camUI:FlxCamera)
 	{
-		super();
-		this.camUI = camUI;
+		super(camUI, 940, 490);
 	}
 
 	override public function create():Void
 	{
-		var px = (FlxG.width - PANEL_W) * 0.5;
-		var py = (FlxG.height - PANEL_H) * 0.5;
-
-		plate(0, 0, FlxG.width, FlxG.height, 0xE60A0B0F);
-		plate(px - 3, py - 3, PANEL_W + 6, PANEL_H + 6, EDGE);
-		plate(px, py, PANEL_W, PANEL_H, INK);
-
-		var title = label(px, py + 26, PANEL_W, Lang.t("lobby.player"), 34, FlxColor.WHITE, CENTER);
-		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		chrome("lobby.player");
 
 		var boxX = px + 46;
 		var boxY = py + 96;
-		plate(boxX - 3, boxY - 3, BOX_W + 6, BOX_H + 6, EDGE);
-		plate(boxX, boxY, BOX_W, BOX_H, WELL);
+		well(boxX, boxY, BOX_W, BOX_H);
 
 		preview = new FlxSprite();
 		preview.antialiasing = false;
@@ -87,26 +67,25 @@ class DressUpSubState extends FlxSubState
 		dressPreview();
 
 		var colX = px + 290;
-		label(colX, py + 128, FIELD_W, Lang.t("lobby.nameLabel"), 20, DIM, LEFT);
+		label(colX, py + 128, FIELD_W, Lang.t("lobby.nameLabel"), 20, LobbyPanel.DIM, LEFT);
 
 		var fieldY = py + 158;
-		plate(colX - 3, fieldY - 3, FIELD_W + 6, FIELD_H + 6, EDGE);
-		plate(colX, fieldY, FIELD_W, FIELD_H, WELL);
+		well(colX, fieldY, FIELD_W, FIELD_H);
 
-		ghostText = label(colX + 32, fieldY + 14, 0, Lang.t("online.defaultName"), 30, DIM, LEFT);
+		ghostText = label(colX + 32, fieldY + 14, 0, Lang.t("online.defaultName"), 30, LobbyPanel.DIM, LEFT);
 		ghostText.alpha = 0.35;
 
 		nameText = label(colX + 16, fieldY + 14, 0, "", 30, FlxColor.WHITE, LEFT);
 
 		caret = plate(colX + 16, fieldY + 13, 3, 20, FlxColor.WHITE);
 
-		counter = label(colX, fieldY + 20, FIELD_W - 16, "", 18, DIM, RIGHT);
+		counter = label(colX, fieldY + 20, FIELD_W - 16, "", 18, LobbyPanel.DIM, RIGHT);
 
-		stripX = px + (PANEL_W - STEPS * CHIP_W) * 0.5;
+		stripX = px + (panelW - STEPS * CHIP_W) * 0.5;
 		stripY = py + 352;
-		label(stripX, py + 320, STEPS * CHIP_W, Lang.t("lobby.colorLabel"), 20, DIM, LEFT);
+		label(stripX, py + 320, STEPS * CHIP_W, Lang.t("lobby.colorLabel"), 20, LobbyPanel.DIM, LEFT);
 
-		plate(stripX - 3, stripY - 3, STEPS * CHIP_W + 6, CHIP_H + 6, EDGE);
+		plate(stripX - 3, stripY - 3, STEPS * CHIP_W + 6, CHIP_H + 6, LobbyPanel.EDGE);
 
 		for (i in 0...STEPS)
 		{
@@ -122,8 +101,7 @@ class DressUpSubState extends FlxSubState
 		ringBars.push(plate(0, 0, RING, CHIP_H + RING * 2, FlxColor.WHITE));
 		ringBars.push(plate(0, 0, RING, CHIP_H + RING * 2, FlxColor.WHITE));
 
-		var hint = label(px, py + 432, PANEL_W, Lang.t("lobby.dressHints"), 18, DIM, CENTER);
-		hint.setBorderStyle(OUTLINE, FlxColor.BLACK, 1);
+		hints(Lang.t("lobby.dressHints"), py + 432);
 
 		pick = Math.round(SaveData.playerHue() * STEPS) % STEPS;
 		if (pick < 0)
@@ -132,24 +110,6 @@ class DressUpSubState extends FlxSubState
 		refreshName();
 
 		super.create();
-	}
-
-	function plate(x:Float, y:Float, w:Float, h:Float, colour:Int):FlxSprite
-	{
-		var s = new FlxSprite(x, y);
-		s.makeGraphic(Std.int(w), Std.int(h), colour);
-		s.cameras = [camUI];
-		add(s);
-		return s;
-	}
-
-	function label(x:Float, y:Float, w:Float, text:String, size:Int, colour:Int, align:flixel.text.FlxTextAlign):FlxText
-	{
-		var t = new FlxText(x, y, w, text);
-		t.setFormat(Lang.font(), size, colour, align);
-		t.cameras = [camUI];
-		add(t);
-		return t;
 	}
 
 	function dressPreview():Void
@@ -184,19 +144,18 @@ class DressUpSubState extends FlxSubState
 	{
 		super.update(elapsed);
 
-		if (arm > 0)
-			arm -= elapsed;
+		tickArm(elapsed);
 
 		blink += elapsed * CARET_RATE;
 		caret.visible = Math.sin(blink) > -0.2;
 
-		var closing = arm <= 0
+		var closing = armed()
 			&& (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.ESCAPE
 				|| util.Controls.justPressed(util.Controls.ACCEPT));
 
 		colourInput(elapsed);
 		if (!closing)
-			nameInput();
+			nameInput(elapsed);
 
 		if (closing)
 		{
@@ -244,11 +203,11 @@ class DressUpSubState extends FlxSubState
 		dressPreview();
 	}
 
-	function nameInput():Void
+	function nameInput(elapsed:Float):Void
 	{
 		var n = SaveData.playerName();
 
-		if (FlxG.keys.justPressed.BACKSPACE)
+		if (eraseWanted(elapsed))
 		{
 			if (n.length > 0)
 			{

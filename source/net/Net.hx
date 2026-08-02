@@ -108,6 +108,22 @@ class Net
 		#end
 	}
 
+	public static function localAddress():String
+	{
+		#if desktop
+		try
+		{
+			return new Host(Host.localhost()).toString();
+		}
+		catch (e:Dynamic)
+		{
+			return "";
+		}
+		#else
+		return "";
+		#end
+	}
+
 	public static function join(address:String):Bool
 	{
 		#if desktop
