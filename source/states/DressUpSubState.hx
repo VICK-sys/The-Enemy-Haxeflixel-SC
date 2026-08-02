@@ -190,12 +190,15 @@ class DressUpSubState extends FlxSubState
 		blink += elapsed * CARET_RATE;
 		caret.visible = Math.sin(blink) > -0.2;
 
-		colourInput(elapsed);
-		nameInput();
-
-		if (arm <= 0
+		var closing = arm <= 0
 			&& (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.ESCAPE
-				|| util.Controls.justPressed(util.Controls.INTERACT)))
+				|| util.Controls.justPressed(util.Controls.ACCEPT));
+
+		colourInput(elapsed);
+		if (!closing)
+			nameInput();
+
+		if (closing)
 		{
 			if (onDone != null)
 				onDone();
@@ -206,9 +209,9 @@ class DressUpSubState extends FlxSubState
 	function colourInput(elapsed:Float):Void
 	{
 		var turn = 0;
-		if (util.Controls.moveLeft())
+		if (FlxG.keys.pressed.LEFT || util.Controls.padLeftHeld())
 			turn = -1;
-		else if (util.Controls.moveRight())
+		else if (FlxG.keys.pressed.RIGHT || util.Controls.padRightHeld())
 			turn = 1;
 
 		if (turn == 0)

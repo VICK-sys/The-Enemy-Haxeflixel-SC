@@ -26,7 +26,7 @@
 	"lobby.player": "PLAYER",
 	"lobby.nameLabel": "NAME",
 	"lobby.colorLabel": "COLOUR",
-	"lobby.dressHints": "LEFT / RIGHT - COLOUR      TYPE - NAME      E - DONE",
+	"lobby.dressHints": "ARROWS - COLOUR      TYPE - NAME      ENTER - DONE",
 	"menu.best": "BEST: WAVE {0}",
 	"pause.title": "PAUSED",
 	"pause.resume": "RESUME",
