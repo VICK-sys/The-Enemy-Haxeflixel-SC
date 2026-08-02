@@ -4,13 +4,24 @@
 	<SubTexture name="Idle00001" x="32" y="0" width="32" height="32"/>
 	<SubTexture name="Idle00002" x="64" y="0" width="32" height="32"/>
 	<SubTexture name="Idle00003" x="96" y="0" width="32" height="32"/>
-	<SubTexture name="Walk00000" x="0" y="0" width="32" height="32"/>
-	<SubTexture name="Walk00001" x="32" y="0" width="32" height="32"/>
-	<SubTexture name="Walk00002" x="64" y="0" width="32" height="32"/>
-	<SubTexture name="Walk00003" x="96" y="0" width="32" height="32"/>
-	<SubTexture name="Hurt00000" x="0" y="0" width="32" height="32"/>
-	<SubTexture name="Spin00000" x="0" y="32" width="32" height="32"/>
-	<SubTexture name="Spin00001" x="32" y="32" width="32" height="32"/>
-	<SubTexture name="Death00000" x="0" y="32" width="32" height="32"/>
-	<SubTexture name="Death00001" x="32" y="32" width="32" height="32"/>
+	<SubTexture name="Walk00000" x="0" y="32" width="32" height="32"/>
+	<SubTexture name="Walk00001" x="32" y="32" width="32" height="32"/>
+	<SubTexture name="Walk00002" x="64" y="32" width="32" height="32"/>
+	<SubTexture name="Walk00003" x="96" y="32" width="32" height="32"/>
+	<SubTexture name="Walk00004" x="128" y="32" width="32" height="32"/>
+	<SubTexture name="Walk00005" x="160" y="32" width="32" height="32"/>
+	<SubTexture name="Hurt00000" x="0" y="64" width="32" height="32"/>
+	<SubTexture name="Hurt00001" x="32" y="64" width="32" height="32"/>
+	<SubTexture name="Hurt00002" x="64" y="64" width="32" height="32"/>
+	<SubTexture name="Spin00000" x="0" y="96" width="32" height="32"/>
+	<SubTexture name="Spin00001" x="32" y="96" width="32" height="32"/>
+	<SubTexture name="Spin00002" x="64" y="96" width="32" height="32"/>
+	<SubTexture name="Death00000" x="0" y="128" width="32" height="32"/>
+	<SubTexture name="Death00001" x="32" y="128" width="32" height="32"/>
+	<SubTexture name="Death00002" x="64" y="128" width="32" height="32"/>
+	<SubTexture name="Death00003" x="96" y="128" width="32" height="32"/>
+	<SubTexture name="Death00004" x="128" y="128" width="32" height="32"/>
+	<SubTexture name="Death00005" x="160" y="128" width="32" height="32"/>
+	<SubTexture name="Death00006" x="192" y="128" width="32" height="32"/>
+	<SubTexture name="Death00007" x="224" y="128" width="32" height="32"/>
 </TextureAtlas>

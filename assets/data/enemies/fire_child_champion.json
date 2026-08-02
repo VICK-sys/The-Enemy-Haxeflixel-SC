@@ -5,11 +5,36 @@
 	"offsetX": -23,
 	"offsetY": -18,
 	"animations": [
-		{ "name": "idle", "prefix": "Idle", "fps": 10, "loop": true },
-		{ "name": "walk", "prefix": "Walk", "fps": 12, "loop": true },
-		{ "name": "hurt", "prefix": "Hurt", "fps": 12, "loop": false },
-		{ "name": "death", "prefix": "Death", "fps": 10, "loop": true },
-		{ "name": "spin", "prefix": "Spin", "fps": 14, "loop": true }
+		{
+			"name": "idle",
+			"prefix": "Idle",
+			"fps": 10,
+			"loop": true
+		},
+		{
+			"name": "walk",
+			"prefix": "Walk",
+			"fps": 12,
+			"loop": true
+		},
+		{
+			"name": "hurt",
+			"prefix": "Hurt",
+			"fps": 12,
+			"loop": false
+		},
+		{
+			"name": "death",
+			"prefix": "Death",
+			"fps": 10,
+			"loop": false
+		},
+		{
+			"name": "spin",
+			"prefix": "Spin",
+			"fps": 14,
+			"loop": true
+		}
 	],
 	"hp": 4,
 	"speed": 345,
