@@ -37,9 +37,6 @@ class LobbyState extends FlxState
 	static inline var SEND_FRAMES:Int = 3;
 	static inline var STALE:Float = 5;
 	static inline var ZOOM:Float = 0.75;
-	static inline var HUE_STEP:Float = 1 / 24;
-	static inline var HUE_GAP:Float = 0.12;
-	static inline var NAME_MAX:Int = 12;
 
 	private var arena:Arena;
 	private var player:Player;
@@ -54,8 +51,6 @@ class LobbyState extends FlxState
 	private var leaving:Bool = false;
 
 	private var typing:Bool = false;
-	private var dressing:Bool = false;
-	private var hueClock:Float = 0;
 	private var ip:String = "";
 	private var frame:Int = 0;
 
@@ -66,6 +61,7 @@ class LobbyState extends FlxState
 	{
 		Lobby.enter();
 		FlxG.mouse.visible = false;
+		persistentUpdate = true;
 
 		arena = new Arena(this);
 		arena.tileBackground("stages/rock_tile");
@@ -149,7 +145,7 @@ class LobbyState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		util.Controls.setAimAnchor(player.x + player.width * 0.5, player.y + player.height * 0.5);
-		player.blockMovement = typing || dressing || leaving;
+		player.blockMovement = typing || leaving || subState != null;
 
 		super.update(elapsed);
 
@@ -159,15 +155,12 @@ class LobbyState extends FlxState
 		frame++;
 		pump();
 
+		if (subState != null)
+			return;
+
 		if (typing)
 		{
 			typeIp();
-			return;
-		}
-
-		if (dressing)
-		{
-			dressUpTick(elapsed);
 			return;
 		}
 
@@ -285,46 +278,11 @@ class LobbyState extends FlxState
 
 	function dressUp():Void
 	{
-		dressing = true;
 		prompt.text = "";
-	}
-
-	function dressUpTick(elapsed:Float):Void
-	{
-		var name = SaveData.playerName();
-		status.text = Lang.t("lobby.dress") + "
-"
-			+ Lang.t("lobby.dressColor", [Math.round(SaveData.playerHue() * 360)]) + "
-"
-			+ Lang.t("lobby.dressName", [name == "" ? Lang.t("online.defaultName") : name]);
-
-		if (hueClock > 0)
-			hueClock -= elapsed;
-
-		var turn = 0;
-		if (util.Controls.moveLeft())
-			turn = -1;
-		else if (util.Controls.moveRight())
-			turn = 1;
-		if (turn != 0 && hueClock <= 0)
-		{
-			hueClock = HUE_GAP;
-			SaveData.setPlayerHue(SaveData.playerHue() + turn * HUE_STEP);
-			player.setHue(SaveData.playerHue());
-		}
-
-		var k = FlxG.keys.firstJustPressed();
-		if (name.length < NAME_MAX && ((k >= 65 && k <= 90) || (k >= 48 && k <= 57)))
-			SaveData.setPlayerName(name + String.fromCharCode(k));
-		else if (FlxG.keys.justPressed.BACKSPACE && name.length > 0)
-			SaveData.setPlayerName(name.substr(0, name.length - 1));
-
-		if (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.ESCAPE
-			|| util.Controls.justPressed(util.Controls.INTERACT))
-		{
-			dressing = false;
-			status.text = "";
-		}
+		var panel = new DressUpSubState(camUI);
+		panel.onDone = function() player.setHue(SaveData.playerHue());
+		FlxG.keys.reset();
+		openSubState(panel);
 	}
 
 	function askIp():Void
