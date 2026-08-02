@@ -37,6 +37,14 @@ class WeaponPickSubState extends FlxSubState
 	}
 
 	static inline var ACCENT:Int = 0xFFB2273A;
+
+	static function accent():FlxColor
+	{
+		var c:FlxColor = ACCENT;
+		c.hue = c.hue + util.SaveData.playerHue() * 360;
+		return c;
+	}
+
 	static inline var CARD:Int = 0xFF4A4550;
 	static inline var CARD_ON:Int = 0xFF6E6478;
 	static inline var TEXT_DIM:Int = 0xFFCFCAD4;
@@ -147,7 +155,7 @@ class WeaponPickSubState extends FlxSubState
 		var c = new Card();
 
 		c.edge = new FlxSprite(x - 3, CARD_TOP - 3);
-		c.edge.makeGraphic(CARD_W + 6, CARD_H + 6, ACCENT);
+		c.edge.makeGraphic(CARD_W + 6, CARD_H + 6, accent());
 		ui(c.edge);
 
 		c.bg = new FlxSprite(x, CARD_TOP);
