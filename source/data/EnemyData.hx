@@ -32,20 +32,6 @@ typedef BossData = {
 	guns:Array<GunData>
 }
 
-typedef KnightData = {
-	hoverSpeed:Float,
-	hoverTime:Float,
-	prefMin:Float,
-	prefMax:Float,
-	strafeWeight:Float,
-	windTime:Float,
-	flySpeed:Float,
-	flyTime:Float,
-	slashTime:Float,
-	slashScale:Float,
-	restTime:Float
-}
-
 typedef FlankData = {
 	standoff:Float,
 	minDist:Float,
@@ -126,7 +112,6 @@ typedef EnemyData = {
 	attack:String,
 	?big:Bool,
 	?boss:BossData,
-	?knight:KnightData,
 	?domo:DomoData,
 	?flank:FlankData,
 	?worm:WormData,

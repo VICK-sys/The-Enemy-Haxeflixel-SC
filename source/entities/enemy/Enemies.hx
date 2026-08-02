@@ -151,14 +151,6 @@ class Enemies extends FlxSprite
 			grabbable = false;
 			explodes = true;
 		}
-		else if (data.attack == "knight")
-		{
-			bossBody = true;
-			attack = new KnightBoss(data.knight);
-			selfDriven = true;
-			grabbable = false;
-			explodes = true;
-		}
 		else if (data.attack == "boss")
 		{
 			bossBody = true;

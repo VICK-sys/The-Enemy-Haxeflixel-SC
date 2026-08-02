@@ -10,7 +10,7 @@
 	"bossRepeat": 6,
 
 	"bosses": ["domo", "worm"],
-	"debugBosses": ["knight", "rofel"],
+	"debugBosses": ["rofel"],
 	"duoChance": 0.5,
 	"scaling": {
 		"hpPerWave": 0.1,

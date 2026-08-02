@@ -580,7 +580,7 @@ class PlayState extends FlxState
 				boxes.box(s.x, s.y, s.width, s.height, systems.HitboxView.LOOT);
 	}
 
-	static var SUMMONS:Array<String> = ["worm", "domo", "knight", "rofel"];
+	static var SUMMONS:Array<String> = ["worm", "domo", "rofel"];
 
 	function summonKeys():Void
 	{
@@ -594,8 +594,6 @@ class PlayState extends FlxState
 			pick = 1;
 		else if (FlxG.keys.justPressed.EIGHT)
 			pick = 2;
-		else if (FlxG.keys.justPressed.SEVEN)
-			pick = 3;
 		if (pick < 0)
 			return;
 

@@ -94,7 +94,7 @@ Online, the lobby opens this screen instead. A substate over PlayState would fre
 
 ## PlayState debug keys
 
-CONTROL with a number summons a boss straight into the run, whatever the build: 0 the magma wyrm, 9 Domo, 8 Rofel, 7 the knight. It goes through the same `summonBoss` a real boss wave uses, so the banner, the alarm and the music all play and it is refused while a boss is already out.
+CONTROL with a number summons a boss straight into the run, whatever the build: 0 the magma wyrm, 9 Domo, 8 Rofel. It goes through the same `summonBoss` a real boss wave uses, so the banner, the alarm and the music all play and it is refused while a boss is already out.
 
 They answer to CONTROL rather than the bare number because they are not behind `#if debug` any more. The summons used to sit in that block with the rest of the debug row, which meant they did nothing at all in the build you actually play, and the row is the only way to reach a boss without grinding waves. The genuinely destructive keys, killing yourself, reviving and the hitbox overlay, are still debug only and still bare.
 

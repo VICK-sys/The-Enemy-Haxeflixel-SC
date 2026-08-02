@@ -104,7 +104,6 @@ class BossHud
 
 	static var BOSS_NAMES:Map<String, String> = [
 		"rofel" => "Rofel",
-		"knight" => "The Roaring Knight",
 		"domo" => "Domo",
 		"worm" => "Magma Wyrm"
 	];
