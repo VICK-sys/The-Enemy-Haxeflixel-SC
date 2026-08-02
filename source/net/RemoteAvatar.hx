@@ -31,6 +31,7 @@ class RemoteAvatar
 	private var leveling:Bool = false;
 	public var hue(default, null):Float = 0;
 	public var skin(default, null):Int = 0;
+	public var gearIdx(default, null):Int = 0;
 	private var wasDead:Bool = false;
 	private var burst:systems.DeathBurst;
 	private var ghost:systems.CoopGhost;
@@ -121,16 +122,18 @@ class RemoteAvatar
 	}
 
 	public function setHue(h:Float):Void
-		setLook(h, skin);
+		setLook(h, skin, gearIdx);
 
-	public function setLook(h:Float, sk:Int):Void
+	public function setLook(h:Float, sk:Int, gr:Int):Void
 	{
 		sk = util.Skins.clamp(sk);
-		if (h == hue && sk == skin)
+		gr = util.Skins.clampGear(gr);
+		if (h == hue && sk == skin && gr == gearIdx)
 			return;
 		hue = h;
 		skin = sk;
-		gear.paint(h, sk);
+		gearIdx = gr;
+		gear.paint(h, sk, gr);
 		if (weaponIdx >= 0)
 			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
 		var was = sprite.animation.name;
@@ -192,7 +195,7 @@ class RemoteAvatar
 		sprite.visible = !dead;
 		sprite.flipX = m.fx;
 		if (m.hu != null)
-			setLook(m.hu, m.sk == null ? skin : m.sk);
+			setLook(m.hu, m.sk == null ? skin : m.sk, m.gr == null ? gearIdx : m.gr);
 		if (m.an != null && sprite.animation.name != m.an && sprite.animation.getByName(m.an) != null)
 			sprite.animation.play(m.an);
 

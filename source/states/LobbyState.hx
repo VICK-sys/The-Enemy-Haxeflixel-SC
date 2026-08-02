@@ -257,6 +257,7 @@ class LobbyState extends FlxState
 				an: player.animation.name,
 				hu: SaveData.playerHue(),
 				sk: SaveData.playerSkin(),
+				gr: SaveData.playerGear(),
 				nm: SaveData.playerName(),
 				wi: WeaponPickSubState.lastPick,
 				hv: false,

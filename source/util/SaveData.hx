@@ -345,6 +345,20 @@ class SaveData
 			save.flush();
 	}
 
+	public static function playerGear():Int
+	{
+		ensure();
+		return save.data.playerGear != null ? save.data.playerGear : 0;
+	}
+
+	public static function setPlayerGear(i:Int, store:Bool = true):Void
+	{
+		ensure();
+		save.data.playerGear = Skins.clampGear(i);
+		if (store)
+			save.flush();
+	}
+
 	public static function commit():Void
 	{
 		ensure();

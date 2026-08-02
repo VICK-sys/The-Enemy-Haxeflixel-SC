@@ -25,6 +25,15 @@ class DressUpSubState extends LobbyPanel
 	static inline var REPEAT_NEXT:Float = 0.09;
 	static inline var CARET_RATE:Float = 3.4;
 	static inline var SKIN_H:Int = 52;
+	static inline var HALF_GAP:Int = 20;
+	static inline var HALF_W:Int = (FIELD_W - HALF_GAP) >> 1;
+	static inline var PREVIEW_SCALE:Float = 5;
+	static inline var GEAR_DX:Float = -21.25;
+	static inline var GEAR_DY:Float = 32.5;
+	static inline var ROW_SKIN:Int = 0;
+	static inline var ROW_GEAR:Int = 1;
+	static inline var ROW_COLOR:Int = 2;
+	static inline var ROWS:Int = 3;
 
 	public var onDone:Void->Void;
 
@@ -34,11 +43,20 @@ class DressUpSubState extends LobbyPanel
 	private var caret:FlxSprite;
 	private var counter:FlxText;
 	private var skinText:FlxText;
+	private var gearText:FlxText;
+	private var skinLabel:FlxText;
+	private var gearLabel:FlxText;
+	private var colorLabel:FlxText;
+	private var skinArrows:Array<FlxText> = [];
+	private var gearArrows:Array<FlxText> = [];
+	private var previewGear:systems.BackGear;
 	private var ringBars:Array<FlxSprite> = [];
 	private var chips:Array<FlxSprite> = [];
 
 	private var pick:Int = 0;
 	private var skin:Int = 0;
+	private var gear:Int = 0;
+	private var focus:Int = ROW_COLOR;
 	private var held:Float = 0;
 	private var lastTurn:Int = 0;
 	private var blink:Float = 0;
@@ -56,22 +74,30 @@ class DressUpSubState extends LobbyPanel
 	{
 		chrome("lobby.player");
 
+		skin = SaveData.playerSkin();
+		gear = SaveData.playerGear();
+
 		var boxX = px + 46;
 		var boxY = py + 96;
 		well(boxX, boxY, BOX_W, BOX_H);
+
+		previewCx = boxX + BOX_W * 0.5;
+		previewCy = boxY + BOX_H * 0.5;
+
+		previewGear = new systems.BackGear();
+		previewGear.sprite.cameras = [camUI];
+		add(previewGear.sprite);
 
 		preview = new FlxSprite();
 		preview.antialiasing = false;
 		preview.cameras = [camUI];
 		add(preview);
-		previewCx = boxX + BOX_W * 0.5;
-		previewCy = boxY + BOX_H * 0.5;
 		dressPreview();
 
 		var colX = px + 290;
-		label(colX, py + 128, FIELD_W, Lang.t("lobby.nameLabel"), 20, LobbyPanel.DIM, LEFT);
+		label(colX, py + 118, FIELD_W, Lang.t("lobby.nameLabel"), 20, LobbyPanel.DIM, LEFT);
 
-		var fieldY = py + 158;
+		var fieldY = py + 146;
 		well(colX, fieldY, FIELD_W, FIELD_H);
 
 		ghostText = label(colX + 32, fieldY + 14, 0, Lang.t("online.defaultName"), 30, LobbyPanel.DIM, LEFT);
@@ -83,16 +109,24 @@ class DressUpSubState extends LobbyPanel
 
 		counter = label(colX, fieldY + 20, FIELD_W - 16, "", 18, LobbyPanel.DIM, RIGHT);
 
-		var skinY = fieldY + 106;
-		label(colX, skinY - 30, FIELD_W, Lang.t("lobby.skinLabel"), 20, LobbyPanel.DIM, LEFT);
-		well(colX, skinY, FIELD_W, SKIN_H);
-		label(colX + 16, skinY + 12, 0, "<", 26, LobbyPanel.DIM, LEFT);
-		label(colX + FIELD_W - 32, skinY + 12, 0, ">", 26, LobbyPanel.DIM, LEFT);
-		skinText = label(colX, skinY + 12, FIELD_W, "", 26, FlxColor.WHITE, CENTER);
+		var modelY = fieldY + 108;
+		var gearX = colX + HALF_W + HALF_GAP;
+
+		skinLabel = label(colX, modelY - 30, HALF_W, Lang.t("lobby.skinLabel"), 20, LobbyPanel.DIM, LEFT);
+		well(colX, modelY, HALF_W, SKIN_H);
+		skinArrows.push(label(colX + 12, modelY + 14, 0, "<", 24, LobbyPanel.DIM, LEFT));
+		skinArrows.push(label(colX + HALF_W - 26, modelY + 14, 0, ">", 24, LobbyPanel.DIM, LEFT));
+		skinText = label(colX, modelY + 14, HALF_W, "", 24, FlxColor.WHITE, CENTER);
+
+		gearLabel = label(gearX, modelY - 30, HALF_W, Lang.t("lobby.gearLabel"), 20, LobbyPanel.DIM, LEFT);
+		well(gearX, modelY, HALF_W, SKIN_H);
+		gearArrows.push(label(gearX + 12, modelY + 14, 0, "<", 24, LobbyPanel.DIM, LEFT));
+		gearArrows.push(label(gearX + HALF_W - 26, modelY + 14, 0, ">", 24, LobbyPanel.DIM, LEFT));
+		gearText = label(gearX, modelY + 14, HALF_W, "", 24, FlxColor.WHITE, CENTER);
 
 		stripX = px + (panelW - STEPS * CHIP_W) * 0.5;
 		stripY = py + 352;
-		label(stripX, py + 320, STEPS * CHIP_W, Lang.t("lobby.colorLabel"), 20, LobbyPanel.DIM, LEFT);
+		colorLabel = label(stripX, py + 320, STEPS * CHIP_W, Lang.t("lobby.colorLabel"), 20, LobbyPanel.DIM, LEFT);
 
 		plate(stripX - 3, stripY - 3, STEPS * CHIP_W + 6, CHIP_H + 6, LobbyPanel.EDGE);
 
@@ -112,8 +146,8 @@ class DressUpSubState extends LobbyPanel
 
 		hints(Lang.t("lobby.dressHints"), py + 432);
 
-		skin = SaveData.playerSkin();
 		refreshSkin();
+		refreshFocus();
 
 		pick = Math.round(SaveData.playerHue() * STEPS) % STEPS;
 		if (pick < 0)
@@ -126,6 +160,7 @@ class DressUpSubState extends LobbyPanel
 
 	function dressPreview():Void
 	{
+		previewGear.paint(SaveData.playerHue(), skin, gear);
 		preview.frames = HuePalette.sparrow(util.Skins.of(skin), SaveData.playerHue());
 		preview.animation.addByPrefix("idle", "Idle", 9, true);
 		preview.animation.play("idle", true);
@@ -134,20 +169,50 @@ class DressUpSubState extends LobbyPanel
 	}
 
 	function refreshSkin():Void
-		skinText.text = util.Skins.nameOf(skin);
-
-	function skinInput():Void
 	{
-		var turn = 0;
-		if (FlxG.keys.justPressed.UP || util.Controls.padUpJust())
-			turn = -1;
-		else if (FlxG.keys.justPressed.DOWN || util.Controls.padDownJust())
-			turn = 1;
-		if (turn == 0)
-			return;
+		skinText.text = util.Skins.nameOf(skin);
+		gearText.text = util.Skins.gearNameOf(gear);
+	}
 
-		skin = (skin + turn + util.Skins.count()) % util.Skins.count();
-		SaveData.setPlayerSkin(skin);
+	function refreshFocus():Void
+	{
+		skinLabel.color = focus == ROW_SKIN ? FlxColor.WHITE : LobbyPanel.DIM;
+		gearLabel.color = focus == ROW_GEAR ? FlxColor.WHITE : LobbyPanel.DIM;
+		colorLabel.color = focus == ROW_COLOR ? FlxColor.WHITE : LobbyPanel.DIM;
+		for (a in skinArrows)
+			a.color = focus == ROW_SKIN ? FlxColor.WHITE : LobbyPanel.DIM;
+		for (a in gearArrows)
+			a.color = focus == ROW_GEAR ? FlxColor.WHITE : LobbyPanel.DIM;
+		for (b in ringBars)
+			b.color = focus == ROW_COLOR ? FlxColor.WHITE : LobbyPanel.DIM;
+	}
+
+	function focusInput():Void
+	{
+		var step = 0;
+		if (FlxG.keys.justPressed.UP || util.Controls.padUpJust())
+			step = -1;
+		else if (FlxG.keys.justPressed.DOWN || util.Controls.padDownJust())
+			step = 1;
+		if (step == 0)
+			return;
+		focus = (focus + step + ROWS) % ROWS;
+		refreshFocus();
+		util.MenuSfx.hover();
+	}
+
+	function turnModel(turn:Int):Void
+	{
+		if (focus == ROW_SKIN)
+		{
+			skin = (skin + turn + util.Skins.count()) % util.Skins.count();
+			SaveData.setPlayerSkin(skin);
+		}
+		else
+		{
+			gear = (gear + turn + util.Skins.gearCount()) % util.Skins.gearCount();
+			SaveData.setPlayerGear(gear);
+		}
 		refreshSkin();
 		dressPreview();
 		util.MenuSfx.hover();
@@ -185,9 +250,12 @@ class DressUpSubState extends LobbyPanel
 			&& (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.ESCAPE
 				|| util.Controls.justPressed(util.Controls.ACCEPT));
 
-		colourInput(elapsed);
+		previewGear.sprite.scale.set(PREVIEW_SCALE, PREVIEW_SCALE);
+		previewGear.update(elapsed, previewCx + GEAR_DX + 20, previewCy + GEAR_DY - 11, false, 0, true, 0, 0, 0, "idle");
+
 		if (!closing)
-			skinInput();
+			focusInput();
+		colourInput(elapsed);
 		if (!closing)
 			nameInput(elapsed);
 
@@ -230,6 +298,12 @@ class DressUpSubState extends LobbyPanel
 		lastTurn = turn;
 		if (!step)
 			return;
+
+		if (focus != ROW_COLOR)
+		{
+			turnModel(turn);
+			return;
+		}
 
 		pick = (pick + turn + STEPS) % STEPS;
 		SaveData.setPlayerHue(pick / STEPS);

@@ -27,6 +27,7 @@ class BackGear
 
 	private var hue:Float = -1;
 	private var skin:Int = -1;
+	private var gearIdx:Int = -1;
 	private var pack:Bool = false;
 
 	public function new()
@@ -39,15 +40,17 @@ class BackGear
 		sprite.height = 1;
 	}
 
-	public function paint(h:Float, skinIndex:Int = -1):Void
+	public function paint(h:Float, skinIndex:Int = -1, gearIndex:Int = -1):Void
 	{
 		var i = skinIndex < 0 ? util.SaveData.playerSkin() : util.Skins.clamp(skinIndex);
-		if (h == hue && i == skin)
+		var g = gearIndex < 0 ? util.SaveData.playerGear() : util.Skins.clampGear(gearIndex);
+		if (h == hue && i == skin && g == gearIdx)
 			return;
 		hue = h;
 		skin = i;
+		gearIdx = g;
 
-		var art = util.Skins.gearOf(i);
+		var art = util.Skins.gearOf(g);
 		pack = art != null;
 		if (pack)
 		{
