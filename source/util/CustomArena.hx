@@ -7,6 +7,9 @@ class CustomArena
 	public static var csv:String = null;
 	public static var spawnX:Float = 0;
 	public static var spawnY:Float = 0;
+	public static var shopX:Float = 0;
+	public static var shopY:Float = 0;
+	public static var shopSet:Bool = false;
 	public static var props:Array<data.PropData.PropPlace> = [];
 	public static var tileset:String = null;
 	public static var tiles:String = null;
@@ -41,11 +44,20 @@ class CustomArena
 	{
 		set(m.csv, m.sx, m.sy, m.props);
 		setTiles(m.tileset, m.tiles);
+		setShop(m.shopX, m.shopY);
 		slot = fromSlot;
+	}
+
+	public static function setShop(x:Null<Float>, y:Null<Float>):Void
+	{
+		shopSet = x != null && y != null;
+		shopX = shopSet ? x : 0;
+		shopY = shopSet ? y : 0;
 	}
 
 	public static function clear():Void
 	{
+		shopSet = false;
 		csv = null;
 		props = [];
 		tileset = null;

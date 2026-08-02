@@ -13,13 +13,13 @@ class EditorHud
 
 	static var KEYS:Array<String> = [
 		"P", "WHEEL", "SPACE-DRAG", "ARROWS", "0", "X", "CTRL+Z", "CTRL-DRAG", "CTRL+C", "CTRL+V", "Q", "DEL", "H", "C", "L",
-		"1-5", "S", "ENTER", "ESC"
+		"K", "1-5", "S", "ENTER", "ESC"
 	];
 	static var ACTIONS:Array<String> = [
 		"CYCLE MODE", "ZOOM IN / OUT", "PAN THE VIEW", "PAN THE VIEW", "RESET THE VIEW", "MOVE THE SPAWN POINT", "UNDO",
 		"SELECT TILES ON THE MAP", "COPY THE SELECTION", "PASTE AT THE CURSOR", "HOLD / DROP THE PROP IN HAND",
 		"REMOVE THE SELECTED PROP", "EDIT THAT PROP'S HITBOX", "CLEAR THE MAP", "COPY THE STOCK STAGE",
-		"SWITCH SLOT", "SAVE", "PLAY THE MAP", "BACK TO MENU"
+		"MOVE THE SHOP", "SWITCH SLOT", "SAVE", "PLAY THE MAP", "BACK TO MENU"
 	];
 
 	private var hintBar:FlxSprite;

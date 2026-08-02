@@ -8,7 +8,15 @@ import util.Paths;
 
 class DecorTiles
 {
+	public static inline var SCALE:Float = 4;
+
 	static var boundsCache:Map<String, Array<Int>> = new Map();
+
+	public static function cellW(t:TilesetData):Float
+		return t.tileW * SCALE;
+
+	public static function cellH(t:TilesetData):Float
+		return t.tileH * SCALE;
 
 	public static function contentCells(t:TilesetData):Array<Int>
 	{
@@ -54,10 +62,10 @@ class DecorTiles
 	}
 
 	public static function cols(t:TilesetData):Int
-		return Math.ceil(ArenaDataRegistry.pixelWidth() / t.tileW);
+		return Math.ceil(ArenaDataRegistry.pixelWidth() / cellW(t));
 
 	public static function rows(t:TilesetData):Int
-		return Math.ceil(ArenaDataRegistry.pixelHeight() / t.tileH);
+		return Math.ceil(ArenaDataRegistry.pixelHeight() / cellH(t));
 
 	public static function blankCsv(t:TilesetData):String
 	{
@@ -120,6 +128,7 @@ class DecorTiles
 			return null;
 		var m = new FlxTilemap();
 		m.loadMapFromCSV(csv, Paths.image(t.image), t.tileW, t.tileH, null, 1, 1, 999999);
+		m.scale.set(SCALE, SCALE);
 		return m;
 	}
 }

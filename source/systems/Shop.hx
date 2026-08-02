@@ -16,8 +16,14 @@ class Shop
 {
 	public static inline var EVERY:Int = 10;
 
-	static inline var SPOT_X:Float = 1280;
-	static inline var SPOT_Y:Float = 340;
+	static inline var SPOT_X:Float = 2560;
+	static inline var SPOT_Y:Float = 680;
+
+	public static function spotX():Float
+		return util.CustomArena.shopSet ? util.CustomArena.shopX : SPOT_X;
+
+	public static function spotY():Float
+		return util.CustomArena.shopSet ? util.CustomArena.shopY : SPOT_Y;
 	static inline var REACH:Float = 260;
 	static inline var PROMPT_DROP:Float = 8;
 	static inline var PROMPT_W:Float = 460;
@@ -62,7 +68,7 @@ class Shop
 		sprite = Decor.make("repairShop");
 		if (sprite != null)
 		{
-			Decor.place(sprite, SPOT_X, SPOT_Y);
+			Decor.place(sprite, spotX(), spotY());
 			inside = pinned(SORT_INSIDE);
 			inside.loadGraphic(Paths.image("props/shop_inside"));
 			dress(inside);
@@ -97,7 +103,7 @@ class Shop
 
 	public function solid():Array<FlxSprite>
 	{
-		var list = Decor.solids([{n: "repairShop", x: SPOT_X, y: SPOT_Y}]);
+		var list = Decor.solids([{n: "repairShop", x: spotX(), y: spotY()}]);
 		var out:Array<FlxSprite> = [];
 		for (s in list.members)
 			if (s != null)
@@ -181,8 +187,8 @@ class Shop
 	{
 		if (!open || sprite == null)
 			return false;
-		var dx = player.x + player.width * 0.5 - SPOT_X;
-		var dy = player.feetY - SPOT_Y;
+		var dx = player.x + player.width * 0.5 - spotX();
+		var dy = player.feetY - spotY();
 		return dx * dx + dy * dy <= REACH * REACH;
 	}
 
@@ -247,7 +253,7 @@ class Shop
 		if (near)
 		{
 			prompt.text = Lang.t("shop.enter", [util.Controls.bindName(util.Controls.INTERACT)]);
-			prompt.x = SPOT_X - PROMPT_W * 0.5;
+			prompt.x = spotX() - PROMPT_W * 0.5;
 			prompt.y = sprite.y + sprite.height + PROMPT_DROP;
 			if (util.Controls.justPressed(util.Controls.INTERACT))
 			{

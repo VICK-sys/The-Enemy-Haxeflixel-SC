@@ -59,6 +59,7 @@ class TileTool
 		if (t == null)
 			return;
 		layer.loadMapFromCSV(DecorTiles.toCsv(doc.tiles, t), Paths.image(t.image), t.tileW, t.tileH, null, 1, 1, 999999);
+		layer.scale.set(DecorTiles.SCALE, DecorTiles.SCALE);
 	}
 
 	public function hideCursor():Void
@@ -84,6 +85,8 @@ class TileTool
 		if (old != null && old != ghost.graphic)
 			FlxG.bitmap.remove(old);
 		ghost.alpha = 0.6;
+		ghost.scale.set(DecorTiles.SCALE, DecorTiles.SCALE);
+		ghost.updateHitbox();
 	}
 
 	public function toggleSolid():Void
@@ -128,8 +131,8 @@ class TileTool
 		}
 
 		var m = EditorView.mouseWorld();
-		var c0 = Math.floor(m.x / t.tileW);
-		var r0 = Math.floor(m.y / t.tileH);
+		var c0 = Math.floor(m.x / DecorTiles.cellW(t));
+		var r0 = Math.floor(m.y / DecorTiles.cellH(t));
 
 		if (ctrl)
 		{
@@ -140,8 +143,8 @@ class TileTool
 
 		selecting = false;
 		ghost.visible = true;
-		ghost.x = c0 * t.tileW;
-		ghost.y = r0 * t.tileH;
+		ghost.x = c0 * DecorTiles.cellW(t);
+		ghost.y = r0 * DecorTiles.cellH(t);
 
 		if (FlxG.keys.justPressed.LBRACKET || FlxG.keys.justPressed.RBRACKET)
 		{
@@ -176,9 +179,9 @@ class TileTool
 		headC = c;
 		headR = r;
 
-		marquee.x = Math.min(anchorC, headC) * t.tileW;
-		marquee.y = Math.min(anchorR, headR) * t.tileH;
-		marquee.scale.set((Math.abs(headC - anchorC) + 1) * t.tileW, (Math.abs(headR - anchorR) + 1) * t.tileH);
+		marquee.x = Math.min(anchorC, headC) * DecorTiles.cellW(t);
+		marquee.y = Math.min(anchorR, headR) * DecorTiles.cellH(t);
+		marquee.scale.set((Math.abs(headC - anchorC) + 1) * DecorTiles.cellW(t), (Math.abs(headR - anchorR) + 1) * DecorTiles.cellH(t));
 		marquee.visible = true;
 
 		if (!FlxG.mouse.pressed)
@@ -227,8 +230,8 @@ class TileTool
 	{
 		var t = set();
 		var m = EditorView.mouseWorld();
-		var c0 = Math.floor(m.x / t.tileW);
-		var r0 = Math.floor(m.y / t.tileH);
+		var c0 = Math.floor(m.x / DecorTiles.cellW(t));
+		var r0 = Math.floor(m.y / DecorTiles.cellH(t));
 		var w = DecorTiles.cols(t);
 		var h = DecorTiles.rows(t);
 		var stamped = clip != null;
@@ -255,10 +258,10 @@ class TileTool
 
 	function solidUnder(tc:Int, tr:Int, t:TilesetData, on:Bool):Void
 	{
-		var c0 = Math.floor(tc * t.tileW / doc.cell);
-		var r0 = Math.floor(tr * t.tileH / doc.cell);
-		var c1 = Math.ceil((tc + 1) * t.tileW / doc.cell) - 1;
-		var r1 = Math.ceil((tr + 1) * t.tileH / doc.cell) - 1;
+		var c0 = Math.floor(tc * DecorTiles.cellW(t) / doc.cell);
+		var r0 = Math.floor(tr * DecorTiles.cellH(t) / doc.cell);
+		var c1 = Math.ceil((tc + 1) * DecorTiles.cellW(t) / doc.cell) - 1;
+		var r1 = Math.ceil((tr + 1) * DecorTiles.cellH(t) / doc.cell) - 1;
 		for (r in r0...r1 + 1)
 			for (c in c0...c1 + 1)
 				walls.setCell(c, r, on);

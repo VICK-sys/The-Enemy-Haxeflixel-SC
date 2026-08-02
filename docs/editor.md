@@ -37,7 +37,7 @@ P cycles the three modes. The number keys hold five slots, and a switch autosave
 Each subsystem owns its own sprites, while the state owns the display order.
 
 - `EditorState` - the coordinator. It builds the parts in order: document and cameras first, then panels, then tools. The palettes must exist before anything can reference them. It adds their sprites in draw order, dispatches update to the active mode, and maps the keys onto their operations. It holds no editing logic of its own.
-- `EditorMap` - the map you edit. It holds collision, painted floor, props, spawn and tileset, plus the CSV serialisation and the slot load and save. It also holds the rules that go with that data. The outer ring stays solid, the undo history lives here, and the floor clears when the tileset's cell size changes. Its `setWall` reports whether a cell actually changed, so strokes skip redundant redraws.
+- `EditorMap` - the map you edit. It holds collision, painted floor, props, spawn, shop spot and tileset, plus the CSV serialisation and the slot load and save. It also holds the rules that go with that data. The outer ring stays solid, the undo history lives here, and the floor clears when the tileset's cell size changes. Its `setWall` reports whether a cell actually changed, so strokes skip redundant redraws.
 - `EditorView` - the world camera: cursor-anchored zoom, panning, and the fresh mouse-to-world read.
 - `WallTool`, `TileTool`, `PropTool` - the three modes. Each holds its layer, its cursor ghost, and its input handling. Only `TileTool` reaches walls, and only through `WallTool.setCell`. That keeps the V-solid feature on a single write path.
 - `TilePalette`, `PropPalette` - both sit on a shared `PalettePanel` base. That base owns the panel sprites and the hit-testing.
@@ -47,7 +47,7 @@ Each subsystem owns its own sprites, while the state owns the display order.
 
 ## Walls
 
-The left button paints, and the right button erases. Hold SHIFT and drag for a filled box. B cycles the brush through 1x1, 2x2 and 3x3. X drops the player spawn at the cursor. Z undoes, and C clears the interior. L copies the stock stage in as a starting point.
+The left button paints, and the right button erases. Hold SHIFT and drag for a filled box. B cycles the brush through 1x1, 2x2 and 3x3. X drops the player spawn at the cursor, and K drops the shop. Both show as a diamond and a label, green for the spawn and amber for the shop, and both save with the map. A map that never named a shop spot, including every map saved before the key existed, opens with the shop on the stock stage's spot. Z undoes, and C clears the interior. L copies the stock stage in as a starting point.
 
 The painted grid is the source of truth. The tilemap is only its picture. The editor patches it per cell while a stroke is live, then rebuilds it cleanly when the stroke ends. The autotile edges therefore stay exact.
 

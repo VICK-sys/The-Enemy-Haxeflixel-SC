@@ -47,6 +47,8 @@ class EditorState extends FlxState
 	private var bg:FlxSprite;
 	private var spawnMark:FlxSprite;
 	private var spawnLabel:FlxText;
+	private var shopMark:FlxSprite;
+	private var shopLabel:FlxText;
 
 	private var slot:Int;
 	private var mode:Int = MODE_WALLS;
@@ -109,6 +111,16 @@ class EditorState extends FlxState
 		spawnLabel.setFormat(null, 20, 0xFF7CFC00, CENTER);
 		spawnLabel.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		insert(12, spawnLabel);
+
+		shopMark = new FlxSprite();
+		shopMark.makeGraphic(22, 22, 0xFFFFC24A);
+		shopMark.angle = 45;
+		insert(13, shopMark);
+
+		shopLabel = new FlxText(0, 0, 120, "SHOP");
+		shopLabel.setFormat(null, 20, 0xFFFFC24A, CENTER);
+		shopLabel.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		insert(14, shopLabel);
 
 		wireChrome();
 		refreshAll();
@@ -210,6 +222,11 @@ class EditorState extends FlxState
 		spawnMark.y = doc.spawnY - spawnMark.height / 2;
 		spawnLabel.x = doc.spawnX - 60;
 		spawnLabel.y = doc.spawnY - 42;
+
+		shopMark.x = doc.shopX - shopMark.width / 2;
+		shopMark.y = doc.shopY - shopMark.height / 2;
+		shopLabel.x = doc.shopX - 60;
+		shopLabel.y = doc.shopY - 42;
 	}
 
 	function showPalettes():Void
@@ -315,15 +332,29 @@ class EditorState extends FlxState
 	function dropSpawn():Void
 	{
 		var m = EditorView.mouseWorld();
-		if (m.x > doc.cell * 2 && m.y > doc.cell * 2 && m.x < (doc.cols - 2) * doc.cell && m.y < (doc.rows - 2) * doc.cell)
-		{
-			doc.spawnX = m.x;
-			doc.spawnY = m.y;
-			placeSpawnMark();
-			doc.dirty = true;
-			hud.flash("SPAWN MOVED");
-		}
+		if (!insideMap(m.x, m.y))
+			return;
+		doc.spawnX = m.x;
+		doc.spawnY = m.y;
+		placeSpawnMark();
+		doc.dirty = true;
+		hud.flash("SPAWN MOVED");
 	}
+
+	function dropShop():Void
+	{
+		var m = EditorView.mouseWorld();
+		if (!insideMap(m.x, m.y))
+			return;
+		doc.shopX = m.x;
+		doc.shopY = m.y;
+		placeSpawnMark();
+		doc.dirty = true;
+		hud.flash("SHOP MOVED");
+	}
+
+	function insideMap(x:Float, y:Float):Bool
+		return x > doc.cell * 2 && y > doc.cell * 2 && x < (doc.cols - 2) * doc.cell && y < (doc.rows - 2) * doc.cell;
 
 	function playTest():Void
 	{
@@ -332,6 +363,7 @@ class EditorState extends FlxState
 		leaving = true;
 		saveSlot();
 		CustomArena.set(doc.wallCsv(), doc.spawnX, doc.spawnY, doc.props);
+		CustomArena.setShop(doc.shopX, doc.shopY);
 		var t = doc.tileset();
 		CustomArena.setTiles(t == null ? null : t.name, doc.tileCsv());
 		CustomArena.fromEditor = true;
@@ -443,6 +475,8 @@ class EditorState extends FlxState
 			saveSlot();
 		if (FlxG.keys.justPressed.X)
 			dropSpawn();
+		if (FlxG.keys.justPressed.K)
+			dropShop();
 
 		if (FlxG.keys.justPressed.ONE)
 			switchSlot(1);

@@ -26,6 +26,8 @@ class EditorMap
 	public var props:Array<PropPlace> = [];
 	public var spawnX:Float;
 	public var spawnY:Float;
+	public var shopX:Float;
+	public var shopY:Float;
 	public var tilesetIndex:Int = 0;
 	public var dirty:Bool = false;
 
@@ -73,6 +75,8 @@ class EditorMap
 	{
 		walls = [for (i in 0...cols * rows) false];
 		closeRing();
+		shopX = defaultShopX();
+		shopY = defaultShopY();
 		spawnX = cols * cell / 2;
 		spawnY = rows * cell / 2;
 		props = [];
@@ -183,6 +187,12 @@ class EditorMap
 		dirty = true;
 	}
 
+	public function defaultShopX():Float
+		return cols * cell / 2;
+
+	public function defaultShopY():Float
+		return rows * cell / 3;
+
 	public function load(slot:Int):Void
 	{
 		var stored = MapStore.load(slot);
@@ -196,6 +206,8 @@ class EditorMap
 		readWallCsv(stored.csv);
 		spawnX = stored.sx;
 		spawnY = stored.sy;
+		shopX = stored.shopX == null ? defaultShopX() : stored.shopX;
+		shopY = stored.shopY == null ? defaultShopY() : stored.shopY;
 		props = stored.props == null ? [] : stored.props;
 		tilesetIndex = TilesetDataRegistry.indexOf(stored.tileset);
 		var t = tileset();
@@ -216,7 +228,9 @@ class EditorMap
 			props: props,
 			tileset: t == null ? null : t.name,
 			tiles: tileCsv(),
-			tileW: t == null ? 0 : t.tileW
+			tileW: t == null ? 0 : t.tileW,
+			shopX: shopX,
+			shopY: shopY
 		});
 		dirty = false;
 	}

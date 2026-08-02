@@ -16,7 +16,9 @@ typedef StoredMap =
 	?props:Array<data.PropData.PropPlace>,
 	?tileset:String,
 	?tiles:String,
-	?tileW:Int
+	?tileW:Int,
+	?shopX:Float,
+	?shopY:Float
 }
 
 class MapStore

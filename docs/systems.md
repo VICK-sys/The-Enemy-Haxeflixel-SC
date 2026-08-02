@@ -36,6 +36,8 @@ That sequence runs from `update(elapsed)`, which also advances the shader. At th
 
 The painted floor layer: grid maths, CSV round-tripping, and building the tilemap from a map's tiles. The editor and the game share it. It is purely decorative, and nothing ever collides against it.
 
+Floor art is drawn at `SCALE`, the same four the player, the enemies and every pickup use, so a 24 px tile covers 96 px of floor. It used to draw at its own size, which made the only art in the game at one to one: a fleck you needed eight of to span a character. The scale belongs to the grid as much as the drawing, so `cellW` and `cellH` answer the drawn size and the column count, the cursor, the marquee and the tile to wall mapping all measure in those. A floor painted before this loads on the coarser grid through `parse`, which fills the current grid and takes what fits, so an old map opens with its top corner kept rather than breaking.
+
 ### WallSkin
 
 How a run's walls look. It reads from `CustomArena` once at construction: the theme's colour and repeating texture, plus the painted tiles stamped over them. Arena hands it each wall block to fill. Arena therefore keeps to geometry and the boss transition, while the skin owns every pixel decision.
