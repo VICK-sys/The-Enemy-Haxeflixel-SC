@@ -310,10 +310,8 @@ class PlayState extends FlxState
 		{
 			if (resumed)
 				hud.showWave(director.wave);
-			else if (Net.active)
-				intro.openTutorialIfNew();
 			else
-				intro.openWeaponPick();
+				intro.armForRun();
 			if (!Net.isClient)
 				gate.arm();
 		}

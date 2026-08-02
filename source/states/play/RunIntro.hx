@@ -27,38 +27,12 @@ class RunIntro
 		flyIn = new WeaponFlyIn(hud.camUI, combat.held);
 	}
 
-	public function openWeaponPick():Void
+	public function armForRun():Void
 	{
-		var picker = new WeaponPickSubState(hud.camUI);
-		picker.onPicked = function(i)
-		{
-			combat.equip(i);
-			pick = i;
-			fromX = picker.pickedX;
-			fromY = picker.pickedY;
-		};
-		picker.closeCallback = function()
-		{
-			if (picker.cancelled)
-			{
-				quitToMenu();
-				return;
-			}
-			openTutorialIfNew();
-		};
-		host.openPanel(picker);
-	}
-
-	function quitToMenu():Void
-	{
-		Net.stop();
-		host.leaveFor(function()
-		{
-			if (util.CustomArena.fromEditor)
-				flixel.FlxG.switchState(() -> new EditorState());
-			else
-				flixel.FlxG.switchState(() -> new MainMenuState());
-		});
+		pick = WeaponPickSubState.lastPick;
+		fromX = flixel.FlxG.width * 0.5;
+		fromY = flixel.FlxG.height * 0.95;
+		openTutorialIfNew();
 	}
 
 	public function openTutorialIfNew():Void
