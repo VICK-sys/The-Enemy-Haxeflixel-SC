@@ -4,8 +4,8 @@ import data.ArenaData.ArenaDataRegistry;
 
 class Lobby
 {
-	public static inline var COLS:Int = 80;
-	public static inline var ROWS:Int = 46;
+	public static inline var COLS:Int = 128;
+	public static inline var ROWS:Int = 78;
 
 	public static var active:Bool = false;
 

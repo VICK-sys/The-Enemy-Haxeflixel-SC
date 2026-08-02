@@ -99,6 +99,7 @@ class LobbyState extends FlxState
 		FlxG.camera.zoom = ZOOM;
 
 		wipe = new IrisWipe(this);
+		wipe.open();
 		Music.play(states.play.QuietRoom.track(), 0.3);
 		super.create();
 	}
