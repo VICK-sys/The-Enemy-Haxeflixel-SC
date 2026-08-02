@@ -18,7 +18,7 @@ class HealthDemo extends TutorialDemo
 		actor = player();
 
 		heart = sprite();
-		heart.loadGraphic(Paths.image("items/hp_battery"));
+		heart.loadGraphic(util.Outline.graphic("items/repair_kit"));
 		heart.scale.set(4, 4);
 		heart.updateHitbox();
 		center(heart, 770, TutorialDemo.CY + 20);

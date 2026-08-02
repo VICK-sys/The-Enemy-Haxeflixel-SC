@@ -124,7 +124,7 @@ Spawned enemies pass through walls and prop footprints while entering. They turn
 
 The health pickup pool. The player collects one on contact, unless health is full.
 
-Contact carries a `GRAB` margin around the battery. The art is the smallest pickup in the game and the player's body box is only 42 by 44, so a plain overlap of the two meant clipping the corner of a small box against a small box, and a run past one often failed to take it. Scraps never had that problem because they magnet in. The margin widens the catch to 72 px from the player's centre, up from 43, without touching the art, the shadow or the drop maths.
+Contact carries a `GRAB` margin around the kit. The art is the smallest pickup in the game and the player's body box is only 42 by 44, so a plain overlap of the two meant clipping the corner of a small box against a small box, and a run past one often failed to take it. Scraps never had that problem because they magnet in. The margin widens the catch to 72 px from the player's centre, up from 43, without touching the art, the shadow or the drop maths.
 
 ### TimeStop
 
@@ -158,7 +158,7 @@ The HUD wears the player's colour. Every piece of its art loads through the same
 
 Both bars slide to their new value rather than snapping to it. The drawn amount chases the real amount by a quarter of the remaining gap each sixtieth of a second, worked out from the frame time so the slide takes the same wall-clock time at any framerate. The first frame after a bar appears snaps, since there is nothing to slide from. The clip only gets rewritten when the whole-pixel width actually changes, so a bar at rest costs nothing. Cues still key on the real value, not the drawn one: the super's chime and glow land the moment it is usable, while the bar is still catching up.
 
-Picking up a battery flashes the health bar green for a second before it settles back to red. A hue-shifted copy of the bar art draws over the red one, sharing its position, scale, offset and clip rect, so the green covers the red exactly rather than sitting proud of it. It fades out over the last third of the second. The flash keys on `heal`, which only the battery pickup calls, and it stays hidden while the HUD is switched off.
+Picking up a repair kit flashes the health bar green for a second before it settles back to red. A hue-shifted copy of the bar art draws over the red one, sharing its position, scale, offset and clip rect, so the green covers the red exactly rather than sitting proud of it. It fades out over the last third of the second. The flash keys on `heal`, which only the health pickup calls, and it stays hidden while the HUD is switched off.
 
 The super bar lights up the moment the super becomes usable. It keys on the same `canSuper` the input check uses rather than on the meter merely reading full, so a meter that refilled while the cooldown was still running stays dark until the cooldown ends, and the bar never invites a press that would do nothing. Becoming usable plays a chime once and starts a slow additive pulse on the fill; spending it, dying, or dropping below full puts the light out. The cue keys on the crossing rather than on the state, so holding a full meter stays quiet.
 
@@ -180,7 +180,7 @@ Scrap is collected one piece at a time, a fifth of a second apart, and the neare
 
 The magnet stops pulling at `HOLD`, a little short of the player, rather than dragging every piece onto the same point. A queue waiting its turn therefore sits spread around the player instead of stacking into what looks like a single piece. `HOLD` is set inside the overlap the collection test needs, so a waiting piece still counts as touching even at the bottom of its bob.
 
-Health drops are batteries now, and carry the same small ground shadow scrap does. The shadow mounts once per pickup, the first time it leaves the pool, on both the local drop path and the mirrored one a guest builds from a host snapshot.
+Health drops are repair kits, and carry the same small ground shadow scrap does. The shadow mounts once per pickup, the first time it leaves the pool, on both the local drop path and the mirrored one a guest builds from a host snapshot.
 
 The kill counter and the super gain still fire on the kill itself. Only the exp moved.
 
@@ -253,9 +253,9 @@ The field `baseOffsetY` is public here for the supers. They ride the player's dr
 
 ### HealthPickup
 
-A dropped heart. It restores health on contact and expires after a few seconds.
+A dropped repair kit. It restores health on contact and expires after a few seconds.
 
-It is drawn from a baked white outline rather than the raw art, and it hovers: the graphic rides a sine on its draw offset while the body stays put, so the hitbox never moves with the bob. Its shadow shrinks and thins as it rises, which is what sells the hover. A white shine pulses over it on a slower sine than the bob, set through the colour transform after the expiry blink has written alpha, since writing alpha rebuilds the transform and would drop the shine. Each battery starts its cycle at a random phase so a scattered drop does not pulse in lockstep.
+It is drawn from a baked white outline rather than the raw art, and it hovers: the graphic rides a sine on its draw offset while the body stays put, so the hitbox never moves with the bob. Its shadow shrinks and thins as it rises, which is what sells the hover. A white shine pulses over it on a slower sine than the bob, set through the colour transform after the expiry blink has written alpha, since writing alpha rebuilds the transform and would drop the shine. Each kit starts its cycle at a random phase so a scattered drop does not pulse in lockstep.
 
 ## Weapon projectiles (source/entities/weapon/)
 

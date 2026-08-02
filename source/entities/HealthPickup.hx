@@ -33,7 +33,7 @@ class HealthPickup extends FlxSprite
 	public function new()
 	{
 		super();
-		loadGraphic(util.Outline.graphic("items/hp_battery"));
+		loadGraphic(util.Outline.graphic("items/repair_kit"));
 		antialiasing = false;
 		scale.set(SCALE, SCALE);
 		updateHitbox();
