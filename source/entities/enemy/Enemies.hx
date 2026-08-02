@@ -19,6 +19,7 @@ class Enemies extends FlxSprite
 	public var stopThreshold:Float = 170;
 	public var attackRange:Float = 150;
 	public var contactDamage:Float = 0.25;
+	public var contactPush:Float = 0;
 	public var shotDamage:Float = 0.25;
 	public var shotSpeed:Float = 480;
 	public var shotRange:Float = 99999;
@@ -123,6 +124,7 @@ class Enemies extends FlxSprite
 		stopThreshold = data.stopThreshold;
 		attackRange = data.attackRange;
 		contactDamage = data.contactDamage;
+		contactPush = data.contactPush == null ? 0 : data.contactPush;
 		shotDamage = data.shotDamage != null ? data.shotDamage : 0.25;
 		if (data.shotSpeed != null) shotSpeed = data.shotSpeed;
 		if (data.shotRange != null) shotRange = data.shotRange;

@@ -228,7 +228,21 @@ class PlayerCombat
 		return true;
 	}
 
-	public function hurtPlayer(source:FlxObject, damage:Float, ?fromY:Null<Float>):Bool
+	function shove(source:FlxObject, speed:Float):Void
+	{
+		var dx = player.x + player.width * 0.5 - (source.x + source.width * 0.5);
+		var dy = player.y + player.height * 0.5 - (source.y + source.height * 0.5);
+		var len = Math.sqrt(dx * dx + dy * dy);
+		if (len < 0.001)
+		{
+			dx = player.flipX ? 1 : -1;
+			dy = 0;
+			len = 1;
+		}
+		player.velocity.set(dx / len * speed, dy / len * speed);
+	}
+
+	public function hurtPlayer(source:FlxObject, damage:Float, ?fromY:Null<Float>, push:Float = 0):Bool
 	{
 		if (dead || iframeTimer > 0 || invincible)
 			return false;
@@ -245,8 +259,7 @@ class PlayerCombat
 			say("voice/hurt" + (1 + Std.random(HURT_LINES)));
 		fx.hurtShake();
 
-		player.velocity.x = data.knockback * (player.x > source.x ? 1 : -1);
-		player.velocity.y = data.knockback * (player.y > source.y ? 1 : -1);
+		shove(source, push > 0 ? push : data.knockback);
 
 		health -= damage;
 		player.animation.play("hurt", false);

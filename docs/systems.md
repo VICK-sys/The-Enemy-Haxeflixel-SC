@@ -70,6 +70,10 @@ The shadow, entity and tag render groups. It sorts the entity layer every frame 
 
 ### PlayerCombat
 
+A hit shoves the player straight away from whatever landed it, along the line between the two bodies. It used to push a fixed 300 on each axis with only the sign taken from the positions, so every hit threw the player on a 45 degree diagonal whatever direction it came from, and a hit from due left moved them sideways as much as back.
+
+How hard is the attacker's to set. `contactPush` on an enemy overrides the player's own `knockback` for contact with that enemy, which is what lets the fire children shove while a stray bullet still only nudges. Enemies without one, and every shot, keep the old figure.
+
 Player health and the super meter. Damage intake, invincibility frames and blink. The meter is locked while any super is running, so no damage dealt during one, by the super or by the hands beside it, charges the next. Dash input, death and revive, and the run's kill counter. The HUD bars bind straight to its fields.
 
 The dash speaks twice. Launching one plays a random line from `dash/dash1` and `dash/dash2`, and the moment its cooldown runs out `dash/charged` sounds and a puff of steam vents from the player's back, so the dash announces itself as ready rather than leaving the player to count the seconds. The ready cue keys on the cooldown crossing zero rather than on it being zero, so it sounds once per dash instead of every frame afterwards, and it stays quiet for a player who died mid-cooldown.

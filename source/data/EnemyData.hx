@@ -112,6 +112,7 @@ typedef EnemyData = {
 	?flank:FlankData,
 	?chargeAnim:String,
 	contactDamage:Float,
+	?contactPush:Float,
 	?shotDamage:Float,
 	?shotSpeed:Float,
 	?shotRange:Float,

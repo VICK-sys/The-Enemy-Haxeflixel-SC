@@ -33,6 +33,7 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `systems/BossDeath.hx` | boss death shake duration and amplitude |
 | `entities/HealthPickup.hx` | pickup hover height and rate, white shine strength, shadow shrink |
 | `systems/Pickups.hx` | GRAB, the margin around the pickup that counts as contact |
+| `data/enemies/*.json` | `contactPush`, how hard that enemy shoves the player on contact |
 | `states/LobbyState.hx` | sign reach, how often presence is sent, how long before a quiet peer is dropped |
 | `systems/BossFinish.hx` | kill camera slow factor, zoom, lean, whoosh volume, and the three timings that make up its length |
 | `systems/Fx.hx` | hitstop length, shake strengths, spark settings, dash line fade, dash steam frame rate and scale |

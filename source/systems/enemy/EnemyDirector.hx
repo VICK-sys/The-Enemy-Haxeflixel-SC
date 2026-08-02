@@ -471,7 +471,7 @@ class EnemyDirector
 			rig.hitbox.x = e.x + (e.flipX ? e.hitOffXFlip : e.hitOffX);
 			rig.hitbox.y = e.y + e.hitOffY;
 			if (!e.seized && e.throwGrace <= 0 && WorldClock.scale > 0.05)
-				status.hurtPlayer(rig.hitbox, e.contactDamage, e.feetY);
+				status.hurtPlayer(rig.hitbox, e.contactDamage, e.feetY, e.contactPush);
 
 			gunfire.emit(e);
 			if (e.pendingSummons.length > 0)
