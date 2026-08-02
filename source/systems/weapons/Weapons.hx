@@ -32,6 +32,9 @@ class Weapons
 	public var yoyoSpin:YoyoSpin;
 	public var weapon:Int = 0;
 	public var disabled:Bool = false;
+	public var inputBlocked:Bool = false;
+
+	private var wasBlocked:Bool = false;
 	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float, Bool) -> Void;
 	public var onSuper:Int -> Void;
 	public var onSuperLaunch:(Float, Float) -> Void;
@@ -142,10 +145,15 @@ class Weapons
 			return;
 		}
 
+		if (inputBlocked && !wasBlocked)
+			letGo();
+		wasBlocked = inputBlocked;
+
 		held.charge = bow.charging ? bow.charge : (giga.engaged ? giga.progress : 0);
 		if (!superBusy || flurry.active)
 			held.update(elapsed);
-		updateAttackInput();
+		if (!inputBlocked)
+			updateAttackInput();
 		swing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		bash.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
 		gigaSwing.update(elapsed, player.x + player.width * 0.5, player.y + player.height * 0.5);
@@ -313,6 +321,15 @@ class Weapons
 			emitAttack(Shoot, held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
 			revolver.fire(held.handX(), held.handY(), shot.dx, shot.dy, shot.deg);
 		}
+	}
+
+	function letGo():Void
+	{
+		bow.cancelCharge();
+		if (yoyoJab.active)
+			yoyoJab.release();
+		if (giga.engaged)
+			giga.letGo();
 	}
 
 	function updateAttackInput():Void

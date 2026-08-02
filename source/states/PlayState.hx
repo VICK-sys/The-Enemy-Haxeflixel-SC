@@ -423,8 +423,9 @@ class PlayState extends FlxState
 		combat.flurryFinish.slashes.visible = !props.buried;
 		combat.yoyoJab.flight.string.visible = !props.buried;
 		combat.yoyoJab.flight.yoyo.visible = !props.buried;
-		if (!inputLocked)
-			combat.update(elapsed);
+		combat.inputBlocked = inputLocked;
+		_player.blockMovement = inputLocked;
+		combat.update(elapsed);
 		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y - 21, _player.flipX,
 			systems.BackGear.leanFor(_player.animation.name), _player.visible,
 			_player.angle, _player.offset.y - _player.baseOffsetY, _player.y + _player.height * 0.5,
