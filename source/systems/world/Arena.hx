@@ -335,6 +335,38 @@ class Arena
 		return true;
 	}
 
+	public function tileBackground(name:String, k:Int = 4):Void
+	{
+		var src = FlxG.bitmap.add(Paths.image(name)).bitmap;
+		if (src == null)
+			return;
+
+		var tile = new openfl.display.BitmapData(src.width * k, src.height * k, true, 0);
+		var m = new openfl.geom.Matrix();
+		m.scale(k, k);
+		tile.draw(src, m, null, null, null, false);
+
+		bg.scale.set(1, 1);
+		bg.makeGraphic(Std.int(map.width), Std.int(map.height), 0xFF000000, true);
+		bg.antialiasing = false;
+
+		var step = new openfl.geom.Point();
+		var y:Float = 0;
+		while (y < map.height)
+		{
+			var x:Float = 0;
+			while (x < map.width)
+			{
+				step.setTo(x, y);
+				bg.pixels.copyPixels(tile, tile.rect, step, null, null, true);
+				x += tile.width;
+			}
+			y += tile.height;
+		}
+		bg.dirty = true;
+		bg.updateHitbox();
+	}
+
 	public function wallAt(px:Float, py:Float):Bool
 	{
 		return map.getTileIndexAt(px, py) > 0;

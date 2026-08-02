@@ -94,7 +94,7 @@ Online, the lobby opens this screen instead. A substate over PlayState would fre
 
 ## LobbyState
 
-The room you stand in before a run, reached from PLAY. It is a plain walled room built the way any custom map is, through `CustomArena`, so it gets collision, camera bounds and a background from the same code a real stage does. Combat, waves and the HUD are simply absent rather than switched off, since nothing here builds them.
+The room you stand in before a run, reached from PLAY. It is a plain walled room built the way any custom map is, through `CustomArena`, so it gets collision, camera bounds and a background from the same code a real stage does. Its floor is a rock tile repeated over the room rather than the stage art, which `Arena.tileBackground` fills in: a stage background is one image stretched to the map, which on a room this size read as a blown up logo. The tile is scaled before it repeats, by the same four the rest of the art uses, so the rock sits at the size of everything else. Combat, waves and the HUD are simply absent rather than switched off, since nothing here builds them.
 
 Four signs stand in it, START, HOST, JOIN and PLAYER, each a spot with a label. Walking within reach of one offers it on the interact key, the same key the shop uses. START begins the run. HOST opens the port and shows how many have joined. JOIN takes an address typed in and connects. PLAYER is where you dress: left and right walk the colour round, letters spell a name, and the interact key closes it. It recolours the character standing in front of the sign rather than a preview of one, since the lobby already has the real body on screen. Colour used to sit in the options menu behind a preview sprite; it lives here now and the menu no longer carries it.
 

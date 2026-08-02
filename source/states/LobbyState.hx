@@ -68,6 +68,7 @@ class LobbyState extends FlxState
 		FlxG.mouse.visible = false;
 
 		arena = new Arena(this);
+		arena.tileBackground("stages/rock_tile");
 		player = new Player(arena.spawnX, arena.spawnY);
 
 		heldSprite = new FlxSprite();
