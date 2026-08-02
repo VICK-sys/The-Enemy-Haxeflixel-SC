@@ -683,7 +683,7 @@ class EnemyDirector
 		for (rig in rigs)
 		{
 			var e = rig.enemy;
-			if (e.isDead || (skipSeized && e.seized))
+			if (e.isDead || e.buried || (skipSeized && e.seized))
 				continue;
 			if (circleTouches(e, cx, cy, radius))
 				return e;
@@ -698,7 +698,7 @@ class EnemyDirector
 		for (rig in rigs)
 		{
 			var e = rig.enemy;
-			if (e.isDead)
+			if (e.isDead || e.buried)
 				continue;
 			if (circleTouches(e, cx, cy, radius))
 				f(e);

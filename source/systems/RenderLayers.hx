@@ -12,6 +12,7 @@ import systems.world.Decor;
 class RenderLayers
 {
 	static inline var CORPSE_BAND:Float = -800000;
+	static inline var BURIED_BAND:Float = -400000;
 
 	public var host(default, null):FlxState;
 	public var shadowLayer:FlxTypedGroup<FlxSprite>;
@@ -109,7 +110,9 @@ class RenderLayers
 		if (Std.isOfType(s, Enemies))
 		{
 			var e = cast(s, Enemies);
-			return e.isDead ? CORPSE_BAND + e.feetY : e.feetY;
+			if (e.isDead)
+				return CORPSE_BAND + e.feetY;
+			return e.buried ? BURIED_BAND + e.feetY : e.feetY;
 		}
 		if (flying.indexOf(s) >= 0)
 			return s.y + s.height * 0.5;
