@@ -8,7 +8,7 @@
 		"hitstop": 10,
 		"hitstopScale": 0.06,
 		"hitShake": 0.007,
-		"knock": 3.2,
+		"knock": 1.2,
 		"hitBrace": 7,
 		"cooldown": 0.55
 	},
@@ -62,7 +62,9 @@
 	"thrown": {
 		"maxDist": 500,
 		"returnSpeed": 1250,
-		"catchCooldown": 0.45
+		"catchCooldown": 0.45,
+		"damage": 2,
+		"knock": 2.4
 	},
 	"bowCharge": {
 		"minTime": 0.15,
@@ -161,12 +163,13 @@
 		"hitstop": 8,
 		"hitstopScale": 0.08,
 		"hitShake": 0.009,
-		"knock": 7.0,
+		"knock": 1.8,
 		"hitBrace": 6,
 		"cooldown": 1.1,
 		"deflects": false,
 		"effect": "spear",
 		"hitLift": 15,
-		"hitPush": -30
+		"hitPush": -30,
+		"hitFromEffect": true
 	}
 }

@@ -10,6 +10,7 @@ import util.Paths;
 class SwingAttack
 {
 	static inline var GUARD_TIME:Float = 0.2;
+	static inline var EFFECT_HALF:Float = 128;
 
 	public var slashes:FlxTypedGroup<SlashEffect>;
 	public var onConnect:Void->Void;
@@ -84,11 +85,12 @@ class SwingAttack
 		var ex = ox == null ? pmx : ox;
 		var ey = oy == null ? pmy : oy;
 		boosted = boost && cfg.shineMult != null;
+		var slashX = ex + dx * cfg.spawnDist;
+		var slashY = ey + dy * cfg.spawnDist;
 		var slash = slashes.recycle(SlashEffect);
-		slash.fire(ex + dx * cfg.spawnDist, ey + dy * cfg.spawnDist, dx, dy, aimDeg, cfg.effectScale,
-			cfg.effect == null ? "sword" : cfg.effect);
+		slash.fire(slashX, slashY, dx, dy, aimDeg, cfg.effectScale, cfg.effect == null ? "sword" : cfg.effect);
 		slash.flipY = mirror;
-		strike(pmx, pmy, dx, dy, boosted ? cfg.shineMult : 1);
+		strike(pmx, pmy, dx, dy, boosted ? cfg.shineMult : 1, slashX, slashY);
 		guardTimer = GUARD_TIME;
 		guardX = dx;
 		guardY = dy;
@@ -106,17 +108,28 @@ class SwingAttack
 		deflect(pmx, pmy, guardX, guardY);
 	}
 
-	function strike(pmx:Float, pmy:Float, aimX:Float, aimY:Float, scale:Float = 1):Void
+	function strike(pmx:Float, pmy:Float, aimX:Float, aimY:Float, scale:Float = 1, ?efx:Float, ?efy:Float):Void
 	{
-		pmx += aimX * hitPush;
-		pmy += aimY * hitPush - hitLift;
+		var fromEffect = cfg.hitFromEffect == true && efx != null;
+		var range = cfg.meleeRange;
+		if (fromEffect)
+		{
+			pmx = efx;
+			pmy = efy;
+			range = cfg.effectScale * EFFECT_HALF;
+		}
+		else
+		{
+			pmx += aimX * hitPush;
+			pmy += aimY * hitPush - hitLift;
+		}
 		var connected = false;
-		director.eachInCircle(pmx, pmy, cfg.meleeRange, function(e)
+		director.eachInCircle(pmx, pmy, range, function(e)
 		{
 			var ex = e.x + e.width / 2 - pmx;
 			var ey = e.y + e.height / 2 - pmy;
 			var elen = Math.sqrt(ex * ex + ey * ey);
-			if (elen > 0 && (ex * aimX + ey * aimY) / elen < cfg.meleeArcCos)
+			if (!fromEffect && elen > 0 && (ex * aimX + ey * aimY) / elen < cfg.meleeArcCos)
 				return;
 
 			if (!connected)

@@ -18,6 +18,7 @@ typedef SwingConfig = {
 	?effect:String,
 	?hitLift:Float,
 	?hitPush:Float,
+	?hitFromEffect:Bool,
 	?chargeTime:Float,
 	?sound:String,
 	?shineMult:Float
@@ -59,7 +60,9 @@ typedef RevolverConfig = {
 typedef ThrownConfig = {
 	maxDist:Float,
 	returnSpeed:Float,
-	catchCooldown:Float
+	catchCooldown:Float,
+	?damage:Float,
+	?knock:Float
 }
 
 typedef BowChargeConfig = {

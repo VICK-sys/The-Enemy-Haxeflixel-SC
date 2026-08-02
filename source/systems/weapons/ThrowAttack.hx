@@ -129,14 +129,15 @@ class ThrowAttack
 			vy = nav.moveY;
 		}
 
-		var pushX = vx;
-		var pushY = vy;
+		var knock = cfg.knock == null ? 1 : cfg.knock;
+		var pushX = vx * knock;
+		var pushY = vy * knock;
 		director.eachInCircle(cx, cy, ThrownWeapon.RADIUS, function(e)
 		{
 			if (thrown.hasHit(e))
 				return;
 			thrown.markHit(e);
-			hits.damage(e, pushX, pushY);
+			hits.damageN(e, pushX, pushY, cfg.damage == null ? 1 : cfg.damage);
 		});
 	}
 
