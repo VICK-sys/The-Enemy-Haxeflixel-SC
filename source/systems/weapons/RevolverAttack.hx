@@ -139,11 +139,11 @@ class RevolverAttack
 	function get_twinActive():Bool
 		return twin;
 
-	function beginReloadFrom(n:Int):Void
+	function beginReloadFrom(n:Int, quick:Bool = false):Void
 	{
 		reloadFrom = n;
 		twinReloadFrom = settledTwin();
-		reloadTotal = cfg.reloadTime * (twin ? TWIN_RELOAD : 1) * util.Levels.actionScale();
+		reloadTotal = cfg.reloadTime * (quick ? TWIN_RELOAD : 1) * util.Levels.actionScale();
 		reloading = reloadTotal;
 		spunStart = false;
 		spunEnd = false;
@@ -194,7 +194,7 @@ class RevolverAttack
 		twinSprite.loadGraphic(util.HuePalette.graphic("items/revolver", util.SaveData.playerHue()));
 		twinSprite.origin.set(twinSprite.width * 0.5, twinSprite.height * 0.5);
 		twinSprite.color = TWIN_SHADE;
-		beginReloadFrom(reloading > 0 ? reloadFrom : rounds);
+		beginReloadFrom(reloading > 0 ? reloadFrom : rounds, true);
 		FlxG.sound.play(Paths.sound("power_up"), 0.7);
 	}
 
