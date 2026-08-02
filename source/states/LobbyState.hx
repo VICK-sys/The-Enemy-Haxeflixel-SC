@@ -265,9 +265,19 @@ class LobbyState extends FlxState
 
 	function hostGame():Void
 	{
+		if (Net.isClient)
+			return;
 		prompt.text = "";
 		FlxG.keys.reset();
-		openSubState(new HostSubState(camUI));
+		var panel = new HostSubState(camUI);
+		panel.onStopped = clearPeers;
+		openSubState(panel);
+	}
+
+	function clearPeers():Void
+	{
+		for (id in [for (k in peers.keys()) k])
+			drop(id);
 	}
 
 	function dressUp():Void

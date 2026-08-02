@@ -14,8 +14,14 @@ class HostSubState extends LobbyPanel
 	static inline var ROW_W:Int = 700;
 	static inline var ROW_H:Int = 66;
 
+	static inline var CONFIRM:Float = 3;
+
+	public var onStopped:Void->Void;
+
 	private var joined:FlxText;
+	private var note:FlxText;
 	private var failed:Bool = false;
+	private var confirm:Float = 0;
 
 	public function new(camUI:FlxCamera)
 	{
@@ -51,12 +57,21 @@ class HostSubState extends LobbyPanel
 			shown == "" ? Lang.t("lobby.hostNoAddress") : shown + ":" + Net.hostPort,
 			30, shown == "" ? LobbyPanel.DIM : LobbyPanel.GOOD, LEFT);
 
-		joined = label(rowX, py + 226, ROW_W, "", 24, FlxColor.WHITE, LEFT);
+		joined = label(rowX, py + 216, ROW_W, "", 24, FlxColor.WHITE, LEFT);
+		note = label(rowX, py + 250, ROW_W, "", 20, LobbyPanel.BAD, LEFT);
 
 		hints(Lang.t("lobby.hostHints"), py + H - 74);
 		refresh();
 
 		super.create();
+	}
+
+	function stopHosting():Void
+	{
+		Net.stop();
+		if (onStopped != null)
+			onStopped();
+		close();
 	}
 
 	function refresh():Void
@@ -71,6 +86,25 @@ class HostSubState extends LobbyPanel
 		super.update(elapsed);
 		tickArm(elapsed);
 		refresh();
+
+		if (confirm > 0)
+		{
+			confirm -= elapsed;
+			if (confirm <= 0)
+				note.text = "";
+		}
+
+		if (!failed && armed() && FlxG.keys.justPressed.X)
+		{
+			if (confirm > 0)
+				stopHosting();
+			else
+			{
+				confirm = CONFIRM;
+				note.text = Lang.t("lobby.hostStopAgain");
+			}
+			return;
+		}
 
 		if (armed()
 			&& (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.ESCAPE
