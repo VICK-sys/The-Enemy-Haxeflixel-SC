@@ -43,6 +43,9 @@
 		"prefMax": 520,
 		"strafeWeight": 0.6,
 		"cooldown": 1.4,
+		"closeDist": 340,
+		"closeReact": 0.25,
+		"dashCooldown": 2.4,
 		"shotWindup": 0.55,
 		"shotBursts": 3,
 		"shotGap": 0.24,
@@ -63,7 +66,8 @@
 		"dashSpeed": 1050,
 		"dashTime": 0.95,
 		"dashGap": 0.2,
-		"dashRest": 0.5,
+		"dashRest": 0.75,
+		"sprayDelay": 0.28,
 		"dashTurn": 0.35,
 		"dashShots": [
 			3,
@@ -81,5 +85,6 @@
 	"shadowScaleX": 10,
 	"hitOffX": 35,
 	"hitOffXFlip": 35,
-	"hitOffY": 45
+	"hitOffY": 45,
+	"stunImmunity": 0.55
 }

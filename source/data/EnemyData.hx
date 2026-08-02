@@ -94,7 +94,11 @@ typedef DomoData = {
 	dashGap:Float,
 	dashRest:Float,
 	dashTurn:Float,
-	dashShots:Array<Int>
+	dashShots:Array<Int>,
+	?closeDist:Float,
+	?closeReact:Float,
+	?dashCooldown:Float,
+	?sprayDelay:Float
 }
 
 typedef EnemyData = {
@@ -127,6 +131,7 @@ typedef EnemyData = {
 	?knockback:Float,
 	?knockbackDrag:Float,
 	?stunTime:Float,
+	?stunImmunity:Float,
 	?hitRecover:Float,
 	?wanderSpeed:Float,
 	?chargeWindup:Float,

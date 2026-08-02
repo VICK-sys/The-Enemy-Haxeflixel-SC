@@ -34,6 +34,8 @@ class Enemies extends FlxSprite
 	static inline var NORMAL_KNOCK:Float = 1.35;
 	public var stunTime:Float = 0.3;
 	public var hitRecover:Float = 0;
+	public var stunImmunity:Float = 0;
+	private var stunLock:Float = 0;
 
 	public var target:FlxSprite;
 	public var kind(default, null):String;
@@ -137,6 +139,7 @@ class Enemies extends FlxSprite
 		if (data.knockback != null) knockbackTaken = data.knockback;
 		if (data.knockbackDrag != null) knockbackDrag = data.knockbackDrag;
 		if (data.stunTime != null) stunTime = data.stunTime;
+		if (data.stunImmunity != null) stunImmunity = data.stunImmunity;
 		if (data.hitRecover != null) hitRecover = data.hitRecover;
 		brain.wanderSpeed = (data.wanderSpeed != null ? data.wanderSpeed : 100) + FlxG.random.float() * 20;
 
@@ -207,7 +210,9 @@ class Enemies extends FlxSprite
 		if (isDead || buried)
 			return;
 
-		if (!poise)
+		var shaken = !poise && stunLock <= 0;
+
+		if (shaken)
 		{
 			brain.interrupt();
 			attack.reset();
@@ -228,12 +233,13 @@ class Enemies extends FlxSprite
 			if (!explodes)
 				FlxTween.tween(this, {alpha: 0}, 0.6, {startDelay: 1.2, onComplete: function(t:FlxTween) kill()});
 		}
-		else if (!poise)
+		else if (shaken)
 		{
 			this.animation.play("hurt", true);
 			velocity.set(pushX * knockbackTaken * knockScale(), pushY * knockbackTaken * knockScale());
 			drag.set(knockbackDrag, knockbackDrag);
 			stun = stunTime;
+			stunLock = stunTime + stunImmunity;
 		}
 	}
 
@@ -305,6 +311,9 @@ class Enemies extends FlxSprite
 
 		if (throwGrace > 0)
 			throwGrace -= elapsed;
+
+		if (stunLock > 0)
+			stunLock -= elapsed;
 
 		if (flashTimer > 0)
 		{

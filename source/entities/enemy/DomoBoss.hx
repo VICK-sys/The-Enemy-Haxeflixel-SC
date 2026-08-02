@@ -27,10 +27,21 @@ class DomoBoss implements AttackBehavior
 	private var dashY:Float = 0;
 	private var strafeDir:Int = 1;
 	private var strafeTimer:Float = 0;
+	private var sprayIn:Float = 0;
+	private var sprayN:Int = 0;
+
+	private var closeDist:Float;
+	private var closeReact:Float;
+	private var dashCooldown:Float;
+	private var sprayDelay:Float;
 
 	public function new(cfg:DomoData)
 	{
 		this.cfg = cfg;
+		closeDist = cfg.closeDist != null ? cfg.closeDist : cfg.prefMin;
+		closeReact = cfg.closeReact != null ? cfg.closeReact : 0;
+		dashCooldown = cfg.dashCooldown != null ? cfg.dashCooldown : cfg.cooldown;
+		sprayDelay = cfg.sprayDelay != null ? cfg.sprayDelay : 0;
 	}
 
 	public function update(e:Enemies, elapsed:Float, dirX:Float, dirY:Float, distance:Float):Bool
@@ -46,6 +57,8 @@ class DomoBoss implements AttackBehavior
 				face(e, ax);
 				hover(e, elapsed, ax, ay, distance);
 				cooldown -= elapsed;
+				if (distance < closeDist && cooldown > closeReact)
+					cooldown = closeReact;
 				if (cooldown <= 0)
 					pick(e, distance);
 			case SHOT:
@@ -83,15 +96,22 @@ class DomoBoss implements AttackBehavior
 			case DASH_REST:
 				face(e, ax);
 				brakeAt(e, elapsed, PLANT);
+				if (sprayIn > 0)
+				{
+					sprayIn -= elapsed;
+					if (sprayIn <= 0)
+						spray(e, ax, ay, sprayN, distance);
+				}
 				if (timer <= 0)
 				{
+					sprayIn = 0;
 					if (dashesLeft > 0)
 					{
 						phase = DASH_WIND;
 						timer = cfg.dashGap;
 					}
 					else
-						rest(e);
+						rest(e, dashCooldown);
 				}
 			default:
 				var turn = Math.min(1, cfg.dashTurn * elapsed);
@@ -106,7 +126,10 @@ class DomoBoss implements AttackBehavior
 				e.velocity.set(dashX * cfg.dashSpeed, dashY * cfg.dashSpeed);
 				if (timer <= 0)
 				{
-					spray(e, ax, ay, cfg.dashCount - dashesLeft, distance);
+					sprayN = cfg.dashCount - dashesLeft;
+					sprayIn = sprayDelay;
+					if (sprayIn <= 0)
+						spray(e, ax, ay, sprayN, distance);
 					dashesLeft--;
 					phase = DASH_REST;
 					timer = cfg.dashRest;
@@ -141,12 +164,7 @@ class DomoBoss implements AttackBehavior
 
 		var mvx = 0.0;
 		var mvy = 0.0;
-		if (distance < cfg.prefMin)
-		{
-			mvx -= ax;
-			mvy -= ay;
-		}
-		else if (distance > cfg.prefMax)
+		if (distance > cfg.prefMax)
 		{
 			mvx += ax;
 			mvy += ay;
@@ -169,6 +187,11 @@ class DomoBoss implements AttackBehavior
 
 	function pick(e:Enemies, distance:Float):Void
 	{
+		if (distance < closeDist)
+		{
+			beginDash(e);
+			return;
+		}
 		if (distance > cfg.farDist)
 		{
 			if (!crowded() && FlxG.random.bool())
@@ -225,10 +248,11 @@ class DomoBoss implements AttackBehavior
 		e.poise = true;
 	}
 
-	function rest(e:Enemies):Void
+	function rest(e:Enemies, ?wait:Float):Void
 	{
 		phase = CHASE;
-		cooldown = cfg.cooldown;
+		cooldown = wait != null ? wait : cfg.cooldown;
+		sprayIn = 0;
 		e.poise = false;
 	}
 
@@ -302,6 +326,6 @@ class DomoBoss implements AttackBehavior
 	{
 		phase = CHASE;
 		timer = 0;
-		cooldown = 1.0;
+		sprayIn = 0;
 	}
 }
