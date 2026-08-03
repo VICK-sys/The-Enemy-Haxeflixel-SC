@@ -38,6 +38,8 @@
 	],
 	"hp": 4,
 	"speed": 345,
+	"hitRecover": 0.7,
+	"hitRecoil": 620,
 	"aggroRange": 200,
 	"stopThreshold": 170,
 	"attackRange": 260,

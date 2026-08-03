@@ -133,6 +133,7 @@ typedef EnemyData = {
 	?stunTime:Float,
 	?stunImmunity:Float,
 	?hitRecover:Float,
+	?hitRecoil:Float,
 	?wanderSpeed:Float,
 	?chargeWindup:Float,
 	?chargeSpeed:Float,

@@ -34,6 +34,7 @@ class Enemies extends FlxSprite
 	static inline var NORMAL_KNOCK:Float = 1.35;
 	public var stunTime:Float = 0.3;
 	public var hitRecover:Float = 0;
+	public var hitRecoil:Float = 0;
 	public var stunImmunity:Float = 0;
 	private var stunLock:Float = 0;
 
@@ -141,6 +142,7 @@ class Enemies extends FlxSprite
 		if (data.stunTime != null) stunTime = data.stunTime;
 		if (data.stunImmunity != null) stunImmunity = data.stunImmunity;
 		if (data.hitRecover != null) hitRecover = data.hitRecover;
+		if (data.hitRecoil != null) hitRecoil = data.hitRecoil;
 		brain.wanderSpeed = (data.wanderSpeed != null ? data.wanderSpeed : 100) + FlxG.random.float() * 20;
 
 		if (data.attack == "domo")

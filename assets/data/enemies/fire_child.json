@@ -45,6 +45,7 @@
 	"contactDamage": 0.25,
 	"contactPush": 900,
 	"hitRecover": 0.7,
+	"hitRecoil": 620,
 	"dropChance": 0.2,
 	"shadowOffX": 33,
 	"shadowOffXFlip": 33,
