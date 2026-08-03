@@ -58,6 +58,9 @@ class Controls
 	static var anchorY:Float = 0;
 	static var lastMouseX:Float = 0;
 	static var lastMouseY:Float = 0;
+	static var swallowIds:Map<Int, Bool> = new Map();
+	static var swallowTrig:Array<Bool> = [false, false];
+	static var swallowStick:Bool = false;
 	static var gamePoint:flixel.math.FlxPoint = flixel.math.FlxPoint.get();
 
 	public static function defaultKeys():Array<Int>
@@ -171,6 +174,8 @@ class Controls
 		if (isTrigger(id))
 			return trigNow[id == FlxGamepadInputID.LEFT_TRIGGER ? 0 : 1]
 				&& !trigPrev[id == FlxGamepadInputID.LEFT_TRIGGER ? 0 : 1];
+		if (swallowIds.exists(id))
+			return false;
 		return p.anyJustPressed([id]);
 	}
 
@@ -352,10 +357,46 @@ class Controls
 		trigNow[0] = p != null && p.analog.value.LEFT_TRIGGER > TRIGGER_ON;
 		trigNow[1] = p != null && p.analog.value.RIGHT_TRIGGER > TRIGGER_ON;
 
+		for (i in 0...2)
+			if (swallowTrig[i])
+			{
+				if (!trigNow[i])
+					swallowTrig[i] = false;
+				else
+					trigPrev[i] = true;
+			}
+
 		menuXPrev = menuXNow;
 		menuYPrev = menuYNow;
 		menuXNow = stickX() > STICK_MENU ? 1 : (stickX() < -STICK_MENU ? -1 : 0);
 		menuYNow = stickY() > STICK_MENU ? 1 : (stickY() < -STICK_MENU ? -1 : 0);
+
+		if (swallowStick)
+		{
+			if (menuXNow == 0 && menuYNow == 0)
+				swallowStick = false;
+			else
+			{
+				menuXPrev = menuXNow;
+				menuYPrev = menuYNow;
+			}
+		}
+
+		if (p == null)
+		{
+			swallowIds.clear();
+			swallowTrig[0] = swallowTrig[1] = false;
+			swallowStick = false;
+		}
+		else
+		{
+			var lifted:Array<Int> = [];
+			for (id in swallowIds.keys())
+				if (!padPressed(id))
+					lifted.push(id);
+			for (id in lifted)
+				swallowIds.remove(id);
+		}
 
 		if (p != null)
 		{
@@ -434,6 +475,19 @@ class Controls
 		trigNow[0] = trigNow[1] = false;
 		menuXPrev = menuYPrev = 0;
 		menuXNow = menuYNow = 0;
+
+		for (id in [
+			FlxGamepadInputID.A, FlxGamepadInputID.B, FlxGamepadInputID.X, FlxGamepadInputID.Y,
+			FlxGamepadInputID.START, FlxGamepadInputID.BACK, FlxGamepadInputID.DPAD_UP,
+			FlxGamepadInputID.DPAD_DOWN, FlxGamepadInputID.DPAD_LEFT, FlxGamepadInputID.DPAD_RIGHT,
+			FlxGamepadInputID.LEFT_SHOULDER, FlxGamepadInputID.RIGHT_SHOULDER
+		])
+			swallowIds.set(id, true);
+		for (id in pads)
+			if (id != FlxGamepadInputID.NONE && !isTrigger(id))
+				swallowIds.set(id, true);
+		swallowTrig[0] = swallowTrig[1] = true;
+		swallowStick = true;
 	}
 
 	static function applyGyro(pitch:Float, yaw:Float, elapsed:Float):Void
