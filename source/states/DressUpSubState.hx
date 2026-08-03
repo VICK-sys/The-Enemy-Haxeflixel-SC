@@ -14,19 +14,28 @@ class DressUpSubState extends LobbyPanel
 	public static inline var STEPS:Int = 24;
 
 	static inline var NAME_MAX:Int = 12;
-	static inline var CHIP_W:Int = 30;
-	static inline var CHIP_H:Int = 46;
+	static inline var CHIP_W:Int = 40;
+	static inline var CHIP_H:Int = 56;
 	static inline var RING:Int = 4;
-	static inline var BOX_W:Int = 200;
-	static inline var BOX_H:Int = 200;
-	static inline var FIELD_W:Int = 470;
+	static inline var BOX_W:Int = 250;
+	static inline var BOX_H:Int = 250;
+	static inline var FIELD_W:Int = 686;
 	static inline var FIELD_H:Int = 62;
+
+	static inline var MARGIN:Float = 44;
+	static inline var COL_GAP:Float = 36;
+	static inline var LABEL_GAP:Float = 26;
+	static inline var ARROW_IN:Float = 16;
+	static inline var TEXT_DROP:Float = 16;
+	static inline var ROW_NAME:Float = 112;
+	static inline var ROW_SKIN_Y:Float = 224;
+	static inline var ROW_GEAR_Y:Float = 330;
+	static inline var ROW_COLOR_Y:Float = 434;
+	static inline var ROW_HINTS:Float = 518;
 	static inline var REPEAT_FIRST:Float = 0.30;
 	static inline var REPEAT_NEXT:Float = 0.09;
 	static inline var CARET_RATE:Float = 3.4;
-	static inline var SKIN_H:Int = 52;
-	static inline var HALF_GAP:Int = 20;
-	static inline var HALF_W:Int = (FIELD_W - HALF_GAP) >> 1;
+	static inline var SKIN_H:Int = 56;
 	static inline var PREVIEW_SCALE:Float = 5;
 	static inline var GEAR_DX:Float = -21.25;
 	static inline var GEAR_DY:Float = 32.5;
@@ -68,7 +77,7 @@ class DressUpSubState extends LobbyPanel
 
 	public function new(camUI:FlxCamera)
 	{
-		super(camUI, 940, 490);
+		super(camUI, 1060, 566);
 	}
 
 	override public function create():Void
@@ -78,8 +87,8 @@ class DressUpSubState extends LobbyPanel
 		skin = SaveData.playerSkin();
 		gear = SaveData.playerGear();
 
-		var boxX = px + 46;
-		var boxY = py + 96;
+		var boxX = px + MARGIN;
+		var boxY = py + ROW_NAME;
 		well(boxX, boxY, BOX_W, BOX_H);
 
 		previewCx = boxX + BOX_W * 0.5;
@@ -96,10 +105,10 @@ class DressUpSubState extends LobbyPanel
 		add(preview);
 		dressPreview();
 
-		var colX = px + 290;
-		label(colX, py + 118, FIELD_W, Lang.t("lobby.nameLabel"), 20, LobbyPanel.DIM, LEFT);
+		var colX = px + MARGIN + BOX_W + COL_GAP;
+		label(colX, py + ROW_NAME - LABEL_GAP, FIELD_W, Lang.t("lobby.nameLabel"), 20, LobbyPanel.DIM, LEFT);
 
-		var fieldY = py + 146;
+		var fieldY = py + ROW_NAME;
 		well(colX, fieldY, FIELD_W, FIELD_H);
 
 		ghostText = label(colX + 32, fieldY + 14, 0, Lang.t("online.defaultName"), 30, LobbyPanel.DIM, LEFT);
@@ -111,24 +120,23 @@ class DressUpSubState extends LobbyPanel
 
 		counter = label(colX, fieldY + 20, FIELD_W - 16, "", 18, LobbyPanel.DIM, RIGHT);
 
-		var modelY = fieldY + 108;
-		var gearX = colX + HALF_W + HALF_GAP;
+		var skinY = py + ROW_SKIN_Y;
+		skinLabel = label(colX, skinY - LABEL_GAP, FIELD_W, Lang.t("lobby.skinLabel"), 20, LobbyPanel.DIM, LEFT);
+		well(colX, skinY, FIELD_W, SKIN_H);
+		skinArrows.push(label(colX + ARROW_IN, skinY + TEXT_DROP, 0, "<", 24, LobbyPanel.DIM, LEFT));
+		skinArrows.push(label(colX + FIELD_W - ARROW_IN - 16, skinY + TEXT_DROP, 0, ">", 24, LobbyPanel.DIM, LEFT));
+		skinText = label(colX, skinY + TEXT_DROP, FIELD_W, "", 24, FlxColor.WHITE, CENTER);
 
-		skinLabel = label(colX, modelY - 30, HALF_W, Lang.t("lobby.skinLabel"), 20, LobbyPanel.DIM, LEFT);
-		well(colX, modelY, HALF_W, SKIN_H);
-		skinArrows.push(label(colX + 12, modelY + 14, 0, "<", 24, LobbyPanel.DIM, LEFT));
-		skinArrows.push(label(colX + HALF_W - 26, modelY + 14, 0, ">", 24, LobbyPanel.DIM, LEFT));
-		skinText = label(colX, modelY + 14, HALF_W, "", 24, FlxColor.WHITE, CENTER);
-
-		gearLabel = label(gearX, modelY - 30, HALF_W, Lang.t("lobby.gearLabel"), 20, LobbyPanel.DIM, LEFT);
-		well(gearX, modelY, HALF_W, SKIN_H);
-		gearArrows.push(label(gearX + 12, modelY + 14, 0, "<", 24, LobbyPanel.DIM, LEFT));
-		gearArrows.push(label(gearX + HALF_W - 26, modelY + 14, 0, ">", 24, LobbyPanel.DIM, LEFT));
-		gearText = label(gearX, modelY + 14, HALF_W, "", 24, FlxColor.WHITE, CENTER);
+		var gearY = py + ROW_GEAR_Y;
+		gearLabel = label(colX, gearY - LABEL_GAP, FIELD_W, Lang.t("lobby.gearLabel"), 20, LobbyPanel.DIM, LEFT);
+		well(colX, gearY, FIELD_W, SKIN_H);
+		gearArrows.push(label(colX + ARROW_IN, gearY + TEXT_DROP, 0, "<", 24, LobbyPanel.DIM, LEFT));
+		gearArrows.push(label(colX + FIELD_W - ARROW_IN - 16, gearY + TEXT_DROP, 0, ">", 24, LobbyPanel.DIM, LEFT));
+		gearText = label(colX, gearY + TEXT_DROP, FIELD_W, "", 24, FlxColor.WHITE, CENTER);
 
 		stripX = px + (panelW - STEPS * CHIP_W) * 0.5;
-		stripY = py + 352;
-		colorLabel = label(stripX, py + 320, STEPS * CHIP_W, Lang.t("lobby.colorLabel"), 20, LobbyPanel.DIM, LEFT);
+		stripY = py + ROW_COLOR_Y;
+		colorLabel = label(stripX, stripY - LABEL_GAP, STEPS * CHIP_W, Lang.t("lobby.colorLabel"), 20, LobbyPanel.DIM, LEFT);
 
 		plate(stripX - 3, stripY - 3, STEPS * CHIP_W + 6, CHIP_H + 6, LobbyPanel.EDGE);
 
@@ -146,7 +154,7 @@ class DressUpSubState extends LobbyPanel
 		ringBars.push(plate(0, 0, RING, CHIP_H + RING * 2, FlxColor.WHITE));
 		ringBars.push(plate(0, 0, RING, CHIP_H + RING * 2, FlxColor.WHITE));
 
-		hints(Lang.t("lobby.dressHints"), py + 432);
+		hints(Lang.t("lobby.dressHints"), py + ROW_HINTS);
 
 		refreshSkin();
 		refreshFocus();
