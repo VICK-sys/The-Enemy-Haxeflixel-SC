@@ -22,7 +22,9 @@ class BackGear
 	static inline var MOVE_FPS:Int = 12;
 
 	public var sprite:FlxSprite;
+	public var liveTint:Bool = false;
 
+	private var shownArt:String = null;
 	private var hue:Float = -1;
 	private var skin:Int = -1;
 	private var gearIdx:Int = -1;
@@ -44,19 +46,29 @@ class BackGear
 		var g = gearIndex < 0 ? util.SaveData.playerGear() : util.Skins.clampGear(gearIndex);
 		if (h == hue && i == skin && g == gearIdx)
 			return;
+
+		var art = util.Skins.gearOf(g);
+		var settled = art != null && art == shownArt && i == skin;
+
 		hue = h;
 		skin = i;
 		gearIdx = g;
-
-		var art = util.Skins.gearOf(g);
 		pack = art != null;
+
+		if (pack && liveTint && settled)
+		{
+			util.HuePalette.live(art, h);
+			return;
+		}
+
+		shownArt = art;
 		if (pack)
 		{
-			var at = sprite.animation.curAnim == null ? 0 : sprite.animation.curAnim.curFrame;
 			var box = util.Skins.gearFrameOf(g);
-			sprite.loadGraphic(util.HuePalette.graphic(art, h), true, box[0], box[1]);
+			sprite.loadGraphic(liveTint ? util.HuePalette.live(art, h) : util.HuePalette.graphic(art, h),
+				true, box[0], box[1]);
 			sprite.animation.add("turn", [for (f in 0...sprite.animation.numFrames) f], MOVE_FPS, true);
-			sprite.animation.play("turn", true, false, at % sprite.animation.numFrames);
+			sprite.animation.play("turn");
 			sprite.origin.set(PACK_PIVOT_X, PACK_PIVOT_Y);
 		}
 		else

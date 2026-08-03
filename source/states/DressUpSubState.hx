@@ -86,6 +86,7 @@ class DressUpSubState extends LobbyPanel
 		previewCy = boxY + BOX_H * 0.5;
 
 		previewGear = new systems.BackGear();
+		previewGear.liveTint = true;
 		previewGear.sprite.cameras = [camUI];
 		add(previewGear.sprite);
 
