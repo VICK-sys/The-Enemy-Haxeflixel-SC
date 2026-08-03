@@ -18,33 +18,42 @@ class ChatWindow extends FlxSpriteGroup
 		"smile", "joy", "sob", "heart", "up", "fire", "skull", "mad", "sweat", "sword"
 	];
 
-	static inline var W:Int = 380;
-	static inline var HEADER_H:Int = 20;
-	static inline var LIST_H:Int = 168;
-	static inline var INPUT_H:Int = 24;
-	static inline var H:Int = HEADER_H + LIST_H + INPUT_H;
-	static inline var PAD:Int = 6;
-	static inline var LINE_H:Int = 17;
-	static inline var QUOTE_H:Int = 14;
-	static inline var GAP:Int = 3;
-	static inline var EMO:Int = 16;
-	static inline var BODY_SIZE:Int = 14;
-	static inline var META_SIZE:Int = 12;
-	static inline var STRIP_H:Int = 16;
-	static inline var PALETTE_H:Int = 24;
-	static inline var CHIP_W:Int = 16;
+	public static inline var MIN_SCALE:Float = 0.7;
+	public static inline var MAX_SCALE:Float = 2.0;
+
+	static inline var W0:Int = 380;
+	static inline var HEADER0:Int = 20;
+	static inline var LIST0:Int = 168;
+	static inline var INPUT0:Int = 24;
+	static inline var PAD0:Int = 6;
+	static inline var LINE0:Int = 17;
+	static inline var QUOTE0:Int = 14;
+	static inline var GAP0:Int = 3;
+	static inline var EMO0:Int = 16;
+	static inline var BODY0:Int = 14;
+	static inline var META0:Int = 12;
+	static inline var STRIP0:Int = 16;
+	static inline var PALETTE0:Int = 24;
+	static inline var CHIP0:Int = 16;
+	static inline var GRIP0:Int = 12;
+	static inline var GRAB:Float = 220;
 
 	static inline var BG:Int = 0xD2131019;
 	static inline var HEAD_BG:Int = 0xFF262231;
 	static inline var EDGE:Int = 0xFF3C4356;
 	static inline var DIM:Int = 0xFF8A90A0;
 	static inline var INPUT_BG:Int = 0xFF0B0A10;
+	static inline var GRIP_BG:Int = 0xFF5A6480;
+
+	public var hovering(default, null):Bool = false;
 
 	var cam:FlxCamera;
 	var bg:FlxSprite;
 	var header:FlxSprite;
+	var headEdge:FlxSprite;
 	var title:FlxText;
 	var inputBg:FlxSprite;
+	var inputEdge:FlxSprite;
 	var input:FlxInputText;
 	var hint:FlxText;
 	var stripBg:FlxSprite;
@@ -53,6 +62,7 @@ class ChatWindow extends FlxSpriteGroup
 	var paletteIcons:Array<FlxSprite> = [];
 	var emojiBtn:FlxSprite;
 	var emojiBtnIcon:FlxSprite;
+	var grip:FlxSprite;
 	var rows:Array<FlxSprite> = [];
 	var rowHits:Array<{key:String, own:Bool, ry:Float, rh:Float}> = [];
 	var chipR:FlxText;
@@ -60,16 +70,38 @@ class ChatWindow extends FlxSpriteGroup
 	var chipX:FlxText;
 	var chipPlate:FlxSprite;
 
+	var s:Float = 1;
+	var w:Int = W0;
+	var h:Int = HEADER0 + LIST0 + INPUT0;
+	var headerH:Int = HEADER0;
+	var inputH:Int = INPUT0;
+	var pad:Int = PAD0;
+	var lineH:Int = LINE0;
+	var quoteH:Int = QUOTE0;
+	var gap:Int = GAP0;
+	var emo:Int = EMO0;
+	var bodySize:Int = BODY0;
+	var metaSize:Int = META0;
+	var stripH:Int = STRIP0;
+	var paletteH:Int = PALETTE0;
+	var chipW:Int = CHIP0;
+	var gripW:Int = GRIP0;
+
 	var scroll:Int = 0;
 	var lastVer:Int = -1;
 	var lastScroll:Int = -1;
 	var lastListH:Int = -1;
+	var lastScale:Float = -1;
 	var replyKey:String = null;
 	var editKey:String = null;
 	var paletteOpen:Bool = false;
 	var dragging:Bool = false;
+	var sizing:Bool = false;
 	var dragDX:Float = 0;
 	var dragDY:Float = 0;
+	var gripFromX:Float = 0;
+	var gripFromY:Float = 0;
+	var gripFromScale:Float = 1;
 	var typingHold:Int = 0;
 	var wantFocus:Bool = false;
 	var hoverKey:String = null;
@@ -84,51 +116,44 @@ class ChatWindow extends FlxSpriteGroup
 		this.cam = cam;
 		scrollFactor.set(0, 0);
 
-		bg = plate(0, 0, W, H, BG);
-		header = plate(0, 0, W, HEADER_H, HEAD_BG);
-		plate(0, HEADER_H - 1, W, 1, EDGE);
-		title = label(PAD, 3, W - PAD * 2, Lang.t("chat.title"), META_SIZE, DIM, LEFT);
+		s = util.SaveData.chatScale();
+		metrics();
 
-		inputBg = plate(0, H - INPUT_H, W - INPUT_H, INPUT_H, INPUT_BG);
-		plate(0, H - INPUT_H - 1, W, 1, EDGE);
+		bg = plate(BG);
+		header = plate(HEAD_BG);
+		headEdge = plate(EDGE);
+		title = label("", DIM, LEFT);
+		inputBg = plate(INPUT_BG);
+		inputEdge = plate(EDGE);
 
-		input = new FlxInputText(PAD, H - INPUT_H + 3, W - INPUT_H - PAD * 2, "", BODY_SIZE, FlxColor.WHITE, FlxColor.TRANSPARENT);
-		input.setFormat(Lang.font(), BODY_SIZE, FlxColor.WHITE, LEFT);
+		input = new FlxInputText(0, 0, w, "", bodySize, FlxColor.WHITE, FlxColor.TRANSPARENT);
+		input.setFormat(Lang.font(), bodySize, FlxColor.WHITE, LEFT);
 		input.fieldBorderThickness = 0;
 		input.maxChars = ChatLog.MAX_LEN;
 		input.caretColor = FlxColor.WHITE;
 		input.onEnter.add(function(_) submit());
 		add(input);
 
-		hint = label(PAD + 2, H - INPUT_H + 5, W - INPUT_H - PAD * 2, Lang.t("chat.typeHint"), META_SIZE, DIM, LEFT);
-
-		emojiBtn = plate(W - INPUT_H, H - INPUT_H, INPUT_H, INPUT_H, HEAD_BG);
+		hint = label("", DIM, LEFT);
+		emojiBtn = plate(HEAD_BG);
 		emojiBtnIcon = emoji(0);
-		emojiBtnIcon.setPosition(x + W - INPUT_H + 4, y + H - INPUT_H + 4);
 		add(emojiBtnIcon);
 
-		stripBg = plate(0, H - INPUT_H - STRIP_H, W, STRIP_H, HEAD_BG);
-		stripText = label(PAD, H - INPUT_H - STRIP_H + 2, W - PAD * 2, "", META_SIZE, DIM, LEFT);
-		stripBg.visible = false;
-		stripText.visible = false;
-
-		paletteBg = plate(0, H - INPUT_H - PALETTE_H, W, PALETTE_H, HEAD_BG);
-		paletteBg.visible = false;
+		stripBg = plate(HEAD_BG);
+		stripText = label("", DIM, LEFT);
+		paletteBg = plate(HEAD_BG);
 		for (i in 0...EMOJI.length)
 		{
 			var e = emoji(i);
-			e.setPosition(x + PAD + i * (EMO + 6), y + H - INPUT_H - PALETTE_H + 4);
-			e.visible = false;
 			add(e);
 			paletteIcons.push(e);
 		}
+		grip = plate(GRIP_BG);
 
-		chipPlate = plate(0, 0, CHIP_W * 3 + 8, 15, 0xF0262231);
-		chipPlate.visible = false;
-		chipR = label(0, 0, CHIP_W, "R", META_SIZE, 0xFFB8D8FF, CENTER);
-		chipE = label(0, 0, CHIP_W, "E", META_SIZE, 0xFFFFE28A, CENTER);
-		chipX = label(0, 0, CHIP_W, "X", META_SIZE, 0xFFFF9A9A, CENTER);
-		chipR.visible = chipE.visible = chipX.visible = false;
+		chipPlate = plate(0xF0262231);
+		chipR = label("R", 0xFFB8D8FF, CENTER);
+		chipE = label("E", 0xFFFFE28A, CENTER);
+		chipX = label("X", 0xFFFF9A9A, CENTER);
 
 		cameras = [cam];
 
@@ -137,23 +162,53 @@ class ChatWindow extends FlxSpriteGroup
 		if (sx < 0 || sy < 0)
 		{
 			sx = 8;
-			sy = FlxG.height - H - 8;
+			sy = FlxG.height - h - 8;
 		}
 		setPosition(clampX(sx), clampY(sy));
+		relayout();
 	}
 
-	function plate(px:Float, py:Float, w:Int, h:Int, color:Int):FlxSprite
+	inline function px(v:Float):Int
+		return Std.int(v * s + 0.5);
+
+	function metrics():Void
 	{
-		var s = new FlxSprite(x + px, y + py);
-		s.makeGraphic(w, h, color);
-		add(s);
-		return s;
+		w = px(W0);
+		headerH = px(HEADER0);
+		inputH = px(INPUT0);
+		h = headerH + px(LIST0) + inputH;
+		pad = px(PAD0);
+		lineH = px(LINE0);
+		quoteH = px(QUOTE0);
+		gap = px(GAP0);
+		emo = px(EMO0);
+		bodySize = px(BODY0);
+		metaSize = px(META0);
+		stripH = px(STRIP0);
+		paletteH = px(PALETTE0);
+		chipW = px(CHIP0);
+		gripW = px(GRIP0);
 	}
 
-	function label(px:Float, py:Float, w:Float, text:String, size:Int, color:Int, align:flixel.text.FlxTextAlign):FlxText
+	function plate(color:Int):FlxSprite
 	{
-		var t = new FlxText(x + px, y + py, w, text);
-		t.setFormat(Lang.font(), size, color, align);
+		var sp = new FlxSprite();
+		sp.makeGraphic(1, 1, color);
+		add(sp);
+		return sp;
+	}
+
+	inline function sized(sp:FlxSprite, lx:Float, ly:Float, sw:Int, sh:Int):Void
+	{
+		sp.setGraphicSize(sw < 1 ? 1 : sw, sh < 1 ? 1 : sh);
+		sp.updateHitbox();
+		sp.setPosition(x + lx, y + ly);
+	}
+
+	function label(text:String, color:Int, align:flixel.text.FlxTextAlign):FlxText
+	{
+		var t = new FlxText(0, 0, 0, text);
+		t.setFormat(Lang.font(), metaSize, color, align);
 		add(t);
 		return t;
 	}
@@ -161,13 +216,13 @@ class ChatWindow extends FlxSpriteGroup
 	function emoji(frame:Int):FlxSprite
 	{
 		var e = new FlxSprite();
-		e.loadGraphic(Paths.image("ui/chat_emoji"), true, EMO, EMO);
+		e.loadGraphic(Paths.image("ui/chat_emoji"), true, EMO0, EMO0);
 		e.animation.frameIndex = frame;
 		e.antialiasing = false;
 		return e;
 	}
 
-	static function measure(s:String, size:Int):Float
+	static function measure(str:String, size:Int):Float
 	{
 		if (scratch == null)
 		{
@@ -176,15 +231,71 @@ class ChatWindow extends FlxSpriteGroup
 		}
 		if (scratch.size != size)
 			scratch.size = size;
-		scratch.text = s;
+		scratch.text = str;
 		return scratch.textField.textWidth + 4;
 	}
 
 	inline function clampX(v:Float):Float
-		return v < 0 ? 0 : (v > FlxG.width - W ? FlxG.width - W : v);
+		return v < 0 ? 0 : (v > FlxG.width - w ? FlxG.width - w : v);
 
 	inline function clampY(v:Float):Float
-		return v < 0 ? 0 : (v > FlxG.height - H ? FlxG.height - H : v);
+		return v < 0 ? 0 : (v > FlxG.height - h ? FlxG.height - h : v);
+
+	function relayout():Void
+	{
+		metrics();
+
+		sized(bg, 0, 0, w, h);
+		sized(header, 0, 0, w, headerH);
+		sized(headEdge, 0, headerH - 1, w, 1);
+		title.size = metaSize;
+		title.fieldWidth = w - pad * 2;
+		title.text = Lang.t("chat.title");
+		title.setPosition(x + pad, y + px(3));
+
+		sized(inputBg, 0, h - inputH, w - inputH, inputH);
+		sized(inputEdge, 0, h - inputH - 1, w, 1);
+
+		input.size = bodySize;
+		input.fieldWidth = w - inputH - pad * 2;
+		input.setPosition(x + pad, y + h - inputH + px(3));
+
+		hint.size = metaSize;
+		hint.fieldWidth = w - inputH - pad * 2;
+		hint.text = Lang.t("chat.typeHint");
+		hint.setPosition(x + pad + px(2), y + h - inputH + px(5));
+
+		sized(emojiBtn, w - inputH, h - inputH, inputH, inputH);
+		emojiBtnIcon.scale.set(s, s);
+		emojiBtnIcon.updateHitbox();
+		emojiBtnIcon.setPosition(x + w - inputH + px(4), y + h - inputH + px(4));
+
+		sized(grip, w - gripW, h - inputH - gripW, gripW, gripW);
+
+		sized(stripBg, 0, 0, w, stripH);
+		stripText.size = metaSize;
+		stripText.fieldWidth = w - pad * 2;
+
+		sized(paletteBg, 0, 0, w, paletteH);
+		for (i in 0...paletteIcons.length)
+		{
+			var e = paletteIcons[i];
+			e.scale.set(s, s);
+			e.updateHitbox();
+		}
+
+		sized(chipPlate, 0, 0, chipW * 3 + px(8), px(15));
+		chipR.size = metaSize;
+		chipE.size = metaSize;
+		chipX.size = metaSize;
+		chipR.fieldWidth = chipW;
+		chipE.fieldWidth = chipW;
+		chipX.fieldWidth = chipW;
+
+		lastScale = s;
+		lastVer = -1;
+		setPosition(clampX(x), clampY(y));
+	}
 
 	public function show(on:Bool):Void
 	{
@@ -193,6 +304,7 @@ class ChatWindow extends FlxSpriteGroup
 		if (!on)
 		{
 			wantFocus = false;
+			hovering = false;
 			if (input.hasFocus)
 				input.endFocus();
 			util.Controls.typing = false;
@@ -244,9 +356,30 @@ class ChatWindow extends FlxSpriteGroup
 		var mx = mp.x;
 		var my = mp.y;
 		mp.put();
-		var over = mx >= x && mx < x + W && my >= y && my < y + H;
+		var over = !panelOpen && mx >= x && mx < x + w && my >= y && my < y + h;
 
-		if (dragging)
+		if (sizing)
+		{
+			over = true;
+			if (FlxG.mouse.pressed)
+			{
+				var step = ((mx - gripFromX) + (my - gripFromY)) * 0.5;
+				var want = gripFromScale + step / GRAB;
+				want = want < MIN_SCALE ? MIN_SCALE : (want > MAX_SCALE ? MAX_SCALE : want);
+				if (Math.abs(want - s) > 0.01)
+				{
+					s = want;
+					relayout();
+				}
+			}
+			else
+			{
+				sizing = false;
+				util.SaveData.setChatScale(s);
+				util.SaveData.setChatPos(x, y);
+			}
+		}
+		else if (dragging)
 		{
 			over = true;
 			if (FlxG.mouse.pressed)
@@ -257,12 +390,22 @@ class ChatWindow extends FlxSpriteGroup
 				util.SaveData.setChatPos(x, y);
 			}
 		}
-		else if (FlxG.mouse.justPressed && mx >= x && mx < x + W && my >= y && my < y + HEADER_H)
+		else if (over && FlxG.mouse.justPressed && mx >= grip.x && my >= grip.y
+			&& mx < grip.x + gripW && my < grip.y + gripW)
+		{
+			sizing = true;
+			gripFromX = mx;
+			gripFromY = my;
+			gripFromScale = s;
+		}
+		else if (FlxG.mouse.justPressed && !panelOpen && mx >= x && mx < x + w && my >= y && my < y + headerH)
 		{
 			dragging = true;
 			dragDX = mx - x;
 			dragDY = my - y;
 		}
+
+		hovering = over;
 
 		if (!panelOpen && !wantFocus && FlxG.keys.justPressed.T)
 			wantFocus = true;
@@ -283,7 +426,7 @@ class ChatWindow extends FlxSpriteGroup
 
 		if (FlxG.mouse.justPressed && !over && wantFocus)
 			blurInput();
-		if (FlxG.mouse.justPressed && over && my >= y + H - INPUT_H && mx < x + W - INPUT_H)
+		if (FlxG.mouse.justPressed && over && my >= y + h - inputH && mx < x + w - inputH)
 			wantFocus = true;
 
 		if (wantFocus)
@@ -295,13 +438,13 @@ class ChatWindow extends FlxSpriteGroup
 
 		hint.visible = !wantFocus && input.text == "";
 
-		if (over && FlxG.mouse.justPressed && mx >= x + W - INPUT_H && my >= y + H - INPUT_H)
-			setPalette(!paletteOpen);
-		if (paletteOpen && FlxG.mouse.justPressed)
+		if (over && FlxG.mouse.justPressed && mx >= x + w - inputH && my >= y + h - inputH)
+			paletteOpen = !paletteOpen;
+		if (paletteOpen && over && FlxG.mouse.justPressed)
 			for (i in 0...paletteIcons.length)
 			{
 				var e = paletteIcons[i];
-				if (mx >= e.x - 2 && mx < e.x + EMO + 4 && my >= e.y - 4 && my < e.y + EMO + 4)
+				if (mx >= e.x - 2 && mx < e.x + emo + 4 && my >= e.y - 4 && my < e.y + emo + 4)
 				{
 					input.text += ":" + EMOJI[i] + ":";
 					input.caretIndex = input.text.length;
@@ -319,9 +462,6 @@ class ChatWindow extends FlxSpriteGroup
 		}
 
 		refreshStrip();
-		paletteBg.visible = paletteOpen;
-		for (e in paletteIcons)
-			e.visible = paletteOpen;
 
 		var listH = listHeight();
 		if (ChatLog.version != lastVer || scroll != lastScroll || listH != lastListH)
@@ -337,33 +477,30 @@ class ChatWindow extends FlxSpriteGroup
 
 	function listHeight():Int
 	{
-		var h = LIST_H;
+		var lh = h - headerH - inputH;
 		if (paletteOpen)
-			h -= PALETTE_H;
+			lh -= paletteH;
 		if (replyKey != null || editKey != null)
-			h -= STRIP_H;
-		return h;
-	}
-
-	function setPalette(on:Bool):Void
-	{
-		paletteOpen = on;
-		paletteBg.visible = on;
-		for (e in paletteIcons)
-			e.visible = on;
+			lh -= stripH;
+		return lh;
 	}
 
 	function refreshStrip():Void
 	{
 		var want = replyKey != null || editKey != null;
-		var off = (paletteOpen ? PALETTE_H : 0);
-		stripBg.y = y + H - INPUT_H - off - STRIP_H;
-		stripText.y = stripBg.y + 2;
-		paletteBg.y = y + H - INPUT_H - PALETTE_H;
+		var off = paletteOpen ? paletteH : 0;
+		stripBg.setPosition(x, y + h - inputH - off - stripH);
+		stripText.setPosition(x + pad, stripBg.y + px(2));
+		paletteBg.setPosition(x, y + h - inputH - paletteH);
 		for (i in 0...paletteIcons.length)
-			paletteIcons[i].y = y + H - INPUT_H - PALETTE_H + 4;
+			paletteIcons[i].setPosition(x + pad + i * (emo + px(6)), y + h - inputH - paletteH + px(4));
+
 		stripBg.visible = want;
 		stripText.visible = want;
+		paletteBg.visible = paletteOpen;
+		for (e in paletteIcons)
+			e.visible = paletteOpen;
+
 		if (editKey != null)
 			stripText.text = Lang.t("chat.editing");
 		else if (replyKey != null)
@@ -384,15 +521,15 @@ class ChatWindow extends FlxSpriteGroup
 		rowHits = [];
 	}
 
-	function addRow(s:FlxSprite):Void
+	function addRow(sp:FlxSprite):Void
 	{
-		add(s);
-		rows.push(s);
+		add(sp);
+		rows.push(sp);
 	}
 
-	function rowText(px:Float, py:Float, text:String, size:Int, color:Int):FlxText
+	function rowText(lx:Float, ly:Float, text:String, size:Int, color:Int):FlxText
 	{
-		var t = new FlxText(px, py, 0, text);
+		var t = new FlxText(lx, ly, 0, text);
 		t.setFormat(Lang.font(), size, color, LEFT);
 		addRow(t);
 		return t;
@@ -402,20 +539,20 @@ class ChatWindow extends FlxSpriteGroup
 	{
 		clearRows();
 
-		var maxW = W - PAD * 2 - CHIP_W * 3 - 10;
-		var bottom = HEADER_H + listH - GAP;
+		var maxW = w - pad * 2 - chipW * 3 - px(10);
+		var bottom = headerH + listH - gap;
 		var idx = ChatLog.messages.length - 1 - scroll;
 
-		while (idx >= 0 && bottom > HEADER_H + LINE_H)
+		while (idx >= 0 && bottom > headerH + lineH)
 		{
 			var m = ChatLog.messages[idx];
 			idx--;
 
 			var lines = layout(m, maxW);
-			var quote = m.reply != null && !m.deleted ? QUOTE_H : 0;
-			var blockH = quote + lines.length * LINE_H;
+			var quote = m.reply != null && !m.deleted ? quoteH : 0;
+			var blockH = quote + lines.length * lineH;
 			var top = bottom - blockH;
-			if (top < HEADER_H + 2)
+			if (top < headerH + 2)
 				break;
 
 			if (quote > 0)
@@ -424,35 +561,37 @@ class ChatWindow extends FlxSpriteGroup
 				var qs = q == null || q.deleted ? Lang.t("chat.deleted") : q.name + ": " + stripTokens(q.text);
 				if (qs.length > 46)
 					qs = qs.substr(0, 46) + "..";
-				rowText(PAD + 8, top, "> " + qs, META_SIZE, DIM);
+				rowText(pad + px(8), top, "> " + qs, metaSize, DIM);
 			}
 
 			for (li in 0...lines.length)
 			{
-				var ly = top + quote + li * LINE_H;
+				var ly = top + quote + li * lineH;
 				for (seg in lines[li])
 				{
 					if (seg.emoji >= 0)
 					{
 						var e = emoji(seg.emoji);
-						e.setPosition(PAD + seg.sx, ly);
+						e.scale.set(s, s);
+						e.updateHitbox();
+						e.setPosition(pad + seg.sx, ly);
 						addRow(e);
 					}
 					else
-						rowText(PAD + seg.sx, ly, seg.text, BODY_SIZE, seg.color);
+						rowText(pad + seg.sx, ly, seg.text, bodySize, seg.color);
 				}
 			}
 
 			rowHits.push({key: m.key, own: m.sender == net.Net.selfId, ry: top, rh: blockH});
-			bottom = top - GAP;
+			bottom = top - gap;
 		}
 	}
 
-	function stripTokens(s:String):String
+	function stripTokens(str:String):String
 	{
 		for (n in EMOJI)
-			s = StringTools.replace(s, ":" + n + ":", "");
-		return s;
+			str = StringTools.replace(str, ":" + n + ":", "");
+		return str;
 	}
 
 	function layout(m:ChatMsg, maxW:Float):Array<Array<{sx:Float, text:String, color:Int, emoji:Int}>>
@@ -460,9 +599,9 @@ class ChatWindow extends FlxSpriteGroup
 		var lines:Array<Array<{sx:Float, text:String, color:Int, emoji:Int}>> = [[]];
 		var cx:Float = 0;
 
-		function put(text:String, color:Int, emojiIdx:Int, w:Float):Void
+		function put(text:String, color:Int, emojiIdx:Int, tw:Float):Void
 		{
-			if (cx + w > maxW && cx > 0)
+			if (cx + tw > maxW && cx > 0)
 			{
 				lines.push([]);
 				cx = 0;
@@ -470,30 +609,30 @@ class ChatWindow extends FlxSpriteGroup
 					return;
 			}
 			lines[lines.length - 1].push({sx: cx, text: text, color: color, emoji: emojiIdx});
-			cx += w;
+			cx += tw;
 		}
 
 		var nm = m.name + ":";
-		put(nm, nameColor(m.hue), -1, measure(nm, BODY_SIZE) + 4);
+		put(nm, nameColor(m.hue), -1, measure(nm, bodySize) + px(4));
 
 		if (m.deleted)
 		{
-			put(Lang.t("chat.deleted"), DIM, -1, measure(Lang.t("chat.deleted"), BODY_SIZE));
+			put(Lang.t("chat.deleted"), DIM, -1, measure(Lang.t("chat.deleted"), bodySize));
 			return merge(lines);
 		}
 
 		for (tok in tokenize(m.text))
 		{
 			if (tok.emoji >= 0)
-				put("", 0, tok.emoji, EMO + 1);
+				put("", 0, tok.emoji, emo + 1);
 			else if (tok.text == " ")
-				put(" ", FlxColor.WHITE, -1, measure(" ", BODY_SIZE) - 3);
+				put(" ", FlxColor.WHITE, -1, measure(" ", bodySize) - px(3));
 			else
-				put(tok.text, FlxColor.WHITE, -1, measure(tok.text, BODY_SIZE) - 2);
+				put(tok.text, FlxColor.WHITE, -1, measure(tok.text, bodySize) - px(2));
 		}
 
 		if (m.edited)
-			put(Lang.t("chat.edited"), DIM, -1, measure(Lang.t("chat.edited"), META_SIZE));
+			put(Lang.t("chat.edited"), DIM, -1, measure(Lang.t("chat.edited"), metaSize));
 
 		return merge(lines);
 	}
@@ -517,7 +656,7 @@ class ChatWindow extends FlxSpriteGroup
 		return out;
 	}
 
-	function tokenize(s:String):Array<{text:String, emoji:Int}>
+	function tokenize(str:String):Array<{text:String, emoji:Int}>
 	{
 		var out:Array<{text:String, emoji:Int}> = [];
 		var i = 0;
@@ -532,9 +671,9 @@ class ChatWindow extends FlxSpriteGroup
 			}
 		}
 
-		while (i < s.length)
+		while (i < str.length)
 		{
-			var ch = s.charAt(i);
+			var ch = str.charAt(i);
 			if (ch == " ")
 			{
 				flush();
@@ -544,10 +683,10 @@ class ChatWindow extends FlxSpriteGroup
 			}
 			if (ch == ":")
 			{
-				var close = s.indexOf(":", i + 1);
+				var close = str.indexOf(":", i + 1);
 				if (close > i)
 				{
-					var name = s.substring(i + 1, close);
+					var name = str.substring(i + 1, close);
 					var e = EMOJI.indexOf(name);
 					if (e >= 0)
 					{
@@ -568,13 +707,13 @@ class ChatWindow extends FlxSpriteGroup
 	function updateHover(mx:Float, my:Float, over:Bool):Void
 	{
 		hoverKey = null;
-		if (over && !dragging)
-			for (h in rowHits)
-				if (my >= y + h.ry && my < y + h.ry + h.rh)
+		if (over && !dragging && !sizing)
+			for (hit in rowHits)
+				if (my >= y + hit.ry && my < y + hit.ry + hit.rh)
 				{
-					hoverKey = h.key;
-					hoverOwn = h.own;
-					chipPlate.setPosition(x + W - (CHIP_W * 3 + 10), y + h.ry);
+					hoverKey = hit.key;
+					hoverOwn = hit.own;
+					chipPlate.setPosition(x + w - (chipW * 3 + px(10)), y + hit.ry);
 					break;
 				}
 
@@ -586,16 +725,16 @@ class ChatWindow extends FlxSpriteGroup
 		if (!showChips)
 			return;
 
-		chipR.setPosition(chipPlate.x + 2, chipPlate.y + 1);
-		chipE.setPosition(chipPlate.x + 2 + CHIP_W, chipPlate.y + 1);
-		chipX.setPosition(chipPlate.x + 2 + CHIP_W * 2, chipPlate.y + 1);
+		chipR.setPosition(chipPlate.x + px(2), chipPlate.y + px(1));
+		chipE.setPosition(chipPlate.x + px(2) + chipW, chipPlate.y + px(1));
+		chipX.setPosition(chipPlate.x + px(2) + chipW * 2, chipPlate.y + px(1));
 
 		if (!FlxG.mouse.justPressed)
 			return;
-		if (my < chipPlate.y || my >= chipPlate.y + 15 || mx < chipPlate.x)
+		if (my < chipPlate.y || my >= chipPlate.y + px(15) || mx < chipPlate.x)
 			return;
 
-		var slot = Std.int((mx - chipPlate.x - 2) / CHIP_W);
+		var slot = Std.int((mx - chipPlate.x - px(2)) / chipW);
 		var panelOpen = FlxG.state.subState != null;
 		if (slot == 0)
 		{

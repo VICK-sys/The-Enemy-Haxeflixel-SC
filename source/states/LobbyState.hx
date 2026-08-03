@@ -120,6 +120,8 @@ class LobbyState extends FlxState
 
 		chat = new ui.ChatWindow(camUI);
 		add(chat);
+		remove(cursor, true);
+		add(cursor);
 
 		FlxG.camera.follow(player);
 		FlxG.camera.setScrollBoundsRect(0, 0, arena.width, arena.height);
@@ -219,7 +221,10 @@ class LobbyState extends FlxState
 
 		cursor.setPosition(util.Controls.aimViewX(FlxG.camera) - cursor.frameWidth * 0.5,
 			util.Controls.aimViewY(FlxG.camera) - cursor.frameHeight * 0.5);
-		cursor.visible = subState == null;
+		var onChat = chat.visible && chat.hovering;
+		cursor.visible = subState == null && !onChat;
+		if (subState == null)
+			FlxG.mouse.visible = onChat;
 
 		status.visible = subState == null;
 		prompt.visible = subState == null;

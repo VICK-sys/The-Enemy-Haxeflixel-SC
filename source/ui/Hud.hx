@@ -522,6 +522,18 @@ class Hud
 		raiseBanner();
 	}
 
+	public function raiseCursor():Void
+	{
+		state.remove(customCursor, true);
+		state.add(customCursor);
+	}
+
+	public function setCursorOverUi(on:Bool):Void
+	{
+		customCursor.visible = !on;
+		FlxG.mouse.visible = on;
+	}
+
 	function raiseBanner():Void
 	{
 		state.remove(bannerText, true);

@@ -247,6 +247,7 @@ class PlayState extends FlxState
 
 		chat = new ui.ChatWindow(hud.camUI);
 		add(chat);
+		hud.raiseCursor();
 
 		if (petals != null)
 			add(petals.group);
@@ -430,6 +431,8 @@ class PlayState extends FlxState
 		combat.inputBlocked = inputLocked;
 		_player.blockMovement = inputLocked;
 		chat.show(Net.active);
+		if (subState == null)
+			hud.setCursorOverUi(chat.visible && chat.hovering);
 		combat.update(elapsed);
 		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y - 21, _player.flipX,
 			systems.BackGear.leanFor(_player.animation.name), _player.visible,

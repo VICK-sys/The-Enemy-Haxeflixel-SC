@@ -371,6 +371,24 @@ class SaveData
 		return save.data.chatY != null ? save.data.chatY : -1;
 	}
 
+	public static function chatScale():Float
+	{
+		ensure();
+		var v:Float = save.data.chatScale != null ? save.data.chatScale : 1.0;
+		if (v < ui.ChatWindow.MIN_SCALE)
+			v = ui.ChatWindow.MIN_SCALE;
+		if (v > ui.ChatWindow.MAX_SCALE)
+			v = ui.ChatWindow.MAX_SCALE;
+		return v;
+	}
+
+	public static function setChatScale(v:Float):Void
+	{
+		ensure();
+		save.data.chatScale = Math.round(v * 100) / 100;
+		save.flush();
+	}
+
 	public static function setChatPos(x:Float, y:Float):Void
 	{
 		ensure();
