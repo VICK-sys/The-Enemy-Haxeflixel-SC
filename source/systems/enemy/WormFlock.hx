@@ -608,6 +608,7 @@ class WormFlock
 
 		var baseOff = s.kind == "worm" ? headOffY : bodyOffY;
 		s.offset.y = baseOff + lift;
+		s.lift = up ? lift : 0;
 		s.shadowScaleX = up ? 8 : 0;
 
 		var want = up ? (idx == 0 ? "head" : "body") : "mound";

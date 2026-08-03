@@ -13,6 +13,7 @@ class RenderLayers
 {
 	static inline var CORPSE_BAND:Float = -800000;
 	static inline var BURIED_BAND:Float = -400000;
+	static inline var AIRBORNE_BAND:Float = 400000;
 
 	public static inline var GEAR_BIAS:Float = -1;
 	public static inline var HELD_BIAS:Float = 1;
@@ -130,7 +131,9 @@ class RenderLayers
 			var e = cast(s, Enemies);
 			if (e.isDead)
 				return CORPSE_BAND + e.feetY;
-			return e.buried ? BURIED_BAND + e.feetY : e.feetY;
+			if (e.buried)
+				return BURIED_BAND + e.feetY;
+			return e.lift > 0 ? AIRBORNE_BAND + e.feetY : e.feetY;
 		}
 		if (flying.indexOf(s) >= 0)
 			return s.y + s.height * 0.5;

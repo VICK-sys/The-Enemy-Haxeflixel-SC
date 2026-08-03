@@ -52,6 +52,7 @@ class Enemies extends FlxSprite
 	public var entering:Bool = false;
 	public var seized:Bool = false;
 	public var throwGrace:Float = 0;
+	public var lift:Float = 0;
 	public var selfDriven:Bool = false;
 	public var grabbable:Bool = true;
 	public var explodes:Bool = false;
