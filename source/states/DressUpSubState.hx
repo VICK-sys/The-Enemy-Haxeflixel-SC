@@ -55,6 +55,7 @@ class DressUpSubState extends LobbyPanel
 
 	private var pick:Int = 0;
 	private var skin:Int = 0;
+	private var shownSkin:Int = -1;
 	private var gear:Int = 0;
 	private var focus:Int = ROW_COLOR;
 	private var held:Float = 0;
@@ -161,9 +162,18 @@ class DressUpSubState extends LobbyPanel
 	function dressPreview():Void
 	{
 		previewGear.paint(SaveData.playerHue(), skin, gear);
-		preview.frames = HuePalette.sparrow(util.Skins.of(skin), SaveData.playerHue());
+
+		if (preview.frames != null && shownSkin == skin)
+		{
+			HuePalette.live(util.Skins.of(skin), SaveData.playerHue());
+			return;
+		}
+
+		shownSkin = skin;
+		var at = preview.animation.curAnim == null ? 0 : preview.animation.curAnim.curFrame;
+		preview.frames = HuePalette.liveFrames(util.Skins.of(skin), SaveData.playerHue());
 		preview.animation.addByPrefix("idle", "Idle", 9, true);
-		preview.animation.play("idle", true);
+		preview.animation.play("idle", true, false, at);
 		preview.scale.set(5, 5);
 		preview.setPosition(previewCx - preview.frameWidth * 0.5, previewCy - preview.frameHeight * 0.5);
 	}

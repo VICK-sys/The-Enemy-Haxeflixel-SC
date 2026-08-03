@@ -52,10 +52,11 @@ class BackGear
 		pack = art != null;
 		if (pack)
 		{
+			var at = sprite.animation.curAnim == null ? 0 : sprite.animation.curAnim.curFrame;
 			var box = util.Skins.gearFrameOf(g);
 			sprite.loadGraphic(util.HuePalette.graphic(art, h), true, box[0], box[1]);
 			sprite.animation.add("turn", [for (f in 0...sprite.animation.numFrames) f], MOVE_FPS, true);
-			sprite.animation.play("turn");
+			sprite.animation.play("turn", true, false, at % sprite.animation.numFrames);
 			sprite.origin.set(PACK_PIVOT_X, PACK_PIVOT_Y);
 		}
 		else
