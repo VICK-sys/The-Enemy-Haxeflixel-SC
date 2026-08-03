@@ -41,6 +41,9 @@ class LobbyState extends FlxState
 	static inline var DASH_READY_VOL:Float = 0.4;
 	static inline var ZOOM:Float = 0.75;
 	static inline var CURSOR_SCALE:Float = 3;
+	static inline var STEAM_BACK:Float = 34;
+	static inline var STEAM_RISE:Float = 26;
+	static inline var DASH_LINE_GAP:Float = 0.05;
 
 	private var arena:Arena;
 	private var player:Player;
@@ -59,6 +62,11 @@ class LobbyState extends FlxState
 	private var cursor:FlxSprite;
 	private var dashCooldown:Float = 0;
 	private var backGear:systems.BackGear;
+	private var fx:systems.Fx;
+	private var dashGhost:systems.DashGhost;
+	private var steamPuff:FlxSprite;
+	private var dashLineTimer:Float = 0;
+	private var guardTimer:Float = 0;
 	private var chat:ui.ChatWindow;
 	private var wasNetOn:Bool = false;
 
@@ -85,6 +93,14 @@ class LobbyState extends FlxState
 		backGear.paint(SaveData.playerHue());
 		layers.entityLayer.add(backGear.sprite);
 		layers.trackPart(backGear.sprite, player, RenderLayers.GEAR_BIAS);
+
+		fx = new systems.Fx();
+		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
+		insert(members.indexOf(layers.entityLayer), fx.steam);
+
+		dashGhost = new systems.DashGhost(player, SaveData.playerHue());
+		dashGhost.enabled = SaveData.dashTrail();
+		insert(members.indexOf(layers.entityLayer), dashGhost.trail.group);
 
 		camUI = new FlxCamera();
 		camUI.bgColor = 0;
@@ -176,20 +192,69 @@ class LobbyState extends FlxState
 		return best;
 	}
 
+	function steamX():Float
+		return player.x + player.width * 0.5 - (player.flipX ? -1.0 : 1.0) * STEAM_BACK * player.sizeScale;
+
+	function steamY():Float
+		return player.y + player.height * 0.5 - STEAM_RISE * player.sizeScale;
+
+	function trackSteam():Void
+	{
+		if (steamPuff == null)
+			return;
+		if (!steamPuff.exists)
+		{
+			steamPuff = null;
+			return;
+		}
+		steamPuff.flipX = !player.flipX;
+		steamPuff.setPosition(steamX() - steamPuff.width * 0.5, steamY() - steamPuff.height * 0.5);
+	}
+
+	function dashEffects(elapsed:Float):Void
+	{
+		trackSteam();
+		fx.update();
+
+		if (guardTimer > 0)
+			guardTimer -= elapsed;
+		dashGhost.enabled = SaveData.dashTrail();
+		dashGhost.update(elapsed, guardTimer > 0);
+
+		if (player.dashTimer > 0)
+		{
+			dashLineTimer -= elapsed;
+			if (dashLineTimer <= 0)
+			{
+				dashLineTimer = DASH_LINE_GAP;
+				var vx = player.velocity.x;
+				var vy = player.velocity.y;
+				var vlen = Math.sqrt(vx * vx + vy * vy);
+				if (vlen > 0)
+					fx.dashLine(player.x + player.width / 2, player.y + player.height / 2, vx / vlen, vy / vlen);
+			}
+		}
+	}
+
 	function dashTick(elapsed:Float):Void
 	{
 		if (dashCooldown > 0)
 		{
 			dashCooldown -= elapsed;
 			if (dashCooldown <= 0)
+			{
 				FlxG.sound.play(util.Paths.sound("dash/charged"), DASH_READY_VOL);
+				steamPuff = fx.steamAt(steamX(), steamY(), !player.flipX);
+			}
 		}
 
 		if (!util.Controls.justPressed(util.Controls.DASH) || dashCooldown > 0
 			|| player.blockMovement || player.dashTimer > 0)
 			return;
 
-		dashCooldown = data.PlayerData.PlayerDataRegistry.get().dashCooldown;
+		var data = data.PlayerData.PlayerDataRegistry.get();
+		dashCooldown = data.dashCooldown;
+		guardTimer = data.dashIframes;
 		player.dash();
 		FlxG.sound.play(util.Paths.sound("dash/dash" + (1 + Std.random(DASH_LINES))), DASH_VOL);
 	}
@@ -230,6 +295,8 @@ class LobbyState extends FlxState
 
 		status.visible = subState == null;
 		prompt.visible = subState == null;
+
+		dashEffects(elapsed);
 
 		if (subState != null)
 		{
@@ -280,7 +347,8 @@ class LobbyState extends FlxState
 				wi: WeaponPickSubState.lastPick,
 				hv: false,
 				ha: 0,
-				hf: false
+				hf: false,
+				dg: guardTimer > 0
 			});
 
 		for (msg in Net.poll())
