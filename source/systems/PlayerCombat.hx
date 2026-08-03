@@ -343,7 +343,10 @@ class PlayerCombat
 	}
 
 	public function rewardKill():Void
+	{
 		kills++;
+		util.Stats.addKill();
+	}
 
 	public function rewardDamage(amount:Float):Void
 	{

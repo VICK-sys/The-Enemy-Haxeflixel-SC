@@ -94,6 +94,7 @@ class LobbyState extends FlxState
 		addSign(Lobby.width() * 0.75, Lobby.height() * 0.33, "lobby.join", askIp);
 		addSign(Lobby.width() * 0.40, Lobby.height() * 0.58, "lobby.player", dressUp);
 		addSign(Lobby.width() * 0.62, Lobby.height() * 0.58, "lobby.weapon", pickWeapon);
+		addSign(Lobby.width() * 0.84, Lobby.height() * 0.58, "lobby.stats", showStats);
 
 		cursor = new FlxSprite();
 		cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", SaveData.playerHue()));
@@ -378,6 +379,13 @@ class LobbyState extends FlxState
 		player.applySkin();
 		backGear.paint(hue);
 		cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", hue));
+	}
+
+	function showStats():Void
+	{
+		prompt.text = "";
+		util.Controls.resetDevices();
+		openSubState(new StatsSubState(camUI));
 	}
 
 	function dressUp():Void

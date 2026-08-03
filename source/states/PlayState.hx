@@ -78,6 +78,12 @@ class PlayState extends FlxState
 	function canPause():Bool
 		return !status.dead && subState == null && !restarting;
 
+	function onBossDown():Void
+	{
+		util.Stats.addBoss();
+		boss.defeated();
+	}
+
 	function anyoneHurt():Bool
 		return status.health < status.healthMax || (netSync != null && netSync.peersHurt());
 
@@ -158,6 +164,7 @@ class PlayState extends FlxState
 			util.Run.reroll();
 			states.play.QuietRoom.rollTrack();
 			systems.TreeMan.reset();
+			util.Stats.beginRun();
 		}
 		WorldClock.reset();
 		persistentUpdate = Net.active;
@@ -288,7 +295,7 @@ class PlayState extends FlxState
 		director.onWaveCleared = onWaveCleared;
 		director.onBoss = boss.begin;
 		director.onBossPack = hud.showBossBar;
-		director.onBossDefeated = boss.defeated;
+		director.onBossDefeated = onBossDown;
 		director.onBossDrops = boss.dropLoot;
 		combat.hits.wantHeal = anyoneHurt;
 		boss.wantHeal = anyoneHurt;
@@ -311,7 +318,7 @@ class PlayState extends FlxState
 			gate.useNet(netSync);
 			netSync.onWaveEvt = onWaveStarted;
 			netSync.onBossEvt = boss.begin;
-			netSync.onBossDefeatedEvt = boss.defeated;
+			netSync.onBossDefeatedEvt = onBossDown;
 			netSync.onBossKillEvt = bossFinish.trigger;
 			netSync.onDropped = onNetDropped;
 			netSync.startRevive = ritual.begin;
@@ -359,6 +366,7 @@ class PlayState extends FlxState
 
 	override public function destroy():Void
 	{
+		util.Stats.commit();
 		if (hud != null)
 			hud.dispose();
 		super.destroy();
@@ -410,6 +418,7 @@ class PlayState extends FlxState
 				hud.showDeath(director.wave, SaveData.bestWave());
 				DiscordPresence.died(director.wave, SaveData.bestWave());
 			}
+			util.Stats.addDeath();
 		}
 
 		if (!status.dead)
@@ -479,6 +488,9 @@ class PlayState extends FlxState
 		hud.update(elapsed);
 		intro.update(elapsed);
 
+		if (subState == null && !status.dead && !restarting)
+			util.Stats.tick(elapsed);
+
 		if (subState == null && !status.dead)
 			DiscordPresence.playing(director.wave, boss.fighting, combat.weapon, status.kills,
 				boss.fighting ? hud.bossTitle() : "");
@@ -531,11 +543,13 @@ class PlayState extends FlxState
 	function onWaveStarted(n:Int):Void
 	{
 		SaveData.submitWave(n);
+		util.Stats.submitWeaponWave(combat.weapon, n);
 		hud.showWave(n);
 	}
 
 	function onWaveCleared():Void
 	{
+		util.Stats.addWave();
 		round.onWaveCleared();
 		var rest = director.wave % systems.Shop.EVERY == 0 || director.isBossWave(director.wave);
 		if (rest && !Net.isClient)

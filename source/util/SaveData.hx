@@ -416,6 +416,21 @@ class SaveData
 		save.flush();
 	}
 
+	public static function stat(key:String):Float
+	{
+		ensure();
+		var v = Reflect.field(save.data, "st_" + key);
+		return v == null ? 0 : (v : Float);
+	}
+
+	public static function setStat(key:String, v:Float, store:Bool = true):Void
+	{
+		ensure();
+		Reflect.setField(save.data, "st_" + key, v);
+		if (store)
+			save.flush();
+	}
+
 	public static function playerName():String
 	{
 		ensure();
