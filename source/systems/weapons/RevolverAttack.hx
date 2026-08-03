@@ -96,7 +96,7 @@ class RevolverAttack
 		spinEndSoundB.volume = TWIN_SPIN_END_VOL;
 
 		twinSprite = new FlxSprite();
-		util.PixelPerfectShader.on(twinSprite);
+		twinSprite.antialiasing = false;
 		twinSprite.scale.set(4, 4);
 		twinSprite.color = TWIN_SHADE;
 		twinSprite.visible = false;

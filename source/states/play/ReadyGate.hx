@@ -46,7 +46,7 @@ class ReadyGate
 
 		bubble = new FlxSprite();
 		bubble.loadGraphic(Paths.image("ui/speech_ready"));
-		util.PixelPerfectShader.on(bubble);
+		bubble.antialiasing = false;
 		bubble.scale.set(SCALE, SCALE);
 		bubble.updateHitbox();
 		bubble.visible = false;

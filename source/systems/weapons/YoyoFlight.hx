@@ -42,7 +42,7 @@ class YoyoFlight
 	{
 		yoyo = new FlxSprite();
 		yoyo.loadGraphic(util.HuePalette.graphic("items/yoyo_axel", 0));
-		util.PixelPerfectShader.on(yoyo);
+		yoyo.antialiasing = false;
 		yoyo.scale.set(SCALE, SCALE);
 		yoyo.kill();
 		string = new FlxTypedGroup<FlxSprite>();

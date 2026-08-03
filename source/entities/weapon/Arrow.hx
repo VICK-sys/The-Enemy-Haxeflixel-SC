@@ -42,7 +42,7 @@ class Arrow extends FlxSprite
 	{
 		super();
 		loadGraphic(Paths.image(NORMAL));
-		util.PixelPerfectShader.on(this);
+		antialiasing = false;
 		scale.set(4, 4);
 	}
 

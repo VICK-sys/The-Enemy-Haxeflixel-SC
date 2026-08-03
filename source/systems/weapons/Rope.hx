@@ -92,7 +92,7 @@ class Rope
 		if (s.graphic != want)
 		{
 			s.loadGraphic(want);
-			util.PixelPerfectShader.on(s);
+			s.antialiasing = false;
 			s.scale.set(STRAND_SCALE, STRAND_SCALE);
 		}
 		s.setPosition(cx - s.width / 2, cy - s.height / 2);

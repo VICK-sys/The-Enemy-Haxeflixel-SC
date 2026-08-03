@@ -34,7 +34,6 @@ class RenderLayers
 		state.add(shadowLayer);
 
 		playerShadow = new FlxSprite(player.x + 10, player.feetY, Paths.image("effects/shadow"));
-		util.PixelPerfectShader.on(playerShadow);
 		playerShadow.scale.set(4, 4);
 		shadowLayer.add(playerShadow);
 
@@ -50,7 +49,6 @@ class RenderLayers
 	public function addEnemy(e:Enemies):FlxSprite
 	{
 		var sh = new FlxSprite(0, 0, Paths.image("effects/shadow"));
-		util.PixelPerfectShader.on(sh);
 		sh.scale.set(e.shadowScaleX, 4);
 		shadowLayer.add(sh);
 		entityLayer.add(e);

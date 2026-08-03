@@ -77,7 +77,7 @@ class Player extends FlxSprite
 		if (graphic != null)
 			graphic.persist = true;
 
-		util.PixelPerfectShader.on(this);
+		antialiasing = false;
 		width = 42 * sizeScale;
 		height = 44 * sizeScale;
 		scale.set(4 * sizeScale, 4 * sizeScale);

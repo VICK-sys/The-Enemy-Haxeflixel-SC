@@ -167,7 +167,7 @@ class Shop
 
 	function dress(s:FlxSprite):Void
 	{
-		util.PixelPerfectShader.on(s);
+		s.antialiasing = false;
 		s.scale.set(sprite.scale.x, sprite.scale.y);
 		s.updateHitbox();
 	}

@@ -50,7 +50,7 @@ class Decor
 
 		var s = new PropSprite();
 		s.loadGraphic(g);
-		util.PixelPerfectShader.on(s);
+		s.antialiasing = false;
 		var sc = p.scale <= 0 ? 1 : p.scale;
 		s.scale.set(sc, sc);
 		s.updateHitbox();

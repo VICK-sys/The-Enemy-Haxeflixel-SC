@@ -20,7 +20,7 @@ class CoopGhost
 	{
 		sprite = new FlxSprite();
 		load(0);
-		util.PixelPerfectShader.on(sprite);
+		sprite.antialiasing = false;
 		sprite.scale.set(SCALE, SCALE);
 		sprite.updateHitbox();
 		sprite.kill();

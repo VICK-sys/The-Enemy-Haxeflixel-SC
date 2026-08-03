@@ -49,7 +49,7 @@ class PetalFall
 		for (i in 0...POOL)
 		{
 			var s = new FlxSprite(0, 0, Paths.image("props/petal"));
-			util.PixelPerfectShader.on(s);
+			s.antialiasing = false;
 			s.scale.set(SCALE, SCALE);
 			s.updateHitbox();
 			s.exists = false;

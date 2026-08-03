@@ -35,7 +35,7 @@ class EnemyShot extends FlxSprite
 	public function new()
 	{
 		super();
-		util.PixelPerfectShader.on(this);
+		antialiasing = false;
 		use(DEFAULT_SPRITE);
 	}
 

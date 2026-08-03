@@ -33,7 +33,7 @@ class ScrapPickup extends FlxSprite
 
 		shadow = new FlxSprite();
 		shadow.loadGraphic(Paths.image("items/shadow_small"));
-		util.PixelPerfectShader.on(shadow);
+		shadow.antialiasing = false;
 		shadow.scale.set(SCALE, SCALE);
 		shadow.updateHitbox();
 		shadow.moves = false;
@@ -43,7 +43,7 @@ class ScrapPickup extends FlxSprite
 	function wear(n:Int):Void
 	{
 		loadGraphic(Paths.image("items/scrap" + n));
-		util.PixelPerfectShader.on(this);
+		antialiasing = false;
 		scale.set(SCALE, SCALE);
 		updateHitbox();
 	}

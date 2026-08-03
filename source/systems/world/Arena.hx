@@ -86,7 +86,6 @@ class Arena
 		bg = new FlxSprite(0, 0, Paths.image(bgPath));
 		bg.setGraphicSize(Std.int(map.width), Std.int(map.height));
 		bg.updateHitbox();
-		util.PixelPerfectShader.ground(bg, bg.scale.x, 1);
 		state.add(bg);
 
 		whiteOverlay = new FlxSprite(0, 0);
@@ -160,7 +159,6 @@ class Arena
 				bg.setGraphicSize(Std.int(map.width), Std.int(map.height));
 				bg.updateHitbox();
 				bg.shader = warp;
-				bg.antialiasing = false;
 				clearObstacles();
 				gridActive = true;
 				introPhase = BOSS_WAIT;
@@ -199,7 +197,7 @@ class Arena
 				bg.loadGraphic(Paths.image(bgPath));
 				bg.setGraphicSize(Std.int(map.width), Std.int(map.height));
 				bg.updateHitbox();
-				util.PixelPerfectShader.ground(bg, bg.scale.x, 1);
+				bg.shader = null;
 				restoreObstacles();
 				gridActive = false;
 				introPhase = NORMAL_REVEAL;
@@ -350,6 +348,7 @@ class Arena
 
 		bg.scale.set(1, 1);
 		bg.makeGraphic(Std.int(map.width), Std.int(map.height), 0xFF000000, true);
+		bg.antialiasing = false;
 
 		var step = new openfl.geom.Point();
 		var y:Float = 0;
@@ -366,7 +365,6 @@ class Arena
 		}
 		bg.dirty = true;
 		bg.updateHitbox();
-		util.PixelPerfectShader.ground(bg, k, k);
 	}
 
 	public function floorColorAt(px:Float, py:Float):Int

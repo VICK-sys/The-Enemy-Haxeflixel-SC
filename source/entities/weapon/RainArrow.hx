@@ -31,7 +31,7 @@ class RainArrow extends FlxSprite
 	{
 		super();
 		loadGraphic(Paths.image("bullets/arrow"));
-		util.PixelPerfectShader.on(this);
+		antialiasing = false;
 		scale.set(4, 4);
 	}
 

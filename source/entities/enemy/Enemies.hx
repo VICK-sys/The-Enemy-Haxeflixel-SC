@@ -112,7 +112,7 @@ class Enemies extends FlxSprite
         super(x, y);
 		this.kind = kind;
 
-		util.PixelPerfectShader.on(this);
+		this.antialiasing = false;
 		this.scale.set(4, 4);
 
 		var data = EnemyDataRegistry.get(kind);
@@ -150,7 +150,7 @@ class Enemies extends FlxSprite
 			bossBody = true;
 			gun = new FlxSprite();
 			gun.loadGraphic(Paths.image("enemies/domos_shotgun"));
-			util.PixelPerfectShader.on(gun);
+			gun.antialiasing = false;
 			gun.origin.set(gun.frameWidth * 0.5, gun.frameHeight * 0.5);
 			gun.scale.set(4, 4);
 			attack = new DomoBoss(data.domo);
@@ -162,7 +162,7 @@ class Enemies extends FlxSprite
 		{
 			bossBody = true;
 			gun = new FlxSprite();
-			util.PixelPerfectShader.on(gun);
+			gun.antialiasing = false;
 			attack = new RofelBoss(gun, data.boss);
 			selfDriven = true;
 			grabbable = false;

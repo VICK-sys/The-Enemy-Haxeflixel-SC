@@ -167,7 +167,6 @@ class PlayState extends FlxState
 		FlxG.camera.zoom = BASE_ZOOM;
 
 		heldSprite = new FlxSprite(0, 0, Paths.image("items/hammer"));
-		util.PixelPerfectShader.on(heldSprite);
 		heldSprite.scale.set(4, 4);
 		heldSprite.origin.set(heldSprite.width * 0.5, heldSprite.height);
 		heldSprite.x = _player.x - heldSprite.origin.x + 10;
