@@ -304,7 +304,7 @@ class RemoteFx
 			hook.y += (hookTY - hook.y) * k;
 			handCX += (handTX - handCX) * k;
 			handCY += (handTY - handCY) * k;
-			Rope.line(rope, handCX, handCY, hook.x + hook.width / 2, hook.y + hook.height / 2);
+			Rope.line(rope, handCX, handCY, hook.x + hook.width / 2, hook.y + hook.height / 2, avatar.hue);
 		}
 	}
 }
