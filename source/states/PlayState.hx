@@ -245,10 +245,6 @@ class PlayState extends FlxState
 		reloadBar = new ui.ReloadBar(_player);
 		add(reloadBar.group);
 
-		chat = new ui.ChatWindow(hud.camUI);
-		add(chat);
-		hud.raiseCursor();
-
 		if (petals != null)
 			add(petals.group);
 
@@ -258,6 +254,11 @@ class PlayState extends FlxState
 		add(boxes.group);
 
 		hud = new Hud(this, status);
+
+		chat = new ui.ChatWindow(hud.camUI);
+		add(chat);
+		hud.raiseCursor();
+
 		status.onHeal = hud.flashHeal;
 		round.wire(status, director, hud);
 		gate.wire(status, director, hud);
