@@ -58,6 +58,7 @@ class ShopRound
 		sync.onLevelOpen = open;
 		sync.onLevelIn = onPeerEntered;
 		sync.onLevelAck = noteAck;
+		sync.onLevelOut = onPeerLeft;
 		sync.onLevelGo = release;
 		sync.onPeerLost = function(id)
 		{
@@ -129,9 +130,17 @@ class ShopRound
 
 	function onScreenClosed():Void
 	{
+		if (Net.active)
+			Net.send({t: "lvlout"});
 		if (!spentHere)
 			return;
 		reportDone();
+	}
+
+	function onPeerLeft(id:Int):Void
+	{
+		if (netSync != null)
+			netSync.setLeveling(id, false);
 	}
 
 	function onShopShut():Void

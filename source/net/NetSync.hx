@@ -53,6 +53,7 @@ class NetSync
 	public var onLevelOpen:Void->Void;
 	public var onLevelIn:Int->Void;
 	public var onLevelAck:Int->Void;
+	public var onLevelOut:Int->Void;
 	public var onLevelGo:Void->Void;
 	public var onReady:Int->Void;
 	public var onUnready:Int->Void;
@@ -319,6 +320,10 @@ class NetSync
 			case "lvlin":
 				if (onLevelIn != null)
 					onLevelIn(msg.f);
+
+			case "lvlout":
+				if (onLevelOut != null)
+					onLevelOut(msg.f);
 
 			case "lvldone":
 				if (onLevelAck != null)
