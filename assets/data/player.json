@@ -7,7 +7,7 @@
 	"drag": 2600,
 	"dashSpeed": 1250,
 	"dashTime": 0.28,
-	"dashCooldown": 2,
+	"dashCooldown": 1.25,
 	"dashIframes": 0.38,
 	"dropLowHealthBonus": 2.5,
 	"healthMax": 2,
