@@ -5,12 +5,16 @@
 	"countPerWave": 1,
 	"spawnBatch": 3,
 	"spawnEvery": 2,
-	"bossWaveMin": 4,
-	"bossWaveRange": 4,
-	"bossRepeat": 6,
-
-	"bosses": ["domo", "worm"],
-	"debugBosses": ["rofel"],
+	"bossWaveMin": 10,
+	"bossWaveRange": 0,
+	"bossRepeat": 10,
+	"bosses": [
+		"domo",
+		"worm"
+	],
+	"debugBosses": [
+		"rofel"
+	],
 	"duoChance": 0.5,
 	"scaling": {
 		"hpPerWave": 0.1,
@@ -23,8 +27,25 @@
 		"breatherMin": 1.0
 	},
 	"waves": [
-		{ "types": ["fire_child"] },
-		{ "types": ["fire_child", "woodster", "woodster"] },
-		{ "types": ["fire_child", "woodster", "likwid", "fire_child_champion"] }
+		{
+			"types": [
+				"fire_child"
+			]
+		},
+		{
+			"types": [
+				"fire_child",
+				"woodster",
+				"woodster"
+			]
+		},
+		{
+			"types": [
+				"fire_child",
+				"woodster",
+				"likwid",
+				"fire_child_champion"
+			]
+		}
 	]
 }

@@ -72,7 +72,9 @@ class EnemyDirector
 		bodies = new FlxTypedGroup<Enemies>();
 		waveData = WaveDataRegistry.get();
 		betweenWaves = waveData.firstDelay;
-		bossWave = waveData.bossWaveMin + FlxG.random.int(0, waveData.bossWaveRange);
+		bossWave = waveData.bossWaveMin;
+		if (waveData.bossWaveRange > 0)
+			bossWave += FlxG.random.int(0, waveData.bossWaveRange);
 
 		this.fx = fx;
 		spawner = new EnemySpawner(arena);
