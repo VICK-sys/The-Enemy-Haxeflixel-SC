@@ -125,6 +125,8 @@ class PuppetMirror
 			var anim:String = row[5];
 			if (anim != null && e.animation.name != anim && e.animation.getByName(anim) != null)
 				e.animation.play(anim);
+			if (anim != null)
+				e.buried = anim == "mound";
 
 			var dead = row[7] == 1;
 			if (dead && !e.isDead)
