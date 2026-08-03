@@ -71,6 +71,7 @@ class RemoteAvatar
 	static inline var WAVE_SPEED:Float = 10;
 	static inline var FLASH_TIME:Float = 0.16;
 	static inline var HEAD_REACH:Float = 0.7;
+	static inline var BOW_MUZZLE:Float = 70;
 
 	public function new(layers:RenderLayers)
 	{
@@ -161,13 +162,16 @@ class RemoteAvatar
 	}
 
 	public function sparkX():Float
-		return held.x + held.origin.x + Math.cos((held.angle - 90) * Math.PI / 180) * headReach();
+		return held.x + held.origin.x + Math.cos(sparkAngle()) * sparkReach();
 
 	public function sparkY():Float
-		return held.y + held.origin.y + Math.sin((held.angle - 90) * Math.PI / 180) * headReach();
+		return held.y + held.origin.y + Math.sin(sparkAngle()) * sparkReach();
 
-	function headReach():Float
-		return held.frameHeight * held.scale.y * HEAD_REACH;
+	function sparkAngle():Float
+		return (weaponIdx == BOW_INDEX ? held.angle : held.angle - 90) * Math.PI / 180;
+
+	function sparkReach():Float
+		return weaponIdx == BOW_INDEX ? BOW_MUZZLE : held.frameHeight * held.scale.y * HEAD_REACH;
 
 	function glowTick(elapsed:Float):Void
 	{
