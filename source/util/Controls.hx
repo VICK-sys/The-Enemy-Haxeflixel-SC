@@ -35,6 +35,8 @@ class Controls
 	static inline var GYRO_RANGE:Float = 380;
 	static inline var GYRO_STILL:Float = 0.05;
 
+	public static var typing:Bool = false;
+	public static var uiMouse:Bool = false;
 	public static var padMode(default, null):Bool = false;
 	public static var padLabels(default, null):Bool = false;
 
@@ -185,14 +187,26 @@ class Controls
 	static function keyPressed(k:Int):Bool
 	{
 		if (isMouse(k))
+		{
+			if (uiMouse)
+				return false;
 			return k == MOUSE_LEFT ? FlxG.mouse.pressed : (k == MOUSE_RIGHT ? FlxG.mouse.pressedRight : FlxG.mouse.pressedMiddle);
+		}
+		if (typing)
+			return false;
 		return k != FlxKey.NONE && FlxG.keys.anyPressed([k]);
 	}
 
 	static function keyJust(k:Int):Bool
 	{
 		if (isMouse(k))
+		{
+			if (uiMouse)
+				return false;
 			return k == MOUSE_LEFT ? FlxG.mouse.justPressed : (k == MOUSE_RIGHT ? FlxG.mouse.justPressedRight : FlxG.mouse.justPressedMiddle);
+		}
+		if (typing)
+			return false;
 		return k != FlxKey.NONE && FlxG.keys.anyJustPressed([k]);
 	}
 
@@ -272,7 +286,7 @@ class Controls
 		return !fireHeldOff() && pressed(SECOND);
 
 	public static function acceptJustPressed():Bool
-		return justPressed(ACCEPT) || FlxG.keys.anyJustPressed([FlxKey.Z]);
+		return justPressed(ACCEPT) || (!typing && FlxG.keys.anyJustPressed([FlxKey.Z]));
 
 	public static function setAimAnchor(x:Float, y:Float):Void
 	{
@@ -293,31 +307,31 @@ class Controls
 		return (aimY() - cam.scroll.y - cam.viewMarginTop) * cam.zoom;
 
 	public static function menuUp():Bool
-		return FlxG.keys.anyJustPressed([FlxKey.W, FlxKey.UP]) || padJust(FlxGamepadInputID.DPAD_UP) || menuYNow < 0 && menuYPrev >= 0;
+		return (!typing && FlxG.keys.anyJustPressed([FlxKey.W, FlxKey.UP])) || padJust(FlxGamepadInputID.DPAD_UP) || menuYNow < 0 && menuYPrev >= 0;
 
 	public static function menuDown():Bool
-		return FlxG.keys.anyJustPressed([FlxKey.S, FlxKey.DOWN]) || padJust(FlxGamepadInputID.DPAD_DOWN) || menuYNow > 0 && menuYPrev <= 0;
+		return (!typing && FlxG.keys.anyJustPressed([FlxKey.S, FlxKey.DOWN])) || padJust(FlxGamepadInputID.DPAD_DOWN) || menuYNow > 0 && menuYPrev <= 0;
 
 	public static function menuLeftJust():Bool
-		return FlxG.keys.anyJustPressed([FlxKey.A, FlxKey.LEFT]) || padJust(FlxGamepadInputID.DPAD_LEFT) || menuXNow < 0 && menuXPrev >= 0;
+		return (!typing && FlxG.keys.anyJustPressed([FlxKey.A, FlxKey.LEFT])) || padJust(FlxGamepadInputID.DPAD_LEFT) || menuXNow < 0 && menuXPrev >= 0;
 
 	public static function menuRightJust():Bool
-		return FlxG.keys.anyJustPressed([FlxKey.D, FlxKey.RIGHT]) || padJust(FlxGamepadInputID.DPAD_RIGHT) || menuXNow > 0 && menuXPrev <= 0;
+		return (!typing && FlxG.keys.anyJustPressed([FlxKey.D, FlxKey.RIGHT])) || padJust(FlxGamepadInputID.DPAD_RIGHT) || menuXNow > 0 && menuXPrev <= 0;
 
 	public static function menuLeftHeld():Bool
-		return FlxG.keys.anyPressed([FlxKey.A, FlxKey.LEFT]) || padPressed(FlxGamepadInputID.DPAD_LEFT) || menuXNow < 0;
+		return (!typing && FlxG.keys.anyPressed([FlxKey.A, FlxKey.LEFT])) || padPressed(FlxGamepadInputID.DPAD_LEFT) || menuXNow < 0;
 
 	public static function menuRightHeld():Bool
-		return FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT]) || padPressed(FlxGamepadInputID.DPAD_RIGHT) || menuXNow > 0;
+		return (!typing && FlxG.keys.anyPressed([FlxKey.D, FlxKey.RIGHT])) || padPressed(FlxGamepadInputID.DPAD_RIGHT) || menuXNow > 0;
 
 	public static function menuAccept():Bool
-		return FlxG.keys.anyJustPressed([FlxKey.ENTER, FlxKey.Z]) || padJust(FlxGamepadInputID.A);
+		return (!typing && FlxG.keys.anyJustPressed([FlxKey.ENTER, FlxKey.Z])) || padJust(FlxGamepadInputID.A);
 
 	public static function menuBack():Bool
-		return FlxG.keys.anyJustPressed([FlxKey.ESCAPE]) || padJust(FlxGamepadInputID.B);
+		return (!typing && FlxG.keys.anyJustPressed([FlxKey.ESCAPE])) || padJust(FlxGamepadInputID.B);
 
 	public static function walkHeld():Bool
-		return FlxG.keys.anyPressed([FlxKey.SHIFT]) || padPressed(FlxGamepadInputID.LEFT_STICK_CLICK);
+		return (!typing && FlxG.keys.anyPressed([FlxKey.SHIFT])) || padPressed(FlxGamepadInputID.LEFT_STICK_CLICK);
 
 	public static function pausePressed():Bool
 		return justPressed(PAUSE) || padJust(FlxGamepadInputID.START);

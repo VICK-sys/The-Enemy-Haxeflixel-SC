@@ -59,6 +59,8 @@ class LobbyState extends FlxState
 	private var cursor:FlxSprite;
 	private var dashCooldown:Float = 0;
 	private var backGear:systems.BackGear;
+	private var chat:ui.ChatWindow;
+	private var wasNetOn:Bool = false;
 
 	private var peers:Map<Int, RemoteAvatar> = new Map();
 	private var seen:Map<Int, Float> = new Map();
@@ -115,6 +117,9 @@ class LobbyState extends FlxState
 		status.cameras = [camUI];
 		status.y = 24;
 		add(status);
+
+		chat = new ui.ChatWindow(camUI);
+		add(chat);
 
 		FlxG.camera.follow(player);
 		FlxG.camera.setScrollBoundsRect(0, 0, arena.width, arena.height);
@@ -197,6 +202,12 @@ class LobbyState extends FlxState
 
 		frame++;
 		pump();
+
+		var netOn = Net.mode != Off;
+		if (netOn && !wasNetOn)
+			systems.chat.ChatLog.clear();
+		wasNetOn = netOn;
+		chat.show(netOn);
 
 		backGear.update(elapsed, player.x + player.width * 0.5, player.y - 21, player.flipX,
 			systems.BackGear.leanFor(player.animation.name), player.visible, player.angle,
@@ -290,6 +301,7 @@ class LobbyState extends FlxState
 			case "go" if (Net.isClient):
 				beginRun();
 			default:
+				systems.chat.ChatLog.receive(msg);
 		}
 	}
 

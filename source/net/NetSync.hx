@@ -313,6 +313,9 @@ class NetSync
 				if (p != null)
 					p.avatar.setName(msg.n);
 
+			case "chat", "chatE", "chatD":
+				systems.chat.ChatLog.receive(msg);
+
 			case "lvl" if (Net.isClient):
 				if (onLevelOpen != null)
 					onLevelOpen();

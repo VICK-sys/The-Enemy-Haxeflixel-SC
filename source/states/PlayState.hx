@@ -53,6 +53,7 @@ class PlayState extends FlxState
 	private var combat:Weapons;
 	private var hud:Hud;
 	private var reloadBar:ui.ReloadBar;
+	private var chat:ui.ChatWindow;
 	private var round:states.play.ShopRound;
 	private var gate:states.play.ReadyGate;
 	private var quiet:states.play.QuietRoom;
@@ -244,6 +245,9 @@ class PlayState extends FlxState
 		reloadBar = new ui.ReloadBar(_player);
 		add(reloadBar.group);
 
+		chat = new ui.ChatWindow(hud.camUI);
+		add(chat);
+
 		if (petals != null)
 			add(petals.group);
 
@@ -425,6 +429,7 @@ class PlayState extends FlxState
 		combat.yoyoJab.flight.yoyo.visible = !props.buried;
 		combat.inputBlocked = inputLocked;
 		_player.blockMovement = inputLocked;
+		chat.show(Net.active);
 		combat.update(elapsed);
 		backGear.update(elapsed, _player.x + _player.width * 0.5, _player.y - 21, _player.flipX,
 			systems.BackGear.leanFor(_player.animation.name), _player.visible,

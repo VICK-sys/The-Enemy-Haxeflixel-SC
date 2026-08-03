@@ -359,6 +359,26 @@ class SaveData
 			save.flush();
 	}
 
+	public static function chatX():Float
+	{
+		ensure();
+		return save.data.chatX != null ? save.data.chatX : -1;
+	}
+
+	public static function chatY():Float
+	{
+		ensure();
+		return save.data.chatY != null ? save.data.chatY : -1;
+	}
+
+	public static function setChatPos(x:Float, y:Float):Void
+	{
+		ensure();
+		save.data.chatX = x;
+		save.data.chatY = y;
+		save.flush();
+	}
+
 	public static function commit():Void
 	{
 		ensure();
