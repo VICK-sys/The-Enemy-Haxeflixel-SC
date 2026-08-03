@@ -110,6 +110,8 @@ class SwingAttack
 
 	function strike(pmx:Float, pmy:Float, aimX:Float, aimY:Float, scale:Float = 1, ?efx:Float, ?efy:Float):Void
 	{
+		var homeX = pmx;
+		var homeY = pmy;
 		var fromEffect = cfg.hitFromEffect == true && efx != null;
 		var range = cfg.meleeRange;
 		if (fromEffect)
@@ -140,9 +142,22 @@ class SwingAttack
 				fx.meleeImpact(cfg.hitstop, cfg.hitstopScale, cfg.hitShake);
 			}
 
-			var push = (elen > 0 ? elen : 1) / cfg.knock;
-			var vx = ex / push;
-			var vy = ey / push;
+			var px = ex;
+			var py = ey;
+			if (fromEffect)
+			{
+				px = e.x + e.width / 2 - homeX;
+				py = e.y + e.height / 2 - homeY;
+			}
+			var plen = Math.sqrt(px * px + py * py);
+			if (plen < 0.001)
+			{
+				px = aimX;
+				py = aimY;
+				plen = 1;
+			}
+			var vx = px / plen * cfg.knock;
+			var vy = py / plen * cfg.knock;
 			hits.damageN(e, vx, vy, cfg.damage * scale);
 			e.brace(cfg.hitstop, cfg.hitBrace, vx, vy);
 		});
