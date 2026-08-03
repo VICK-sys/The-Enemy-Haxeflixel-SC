@@ -108,7 +108,7 @@ class BossHud
 		"worm" => "Magma Wyrm"
 	];
 
-	function bossName():String
+	public function bossName():String
 	{
 		var kind = bosses.length > 0 && bosses[0] != null ? bosses[0].kind : "domo";
 		var word = BOSS_NAMES.exists(kind) ? BOSS_NAMES.get(kind) : "Domo";

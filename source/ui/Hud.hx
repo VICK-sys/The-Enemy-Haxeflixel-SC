@@ -502,6 +502,9 @@ class Hud
 		bossHud.showBar(pack);
 	}
 
+	public function bossTitle():String
+		return bossHud.bossName();
+
 	public function fadeBanner():Void
 	{
 		bannerTimer = 0;

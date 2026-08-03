@@ -31,6 +31,7 @@ class DiscordPresence
 
 	static var wave:Int = -1;
 	static var boss:Bool = false;
+	static var bossLabel:String = "";
 	static var weapon:Int = -1;
 	static var kills:Int = 0;
 	#end
@@ -127,18 +128,19 @@ class DiscordPresence
 		#end
 	}
 
-	public static function playing(curWave:Int, bossFight:Bool, curWeapon:Int, curKills:Int):Void
+	public static function playing(curWave:Int, bossFight:Bool, curWeapon:Int, curKills:Int, curBoss:String = ""):Void
 	{
 		#if hxdiscord_rpc
-		var major = curWave != wave || bossFight != boss || curWeapon != weapon || overridden;
+		var major = curWave != wave || bossFight != boss || curWeapon != weapon || overridden || curBoss != bossLabel;
 		if (!major && curKills == kills)
 			return;
 		wave = curWave;
 		boss = bossFight;
 		weapon = curWeapon;
 		kills = curKills;
+		bossLabel = curBoss;
 		overridden = false;
-		details = boss ? "Boss Fight - Rofel" : (wave > 0 ? "Fighting Wave " + wave : "Entering the Arena");
+		details = boss ? (bossLabel == "" ? "Boss Fight" : "Boss Fight - " + bossLabel) : (wave > 0 ? "Fighting Wave " + wave : "Entering the Arena");
 		state = weaponName() + " · " + killText();
 		smallKey = weapon >= 0 ? WEAPON_KEYS[weapon] : "";
 		smallText = weaponName();
