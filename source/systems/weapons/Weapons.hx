@@ -58,7 +58,6 @@ class Weapons
 		gigaSwing = new SwingAttack(director, hits, fx, weaponCfg.giga);
 		gigaSwing.onConnect = gigaHit(gigaSwing);
 		giga = new GigaCharge(held, fx, weaponCfg.giga);
-		status.onHurt = function() giga.letGo();
 		yoyoJab = new YoyoJab(director, hits, fx);
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		revolver = new RevolverAttack(arena, director, fx, hits, status);
@@ -403,6 +402,12 @@ class Weapons
 					held.flash();
 				emitAttack(Giga, pmx, pmy, dx, dy, aimDeg, 0, timed);
 				gigaSwing.fire(pmx, pmy, dx, dy, aimDeg, null, null, timed);
+			}
+			else if (swing.ready && !held.swinging)
+			{
+				held.beginSwing(aimDeg, Swing);
+				emitAttack(Swing, pmx, pmy, dx, dy, aimDeg);
+				swing.fire(pmx, pmy, dx, dy, aimDeg);
 			}
 			return;
 		}
