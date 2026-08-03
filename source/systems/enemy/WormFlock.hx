@@ -135,7 +135,7 @@ class WormFlock
 		if (chains.length == 0)
 		{
 			done = true;
-			hush();
+			retire();
 			return;
 		}
 
@@ -149,6 +149,19 @@ class WormFlock
 	{
 		if (digLoop != null && digLoop.playing)
 			digLoop.stop();
+	}
+
+	public function retire():Void
+	{
+		hush();
+		for (p in puffs)
+		{
+			p.life = 0;
+			p.sprite.visible = false;
+			layers.shadowLayer.remove(p.sprite, true);
+			p.sprite.destroy();
+		}
+		puffs.resize(0);
 	}
 
 	function tunnelHum():Void
@@ -524,8 +537,12 @@ class WormFlock
 		{
 			if (idx == 0)
 				s.angle = 0;
-			if (floorAt != null)
-				s.color = floorAt(px, s.feetY);
+			if (s.flashTimer <= 0)
+			{
+				s.setColorTransform(1, 1, 1, s.alpha, 0, 0, 0, 0);
+				if (floorAt != null)
+					s.color = floorAt(px, s.feetY);
+			}
 		}
 
 	}

@@ -350,7 +350,7 @@ class EnemyDirector
 	{
 		var wasX = worm.lastX;
 		var wasY = worm.lastY;
-		worm.hush();
+		worm.retire();
 		worm = null;
 		if (onBossKill != null)
 			onBossKill(wasX, wasY);
@@ -539,6 +539,8 @@ class EnemyDirector
 				e.throwGrace = e.hitRecover;
 				e.velocity.set(0, 0);
 				e.drag.set(0, 0);
+				if (e.hitRecoil > 0)
+					shoveOff(e);
 			}
 
 			gunfire.emit(e);
@@ -552,6 +554,23 @@ class EnemyDirector
 	static inline var FLING_SPEED:Float = 1000;
 	static inline var FLING_STUN:Float = 0.7;
 	static inline var FLING_DRAG:Float = 600;
+
+	function shoveOff(e:Enemies):Void
+	{
+		var px = player.x + player.width * 0.5;
+		var py = player.feetY;
+		var dx = e.x + e.width * 0.5 - px;
+		var dy = e.feetY - py;
+		var len = Math.sqrt(dx * dx + dy * dy);
+		if (len < 0.001)
+		{
+			dx = e.flipX ? 1 : -1;
+			dy = 0;
+			len = 1;
+		}
+		e.velocity.set(dx / len * e.hitRecoil, dy / len * e.hitRecoil);
+		e.drag.set(e.knockbackDrag, e.knockbackDrag);
+	}
 
 	function drainSummons(e:Enemies):Void
 	{
