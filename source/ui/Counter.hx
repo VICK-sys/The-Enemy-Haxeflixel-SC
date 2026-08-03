@@ -9,7 +9,7 @@ class Counter extends TextField
 	static inline var ALARM_BYTES:Float = 1024 * 1024 * 1024;
 	static inline var MEGABYTE:Float = 1024 * 1024;
 	static inline var PLAIN:Int = 0xFFFFFF;
-	static inline var ALARM:Int = 0xFF4A4A;
+	static inline var ALARM:Int = 0x560101;
 	static inline var SIZE:Int = 12;
 
 	private var times:Array<Float> = [];
