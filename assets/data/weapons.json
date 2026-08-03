@@ -122,6 +122,7 @@
 			"hitShake": 0.006,
 			"knock": 0.6,
 			"hitBrace": 4,
+			"bossScale": 0.5,
 			"deflects": true
 		},
 		"finisher": {
@@ -135,6 +136,7 @@
 			"hitShake": 0.016,
 			"knock": 8,
 			"hitBrace": 10,
+			"bossScale": 0.5,
 			"sound": "weapon/gigaSwing",
 			"shineMult": 1.5
 		}

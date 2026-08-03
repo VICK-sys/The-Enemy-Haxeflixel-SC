@@ -158,7 +158,10 @@ class SwingAttack
 			}
 			var vx = px / plen * cfg.knock;
 			var vy = py / plen * cfg.knock;
-			hits.damageN(e, vx, vy, cfg.damage * scale, true, scale > 1);
+			var dmg = cfg.damage * scale;
+			if (e.bossBody && cfg.bossScale != null)
+				dmg *= cfg.bossScale;
+			hits.damageN(e, vx, vy, dmg, true, scale > 1);
 			e.brace(cfg.hitstop, cfg.hitBrace, vx, vy);
 		});
 	}

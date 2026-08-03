@@ -21,7 +21,8 @@ typedef SwingConfig = {
 	?hitFromEffect:Bool,
 	?chargeTime:Float,
 	?sound:String,
-	?shineMult:Float
+	?shineMult:Float,
+	?bossScale:Float
 }
 
 typedef YoyoConfig = {
