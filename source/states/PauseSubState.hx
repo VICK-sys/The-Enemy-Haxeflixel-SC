@@ -17,6 +17,7 @@ class PauseSubState extends FlxSubState
 	private var camUI:FlxCamera;
 	private var list:MenuList;
 	private var leaving:Bool = false;
+	private var holding:Bool = true;
 	private var inLobby:Bool;
 
 	public function new(camUI:FlxCamera, inLobby:Bool = false)
@@ -85,6 +86,13 @@ class PauseSubState extends FlxSubState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+
+		if (holding)
+		{
+			if (util.Controls.pauseHeld())
+				return;
+			holding = false;
+		}
 
 		if (util.Controls.menuBack() || util.Controls.pausePressed())
 		{

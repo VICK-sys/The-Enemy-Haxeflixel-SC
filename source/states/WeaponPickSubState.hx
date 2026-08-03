@@ -108,6 +108,7 @@ class WeaponPickSubState extends FlxSubState
 	private var bob:Float = 0;
 	private var pick:Int = 0;
 	private var done:Bool = false;
+	private var holding:Bool = true;
 	private var lastMouseX:Float = -99999;
 	private var lastMouseY:Float = -99999;
 
@@ -263,6 +264,12 @@ class WeaponPickSubState extends FlxSubState
 
 		updateFloat(elapsed);
 
+		if (holding)
+		{
+			if (util.Controls.pressed(util.Controls.INTERACT))
+				return;
+			holding = false;
+		}
 		updateInput();
 	}
 
