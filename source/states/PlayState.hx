@@ -77,6 +77,9 @@ class PlayState extends FlxState
 	function canPause():Bool
 		return !status.dead && subState == null && !restarting;
 
+	function anyoneHurt():Bool
+		return status.health < status.healthMax || (netSync != null && netSync.peersHurt());
+
 	function openPause():Void
 	{
 		DiscordPresence.paused();
@@ -273,6 +276,8 @@ class PlayState extends FlxState
 		director.onBossPack = hud.showBossBar;
 		director.onBossDefeated = boss.defeated;
 		director.onBossDrops = boss.dropLoot;
+		combat.hits.wantHeal = anyoneHurt;
+		boss.wantHeal = anyoneHurt;
 		bossFinish = new systems.BossFinish(_player, fx);
 		director.onBossKill = bossFinish.trigger;
 		director.onFriendlyShot = onDeflectedShot;
@@ -460,7 +465,8 @@ class PlayState extends FlxState
 		intro.update(elapsed);
 
 		if (subState == null && !status.dead)
-			DiscordPresence.playing(director.wave, boss.fighting, combat.weapon, status.kills);
+			DiscordPresence.playing(director.wave, boss.fighting, combat.weapon, status.kills,
+				boss.fighting ? hud.bossTitle() : "");
 
 		if (util.Controls.pausePressed() && canPause())
 			openPause();

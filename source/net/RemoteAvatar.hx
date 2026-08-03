@@ -35,6 +35,7 @@ class RemoteAvatar
 	private var leveling:Bool = false;
 	public var hue(default, null):Float = 0;
 	public var skin(default, null):Int = 0;
+	public var healthFrac(default, null):Float = 1;
 	public var gearIdx(default, null):Int = 0;
 	private var wasDead:Bool = false;
 	private var burst:systems.DeathBurst;
@@ -201,6 +202,7 @@ class RemoteAvatar
 		haveTarget = true;
 
 		var dead:Bool = m.dd == true;
+		healthFrac = dead ? 0 : (m.hl == null ? 1.0 : (m.hl : Float));
 		if (dead && !wasDead)
 		{
 			burst.burst(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue, sprite.flipX, util.Skins.of(skin));

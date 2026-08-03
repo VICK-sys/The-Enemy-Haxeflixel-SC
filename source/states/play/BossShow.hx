@@ -89,11 +89,14 @@ class BossShow
 		}, onPeak, WARN_HOLD);
 	}
 
+	public var wantHeal:Void->Bool;
+
 	public function dropLoot(cx:Float, cy:Float):Void
 	{
 		for (i in 0...Scraps.BOSS_SCRAP)
 			scraps.drop(cx, cy);
-		pickups.drop(cx, cy);
+		if (wantHeal == null || wantHeal())
+			pickups.drop(cx, cy);
 	}
 
 	public function defeated():Void

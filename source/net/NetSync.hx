@@ -252,6 +252,17 @@ class NetSync
 		return i >= 0 && i < MODE_COUNT;
 	}
 
+	public function peersHurt():Bool
+	{
+		var hurt = false;
+		roster.eachAvatar(function(a)
+		{
+			if (a.healthFrac < 0.999)
+				hurt = true;
+		});
+		return hurt;
+	}
+
 	public function update(elapsed:Float):Void
 	{
 		frame++;
@@ -604,6 +615,7 @@ class NetSync
 			tw: twinState(player),
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
 			dd: status.dead && !status.throes,
+			hl: r2(status.healthMax > 0 ? status.health / status.healthMax : 1),
 			rv: reviving,
 			hk: hookShot.exists ? [r1(hookShot.x), r1(hookShot.y), r1(hookShot.angle), r1(combat.held.handX()), r1(combat.held.handY())] : null,
 			yo: yo.active ? [r1(yo.cx), r1(yo.cy), r1(yo.yoyo.angle)] : null,

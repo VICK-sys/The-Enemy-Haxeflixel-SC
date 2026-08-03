@@ -12,8 +12,11 @@ import systems.world.PropBlock;
 
 class HitPipeline
 {
+	static inline var DROP_RATE:Float = 0.5;
+
 	public var remote:Bool = false;
 	public var owner:entities.Player;
+	public var wantHeal:Void->Bool;
 	public var onClaim:(Enemies, Float, Float, Float, Float) -> Void;
 	public var onImpact:(Float, Float) -> Void;
 
@@ -76,7 +79,8 @@ class HitPipeline
 				status.rewardKill();
 				scraps.drop(e.x + e.width / 2, e.y + e.height / 2);
 			}
-			if (FlxG.random.float() < e.dropChance * status.dropScale())
+			var hurt = wantHeal == null ? status.health < status.healthMax : wantHeal();
+			if (hurt && FlxG.random.float() < e.dropChance * DROP_RATE * status.dropScale())
 				pickups.drop(e.x + e.width / 2, e.y + e.height / 2);
 		}
 	}
