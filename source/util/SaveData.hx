@@ -279,6 +279,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function dashTrail():Bool
+	{
+		ensure();
+		return save.data.dashTrail != null ? save.data.dashTrail : true;
+	}
+
+	public static function setDashTrail(b:Bool):Void
+	{
+		ensure();
+		save.data.dashTrail = b;
+		save.flush();
+	}
+
 	public static function sound3d():Bool
 	{
 		ensure();

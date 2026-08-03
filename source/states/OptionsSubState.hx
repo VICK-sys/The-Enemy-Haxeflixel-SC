@@ -60,6 +60,7 @@ class OptionsSubState extends FlxSubState
 	static inline var PADICONS:Int = 21;
 	static inline var GYRO:Int = 22;
 	static inline var DMGNUM:Int = 23;
+	static inline var DASHTRAIL:Int = 24;
 
 	static inline var TAB:Int = -1;
 	static inline var BACK:Int = -2;
@@ -67,7 +68,7 @@ class OptionsSubState extends FlxSubState
 
 	static var PAGES:Array<{key:String, items:Array<Int>}> = [
 		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE, IDLE_FPS]},
-		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, DMGNUM, HUD, FPS]},
+		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, DMGNUM, DASHTRAIL, HUD, FPS]},
 		{key: "options.page.sounds", items: [VOLUME, MUSIC, SFX, SOUND3D]},
 		{key: "options.page.custom", items: [VOICE, LANGUAGE, CONTROLS, AIMDEAD, PADICONS, GYRO, RESET]}
 	];
@@ -333,6 +334,7 @@ class OptionsSubState extends FlxSubState
 			case COLOR: Lang.t("options.color", [Math.round(SaveData.playerHue() * 360)]);
 			case VOICE: Lang.t("options.voice", [pitchLabel()]);
 			case DMGNUM: Lang.t("options.dmgnum", [onOff(SaveData.damageNumbers())]);
+			case DASHTRAIL: Lang.t("options.dashtrail", [onOff(SaveData.dashTrail())]);
 			case HUD: Lang.t("options.hud", [onOff(SaveData.showHud())]);
 			case SOUND3D: Lang.t("options.sound3d", [onOff(SaveData.sound3d())]);
 			case AIMDEAD: Lang.t("options.aimdead", [SaveData.aimDeadzone() <= 0 ? Lang.t("common.off") : Std.string(Math.round(SaveData.aimDeadzone() * 100)) + "%"]);
@@ -499,6 +501,8 @@ class OptionsSubState extends FlxSubState
 				SaveData.setVoicePitch(SaveData.voicePitch() + dir * VOICE_STEP);
 			case DMGNUM:
 				SaveData.setDamageNumbers(!SaveData.damageNumbers());
+			case DASHTRAIL:
+				SaveData.setDashTrail(!SaveData.dashTrail());
 			case HUD:
 				SaveData.setShowHud(!SaveData.showHud());
 			case SOUND3D:

@@ -68,6 +68,7 @@ class PlayState extends FlxState
 	private var bossFinish:systems.BossFinish;
 	private var boxes:systems.HitboxView;
 	private var numbers:systems.DamageNumbers;
+	private var dashGhost:systems.DashGhost;
 	private var wipe:IrisWipe;
 	public var restarting(default, null):Bool = false;
 	private var hadSub:Bool = false;
@@ -99,6 +100,8 @@ class PlayState extends FlxState
 				numbers.applyLanguage();
 			}
 			numbers.enabled = SaveData.damageNumbers();
+			dashGhost.enabled = SaveData.dashTrail();
+			dashGhost.paint(SaveData.playerHue());
 			_player.setHue(SaveData.playerHue());
 			combat.repaint();
 			hud.repaint();
@@ -233,6 +236,9 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), fx.steam);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
+		dashGhost = new systems.DashGhost(_player);
+		dashGhost.enabled = SaveData.dashTrail();
+		insert(members.indexOf(layers.entityLayer), dashGhost.trail.group);
 		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status, fx) : new EnemyDirector(_player, arena, layers, status, fx);
 		director.solids = props.solids;
 		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups, scraps);
@@ -445,6 +451,7 @@ class PlayState extends FlxState
 		layers.adoptOne(combat.throwAttack.thrown);
 		layers.update();
 		numbers.update(elapsed);
+		dashGhost.update(elapsed, status.guarding);
 		props.update();
 		drawBoxes();
 		bushes.update(step);

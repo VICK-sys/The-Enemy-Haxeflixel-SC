@@ -109,6 +109,7 @@
 	"options.freeze": "FREEZE FRAMES  < {0}% >",
 	"options.color": "CHARACTER COLOR  < {0}° >",
 	"options.dmgnum": "DAMAGE NUMBERS  {0}",
+	"options.dashtrail": "DASH AFTERIMAGE  {0}",
 	"options.hud": "HUD  {0}",
 	"options.sound3d": "3D SOUND  {0}",
 	"options.fps": "FPS COUNTER  {0}",

@@ -39,6 +39,12 @@ class PlayerCombat
 	private var data:PlayerData;
 	private var iframeTimer:Float = 0;
 	private var blink:Bool = false;
+	private var dashGuard:Bool = false;
+
+	public var guarding(get, never):Bool;
+
+	function get_guarding():Bool
+		return iframeTimer > 0 && dashGuard && !dead;
 	private var hurtLockTimer:Float = 0;
 	private var hurtSlowTimer:Float = 0;
 	private var dashCooldownTimer:Float = 0;
@@ -98,6 +104,7 @@ class PlayerCombat
 			if (iframeTimer <= 0)
 			{
 				blink = false;
+				dashGuard = false;
 				player.visible = !gone;
 			}
 		}
@@ -136,6 +143,7 @@ class PlayerCombat
 			FlxG.sound.play(Paths.sound("dash/dash" + (1 + Std.random(DASH_LINES))), DASH_VOL);
 			iframeTimer = data.dashIframes;
 			blink = false;
+			dashGuard = true;
 			player.visible = true;
 		}
 
@@ -276,6 +284,7 @@ class PlayerCombat
 		player.blockMovement = true;
 		iframeTimer = data.iframeTime;
 		blink = true;
+		dashGuard = false;
 		hurtLockTimer = data.hurtLockTime;
 		hurtSlowTimer = data.hurtLockTime + data.hurtSlowTime;
 		player.moveScale = data.hurtMoveScale;
