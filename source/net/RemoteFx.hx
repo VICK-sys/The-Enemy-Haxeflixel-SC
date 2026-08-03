@@ -27,6 +27,7 @@ class RemoteFx
 {
 	private var cfg = WeaponDataRegistry.get();
 	private var fx:Fx;
+	private var layers:RenderLayers;
 
 	private var slashes:FlxTypedGroup<SlashEffect>;
 	private var arrows:FlxTypedGroup<Arrow>;
@@ -62,6 +63,7 @@ class RemoteFx
 	public function new(state:FlxState, layers:RenderLayers, director:EnemyDirector, hits:HitPipeline, fx:Fx, avatar:RemoteAvatar)
 	{
 		this.fx = fx;
+		this.layers = layers;
 		this.avatar = avatar;
 
 		rain = new ArrowRain(fx, hits);
@@ -85,9 +87,6 @@ class RemoteFx
 
 		var below = state.members.indexOf(layers.entityLayer);
 		state.insert(below, rain.markers);
-		state.add(arrows);
-		state.add(bullets);
-		state.add(rain.arrows);
 		state.add(slashes);
 		state.add(rope);
 		state.add(hook);
@@ -273,6 +272,9 @@ class RemoteFx
 
 	public function update(elapsed:Float):Void
 	{
+		layers.adopt(cast bullets);
+		layers.adopt(cast arrows);
+		layers.adopt(cast rain.arrows);
 		rain.hue = avatar.hue;
 		yoyo.setHue(avatar.hue);
 		hook.paint(avatar.hue);
