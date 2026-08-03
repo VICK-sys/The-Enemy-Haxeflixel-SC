@@ -84,6 +84,7 @@ class BackGear
 		if (pack)
 		{
 			sprite.angle = spin;
+			sprite.flipX = facingLeft;
 			if (sprite.animation.curAnim != null)
 				sprite.animation.curAnim.frameRate = anim == "idle" || anim == null ? IDLE_FPS : MOVE_FPS;
 		}
