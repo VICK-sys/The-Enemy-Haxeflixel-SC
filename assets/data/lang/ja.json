@@ -95,6 +95,7 @@
 	"options.shake": "画面の揺れ  < {0}% >",
 	"options.freeze": "ヒットストップ  < {0}% >",
 	"options.color": "キャラクターの色  < {0}° >",
+	"options.dmgnum": "ダメージ表示  {0}",
 	"options.hud": "HUD  {0}",
 	"options.sound3d": "3Dサウンド  {0}",
 	"options.fps": "FPS表示  {0}",

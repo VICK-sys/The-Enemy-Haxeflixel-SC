@@ -19,6 +19,7 @@ class HitPipeline
 	public var wantHeal:Void->Bool;
 	public var onClaim:(Enemies, Float, Float, Float, Float) -> Void;
 	public var onImpact:(Float, Float) -> Void;
+	public var onNumber:(Float, Float, Float, Int, Dynamic) -> Void;
 
 	private var status:PlayerCombat;
 	private var fx:Fx;
@@ -40,29 +41,41 @@ class HitPipeline
 		damageN(e, pushX, pushY, 1);
 	}
 
-	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Float, feedMeter:Bool = true):Void
-		route(e, pushX, pushY, damage, feedMeter);
+	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Float, feedMeter:Bool = true, crit:Bool = false):Void
+		route(e, pushX, pushY, damage, feedMeter, crit);
 
-	public function damageSuper(e:Enemies, pushX:Float, pushY:Float, damage:Float):Void
-		route(e, pushX, pushY, damage, false);
+	public function damageSuper(e:Enemies, pushX:Float, pushY:Float, damage:Float, crit:Bool = false):Void
+		route(e, pushX, pushY, damage, false, crit);
 
-	function route(e:Enemies, pushX:Float, pushY:Float, damage:Float, feedMeter:Bool):Void
+	function route(e:Enemies, pushX:Float, pushY:Float, damage:Float, feedMeter:Bool, crit:Bool = false):Void
 	{
 		damage += util.Levels.damageBonus();
 		if (owner != null && PropBlock.between(owner.x + owner.width / 2, owner.feetY, e.x + e.width / 2, e.feetY))
-			return;
-		if (remote)
 		{
-			claim(e, pushX, pushY, damage, 0, feedMeter);
+			number(e, 0, DamageNumbers.BLOCKED);
 			return;
 		}
-		applyHit(e, pushX, pushY, damage, true, feedMeter);
+		if (remote)
+		{
+			claim(e, pushX, pushY, damage, 0, feedMeter, crit);
+			return;
+		}
+		applyHit(e, pushX, pushY, damage, true, feedMeter, crit);
 	}
 
-	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Float, rewardable:Bool, feedMeter:Bool = true):Void
+	function number(e:Enemies, amount:Float, kind:Int):Void
+	{
+		if (onNumber != null)
+			onNumber(e.x + e.width / 2, e.y, amount, kind, e);
+	}
+
+	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Float, rewardable:Bool, feedMeter:Bool = true,
+			crit:Bool = false):Void
 	{
 		var landed = damage < e.hp ? damage : e.hp;
+		var shrugged = e.isDead || e.buried;
 		e.takeHit(pushX, pushY, damage);
+		number(e, shrugged ? 0 : damage, shrugged ? DamageNumbers.BLOCKED : (crit ? DamageNumbers.CRIT : DamageNumbers.HIT));
 		if (rewardable && feedMeter)
 			status.rewardDamage(landed);
 
@@ -85,10 +98,13 @@ class HitPipeline
 		}
 	}
 
-	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Float, stunTime:Float, feedMeter:Bool = true):Void
+	function claim(e:Enemies, pushX:Float, pushY:Float, damage:Float, stunTime:Float, feedMeter:Bool = true,
+			crit:Bool = false):Void
 	{
 		if (feedMeter)
 			status.rewardDamage(damage < e.hp ? damage : e.hp);
+		var shrugged = e.isDead || e.buried;
+		number(e, shrugged ? 0 : damage, shrugged ? DamageNumbers.BLOCKED : (crit ? DamageNumbers.CRIT : DamageNumbers.HIT));
 		util.Sfx.at("enemies/hit", e.x + e.width / 2, e.y + e.height / 2, 0.6);
 		fx.sparksAt(e.x + e.width / 2, e.y + e.height / 2);
 		e.flashTimer = 0.08;

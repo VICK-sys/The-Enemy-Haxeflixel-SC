@@ -95,6 +95,7 @@
 	"options.shake": "VIBRACIÓN  < {0}% >",
 	"options.freeze": "PAUSA DE IMPACTO  < {0}% >",
 	"options.color": "COLOR DEL PERSONAJE  < {0}° >",
+	"options.dmgnum": "NÚMEROS DE DAÑO  {0}",
 	"options.hud": "HUD  {0}",
 	"options.sound3d": "SONIDO 3D  {0}",
 	"options.fps": "CONTADOR DE FPS  {0}",

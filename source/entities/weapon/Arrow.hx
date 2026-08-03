@@ -17,6 +17,7 @@ class Arrow extends FlxSprite
 	public var damage:Float = 1;
 	public var knock:Float = 1;
 	public var piercing:Bool = false;
+	public var crit:Bool = false;
 
 	private var life:Float = 0;
 	private var hitList:Array<FlxObject> = [];

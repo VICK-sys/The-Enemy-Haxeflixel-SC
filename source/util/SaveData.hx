@@ -266,6 +266,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function damageNumbers():Bool
+	{
+		ensure();
+		return save.data.damageNumbers != null ? save.data.damageNumbers : true;
+	}
+
+	public static function setDamageNumbers(b:Bool):Void
+	{
+		ensure();
+		save.data.damageNumbers = b;
+		save.flush();
+	}
+
 	public static function sound3d():Bool
 	{
 		ensure();

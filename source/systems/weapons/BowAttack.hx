@@ -137,6 +137,7 @@ class BowAttack
 		var damage = hot ? cfg.damage * cfg.sweetMult : cfg.damage * (1 + power * (cfg.fullMult - 1));
 		var arrow = arrows.recycle(Arrow);
 		arrow.paint(util.SaveData.playerHue(), hot);
+		arrow.crit = hot;
 		arrow.fire(bx + dx * 10, by + dy * 10, dx, dy, aimDeg, damage, 1 + power * cfg.speedBonus,
 			1 + power * cfg.sizeBonus, 1 + power * cfg.knockBonus);
 		FlxG.sound.play(Paths.sound(util.Sfx.bowShot(hot, power)), 0.7 + power * 0.3);
@@ -174,7 +175,7 @@ class BowAttack
 					if (arrow.hasHit(e))
 						return;
 					arrow.markHit(e);
-					hits.damageN(e, arrow.dirX * arrow.knock, arrow.dirY * arrow.knock, arrow.damage);
+					hits.damageN(e, arrow.dirX * arrow.knock, arrow.dirY * arrow.knock, arrow.damage, true, arrow.crit);
 				});
 				continue;
 			}
@@ -182,7 +183,7 @@ class BowAttack
 			var hit = director.firstInCircle(acx, acy, Arrow.RADIUS);
 			if (hit != null)
 			{
-				hits.damageN(hit, arrow.dirX * arrow.knock, arrow.dirY * arrow.knock, arrow.damage);
+				hits.damageN(hit, arrow.dirX * arrow.knock, arrow.dirY * arrow.knock, arrow.damage, true, arrow.crit);
 				arrow.kill();
 			}
 		}

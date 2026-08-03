@@ -67,6 +67,7 @@ class PlayState extends FlxState
 	private var backGear:systems.BackGear;
 	private var bossFinish:systems.BossFinish;
 	private var boxes:systems.HitboxView;
+	private var numbers:systems.DamageNumbers;
 	private var wipe:IrisWipe;
 	public var restarting(default, null):Bool = false;
 	private var hadSub:Bool = false;
@@ -87,7 +88,11 @@ class PlayState extends FlxState
 		pause.closeCallback = function()
 		{
 			if (Lang.consumeChanged())
+			{
 				hud.applyLanguage(director.wave);
+				numbers.applyLanguage();
+			}
+			numbers.enabled = SaveData.damageNumbers();
 			_player.setHue(SaveData.playerHue());
 			combat.repaint();
 			hud.repaint();
@@ -256,13 +261,22 @@ class PlayState extends FlxState
 		boxes = new systems.HitboxView();
 		add(boxes.group);
 
+		numbers = new systems.DamageNumbers();
+		numbers.enabled = SaveData.damageNumbers();
+		combat.hits.onNumber = numbers.pop;
+		add(numbers.group);
+
 		hud = new Hud(this, status);
 
 		chat = new ui.ChatWindow(hud.camUI);
 		add(chat);
 		hud.raiseCursor();
 
-		status.onHeal = hud.flashHeal;
+		status.onHeal = function(amount:Float)
+		{
+			hud.flashHeal();
+			numbers.pop(_player.x + _player.width * 0.5, _player.y, amount, systems.DamageNumbers.HEAL, _player);
+		};
 		round.wire(status, director, hud);
 		gate.wire(status, director, hud);
 		gate.blocked = round.shop.inReach;
@@ -421,6 +435,7 @@ class PlayState extends FlxState
 		layers.adopt(cast combat.throwAttack.trail.group);
 		layers.adoptOne(combat.throwAttack.thrown);
 		layers.update();
+		numbers.update(elapsed);
 		props.update();
 		drawBoxes();
 		bushes.update(step);

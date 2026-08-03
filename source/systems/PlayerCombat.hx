@@ -305,17 +305,18 @@ class PlayerCombat
 			health = healthMax;
 	}
 
-	public var onHeal:Void->Void;
+	public var onHeal:Float->Void;
 
 	public function heal(amount:Float):Void
 	{
 		if (dead)
 			return;
+		var room = healthMax - health;
 		health += amount;
 		if (health > healthMax)
 			health = healthMax;
 		if (onHeal != null)
-			onHeal();
+			onHeal(amount < room ? amount : room);
 	}
 
 	public function canSuper():Bool
