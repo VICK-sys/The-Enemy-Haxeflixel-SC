@@ -84,6 +84,7 @@ class LobbyState extends FlxState
 		backGear = new systems.BackGear();
 		backGear.paint(SaveData.playerHue());
 		layers.entityLayer.add(backGear.sprite);
+		layers.trackPart(backGear.sprite, player, RenderLayers.GEAR_BIAS);
 
 		camUI = new FlxCamera();
 		camUI.bgColor = 0;

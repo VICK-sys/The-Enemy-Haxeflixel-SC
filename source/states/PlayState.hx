@@ -232,6 +232,7 @@ class PlayState extends FlxState
 		backGear = new systems.BackGear();
 		backGear.paint(SaveData.playerHue());
 		layers.entityLayer.add(backGear.sprite);
+		layers.trackPart(backGear.sprite, _player, RenderLayers.GEAR_BIAS);
 		insert(members.indexOf(layers.entityLayer), fx.dashTrail);
 		insert(members.indexOf(layers.entityLayer), fx.steam);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);

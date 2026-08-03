@@ -14,6 +14,9 @@ class RenderLayers
 	static inline var CORPSE_BAND:Float = -800000;
 	static inline var BURIED_BAND:Float = -400000;
 
+	public static inline var GEAR_BIAS:Float = -1;
+	public static inline var HELD_BIAS:Float = 1;
+
 	public var host(default, null):FlxState;
 	public var shadowLayer:FlxTypedGroup<FlxSprite>;
 	public var entityLayer:FlxTypedGroup<FlxSprite>;
@@ -23,6 +26,8 @@ class RenderLayers
 	private var player:Player;
 	private var heldSprite:FlxSprite;
 	private var flying:Array<FlxSprite> = [];
+	private var rigOf:Map<FlxSprite, FlxSprite> = new Map();
+	private var rigBias:Map<FlxSprite, Float> = new Map();
 
 	public function new(state:FlxState, player:Player, heldSprite:FlxSprite)
 	{
@@ -44,6 +49,14 @@ class RenderLayers
 
 		tagLayer = new FlxTypedGroup<FlxSprite>();
 		state.add(tagLayer);
+	}
+
+	public function trackPart(part:FlxSprite, anchor:FlxSprite, bias:Float):Void
+	{
+		if (part == null || anchor == null || part == anchor)
+			return;
+		rigOf.set(part, anchor);
+		rigBias.set(part, bias);
 	}
 
 	public function addEnemy(e:Enemies):FlxSprite
@@ -104,9 +117,14 @@ class RenderLayers
 	function sortKey(s:FlxSprite):Float
 	{
 		if (s == heldSprite)
-			return player.feetY + 1;
+			return player.feetY + HELD_BIAS;
 		if (s == player)
 			return player.feetY;
+
+		var anchor = rigOf.get(s);
+		if (anchor != null)
+			return sortKey(anchor) + rigBias.get(s);
+
 		if (Std.isOfType(s, Enemies))
 		{
 			var e = cast(s, Enemies);

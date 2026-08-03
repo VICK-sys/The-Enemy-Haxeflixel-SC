@@ -140,6 +140,10 @@ class RemoteAvatar
 		bubble.updateHitbox();
 		bubble.visible = false;
 		layers.tagLayer.add(bubble);
+
+		layers.trackPart(gear.sprite, sprite, RenderLayers.GEAR_BIAS);
+		layers.trackPart(held, sprite, RenderLayers.HELD_BIAS);
+		layers.trackPart(twinHeld, sprite, RenderLayers.HELD_BIAS);
 	}
 
 	public function setReady(on:Bool):Void
