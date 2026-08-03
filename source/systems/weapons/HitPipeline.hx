@@ -37,8 +37,8 @@ class HitPipeline
 		damageN(e, pushX, pushY, 1);
 	}
 
-	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Float):Void
-		route(e, pushX, pushY, damage, true);
+	public function damageN(e:Enemies, pushX:Float, pushY:Float, damage:Float, feedMeter:Bool = true):Void
+		route(e, pushX, pushY, damage, feedMeter);
 
 	public function damageSuper(e:Enemies, pushX:Float, pushY:Float, damage:Float):Void
 		route(e, pushX, pushY, damage, false);
