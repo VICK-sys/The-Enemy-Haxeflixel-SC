@@ -47,6 +47,7 @@
 	"lobby.skinRobot": "BODY TYPE B",
 	"lobby.gearCog": "GEAR",
 	"lobby.gearPack": "ACCORDION",
+	"lobby.gearKey": "WINDUP KEY",
 	"lobby.dressHints": "UP DOWN - PICK A ROW      LEFT RIGHT - CHANGE IT      TYPE - NAME      ENTER - DONE",
 	"chat.title": "CHAT",
 	"chat.typeHint": "PRESS T TO CHAT",

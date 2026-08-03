@@ -4,8 +4,9 @@ class Skins
 {
 	public static var SHEETS:Array<String> = ["characters/mufu", "characters/robot"];
 	public static var NAMES:Array<String> = ["lobby.skinDefault", "lobby.skinRobot"];
-	public static var GEARS:Array<String> = [null, "characters/robot_pack"];
-	public static var GEAR_NAMES:Array<String> = ["lobby.gearCog", "lobby.gearPack"];
+	public static var GEARS:Array<String> = [null, "characters/robot_pack", "characters/windup_key"];
+	public static var GEAR_NAMES:Array<String> = ["lobby.gearCog", "lobby.gearPack", "lobby.gearKey"];
+	public static var GEAR_FRAMES:Array<Array<Int>> = [null, [16, 17], [16, 16]];
 
 	public static function count():Int
 		return SHEETS.length;
@@ -38,6 +39,9 @@ class Skins
 
 	public static function gearOf(i:Int):String
 		return GEARS[clampGear(i)];
+
+	public static function gearFrameOf(i:Int):Array<Int>
+		return GEAR_FRAMES[clampGear(i)];
 
 	public static function gearNameOf(i:Int):String
 		return Lang.t(GEAR_NAMES[clampGear(i)]);

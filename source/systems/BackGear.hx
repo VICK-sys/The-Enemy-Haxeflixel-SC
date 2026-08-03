@@ -14,8 +14,6 @@ class BackGear
 	static inline var PLACE_Y:Float = 23;
 	static inline var SCALE:Float = 4;
 
-	static inline var PACK_W:Int = 16;
-	static inline var PACK_H:Int = 17;
 	static inline var PACK_PIVOT_X:Float = 8;
 	static inline var PACK_PIVOT_Y:Float = 8;
 	static inline var PACK_PLACE_X:Float = 8;
@@ -54,7 +52,8 @@ class BackGear
 		pack = art != null;
 		if (pack)
 		{
-			sprite.loadGraphic(util.HuePalette.graphic(art, h), true, PACK_W, PACK_H);
+			var box = util.Skins.gearFrameOf(g);
+			sprite.loadGraphic(util.HuePalette.graphic(art, h), true, box[0], box[1]);
 			sprite.animation.add("turn", [for (f in 0...sprite.animation.numFrames) f], MOVE_FPS, true);
 			sprite.animation.play("turn");
 			sprite.origin.set(PACK_PIVOT_X, PACK_PIVOT_Y);
