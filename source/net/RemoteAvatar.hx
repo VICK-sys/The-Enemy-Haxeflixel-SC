@@ -43,6 +43,12 @@ class RemoteAvatar
 	private var gear:systems.BackGear;
 	private var dashGhost:systems.DashGhost;
 	private var guarding:Bool = false;
+	private var heldCharge:Float = 0;
+	private var glowWave:Float = 0;
+	private var flashTime:Float = 0;
+	private var wasFull:Bool = false;
+	private var wasLit:Bool = false;
+	private var sparked:Bool = false;
 	private var ritual:systems.ReviveRitual;
 	private var wasReviving:Bool = false;
 
@@ -59,6 +65,12 @@ class RemoteAvatar
 	static inline var TAG_WIDTH:Float = 320;
 	static inline var NOTE_UP:Float = 119;
 	static inline var NOTE_COLOR:Int = 0xFFE8C860;
+	static inline var GLOW_RAMP:Float = 0.3;
+	static inline var GLOW_BASE:Float = 0.5;
+	static inline var GLOW_WAVE:Float = 0.22;
+	static inline var WAVE_SPEED:Float = 10;
+	static inline var FLASH_TIME:Float = 0.16;
+	static inline var HEAD_REACH:Float = 0.7;
 
 	public function new(layers:RenderLayers)
 	{
@@ -139,6 +151,54 @@ class RemoteAvatar
 		ritual.cancel();
 		burst.clear();
 		ghost.hide();
+	}
+
+	public function consumeSpark():Bool
+	{
+		var was = sparked;
+		sparked = false;
+		return was;
+	}
+
+	public function sparkX():Float
+		return held.x + held.origin.x + Math.cos((held.angle - 90) * Math.PI / 180) * headReach();
+
+	public function sparkY():Float
+		return held.y + held.origin.y + Math.sin((held.angle - 90) * Math.PI / 180) * headReach();
+
+	function headReach():Float
+		return held.frameHeight * held.scale.y * HEAD_REACH;
+
+	function glowTick(elapsed:Float):Void
+	{
+		var full = heldCharge >= 1;
+		if (full && !wasFull)
+		{
+			flashTime = FLASH_TIME;
+			sparked = true;
+		}
+		wasFull = full;
+		glowWave = full ? glowWave + elapsed * WAVE_SPEED : 0;
+
+		var glow = full ? GLOW_BASE + GLOW_WAVE * (0.5 + 0.5 * Math.sin(glowWave)) : GLOW_RAMP * heldCharge * heldCharge;
+		if (flashTime > 0)
+			flashTime -= elapsed;
+		var lit = flashTime > 0 ? flashTime / FLASH_TIME : 0;
+		if (glow > lit)
+			lit = glow;
+		if (lit <= 0)
+		{
+			if (wasLit)
+			{
+				wasLit = false;
+				held.setColorTransform(1, 1, 1, held.alpha, 0, 0, 0, 0);
+			}
+			return;
+		}
+		wasLit = true;
+		var keep = 1 - lit;
+		var add = 255 * lit;
+		held.setColorTransform(keep, keep, keep, held.alpha, add, add, add, 0);
 	}
 
 	public function setHue(h:Float):Void
@@ -272,6 +332,7 @@ class RemoteAvatar
 			var hs:Float = ho[2];
 			held.scale.set(hs, hs);
 			held.color = FlxColor.WHITE;
+			heldCharge = ho.length > 3 && ho[3] != null ? ho[3] : 0;
 		}
 
 		var tw:Array<Dynamic> = m.tw;
@@ -310,6 +371,7 @@ class RemoteAvatar
 	{
 		dashGhost.enabled = util.SaveData.dashTrail();
 		dashGhost.update(elapsed, guarding && !wasDead);
+		glowTick(elapsed);
 		if (wasDead && ghost.sprite.exists)
 			ghost.track(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, sprite.flipX);
 		burst.update(elapsed);

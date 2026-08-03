@@ -275,6 +275,8 @@ class RemoteFx
 		layers.adopt(cast bullets);
 		layers.adopt(cast arrows);
 		layers.adopt(cast rain.arrows);
+		if (avatar.consumeSpark() && avatar.held.visible)
+			fx.chargePop(avatar.sparkX(), avatar.sparkY());
 		rain.hue = avatar.hue;
 		yoyo.setHue(avatar.hue);
 		hook.paint(avatar.hue);
