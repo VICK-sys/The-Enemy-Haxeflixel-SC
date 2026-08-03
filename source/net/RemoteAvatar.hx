@@ -41,6 +41,8 @@ class RemoteAvatar
 	private var burst:systems.DeathBurst;
 	private var ghost:systems.CoopGhost;
 	private var gear:systems.BackGear;
+	private var dashGhost:systems.DashGhost;
+	private var guarding:Bool = false;
 	private var ritual:systems.ReviveRitual;
 	private var wasReviving:Bool = false;
 
@@ -75,6 +77,9 @@ class RemoteAvatar
 		sprite.animation.play("idle");
 		sprite.visible = false;
 		layers.entityLayer.add(sprite);
+
+		dashGhost = new systems.DashGhost(sprite, hue);
+		layers.host.insert(layers.host.members.indexOf(layers.entityLayer), dashGhost.trail.group);
 
 		burst = new systems.DeathBurst();
 		layers.host.insert(layers.host.members.indexOf(layers.entityLayer), burst.group);
@@ -149,6 +154,7 @@ class RemoteAvatar
 		skin = sk;
 		gearIdx = gr;
 		gear.paint(h, sk, gr);
+		dashGhost.paint(h);
 		if (weaponIdx >= 0)
 		{
 			reloadGfx = false;
@@ -202,6 +208,7 @@ class RemoteAvatar
 		haveTarget = true;
 
 		var dead:Bool = m.dd == true;
+		guarding = m.dg == true;
 		healthFrac = dead ? 0 : (m.hl == null ? 1.0 : (m.hl : Float));
 		if (dead && !wasDead)
 		{
@@ -301,6 +308,8 @@ class RemoteAvatar
 
 	public function update(elapsed:Float):Void
 	{
+		dashGhost.enabled = util.SaveData.dashTrail();
+		dashGhost.update(elapsed, guarding && !wasDead);
 		if (wasDead && ghost.sprite.exists)
 			ghost.track(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, sprite.flipX);
 		burst.update(elapsed);

@@ -236,7 +236,7 @@ class PlayState extends FlxState
 		insert(members.indexOf(layers.entityLayer), fx.steam);
 		insert(members.indexOf(layers.entityLayer), timeStop.shadowTrail.group);
 		insert(members.indexOf(layers.entityLayer), timeStop.trail.group);
-		dashGhost = new systems.DashGhost(_player);
+		dashGhost = new systems.DashGhost(_player, SaveData.playerHue());
 		dashGhost.enabled = SaveData.dashTrail();
 		insert(members.indexOf(layers.entityLayer), dashGhost.trail.group);
 		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status, fx) : new EnemyDirector(_player, arena, layers, status, fx);

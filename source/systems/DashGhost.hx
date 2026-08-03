@@ -1,7 +1,7 @@
 package systems;
 
+import flixel.FlxSprite;
 import flixel.util.FlxColor;
-import entities.Player;
 import util.GhostTrail;
 
 class DashGhost
@@ -15,14 +15,17 @@ class DashGhost
 	public var trail:GhostTrail;
 	public var enabled:Bool = true;
 
-	private var player:Player;
+	private var body:FlxSprite;
 	private var tint:FlxColor;
+	private var lastX:Float = 0;
+	private var lastY:Float = 0;
+	private var seeded:Bool = false;
 
-	public function new(player:Player)
+	public function new(body:FlxSprite, hue:Float)
 	{
-		this.player = player;
+		this.body = body;
 		trail = new GhostTrail(util.Skins.sheet(), ALPHA, FADE, INTERVAL);
-		paint(util.SaveData.playerHue());
+		paint(hue);
 	}
 
 	public function paint(hue:Float):Void
@@ -35,13 +38,21 @@ class DashGhost
 	public function update(elapsed:Float, guarding:Bool):Void
 	{
 		var cadence = trail.tick(elapsed);
-		if (!enabled || !guarding || !cadence || !player.visible)
+		var dx = body.x - lastX;
+		var dy = body.y - lastY;
+		lastX = body.x;
+		lastY = body.y;
+		if (!seeded)
+		{
+			seeded = true;
 			return;
-		var vx = player.velocity.x;
-		var vy = player.velocity.y;
-		if (vx * vx + vy * vy < MIN_SPEED * MIN_SPEED)
+		}
+		if (!enabled || !guarding || !cadence || !body.visible || elapsed <= 0)
 			return;
-		trail.stampFrame(player, tint);
+		var travel = MIN_SPEED * elapsed;
+		if (dx * dx + dy * dy < travel * travel)
+			return;
+		trail.stampFrame(body, tint);
 	}
 
 	public function clear():Void
