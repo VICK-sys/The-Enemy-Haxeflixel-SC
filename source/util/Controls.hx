@@ -85,7 +85,7 @@ class Controls
 			keys[ATTACK] = MOUSE_LEFT;
 		if (keys[SECOND] == FlxKey.NONE)
 			keys[SECOND] = MOUSE_RIGHT;
-		FlxG.gamepads.globalDeadZone = SaveData.aimDeadzone();
+		FlxG.gamepads.globalDeadZone = padDeadzone();
 		FlxG.signals.focusGained.add(resetDevices);
 		FlxG.signals.preUpdate.add(tick);
 	}
@@ -134,6 +134,14 @@ class Controls
 		keys = defaultKeys();
 		pads = defaultPads();
 		SaveData.setControls(keys, pads);
+	}
+
+	static inline var PAD_DZ_FLOOR:Float = 0.05;
+
+	static function padDeadzone():Float
+	{
+		var dz = SaveData.aimDeadzone();
+		return dz < PAD_DZ_FLOOR ? PAD_DZ_FLOOR : dz;
 	}
 
 	static function pad():FlxGamepad
@@ -324,8 +332,8 @@ class Controls
 
 	static function tick():Void
 	{
-		if (FlxG.gamepads.globalDeadZone != SaveData.aimDeadzone())
-			FlxG.gamepads.globalDeadZone = SaveData.aimDeadzone();
+		if (FlxG.gamepads.globalDeadZone != padDeadzone())
+			FlxG.gamepads.globalDeadZone = padDeadzone();
 
 		if (firePinned && !pressed(ATTACK) && !pressed(SECOND))
 			firePinned = false;
