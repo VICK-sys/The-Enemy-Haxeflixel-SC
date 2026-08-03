@@ -324,6 +324,9 @@ class Controls
 
 	static function tick():Void
 	{
+		if (FlxG.gamepads.globalDeadZone != SaveData.aimDeadzone())
+			FlxG.gamepads.globalDeadZone = SaveData.aimDeadzone();
+
 		if (firePinned && !pressed(ATTACK) && !pressed(SECOND))
 			firePinned = false;
 
@@ -349,8 +352,6 @@ class Controls
 		if (p != null)
 		{
 			p.deadZoneMode = CIRCULAR;
-			if (p.deadZone != SaveData.aimDeadzone())
-				p.deadZone = SaveData.aimDeadzone();
 
 			var rx = p.analog.value.RIGHT_STICK_X;
 			var ry = p.analog.value.RIGHT_STICK_Y;
