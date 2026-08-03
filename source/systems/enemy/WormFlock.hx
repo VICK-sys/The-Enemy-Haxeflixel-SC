@@ -18,7 +18,13 @@ typedef WormChain =
 	aiming:Float,
 	aimDeg:Float,
 	aimHold:Float,
-	headUp:Bool
+	headUp:Bool,
+	chargeCd:Float,
+	winding:Float,
+	charge:Float,
+	liftFrom:Float,
+	face:Float,
+	faceSet:Bool
 }
 
 typedef WormPuff =
@@ -45,6 +51,9 @@ class WormFlock
 	static inline var PUFF_LIFE:Float = 0.4;
 	static inline var PUFF_GROW:Float = 2.2;
 	static inline var SURFACE_MARK:Float = 0.04;
+	static inline var AIM_TURN:Float = 3.5;
+	static inline var COIL_PACE:Float = 0.55;
+	static inline var CHARGE_RAMP:Float = 0.28;
 
 	public var done(default, null):Bool = false;
 	public var lastX(default, null):Float = 0;
@@ -100,9 +109,33 @@ class WormFlock
 			aiming: 0,
 			aimDeg: 0,
 			aimHold: 0,
-			headUp: false
+			headUp: false,
+			chargeCd: chargeCooldown() * 0.5,
+			winding: 0,
+			charge: 0,
+			liftFrom: 0,
+			face: 0,
+			faceSet: false
 		});
 	}
+
+	inline function chargeCooldown():Float
+		return cfg.chargeCooldown == null ? 6.0 : cfg.chargeCooldown;
+
+	inline function chargeWindup():Float
+		return cfg.chargeWindup == null ? 0.45 : cfg.chargeWindup;
+
+	inline function chargeTime():Float
+		return cfg.chargeTime == null ? 1.15 : cfg.chargeTime;
+
+	inline function chargeSpeed():Float
+		return cfg.chargeSpeed == null ? 1250 : cfg.chargeSpeed;
+
+	inline function chargeRange():Float
+		return cfg.chargeRange == null ? 1000 : cfg.chargeRange;
+
+	inline function chargeTurn():Float
+		return cfg.chargeTurn == null ? 0.7 : cfg.chargeTurn;
 
 	function dropPart(s:Enemies):Void
 		glow.remove(s);
@@ -306,7 +339,13 @@ class WormFlock
 					aiming: 0,
 					aimDeg: 0,
 					aimHold: 0,
-					headUp: !right[0].buried
+					headUp: !right[0].buried,
+					chargeCd: chargeCooldown() * 0.4,
+					winding: 0,
+					charge: 0,
+					liftFrom: 0,
+					face: 0,
+					faceSet: false
 				});
 			}
 			return;
@@ -325,12 +364,16 @@ class WormFlock
 
 	function advance(c:WormChain, elapsed:Float):Void
 	{
-		c.clock += elapsed;
-		c.shot -= elapsed;
-
 		var head = c.segs[0];
 		var hx = head.x + head.width * 0.5;
 		var hy = head.y + head.height * 0.5;
+
+		var rushing = c.winding > 0 || c.charge > 0;
+		if (!rushing)
+			c.clock += elapsed;
+		c.shot -= elapsed;
+		if (c.chargeCd > 0)
+			c.chargeCd -= elapsed;
 
 		var tx = hx + 1;
 		var ty = hy;
@@ -340,9 +383,34 @@ class WormFlock
 			ty = head.target.y + head.target.height * 0.5;
 		}
 
+		var reach = Math.sqrt((tx - hx) * (tx - hx) + (ty - hy) * (ty - hy));
+		if (!rushing && c.chargeCd <= 0 && head.target != null && reach < chargeRange())
+		{
+			c.winding = chargeWindup();
+			c.liftFrom = headLift(c.clock);
+			rushing = true;
+		}
+
+		if (c.winding > 0)
+		{
+			c.winding -= elapsed;
+			if (c.winding <= 0)
+			{
+				c.winding = 0;
+				c.charge = chargeTime();
+				util.Sfx.at("wyrm_surface", hx, hy, 0.9);
+			}
+		}
+		else if (c.charge > 0)
+		{
+			c.charge -= elapsed;
+			if (c.charge <= 0)
+				endCharge(c);
+		}
+
 		var sx = tx;
 		var sy = ty;
-		if (chains.length > 1)
+		if (chains.length > 1 && !rushing)
 		{
 			sx += Math.cos(c.bearing) * cfg.flankDist;
 			sy += Math.sin(c.bearing) * cfg.flankDist;
@@ -357,14 +425,17 @@ class WormFlock
 			wy /= wl;
 		}
 
-		if (hx < edgeTurn)
-			wx += (edgeTurn - hx) / edgeTurn * 3;
-		else if (hx > roomW - edgeTurn)
-			wx -= (hx - (roomW - edgeTurn)) / edgeTurn * 3;
-		if (hy < edgeTurn)
-			wy += (edgeTurn - hy) / edgeTurn * 3;
-		else if (hy > roomH - edgeTurn)
-			wy -= (hy - (roomH - edgeTurn)) / edgeTurn * 3;
+		if (!rushing)
+		{
+			if (hx < edgeTurn)
+				wx += (edgeTurn - hx) / edgeTurn * 3;
+			else if (hx > roomW - edgeTurn)
+				wx -= (hx - (roomW - edgeTurn)) / edgeTurn * 3;
+			if (hy < edgeTurn)
+				wy += (edgeTurn - hy) / edgeTurn * 3;
+			else if (hy > roomH - edgeTurn)
+				wy -= (hy - (roomH - edgeTurn)) / edgeTurn * 3;
+		}
 		var el = Math.sqrt(wx * wx + wy * wy);
 		if (el > 0)
 		{
@@ -381,26 +452,58 @@ class WormFlock
 			oy /= ol;
 		}
 		var heading = ol > 0 ? Math.atan2(oy, ox) : Math.atan2(wy, wx);
+		if (rushing)
+		{
+			if (!c.faceSet)
+			{
+				c.face = heading;
+				c.faceSet = true;
+			}
+			heading = c.face;
+		}
 		var turn = Math.atan2(wy, wx) - heading;
 		while (turn > Math.PI)
 			turn -= Math.PI * 2;
 		while (turn < -Math.PI)
 			turn += Math.PI * 2;
-		var cap = cfg.turn * elapsed;
+		var cap = (c.charge > 0 ? chargeTurn() : (c.winding > 0 ? cfg.turn * AIM_TURN : cfg.turn)) * elapsed;
 		if (turn > cap)
 			turn = cap;
 		else if (turn < -cap)
 			turn = -cap;
 		heading += turn;
+		if (rushing)
+			c.face = heading;
 		var dx = Math.cos(heading);
 		var dy = Math.sin(heading);
 
-		hx += dx * head.speed * elapsed;
-		hy += dy * head.speed * elapsed;
+		var pace = head.speed;
+		if (c.winding > 0)
+			pace = head.speed * COIL_PACE;
+		else if (c.charge > 0)
+		{
+			var into = 1 - c.charge / chargeTime();
+			var ramp = into < CHARGE_RAMP ? into / CHARGE_RAMP : 1;
+			var from = head.speed * COIL_PACE;
+			pace = from + (chargeSpeed() - from) * ramp;
+		}
+		hx += dx * pace * elapsed;
+		hy += dy * pace * elapsed;
+		var freeX = hx;
+		var freeY = hy;
 		hx = hx < EDGE_PAD ? EDGE_PAD : (hx > roomW - EDGE_PAD ? roomW - EDGE_PAD : hx);
 		hy = hy < EDGE_PAD ? EDGE_PAD : (hy > roomH - EDGE_PAD ? roomH - EDGE_PAD : hy);
+		if (c.charge > 0 && (hx != freeX || hy != freeY))
+			endCharge(c);
 
 		var lift = headLift(c.clock);
+		if (c.winding > 0)
+		{
+			var rise = 1 - c.winding / chargeWindup();
+			lift = c.liftFrom + (cfg.lift - c.liftFrom) * rise;
+		}
+		else if (c.charge > 0)
+			lift = cfg.lift;
 		var up = lift > SURFACE_MARK;
 		if (up != c.headUp)
 		{
@@ -599,6 +702,24 @@ class WormFlock
 		}
 	}
 
+	function endCharge(c:WormChain):Void
+	{
+		c.charge = 0;
+		c.winding = 0;
+		c.faceSet = false;
+		c.chargeCd = chargeCooldown();
+		c.clock = cfg.underTime + cfg.overTime * 0.5;
+	}
+
+	function volleySize(c:WormChain):Int
+	{
+		var body = c.segs.length - 1;
+		if (cfg.shotMinParts <= 0 || body >= cfg.shotMinParts)
+			return cfg.shotCount;
+		var n = Math.round(cfg.shotCount * body / cfg.shotMinParts);
+		return n < 1 ? 1 : Std.int(n);
+	}
+
 	function shoot(c:WormChain, elapsed:Float, tx:Float, ty:Float):Void
 	{
 		var head = c.segs[0];
@@ -608,7 +729,7 @@ class WormFlock
 		if (c.aimHold > 0)
 			c.aimHold -= elapsed;
 
-		if (head.buried || c.segs.length - 1 < cfg.shotMinParts)
+		if (head.buried)
 		{
 			c.aiming = 0;
 			return;
@@ -623,9 +744,10 @@ class WormFlock
 			if (c.aiming > 0)
 				return;
 			c.shot = cfg.shotCooldown;
-			for (i in 0...cfg.shotCount)
+			var count = volleySize(c);
+			for (i in 0...count)
 			{
-				var off = (i - (cfg.shotCount - 1) * 0.5) * cfg.shotSpread;
+				var off = (i - (count - 1) * 0.5) * cfg.shotSpread;
 				var rad = (c.aimDeg + off) * Math.PI / 180;
 				head.requestShot(Math.cos(rad), Math.sin(rad), cfg.shotDamage, cfg.shotSpeed, cfg.shotRange,
 					"bullets/round_bullet_enemy", "enemies/shoot");

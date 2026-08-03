@@ -5,13 +5,48 @@
 	"offsetX": -21,
 	"offsetY": -24,
 	"animations": [
-		{ "name": "idle", "prefix": "Head", "fps": 8, "loop": true },
-		{ "name": "walk", "prefix": "Head", "fps": 8, "loop": true },
-		{ "name": "head", "prefix": "Head", "fps": 8, "loop": true },
-		{ "name": "body", "prefix": "Body", "fps": 8, "loop": true },
-		{ "name": "mound", "prefix": "Mound", "fps": 8, "loop": true },
-		{ "name": "hurt", "prefix": "Head", "fps": 8, "loop": false },
-		{ "name": "death", "prefix": "Head", "fps": 8, "loop": false }
+		{
+			"name": "idle",
+			"prefix": "Head",
+			"fps": 8,
+			"loop": true
+		},
+		{
+			"name": "walk",
+			"prefix": "Head",
+			"fps": 8,
+			"loop": true
+		},
+		{
+			"name": "head",
+			"prefix": "Head",
+			"fps": 8,
+			"loop": true
+		},
+		{
+			"name": "body",
+			"prefix": "Body",
+			"fps": 8,
+			"loop": true
+		},
+		{
+			"name": "mound",
+			"prefix": "Mound",
+			"fps": 8,
+			"loop": true
+		},
+		{
+			"name": "hurt",
+			"prefix": "Head",
+			"fps": 8,
+			"loop": false
+		},
+		{
+			"name": "death",
+			"prefix": "Head",
+			"fps": 8,
+			"loop": false
+		}
 	],
 	"hp": 12,
 	"speed": 430,
@@ -29,6 +64,12 @@
 		"turn": 2.35,
 		"flankDist": 340,
 		"orbit": 0.45,
+		"chargeCooldown": 5.5,
+		"chargeWindup": 0.45,
+		"chargeTime": 1.15,
+		"chargeSpeed": 1250,
+		"chargeRange": 1100,
+		"chargeTurn": 0.7,
 		"volleyGap": 0.7,
 		"shotCooldown": 1.8,
 		"shotMinParts": 4,
