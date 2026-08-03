@@ -25,6 +25,7 @@ class BackGear
 	public var liveTint:Bool = false;
 
 	private var shownArt:String = null;
+	private var liveLoaded:Bool = false;
 	private var hue:Float = -1;
 	private var skin:Int = -1;
 	private var gearIdx:Int = -1;
@@ -55,13 +56,14 @@ class BackGear
 		gearIdx = g;
 		pack = art != null;
 
-		if (pack && liveTint && settled)
+		if (pack && liveTint && liveLoaded && settled)
 		{
 			util.HuePalette.live(art, h);
 			return;
 		}
 
 		shownArt = art;
+		liveLoaded = pack && liveTint;
 		if (pack)
 		{
 			var box = util.Skins.gearFrameOf(g);
