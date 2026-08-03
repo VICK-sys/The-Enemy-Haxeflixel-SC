@@ -49,6 +49,10 @@ class RemoteAvatar
 	private var wasFull:Bool = false;
 	private var wasLit:Bool = false;
 	private var sparked:Bool = false;
+	private var puffCount:Int = -1;
+	private var puff:FlxSprite;
+
+	public var fx:systems.Fx;
 	private var ritual:systems.ReviveRitual;
 	private var wasReviving:Bool = false;
 
@@ -72,6 +76,8 @@ class RemoteAvatar
 	static inline var FLASH_TIME:Float = 0.16;
 	static inline var HEAD_REACH:Float = 0.7;
 	static inline var BOW_MUZZLE:Float = 70;
+	static inline var STEAM_BACK:Float = 34;
+	static inline var STEAM_RISE:Float = 26;
 
 	public function new(layers:RenderLayers)
 	{
@@ -177,6 +183,25 @@ class RemoteAvatar
 	function sparkReach():Float
 		return weaponIdx == BOW_INDEX ? BOW_MUZZLE : held.frameHeight * held.scale.y * HEAD_REACH;
 
+	function steamX():Float
+		return sprite.x + sprite.width * 0.5 - (sprite.flipX ? -1.0 : 1.0) * STEAM_BACK;
+
+	function steamY():Float
+		return sprite.y + sprite.height * 0.5 - STEAM_RISE;
+
+	function trackSteam():Void
+	{
+		if (puff == null)
+			return;
+		if (!puff.exists)
+		{
+			puff = null;
+			return;
+		}
+		puff.flipX = !sprite.flipX;
+		puff.setPosition(steamX() - puff.width * 0.5, steamY() - puff.height * 0.5);
+	}
+
 	function glowTick(elapsed:Float):Void
 	{
 		var full = heldCharge >= 1;
@@ -277,6 +302,14 @@ class RemoteAvatar
 
 		var dead:Bool = m.dd == true;
 		guarding = m.dg == true;
+
+		if (m.pf != null)
+		{
+			var pf:Int = m.pf;
+			if (puffCount >= 0 && pf != puffCount && fx != null)
+				puff = fx.steamAt(steamX(), steamY(), !sprite.flipX);
+			puffCount = pf;
+		}
 		healthFrac = dead ? 0 : (m.hl == null ? 1.0 : (m.hl : Float));
 		if (dead && !wasDead)
 		{
@@ -404,6 +437,8 @@ class RemoteAvatar
 		shadow.x = sprite.x + 10;
 		shadow.y = sprite.y + entities.Player.FEET;
 		shadow.scale.set(4, 4);
+
+		trackSteam();
 
 		tag.visible = sprite.visible;
 		tag.x = sprite.x + sprite.width * 0.5 - TAG_WIDTH * 0.5;

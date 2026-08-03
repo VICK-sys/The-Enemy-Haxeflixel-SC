@@ -67,6 +67,7 @@ class LobbyState extends FlxState
 	private var steamPuff:FlxSprite;
 	private var dashLineTimer:Float = 0;
 	private var guardTimer:Float = 0;
+	private var puffs:Int = 0;
 	private var chat:ui.ChatWindow;
 	private var wasNetOn:Bool = false;
 
@@ -245,6 +246,7 @@ class LobbyState extends FlxState
 			{
 				FlxG.sound.play(util.Paths.sound("dash/charged"), DASH_READY_VOL);
 				steamPuff = fx.steamAt(steamX(), steamY(), !player.flipX);
+				puffs++;
 			}
 		}
 
@@ -348,7 +350,8 @@ class LobbyState extends FlxState
 				hv: false,
 				ha: 0,
 				hf: false,
-				dg: guardTimer > 0
+				dg: guardTimer > 0,
+				pf: puffs
 			});
 
 		for (msg in Net.poll())
@@ -391,6 +394,7 @@ class LobbyState extends FlxState
 		if (av == null)
 		{
 			av = new RemoteAvatar(layers);
+			av.fx = fx;
 			peers.set(id, av);
 		}
 		seen.set(id, haxe.Timer.stamp());

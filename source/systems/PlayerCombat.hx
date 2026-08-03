@@ -31,6 +31,7 @@ class PlayerCombat
 	public var onHurt:Void->Void;
 	public var meterLocked:Bool = false;
 	public var kills:Int = 0;
+	public var puffs:Int = 0;
 	public var healthMax:Float = 0;
 	public var superMax:Float = 0;
 
@@ -133,6 +134,7 @@ class PlayerCombat
 			{
 				FlxG.sound.play(Paths.sound("dash/charged"), READY_VOL);
 				steamPuff = fx.steamAt(steamX(), steamY(), !player.flipX);
+				puffs++;
 			}
 		}
 

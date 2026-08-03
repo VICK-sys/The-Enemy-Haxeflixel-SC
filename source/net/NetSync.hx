@@ -616,6 +616,7 @@ class NetSync
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
 			dd: status.dead && !status.throes,
 			dg: status.guarding,
+			pf: status.puffs,
 			hl: r2(status.healthMax > 0 ? status.health / status.healthMax : 1),
 			rv: reviving,
 			hk: hookShot.exists ? [r1(hookShot.x), r1(hookShot.y), r1(hookShot.angle), r1(combat.held.handX()), r1(combat.held.handY())] : null,

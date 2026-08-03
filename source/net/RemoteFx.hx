@@ -65,6 +65,7 @@ class RemoteFx
 		this.fx = fx;
 		this.layers = layers;
 		this.avatar = avatar;
+		avatar.fx = fx;
 
 		rain = new ArrowRain(fx, hits);
 		rain.cosmetic = true;
