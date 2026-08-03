@@ -11,6 +11,7 @@ class SwingAttack
 {
 	static inline var GUARD_TIME:Float = 0.2;
 	static inline var EFFECT_HALF:Float = 128;
+	static inline var SWING_VOL:Float = 0.7;
 
 	public var slashes:FlxTypedGroup<SlashEffect>;
 	public var onConnect:Void->Void;
@@ -25,6 +26,11 @@ class SwingAttack
 	private var guardY:Float = 0;
 	private var cooldown:Float = 0;
 	private var cooldownTotal:Float = 0;
+
+	public var volume(get, never):Float;
+
+	function get_volume():Float
+		return cfg.volume == null ? 1 : cfg.volume;
 
 	public var reach(get, never):Float;
 
@@ -95,7 +101,7 @@ class SwingAttack
 		guardX = dx;
 		guardY = dy;
 		deflect(pmx, pmy, dx, dy);
-		FlxG.sound.play(Paths.sound(cfg.sound != null ? cfg.sound : "swing/swing" + (1 + Std.random(8))), 0.7);
+		FlxG.sound.play(Paths.sound(cfg.sound != null ? cfg.sound : "swing/swing" + (1 + Std.random(8))), SWING_VOL * volume);
 	}
 
 	public function update(elapsed:Float, pmx:Float, pmy:Float):Void

@@ -22,7 +22,8 @@ typedef SwingConfig = {
 	?chargeTime:Float,
 	?sound:String,
 	?shineMult:Float,
-	?bossScale:Float
+	?bossScale:Float,
+	?volume:Float
 }
 
 typedef YoyoConfig = {

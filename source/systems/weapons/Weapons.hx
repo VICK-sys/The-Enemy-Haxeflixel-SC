@@ -100,15 +100,16 @@ class Weapons
 		return function()
 		{
 			held.impactPose();
+			var vol = atk.volume;
 			if (atk.boosted)
 			{
-				var punch = FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 1.0);
+				var punch = FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 1.0 * vol);
 				if (punch != null)
 					punch.pitch = 0.82;
-				FlxG.sound.play(util.Paths.sound("hammer"), 0.5);
+				FlxG.sound.play(util.Paths.sound("hammer"), 0.5 * vol);
 			}
 			else
-				FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 0.9);
+				FlxG.sound.play(util.Paths.sound("weapon/gigaHit"), 0.9 * vol);
 		};
 	}
 
