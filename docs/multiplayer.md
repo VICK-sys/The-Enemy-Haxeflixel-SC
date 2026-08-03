@@ -71,7 +71,7 @@ The arrow storm replays from its activation alone: the drops scatter at random, 
 
 Supers also lift, spin and squash the player's body. Those three ride along in the avatar packet, and no machine recomputes them. That is what keeps the decoration copies out of the body entirely.
 
-The packet also carries the hue the player picked in the lobby. That hue is not a tint over the whole sprite, which would muddy the greys. Every machine bakes its own recoloured copy of the character sheet, rotating only the pixels close to red, and keeps it cached under the hue's own key. Skin, bone and metal therefore hold their colour while the red reads as whatever the player chose. The bake runs once per hue on a sheet of a few thousand pixels, so it costs nothing worth measuring.
+The packet also carries the hue the player picked in the lobby. That hue is not a tint over the whole sprite, which would muddy the greys. Every machine bakes its own recolored copy of the character sheet, rotating only the pixels close to red, and keeps it cached under the hue's own key. Skin, bone and metal therefore hold their color while the red reads as whatever the player chose. The bake runs once per hue on a sheet of a few thousand pixels, so it costs nothing worth measuring.
 
 ## Transport shape
 

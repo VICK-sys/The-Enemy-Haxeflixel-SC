@@ -163,7 +163,7 @@ Each saved map also records `tileW`. Open a map after its tileset moved to anoth
 
 The floor layer goes in before the render layers, so it draws under everything that moves. It hides with the rest of the decoration during the boss fight.
 
-Painted tiles also make up the walls. Three passes fill a wall block, and each pass covers only what the last one left blank. First comes the theme's flat colour, then its repeating texture, then any tiles painted over that spot. The painted layer therefore wins.
+Painted tiles also make up the walls. Three passes fill a wall block, and each pass covers only what the last one left blank. First comes the theme's flat color, then its repeating texture, then any tiles painted over that spot. The painted layer therefore wins.
 
 One map can carry brick walls in one corner and cobble in another. A single theme texture cannot express that.
 
@@ -284,13 +284,13 @@ Know one thing before you add art: **the game never draws the collision tileset*
 |---|---|
 | `name` | shown in the editor |
 | `background` | stage image under `assets/images/` |
-| `wall` | optional image tiled across the wall blocks. Empty means a flat colour |
+| `wall` | optional image tiled across the wall blocks. Empty means a flat color |
 | `wallRect` | optional `[x, y, w, h]` region of that image to tile. Empty means the whole file |
-| `wallColor` | wall colour as `RRGGBB`, also the fill behind a wall texture |
+| `wallColor` | wall color as `RRGGBB`, also the fill behind a wall texture |
 
 `wallColor` is RGB only on purpose. A full ARGB literal like `0xFF1C1010` is larger than a signed 32-bit int. A parse of it clamps to `0x7FFFFFFF`, and every wall comes out translucent white. The code ORs the alpha on instead.
 
-The colour is the base coat under a wall block, and a painted tile covers it. An unpainted cell over a wall therefore shows this colour raw. The first theme holds black for that reason. Erase a tile over a wall and the hole reads as void, rather than as a patch of a different colour.
+The color is the base coat under a wall block, and a painted tile covers it. An unpainted cell over a wall therefore shows this color raw. The first theme holds black for that reason. Erase a tile over a wall and the hole reads as void, rather than as a patch of a different color.
 
 Only player maps read the theme. `WallSkin` gives up early unless `CustomArena` is active, so the stock arena keeps the `0xFF1C1010` default that the class itself holds.
 
