@@ -66,7 +66,7 @@ class RemoteAvatar
 		sprite.animation.addByPrefix("dash", "Dash", 12, false);
 		sprite.animation.addByPrefix("dashBack", "Backdash", 12, false);
 		sprite.animation.addByPrefix("hurt", "Hurt", 12, false);
-		sprite.antialiasing = false;
+		util.PixelPerfectShader.on(sprite);
 		sprite.width = 42;
 		sprite.height = 44;
 		sprite.offset.set(2, 56);
@@ -85,13 +85,13 @@ class RemoteAvatar
 		ritual = new systems.ReviveRitual(burst, ghost);
 
 		held = new FlxSprite();
-		held.antialiasing = false;
+		util.PixelPerfectShader.on(held);
 		held.scale.set(4, 4);
 		held.visible = false;
 		layers.entityLayer.add(held);
 
 		twinHeld = new FlxSprite();
-		twinHeld.antialiasing = false;
+		util.PixelPerfectShader.on(twinHeld);
 		twinHeld.scale.set(4, 4);
 		twinHeld.color = TWIN_SHADE;
 		twinHeld.visible = false;
@@ -116,7 +116,7 @@ class RemoteAvatar
 
 		bubble = new FlxSprite();
 		bubble.loadGraphic(Paths.image("ui/speech_ready"));
-		bubble.antialiasing = false;
+		util.PixelPerfectShader.on(bubble);
 		bubble.scale.set(4, 4);
 		bubble.updateHitbox();
 		bubble.visible = false;

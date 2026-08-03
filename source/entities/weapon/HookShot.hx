@@ -32,7 +32,7 @@ class HookShot extends FlxSprite
 	{
 		super();
 		loadGraphic(Paths.image("items/yoyo_axel"));
-		antialiasing = false;
+		util.PixelPerfectShader.on(this);
 		scale.set(4, 4);
 	}
 

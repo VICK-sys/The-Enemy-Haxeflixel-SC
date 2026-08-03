@@ -45,7 +45,7 @@ class GhostTrail
 		var g = group.recycle(FlxSprite);
 		g.frames = s.frames;
 		g.frame = s.frame;
-		g.antialiasing = false;
+		PixelPerfectShader.on(g);
 		g.setPosition(s.x, s.y);
 		g.offset.set(s.offset.x, s.offset.y);
 		g.origin.set(s.origin.x, s.origin.y);
@@ -63,7 +63,7 @@ class GhostTrail
 		if (g.graphic != s.graphic)
 		{
 			g.loadGraphic(s.graphic);
-			g.antialiasing = false;
+			PixelPerfectShader.on(g);
 		}
 		g.setPosition(s.x, s.y);
 		g.angle = s.angle;

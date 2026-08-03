@@ -59,7 +59,7 @@ class Fx
 			b.key = key;
 			b.loadGraphic(Paths.image(key), true, BURST_FRAME, BURST_FRAME);
 			b.animation.add("go", [0, 1, 2, 3], BURST_FPS, false);
-			b.antialiasing = false;
+			util.PixelPerfectShader.on(b);
 			b.scale.set(BURST_SCALE, BURST_SCALE);
 			b.updateHitbox();
 		}
@@ -113,7 +113,7 @@ class Fx
 		{
 			s.loadGraphic(Paths.image("effects/steam_dash"), true, STEAM_FRAME, STEAM_FRAME);
 			s.animation.add("puff", [0, 1, 2, 3, 4], STEAM_FPS, false);
-			s.antialiasing = false;
+			util.PixelPerfectShader.on(s);
 			s.scale.set(STEAM_SCALE, STEAM_SCALE);
 			s.updateHitbox();
 		}
@@ -131,7 +131,7 @@ class Fx
 			p.loadGraphic(Paths.image("effects/charge_glow"), true, POP_W, POP_H);
 			p.animation.add("pop", [0, 1, 2, 3], POP_FPS, false);
 			p.animation.finishCallback = function(_) p.kill();
-			p.antialiasing = false;
+			util.PixelPerfectShader.on(p);
 			p.scale.set(POP_SCALE, POP_SCALE);
 			p.updateHitbox();
 		}
@@ -174,7 +174,7 @@ class Fx
 		if (l.graphic == null)
 		{
 			l.makeGraphic(44, 4, FlxColor.WHITE);
-			l.antialiasing = false;
+			util.PixelPerfectShader.on(l);
 		}
 		var off = (FlxG.random.float() * 2 - 1) * 35;
 		var lx = cx - dx * 50 - dy * off;
@@ -234,7 +234,7 @@ class Fx
 		var boom = new FlxSprite();
 		boom.loadGraphic(Paths.image("effects/rofel_explosion"), true, 80, 48);
 		boom.animation.add("boom", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 14, false);
-		boom.antialiasing = false;
+		util.PixelPerfectShader.on(boom);
 		boom.scale.set(9, 9);
 		boom.updateHitbox();
 		boom.x = cx - boom.width / 2;

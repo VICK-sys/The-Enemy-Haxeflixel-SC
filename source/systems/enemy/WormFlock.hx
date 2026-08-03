@@ -665,7 +665,7 @@ class WormFlock
 			s = new FlxSprite();
 			s.frames = Paths.sparrow("enemies/worm");
 			s.animation.addByPrefix("puff", "Mound", 8, false);
-			s.antialiasing = false;
+			util.PixelPerfectShader.on(s);
 			layers.shadowLayer.add(s);
 			puffs.push({sprite: s, life: PUFF_LIFE});
 		}

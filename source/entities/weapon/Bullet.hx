@@ -28,7 +28,7 @@ class Bullet extends FlxSprite
 	public function new()
 	{
 		super();
-		antialiasing = false;
+		util.PixelPerfectShader.on(this);
 		setSprite(SHOT);
 	}
 

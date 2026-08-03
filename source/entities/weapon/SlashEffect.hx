@@ -17,7 +17,7 @@ class SlashEffect extends FlxSprite
 		animation.addByPrefix("sword", "Sword", 12, false);
 		animation.addByPrefix("spear", "Spear", 12, false);
 		animation.addByPrefix("dagger", "Dagger", 12, false);
-		antialiasing = false;
+		util.PixelPerfectShader.on(this);
 		scale.set(4, 4);
 	}
 

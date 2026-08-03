@@ -34,7 +34,7 @@ class BackGear
 	{
 		sprite = new FlxSprite();
 		paint(0);
-		sprite.antialiasing = false;
+		util.PixelPerfectShader.on(sprite);
 		sprite.scale.set(SCALE, SCALE);
 		sprite.width = 1;
 		sprite.height = 1;

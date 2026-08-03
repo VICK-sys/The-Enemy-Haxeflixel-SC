@@ -266,6 +266,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function pixelFilter():Bool
+	{
+		ensure();
+		return save.data.pixelFilter != null ? save.data.pixelFilter : true;
+	}
+
+	public static function setPixelFilter(b:Bool):Void
+	{
+		ensure();
+		save.data.pixelFilter = b;
+		save.flush();
+	}
+
 	public static function sound3d():Bool
 	{
 		ensure();

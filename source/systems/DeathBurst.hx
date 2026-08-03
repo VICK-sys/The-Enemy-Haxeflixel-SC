@@ -42,7 +42,7 @@ class DeathBurst
 			var p = group.recycle(FlxSprite);
 			p.frames = util.HuePalette.sparrow(sheet != null ? sheet : util.Skins.sheet(), hue);
 			p.frame = p.frames.getByName("Part0000" + i);
-			p.antialiasing = false;
+			util.PixelPerfectShader.on(p);
 			p.scale.set(4, 4);
 			p.updateHitbox();
 			p.angle = FlxG.random.float(-TILT, TILT);

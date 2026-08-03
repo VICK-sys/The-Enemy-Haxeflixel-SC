@@ -32,7 +32,7 @@ class ThrownWeapon extends FlxSprite
 	{
 		super();
 		loadGraphic(Paths.image("items/hammer"));
-		antialiasing = false;
+		util.PixelPerfectShader.on(this);
 		scale.set(4, 4);
 		kill();
 	}

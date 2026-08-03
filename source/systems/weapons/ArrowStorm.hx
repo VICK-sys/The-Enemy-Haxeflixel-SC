@@ -59,14 +59,14 @@ class ArrowStorm
 
 		superArrow = new FlxSprite();
 		superArrow.loadGraphic(Paths.image("bullets/arrow"));
-		superArrow.antialiasing = false;
+		util.PixelPerfectShader.on(superArrow);
 		superArrow.scale.set(ARROW_SCALE, ARROW_SCALE);
 		superArrow.color = CHARGE_TINT;
 		superArrow.kill();
 
 		marker = new FlxSprite();
 		marker.loadGraphic(Paths.image("effects/crosshair_marker"));
-		marker.antialiasing = false;
+		util.PixelPerfectShader.on(marker);
 		markScale = cfg.radius * 2 / marker.frameWidth;
 		marker.scale.set(markScale, markScale);
 		marker.updateHitbox();

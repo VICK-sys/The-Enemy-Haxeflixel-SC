@@ -34,14 +34,14 @@ class HealthPickup extends FlxSprite
 	{
 		super();
 		loadGraphic(util.Outline.graphic("items/repair_kit"));
-		antialiasing = false;
+		util.PixelPerfectShader.on(this);
 		scale.set(SCALE, SCALE);
 		updateHitbox();
 		baseOffY = offset.y;
 
 		shadow = new FlxSprite();
 		shadow.loadGraphic(Paths.image("items/shadow_small"));
-		shadow.antialiasing = false;
+		util.PixelPerfectShader.on(shadow);
 		shadow.scale.set(SCALE, SCALE);
 		shadow.updateHitbox();
 		shadow.moves = false;

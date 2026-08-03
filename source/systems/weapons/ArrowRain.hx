@@ -58,7 +58,7 @@ class ArrowRain
 		if (m.width != 28)
 		{
 			m.makeGraphic(28, 10, 0xFF221A12);
-			m.antialiasing = false;
+			util.PixelPerfectShader.on(m);
 		}
 		m.alpha = 0.3;
 		m.setPosition(ix - 14, iy - 5);
