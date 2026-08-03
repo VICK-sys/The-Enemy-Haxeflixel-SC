@@ -190,21 +190,19 @@ class YoyoSpin
 
 	function release(pcx:Float, pcy:Float):Void
 	{
+		var throwDeg = baseAng + cfg.turns * 360;
+		var spread = cfg.launchSpread == null ? 20.0 : cfg.launchSpread;
+		var slots = caught.length;
+		var i = -1;
 		for (s in caught)
 		{
+			i++;
 			if (s.e == null || !s.e.exists)
 				continue;
-			var dx = s.e.x + s.e.width * 0.5 - pcx;
-			var dy = s.e.y + s.e.height * 0.5 - pcy;
-			var len = Math.sqrt(dx * dx + dy * dy);
-			if (len < 0.001)
-			{
-				dx = 1;
-				dy = 0;
-				len = 1;
-			}
-			dx /= len;
-			dy /= len;
+			var off = slots > 1 ? (i / (slots - 1) - 0.5) * spread : 0;
+			var rad = (throwDeg + off) * Math.PI / 180;
+			var dx = Math.cos(rad);
+			var dy = Math.sin(rad);
 			s.e.unseize(0.5);
 			if (onGrab != null)
 				onGrab(s.e, false);

@@ -41,7 +41,8 @@
 		"knock": 1.0,
 		"hitBrace": 0,
 		"cooldown": 0.12,
-		"restCooldown": 0.9
+		"restCooldown": 0.9,
+		"bounce": 380
 	},
 	"revolver": {
 		"cylinder": 6,
@@ -153,7 +154,8 @@
 		"stringDamage": 2,
 		"launchSpeed": 1400,
 		"launchPush": 4.0,
-		"launchDamage": 1
+		"launchDamage": 1,
+		"launchSpread": 20
 	},
 	"bash": {
 		"spawnDist": 142,

@@ -37,7 +37,8 @@ typedef YoyoConfig = {
 	knock:Float,
 	hitBrace:Float,
 	cooldown:Float,
-	restCooldown:Float
+	restCooldown:Float,
+	?bounce:Float
 }
 
 typedef RevolverConfig = {
@@ -132,7 +133,8 @@ typedef YoyoSpinConfig = {
 	stringDamage:Float,
 	launchSpeed:Float,
 	launchPush:Float,
-	launchDamage:Float
+	launchDamage:Float,
+	?launchSpread:Float
 }
 
 typedef WeaponsData = {

@@ -15,6 +15,8 @@ class YoyoFlight
 	static inline var TURN:Float = 6.5;
 	static inline var SLOW_RADIUS:Float = 110;
 	static inline var BOUNCE:Float = 1000;
+
+	private var jab = data.WeaponData.WeaponDataRegistry.get().yoyo;
 	static inline var BOUNCE_GRACE:Float = 0.12;
 	static inline var WOBBLE:Float = 5;
 	static inline var WOBBLE_SPIN:Float = 11;
@@ -81,8 +83,9 @@ class YoyoFlight
 			dy = 0;
 			len = 1;
 		}
-		vx = dx / len * BOUNCE;
-		vy = dy / len * BOUNCE;
+		var kick = jab.bounce == null ? BOUNCE : jab.bounce;
+		vx = dx / len * kick;
+		vy = dy / len * kick;
 		grace = BOUNCE_GRACE;
 	}
 
