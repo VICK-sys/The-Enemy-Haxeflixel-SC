@@ -289,6 +289,8 @@ class Enemies extends FlxSprite
 		if (puppet)
 		{
 			super.update(elapsed);
+			if (throwGrace > 0)
+				throwGrace -= elapsed;
 			if (flashTimer > 0)
 			{
 				flashTimer -= elapsed;
