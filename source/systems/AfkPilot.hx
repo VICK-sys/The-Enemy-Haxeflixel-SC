@@ -17,9 +17,12 @@ class AfkPilot
 	static inline var BOW_STAND:Float = 470;
 	static inline var BAND:Float = 45;
 	static inline var AVOID:Float = 240;
-	static inline var WALL_M:Float = 170;
+	static inline var WALL_M:Float = 300;
+	static inline var WALL_HARD:Float = 190;
+	static inline var WALL_STOP:Float = 140;
 	static inline var CROWD_W:Float = 1.35;
-	static inline var WALL_W:Float = 1.7;
+	static inline var WALL_W:Float = 1.6;
+	static inline var WALL_HARD_W:Float = 2.4;
 	static inline var FIELD_ONLY:Float = 0.25;
 	static inline var PANIC:Float = 100;
 	static inline var CROWD_GAP:Float = 210;
@@ -28,7 +31,11 @@ class AfkPilot
 	static inline var LEASH:Float = 90;
 	static inline var REANCHOR:Float = 900;
 	static inline var HEAL_AT:Float = 0.62;
-	static inline var HEAL_REACH:Float = 720;
+	static inline var HEAL_NEAR:Float = 430;
+	static inline var HEAL_FAR:Float = 820;
+	static inline var SCRAP_REACH:Float = 560;
+	static inline var SCRAP_SAFE:Float = 190;
+	static inline var LOOT_STOP:Float = 18;
 	static inline var PEER_STOP:Float = 90;
 	static inline var SWING_GAP:Float = 0.3;
 	static inline var RELOAD_GAP:Float = 0.8;
@@ -56,6 +63,18 @@ class AfkPilot
 	static inline var SUPER_PACK:Int = 3;
 	static inline var SUPER_NEAR:Float = 340;
 	static inline var SUPER_FAR:Float = 700;
+	static inline var SPIN_SWEEP:Float = 300;
+	static inline var SPIN_PACK:Int = 3;
+	static inline var SPIN_HURT_PACK:Int = 2;
+	static inline var SPIN_HURT_AT:Float = 0.55;
+	static inline var STORM_R:Float = 150;
+	static inline var STORM_LEAD:Float = 0.9;
+	static inline var STORM_ARM:Float = 0.2;
+	static inline var STORM_RAIN:Float = 3.3;
+	static inline var STORM_ANCHOR:Float = 110;
+	static inline var STORM_MARK_MAX:Float = 720;
+	static inline var STORM_SELF_EDGE:Int = 1;
+	static inline var STORM_PRESS:Float = 330;
 	static inline var GUN_FIRE:Float = 840;
 	static inline var BOW_FIRE:Float = 900;
 	static inline var YOYO_FIRE:Float = 480;
@@ -71,6 +90,7 @@ class AfkPilot
 	var combat:Weapons;
 	var director:EnemyDirector;
 	var pickups:Pickups;
+	var scraps:Scraps;
 	var gate:ReadyGate;
 	var arena:Arena;
 
@@ -89,15 +109,20 @@ class AfkPilot
 	var gigaGo:Bool = false;
 	var fieldX:Float = 0;
 	var fieldY:Float = 0;
+	var markTimer:Float = 0;
+	var zoneTimer:Float = 0;
+	var zoneX:Float = 0;
+	var zoneY:Float = 0;
 
 	public function new(player:Player, status:PlayerCombat, combat:Weapons, director:EnemyDirector, pickups:Pickups,
-			gate:ReadyGate, arena:Arena)
+			scraps:Scraps, gate:ReadyGate, arena:Arena)
 	{
 		this.player = player;
 		this.status = status;
 		this.combat = combat;
 		this.director = director;
 		this.pickups = pickups;
+		this.scraps = scraps;
 		this.gate = gate;
 		this.arena = arena;
 	}
@@ -122,6 +147,8 @@ class AfkPilot
 		stuckTimer = 0;
 		unstickTimer = 0;
 		gigaGo = false;
+		markTimer = 0;
+		zoneTimer = 0;
 		Controls.pilotAimAt(px() + (player.flipX ? -AIM_IDLE : AIM_IDLE), py());
 	}
 
@@ -142,6 +169,8 @@ class AfkPilot
 			readyTimer -= elapsed;
 		if (sideTimer > 0)
 			sideTimer -= elapsed;
+		if (zoneTimer > 0)
+			zoneTimer -= elapsed;
 		strafeTimer -= elapsed;
 		if (strafeTimer <= 0)
 		{
@@ -156,6 +185,7 @@ class AfkPilot
 			stuckTimer = 0;
 			unstickTimer = 0;
 			gigaGo = false;
+			zoneTimer = 0;
 			deadDrift();
 			lastX = player.x;
 			lastY = player.y;
@@ -191,10 +221,14 @@ class AfkPilot
 			stuckTimer = 0;
 
 		aimAt(target, mv);
-		if (combat.superBusy && combat.weapon == 2)
-			stormAim(target);
+		var marking = combat.weapon == 2 && combat.arrowStorm.marking;
+		if (marking)
+			markStorm(elapsed);
+		else
+			markTimer = 0;
+
 		var superNow = target != null && !combat.superBusy && wantSuper(target, gapTo(target));
-		if (!superNow)
+		if (!superNow && !marking)
 			maybeDash(target);
 		fight(target, elapsed);
 		lastX = player.x;
@@ -212,6 +246,12 @@ class AfkPilot
 
 	function tcy(e:Enemies):Float
 		return e.y + e.height * 0.5;
+
+	function leadX(e:Enemies, t:Float):Float
+		return tcx(e) + e.velocity.x * t;
+
+	function leadY(e:Enemies, t:Float):Float
+		return tcy(e) + e.velocity.y * t;
 
 	function distTo(e:Enemies):Float
 	{
@@ -253,6 +293,15 @@ class AfkPilot
 		return n;
 	}
 
+	function pressure(range:Float):Int
+	{
+		var n = 0;
+		for (e in director.bodies.members)
+			if (!skip(e) && gapTo(e) < range)
+				n++;
+		return n;
+	}
+
 	function clusterAt(c:Enemies):Int
 	{
 		var n = 0;
@@ -287,19 +336,18 @@ class AfkPilot
 			cy += dy / d * w;
 		}
 
-		var wx:Float = 0;
-		var wy:Float = 0;
-		if (px() < WALL_M)
-			wx += (WALL_M - px()) / WALL_M;
-		if (px() > arena.width - WALL_M)
-			wx -= (px() - (arena.width - WALL_M)) / WALL_M;
-		if (py() < WALL_M)
-			wy += (WALL_M - py()) / WALL_M;
-		if (py() > arena.height - WALL_M)
-			wy -= (py() - (arena.height - WALL_M)) / WALL_M;
+		fieldX = cx * CROWD_W + wallPush(px()) - wallPush(arena.width - px());
+		fieldY = cy * CROWD_W + wallPush(py()) - wallPush(arena.height - py());
+	}
 
-		fieldX = cx * CROWD_W + wx * WALL_W;
-		fieldY = cy * CROWD_W + wy * WALL_W;
+	function wallPush(gap:Float):Float
+	{
+		if (gap >= WALL_M)
+			return 0;
+		var push = (WALL_M - gap) / WALL_M * WALL_W;
+		if (gap < WALL_HARD)
+			push += (WALL_HARD - gap) / WALL_HARD * WALL_HARD_W;
+		return push;
 	}
 
 	function tapReady():Void
@@ -334,27 +382,87 @@ class AfkPilot
 			default: MELEE_STAND;
 		}
 
+	function healthLoot():{x:Float, y:Float}
+	{
+		if (status.healthMax <= 0 || status.health >= status.healthMax)
+			return null;
+		var frac = status.health / status.healthMax;
+		var reach = frac < HEAL_AT ? HEAL_FAR : HEAL_NEAR;
+		var best:{x:Float, y:Float} = null;
+		var bestD = reach;
+		for (p in pickups.group.members)
+		{
+			if (p == null || !p.exists)
+				continue;
+			var cx = p.x + p.width * 0.5;
+			var cy = p.y + p.height * 0.5;
+			var dx = cx - px();
+			var dy = cy - py();
+			var d = Math.sqrt(dx * dx + dy * dy);
+			if (d < bestD)
+			{
+				bestD = d;
+				best = {x: cx, y: cy};
+			}
+		}
+		return best;
+	}
+
+	function scrapLoot():{x:Float, y:Float}
+	{
+		var best:{x:Float, y:Float} = null;
+		var bestD = SCRAP_REACH;
+		for (s in scraps.group.members)
+		{
+			if (s == null || !s.exists)
+				continue;
+			var cx = s.x + s.width * 0.5;
+			var cy = s.y + s.height * 0.5;
+			var dx = cx - px();
+			var dy = cy - py();
+			var d = Math.sqrt(dx * dx + dy * dy);
+			if (d < bestD)
+			{
+				bestD = d;
+				best = {x: cx, y: cy};
+			}
+		}
+		return best;
+	}
+
+	function toward(p:{x:Float, y:Float}):{x:Float, y:Float}
+	{
+		var dx = p.x - px();
+		var dy = p.y - py();
+		if (dx * dx + dy * dy < LOOT_STOP * LOOT_STOP)
+			return null;
+		return {x: dx, y: dy};
+	}
+
 	function plan(target:Enemies):{x:Float, y:Float}
 	{
-		if (status.health < status.healthMax * HEAL_AT)
+		var heal = healthLoot();
+		if (heal != null)
+			return toward(heal);
+
+		if (zoneTimer > 0)
 		{
-			var pick:entities.HealthPickup = null;
-			var pickD:Float = HEAL_REACH;
-			for (p in pickups.group.members)
+			var zx = zoneX - px();
+			var zy = zoneY - py();
+			if (zx * zx + zy * zy > STORM_ANCHOR * STORM_ANCHOR)
+				return {x: zx, y: zy};
+			return null;
+		}
+
+		if (target == null || gapTo(target) > SCRAP_SAFE)
+		{
+			var loot = scrapLoot();
+			if (loot != null)
 			{
-				if (p == null || !p.exists)
-					continue;
-				var dx = p.x + p.width * 0.5 - px();
-				var dy = p.y + p.height * 0.5 - py();
-				var d = Math.sqrt(dx * dx + dy * dy);
-				if (d < pickD)
-				{
-					pickD = d;
-					pick = p;
-				}
+				var go = toward(loot);
+				if (go != null)
+					return go;
 			}
-			if (pick != null)
-				return {x: pick.x + pick.width * 0.5 - px(), y: pick.y + pick.height * 0.5 - py()};
 		}
 
 		if (target == null)
@@ -420,6 +528,10 @@ class AfkPilot
 			return;
 		vx /= len;
 		vy /= len;
+		if ((px() < WALL_STOP && vx < 0) || (px() > arena.width - WALL_STOP && vx > 0))
+			vx = 0;
+		if ((py() < WALL_STOP && vy < 0) || (py() > arena.height - WALL_STOP && vy > 0))
+			vy = 0;
 		if (vy < -0.42)
 			Controls.pilotHold(Controls.UP, true);
 		if (vy > 0.42)
@@ -435,7 +547,7 @@ class AfkPilot
 		if (target != null)
 		{
 			var lead = combat.weapon == 1 || combat.weapon == 2 ? RANGED_LEAD : 0.0;
-			Controls.pilotAimAt(tcx(target) + target.velocity.x * lead, tcy(target) + target.velocity.y * lead);
+			Controls.pilotAimAt(leadX(target, lead), leadY(target, lead));
 			return;
 		}
 		if (mv != null)
@@ -446,44 +558,56 @@ class AfkPilot
 		}
 	}
 
-	function stormAim(target:Enemies):Void
+	function caughtAt(cx:Float, cy:Float):Int
 	{
-		var best:Enemies = null;
-		var bestN = 0;
-		for (e in director.bodies.members)
-		{
-			if (skip(e))
-				continue;
-			var n = clusterAt(e);
-			if (n > bestN)
-			{
-				bestN = n;
-				best = e;
-			}
-		}
-		if (best == null)
-			best = target;
-		if (best == null)
-			return;
-
-		var sx:Float = 0;
-		var sy:Float = 0;
 		var n = 0;
 		for (e in director.bodies.members)
 		{
 			if (skip(e))
 				continue;
-			var dx = tcx(e) - tcx(best);
-			var dy = tcy(e) - tcy(best);
-			if (dx * dx + dy * dy < CLUSTER * CLUSTER)
-			{
-				sx += tcx(e);
-				sy += tcy(e);
+			var dx = leadX(e, STORM_LEAD) - cx;
+			var dy = leadY(e, STORM_LEAD) - cy;
+			if (dx * dx + dy * dy < STORM_R * STORM_R)
 				n++;
+		}
+		return n;
+	}
+
+	function stormZone():{x:Float, y:Float}
+	{
+		var bestX = px();
+		var bestY = py();
+		var bestN = caughtAt(bestX, bestY) + STORM_SELF_EDGE;
+
+		for (e in director.bodies.members)
+		{
+			if (skip(e) || distTo(e) > STORM_MARK_MAX)
+				continue;
+			var cx = leadX(e, STORM_LEAD);
+			var cy = leadY(e, STORM_LEAD);
+			var n = caughtAt(cx, cy);
+			if (n > bestN)
+			{
+				bestN = n;
+				bestX = cx;
+				bestY = cy;
 			}
 		}
-		if (n > 0)
-			Controls.pilotAimAt(sx / n, sy / n);
+		return {x: bestX, y: bestY};
+	}
+
+	function markStorm(elapsed:Float):Void
+	{
+		var zone = stormZone();
+		Controls.pilotAimAt(zone.x, zone.y);
+		markTimer += elapsed;
+		if (markTimer < STORM_ARM)
+			return;
+		markTimer = 0;
+		zoneX = zone.x;
+		zoneY = zone.y;
+		zoneTimer = STORM_RAIN;
+		Controls.pilotHold(Controls.ATTACK, true);
 	}
 
 	function escapeMove(fallback:Enemies):Bool
@@ -555,6 +679,14 @@ class AfkPilot
 		}
 	}
 
+	function spinWanted():Bool
+	{
+		var close = pressure(SPIN_SWEEP);
+		if (close >= SPIN_PACK)
+			return true;
+		return close >= SPIN_HURT_PACK && status.healthMax > 0 && status.health < status.healthMax * SPIN_HURT_AT;
+	}
+
 	function wantSuper(target:Enemies, d:Float):Bool
 	{
 		if (!status.canSuper() || !combat.hasSuper())
@@ -562,7 +694,8 @@ class AfkPilot
 		return switch (combat.weapon)
 		{
 			case 1: target.bossBody || packSize(SUPER_FAR) >= SUPER_PACK;
-			case 2: target.bossBody || clusterAt(target) >= SUPER_PACK;
+			case 2: target.bossBody || clusterAt(target) >= SUPER_PACK || pressure(STORM_PRESS) >= SPIN_HURT_PACK;
+			case 3: (target.bossBody && d < SUPER_NEAR) || spinWanted();
 			default: (target.bossBody && d < SUPER_NEAR) || packSize(SUPER_NEAR) >= SUPER_PACK;
 		}
 	}
@@ -580,6 +713,12 @@ class AfkPilot
 
 		if (wantSuper(target, d))
 		{
+			if (combat.weapon == 3)
+			{
+				var flen = Math.sqrt(fieldX * fieldX + fieldY * fieldY);
+				if (flen > 0.05)
+					Controls.pilotAimAt(px() + fieldX / flen * AIM_IDLE, py() + fieldY / flen * AIM_IDLE);
+			}
 			Controls.pilotHold(Controls.SUPER, true);
 			return;
 		}
