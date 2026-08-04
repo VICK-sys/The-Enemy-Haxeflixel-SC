@@ -75,6 +75,7 @@
 	"pause.options": "設定",
 	"pause.quit": "メニューにもどる",
 	"pause.lobby": "ロビーにもどる",
+	"pause.afk": "AFKアシスト  {0}",
 	"options.page": "< {0} >    {1}/{2}",
 	"options.page.graphics": "グラフィック",
 	"options.page.visual": "ビジュアル",

@@ -35,7 +35,7 @@ class ReadyGate
 
 	private var bubble:FlxSprite;
 	private var prompt:FlxText;
-	private var ready:Bool = false;
+	public var ready(default, null):Bool = false;
 	private var quorum:AckQuorum = new AckQuorum();
 	private var clock:Float = 0;
 
@@ -118,18 +118,21 @@ class ReadyGate
 			return;
 		}
 
-		if (host.subState != null)
+		var open = host.subState != null;
+		if (open && !util.Controls.pilot)
 		{
 			prompt.visible = false;
 			return;
 		}
 
-		prompt.visible = true;
-		prompt.text = ready ? waitLabel() : Lang.t("ready.prompt", [util.Controls.bindName(util.Controls.ACCEPT)]);
+		prompt.visible = !open;
+		if (!open)
+			prompt.text = ready ? waitLabel() : Lang.t("ready.prompt", [util.Controls.bindName(util.Controls.ACCEPT)]);
+		var press = open ? util.Controls.pilotAccepted() : util.Controls.acceptJustPressed();
 
 		if (ready)
 		{
-			if (Net.active && !status.dead && util.Controls.acceptJustPressed())
+			if (Net.active && !status.dead && press)
 				unready();
 			return;
 		}
@@ -143,7 +146,7 @@ class ReadyGate
 		if (status.dead || (blocked != null && blocked()))
 			return;
 
-		if (util.Controls.acceptJustPressed())
+		if (press)
 			markReady();
 	}
 

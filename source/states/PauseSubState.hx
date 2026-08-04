@@ -18,16 +18,36 @@ class PauseSubState extends FlxSubState
 	private var list:MenuList;
 	private var leaving:Bool = false;
 	private var inLobby:Bool;
+	private var afk:systems.AfkPilot;
 
-	public function new(camUI:FlxCamera, inLobby:Bool = false)
+	public function new(camUI:FlxCamera, inLobby:Bool = false, afk:systems.AfkPilot = null)
 	{
 		super();
 		this.camUI = camUI;
 		this.inLobby = inLobby;
+		this.afk = afk;
 	}
 
 	function exitKey():String
 		return inLobby ? "pause.quit" : "pause.lobby";
+
+	function rowKeys():Array<String>
+	{
+		var keys = ["pause.resume"];
+		if (afk != null)
+			keys.push("pause.afk");
+		keys.push("pause.help");
+		keys.push("pause.options");
+		keys.push(exitKey());
+		return keys;
+	}
+
+	function labelFor(key:String):String
+	{
+		if (key == "pause.afk")
+			return Lang.t("pause.afk", [Lang.t(afk.on ? "common.on" : "common.off")]);
+		return Lang.t(key);
+	}
 
 	override public function create():Void
 	{
@@ -42,7 +62,7 @@ class PauseSubState extends FlxSubState
 		title.cameras = [camUI];
 		add(title);
 
-		list = new MenuList([Lang.t("pause.resume"), Lang.t("pause.help"), Lang.t("pause.options"), Lang.t(exitKey())], 300, 66, 32);
+		list = new MenuList([for (k in rowKeys()) labelFor(k)], afk == null ? 300 : 272, 66, 32);
 		list.onChoose = choose;
 		list.cameras = [camUI];
 		add(list);
@@ -74,11 +94,11 @@ class PauseSubState extends FlxSubState
 		title.text = Lang.t("pause.title");
 		title.font = Lang.font();
 
-		var keys = ["pause.resume", "pause.help", "pause.options", exitKey()];
+		var keys = rowKeys();
 		for (i in 0...keys.length)
 		{
 			list.rowAt(i).font = Lang.font();
-			list.setLabel(i, Lang.t(keys[i]));
+			list.setLabel(i, labelFor(keys[i]));
 		}
 	}
 
@@ -104,13 +124,16 @@ class PauseSubState extends FlxSubState
 		if (leaving)
 			return;
 
-		switch (i)
+		switch (rowKeys()[i])
 		{
-			case 0:
+			case "pause.resume":
 				close();
-			case 1:
+			case "pause.afk":
+				afk.set(!afk.on);
+				list.setLabel(i, labelFor("pause.afk"));
+			case "pause.help":
 				openSubState(new TutorialSubState(camUI, true));
-			case 2:
+			case "pause.options":
 				openSubState(new OptionsSubState(camUI));
 			default:
 				leaving = true;

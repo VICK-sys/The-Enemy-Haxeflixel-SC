@@ -46,6 +46,11 @@ class PlayerCombat
 
 	function get_guarding():Bool
 		return iframeTimer > 0 && dashGuard && !dead;
+
+	public var dashReady(get, never):Bool;
+
+	function get_dashReady():Bool
+		return dashCooldownTimer <= 0;
 	private var hurtLockTimer:Float = 0;
 	private var hurtSlowTimer:Float = 0;
 	private var dashCooldownTimer:Float = 0;

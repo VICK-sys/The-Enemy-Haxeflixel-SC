@@ -75,6 +75,7 @@
 	"pause.options": "OPCIONES",
 	"pause.quit": "SALIR AL MENÚ",
 	"pause.lobby": "VOLVER A LA SALA",
+	"pause.afk": "ASISTENCIA AFK  {0}",
 	"options.page": "< {0} >    {1}/{2}",
 	"options.page.graphics": "GRAFICOS",
 	"options.page.visual": "VISUAL",

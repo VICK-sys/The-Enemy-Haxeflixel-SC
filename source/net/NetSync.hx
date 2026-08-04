@@ -263,6 +263,28 @@ class NetSync
 		return hurt;
 	}
 
+	public function nearestLivingPeer(x:Float, y:Float):{x:Float, y:Float}
+	{
+		var found:{x:Float, y:Float} = null;
+		var bestD:Float = Math.POSITIVE_INFINITY;
+		roster.eachAvatar(function(a)
+		{
+			if (a.healthFrac <= 0)
+				return;
+			var ax = a.sprite.x + a.sprite.width * 0.5;
+			var ay = a.sprite.y + a.sprite.height * 0.5;
+			var dx = ax - x;
+			var dy = ay - y;
+			var d = dx * dx + dy * dy;
+			if (d < bestD)
+			{
+				bestD = d;
+				found = {x: ax, y: ay};
+			}
+		});
+		return found;
+	}
+
 	public function update(elapsed:Float):Void
 	{
 		frame++;

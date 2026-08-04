@@ -39,6 +39,37 @@ class Controls
 	public static var uiMouse:Bool = false;
 	public static var padMode(default, null):Bool = false;
 	public static var padLabels(default, null):Bool = false;
+	public static var pilot(default, null):Bool = false;
+
+	static var pilotHeld:Array<Bool> = [for (_ in 0...COUNT) false];
+	static var pilotWas:Array<Bool> = [for (_ in 0...COUNT) false];
+	static var pilotAimAtX:Float = 0;
+	static var pilotAimAtY:Float = 0;
+
+	public static function setPilot(on:Bool):Void
+	{
+		pilot = on;
+		for (i in 0...COUNT)
+		{
+			pilotHeld[i] = false;
+			pilotWas[i] = false;
+		}
+	}
+
+	public static function pilotHold(action:Int, on:Bool):Void
+		pilotHeld[action] = on;
+
+	public static function pilotAimAt(x:Float, y:Float):Void
+	{
+		pilotAimAtX = x;
+		pilotAimAtY = y;
+	}
+
+	public static function pilotAccepted():Bool
+		return pilot && pilotHeld[ACCEPT] && !pilotWas[ACCEPT];
+
+	static function pilotOwns(action:Int):Bool
+		return action != PAUSE && action != INTERACT && action != ACCEPT;
 
 	static var inited:Bool = false;
 	static var keys:Array<Int> = [];
@@ -211,10 +242,28 @@ class Controls
 	}
 
 	public static function pressed(action:Int):Bool
+	{
+		if (pilot)
+		{
+			if (pilotOwns(action))
+				return pilotHeld[action];
+			if (pilotHeld[action])
+				return true;
+		}
 		return keyPressed(keys[action]) || padPressed(pads[action]);
+	}
 
 	public static function justPressed(action:Int):Bool
+	{
+		if (pilot)
+		{
+			if (pilotOwns(action))
+				return pilotHeld[action] && !pilotWas[action];
+			if (pilotHeld[action] && !pilotWas[action])
+				return true;
+		}
 		return keyJust(keys[action]) || padJust(pads[action]);
+	}
 
 	static function stickX():Float
 	{
@@ -229,16 +278,16 @@ class Controls
 	}
 
 	public static function moveUp():Bool
-		return pressed(UP) || stickY() < -STICK_MOVE;
+		return pilot ? pilotHeld[UP] : pressed(UP) || stickY() < -STICK_MOVE;
 
 	public static function moveDown():Bool
-		return pressed(DOWN) || stickY() > STICK_MOVE;
+		return pilot ? pilotHeld[DOWN] : pressed(DOWN) || stickY() > STICK_MOVE;
 
 	public static function moveLeft():Bool
-		return pressed(LEFT) || stickX() < -STICK_MOVE;
+		return pilot ? pilotHeld[LEFT] : pressed(LEFT) || stickX() < -STICK_MOVE;
 
 	public static function moveRight():Bool
-		return pressed(RIGHT) || stickX() > STICK_MOVE;
+		return pilot ? pilotHeld[RIGHT] : pressed(RIGHT) || stickX() > STICK_MOVE;
 
 	public static function padLeftHeld():Bool
 		return padPressed(FlxGamepadInputID.DPAD_LEFT) || stickX() < -STICK_MOVE;
@@ -295,10 +344,18 @@ class Controls
 	}
 
 	public static function aimX():Float
+	{
+		if (pilot)
+			return pilotAimAtX;
 		return padMode ? anchorX + aimDirX * aimReach + gyroOffX : FlxG.mouse.x;
+	}
 
 	public static function aimY():Float
+	{
+		if (pilot)
+			return pilotAimAtY;
 		return padMode ? anchorY + aimDirY * aimReach + gyroOffY : FlxG.mouse.y;
+	}
 
 	public static function aimViewX(cam:flixel.FlxCamera):Float
 		return (aimX() - cam.scroll.x - cam.viewMarginLeft) * cam.zoom;
@@ -331,7 +388,7 @@ class Controls
 		return (!typing && FlxG.keys.anyJustPressed([FlxKey.ESCAPE])) || padJust(FlxGamepadInputID.B);
 
 	public static function walkHeld():Bool
-		return (!typing && FlxG.keys.anyPressed([FlxKey.SHIFT])) || padPressed(FlxGamepadInputID.LEFT_STICK_CLICK);
+		return !pilot && ((!typing && FlxG.keys.anyPressed([FlxKey.SHIFT])) || padPressed(FlxGamepadInputID.LEFT_STICK_CLICK));
 
 	public static function pausePressed():Bool
 		return justPressed(PAUSE) || padJust(FlxGamepadInputID.START);
@@ -351,10 +408,13 @@ class Controls
 
 	static function tick():Void
 	{
+		for (i in 0...COUNT)
+			pilotWas[i] = pilotHeld[i];
+
 		if (FlxG.gamepads.globalDeadZone != padDeadzone())
 			FlxG.gamepads.globalDeadZone = padDeadzone();
 
-		if (firePinned && !pressed(ATTACK) && !pressed(SECOND))
+		if (firePinned && (pilot || (!pressed(ATTACK) && !pressed(SECOND))))
 			firePinned = false;
 
 		if (fireLock > 0)

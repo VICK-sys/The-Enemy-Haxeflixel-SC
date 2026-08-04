@@ -69,6 +69,7 @@ class PlayState extends FlxState
 	private var boxes:systems.HitboxView;
 	private var numbers:systems.DamageNumbers;
 	private var dashGhost:systems.DashGhost;
+	private var afk:systems.AfkPilot;
 	private var wipe:IrisWipe;
 	public var restarting(default, null):Bool = false;
 	private var hadSub:Bool = false;
@@ -91,7 +92,7 @@ class PlayState extends FlxState
 	function openPause():Void
 	{
 		DiscordPresence.paused();
-		var pause = new PauseSubState(hud.camUI);
+		var pause = new PauseSubState(hud.camUI, false, afk);
 		pause.closeCallback = function()
 		{
 			if (Lang.consumeChanged())
@@ -113,7 +114,7 @@ class PlayState extends FlxState
 	override public function onFocusLost():Void
 	{
 		super.onFocusLost();
-		if (!Net.active && canPause())
+		if (!Net.active && !afk.on && canPause())
 			openPause();
 	}
 
@@ -243,6 +244,7 @@ class PlayState extends FlxState
 		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status, fx) : new EnemyDirector(_player, arena, layers, status, fx);
 		director.solids = props.solids;
 		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups, scraps);
+		afk = new systems.AfkPilot(_player, status, combat, director, pickups, gate);
 
 		add(combat.swing.slashes);
 		add(combat.bash.slashes);
@@ -330,6 +332,7 @@ class PlayState extends FlxState
 			netSync.onDropped = onNetDropped;
 			netSync.startRevive = ritual.begin;
 			netSync.reviveDone = function() return ritual.done;
+			afk.findPeer = netSync.nearestLivingPeer;
 		netSync.onRestart = beginRestart;
 		}
 
@@ -373,6 +376,7 @@ class PlayState extends FlxState
 
 	override public function destroy():Void
 	{
+		util.Controls.setPilot(false);
 		util.Stats.commit();
 		if (hud != null)
 			hud.dispose();
@@ -383,7 +387,11 @@ class PlayState extends FlxState
 	{
 		EnemyNav.resetBudget();
 
-		var inputLocked = Net.active && subState != null;
+		if (afk.on && status.dead && (!Net.active || (netSync != null && netSync.runFailed)))
+			afk.set(false);
+		afk.update(elapsed);
+
+		var inputLocked = Net.active && subState != null && !afk.on;
 
 		util.Controls.setAimAnchor(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5);
 		bossFinish.update(elapsed);
