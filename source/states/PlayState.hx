@@ -244,7 +244,7 @@ class PlayState extends FlxState
 		director = Net.isClient ? new PuppetDirector(_player, arena, layers, status, fx) : new EnemyDirector(_player, arena, layers, status, fx);
 		director.solids = props.solids;
 		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups, scraps);
-		afk = new systems.AfkPilot(_player, status, combat, director, pickups, gate);
+		afk = new systems.AfkPilot(_player, status, combat, director, pickups, gate, arena);
 
 		add(combat.swing.slashes);
 		add(combat.bash.slashes);
