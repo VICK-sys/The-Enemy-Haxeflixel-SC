@@ -62,6 +62,23 @@ haxelib run lime build windows
 haxelib run lime build html5
 ```
 
+A running copy of the game keeps a lock on `lime.ndll`, and the Windows link
+step then fails while copying its output. The error names the file rather than
+the cause. Close the game, or end the process, and build again:
+
+```
+taskkill /F /IM Enemy.exe
+```
+
+"The process Enemy.exe not found" means no stale copy was running. That is the
+normal case and it is not an error.
+
+`tools/verify.ps1` builds both targets and runs this step for you:
+
+```
+powershell -ExecutionPolicy Bypass -File tools/verify.ps1
+```
+
 ## Discord Rich Presence
 
 The Windows build can show your wave, boss fight, equipped weapon, kill count and run time on Discord. To switch it on, create an application at [discord.com/developers/applications](https://discord.com/developers/applications). Copy its Application ID into `assets/data/discord.json`. You can also upload Rich Presence art named `icon`, `hammer`, `revolver`, `crossbow` and `hook`. An empty ID keeps presence off.
