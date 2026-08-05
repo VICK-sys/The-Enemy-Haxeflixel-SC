@@ -50,11 +50,11 @@ class ControlsSubState extends FlxSubState
 		add(shade);
 
 		title = new FlxText(0, 34, FlxG.width, Lang.t("controls.title"));
-		title.setFormat(Lang.font(), 40, FlxColor.WHITE, CENTER);
+		title.setFormat(Lang.titleFont(), Lang.titleSize(), FlxColor.WHITE, CENTER);
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
 		add(title);
 
-		list = new MenuList([for (i in 0...ROWS) ""], TOP, STEP, 22);
+		list = new MenuList([for (i in 0...ROWS) ""], TOP, STEP, Lang.bodySize());
 		list.onChoose = choose;
 		list.onAdjust = adjust;
 		list.marker.scale.set(1.6, 1.6);
@@ -62,12 +62,12 @@ class ControlsSubState extends FlxSubState
 		add(list);
 
 		prompt = new FlxText(0, 654, FlxG.width, "");
-		prompt.setFormat(Lang.font(), 18, FlxColor.YELLOW, CENTER);
+		prompt.setFormat(Lang.smallFont(), Lang.smallSize(), FlxColor.YELLOW, CENTER);
 		prompt.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(prompt);
 
 		note = new FlxText(0, 684, FlxG.width, "");
-		note.setFormat(Lang.font(), 14, FlxColor.WHITE, CENTER);
+		note.setFormat(Lang.smallFont(), Lang.smallSize(), FlxColor.WHITE, CENTER);
 		note.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		note.alpha = 0.7;
 		add(note);

@@ -75,4 +75,5 @@ class TitleSequence extends FlxState
             wipe = new IrisWipe(this);
         wipe.close(function() FlxG.switchState(() -> new MainMenuState()));
     }
+
 }

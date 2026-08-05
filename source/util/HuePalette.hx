@@ -8,6 +8,9 @@ import openfl.display.BitmapData;
 
 class HuePalette
 {
+	public static function nameTint(hue:Float):Int
+		return FlxColor.fromHSB(hue * 360, 0.82, 0.98);
+
 	public static function sparrow(name:String, hue:Float):FlxAtlasFrames
 	{
 		return FlxAtlasFrames.fromSparrow(graphic(name, hue), "assets/images/" + name + ".xml");

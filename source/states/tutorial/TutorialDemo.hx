@@ -44,7 +44,7 @@ class TutorialDemo extends FlxGroup
 	function label(y:Float, size:Int, str:String):FlxText
 	{
 		var t = new FlxText(0, y, FlxG.width, str);
-		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
+		t.setFormat(Lang.fontFor(size), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		t.cameras = [cam];
 		add(t);

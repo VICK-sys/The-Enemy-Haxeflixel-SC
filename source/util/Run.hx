@@ -1,6 +1,5 @@
 package util;
 
-import data.RunData.RunEvent;
 import data.RunData.RunDataRegistry;
 
 class Run

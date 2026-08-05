@@ -32,7 +32,7 @@ class Controls
 	static inline var AIM_NEAR:Float = 150;
 	static inline var AIM_FAR:Float = 620;
 	static inline var GYRO_CLAIM:Float = 0.25;
-	static inline var GYRO_RANGE:Float = 380;
+	static inline var GYRO_RANGE:Float = 285;
 	static inline var GYRO_STILL:Float = 0.05;
 
 	public static var typing:Bool = false;
@@ -81,8 +81,11 @@ class Controls
 	static var menuXNow:Int = 0;
 	static var menuYNow:Int = 0;
 	static var aimReach:Float = AIM_NEAR;
-	static var gyroOffX:Float = 0;
-	static var gyroOffY:Float = 0;
+	static var gyroViewX:Float = 0;
+	static var gyroViewY:Float = 0;
+	static var gyroOriginX:Float = 0;
+	static var gyroOriginY:Float = 0;
+	static var gyroClaimed:Bool = false;
 	static var gyroBiasP:Float = 0;
 	static var gyroBiasY:Float = 0;
 	static var aimDirX:Float = 1;
@@ -347,21 +350,45 @@ class Controls
 	{
 		if (pilot)
 			return pilotAimAtX;
-		return padMode ? anchorX + aimDirX * aimReach + gyroOffX : FlxG.mouse.x;
+		if (!padMode)
+			return FlxG.mouse.x;
+		var cam = FlxG.camera;
+		return gyroClaimed && cam != null ? viewWorldX(gyroViewX, cam) : padAimX();
 	}
 
 	public static function aimY():Float
 	{
 		if (pilot)
 			return pilotAimAtY;
-		return padMode ? anchorY + aimDirY * aimReach + gyroOffY : FlxG.mouse.y;
+		if (!padMode)
+			return FlxG.mouse.y;
+		var cam = FlxG.camera;
+		return gyroClaimed && cam != null ? viewWorldY(gyroViewY, cam) : padAimY();
 	}
 
 	public static function aimViewX(cam:flixel.FlxCamera):Float
-		return (aimX() - cam.scroll.x - cam.viewMarginLeft) * cam.zoom;
+		return !pilot && padMode && gyroClaimed ? gyroViewX : worldViewX(aimX(), cam);
 
 	public static function aimViewY(cam:flixel.FlxCamera):Float
-		return (aimY() - cam.scroll.y - cam.viewMarginTop) * cam.zoom;
+		return !pilot && padMode && gyroClaimed ? gyroViewY : worldViewY(aimY(), cam);
+
+	static inline function padAimX():Float
+		return anchorX + aimDirX * aimReach;
+
+	static inline function padAimY():Float
+		return anchorY + aimDirY * aimReach;
+
+	static inline function worldViewX(x:Float, cam:flixel.FlxCamera):Float
+		return (x - cam.scroll.x - cam.viewMarginLeft) * cam.zoom;
+
+	static inline function worldViewY(y:Float, cam:flixel.FlxCamera):Float
+		return (y - cam.scroll.y - cam.viewMarginTop) * cam.zoom;
+
+	static inline function viewWorldX(x:Float, cam:flixel.FlxCamera):Float
+		return cam.scroll.x + cam.viewMarginLeft + x / cam.zoom;
+
+	static inline function viewWorldY(y:Float, cam:flixel.FlxCamera):Float
+		return cam.scroll.y + cam.viewMarginTop + y / cam.zoom;
 
 	public static function menuUp():Bool
 		return (!typing && FlxG.keys.anyJustPressed([FlxKey.W, FlxKey.UP])) || padJust(FlxGamepadInputID.DPAD_UP) || menuYNow < 0 && menuYPrev >= 0;
@@ -481,9 +508,23 @@ class Controls
 			var len = Math.sqrt(rx * rx + ry * ry);
 			if (len > STICK_AIM)
 			{
-				aimDirX = rx / len;
-				aimDirY = ry / len;
-				aimReach = AIM_NEAR + (AIM_FAR - AIM_NEAR) * Math.min(1, (len - STICK_AIM) / (1 - STICK_AIM));
+				var nextDirX = rx / len;
+				var nextDirY = ry / len;
+				var nextReach = AIM_NEAR + (AIM_FAR - AIM_NEAR) * Math.min(1, (len - STICK_AIM) / (1 - STICK_AIM));
+				if (gyroClaimed && FlxG.camera != null)
+				{
+					var viewDx = (nextDirX * nextReach - aimDirX * aimReach) * FlxG.camera.zoom;
+					var viewDy = (nextDirY * nextReach - aimDirY * aimReach) * FlxG.camera.zoom;
+					gyroViewX += viewDx;
+					gyroViewY += viewDy;
+					gyroOriginX += viewDx;
+					gyroOriginY += viewDy;
+				}
+				aimDirX = nextDirX;
+				aimDirY = nextDirY;
+				aimReach = nextReach;
+				if (gyroClaimed)
+					clampGyroView();
 				padMode = true;
 			}
 			if (p.anyJustPressed([
@@ -515,16 +556,16 @@ class Controls
 				var fx = p.analog.value.RIGHT_STICK_X;
 				var fy = p.analog.value.RIGHT_STICK_Y;
 				if (fx * fx + fy * fy > 0.81)
-				{
-					gyroOffX *= 0.82;
-					gyroOffY *= 0.82;
-				}
+					recenterGyro(FlxG.camera);
 			}
 		}
-		else if (gyroOffX != 0 || gyroOffY != 0)
+		else if (gyroClaimed)
 		{
-			gyroOffX = 0;
-			gyroOffY = 0;
+			gyroClaimed = false;
+			gyroViewX = 0;
+			gyroViewY = 0;
+			gyroOriginX = 0;
+			gyroOriginY = 0;
 		}
 		#end
 
@@ -532,7 +573,10 @@ class Controls
 		var mdx = gamePoint.x - lastMouseX;
 		var mdy = gamePoint.y - lastMouseY;
 		if (mdx * mdx + mdy * mdy > 9 || FlxG.mouse.justPressed || FlxG.mouse.justPressedRight)
+		{
 			padMode = false;
+			gyroClaimed = false;
+		}
 		lastMouseX = gamePoint.x;
 		lastMouseY = gamePoint.y;
 
@@ -566,18 +610,54 @@ class Controls
 
 	static function applyGyro(pitch:Float, yaw:Float, elapsed:Float):Void
 	{
-		if (Math.abs(yaw) > GYRO_CLAIM || Math.abs(pitch) > GYRO_CLAIM)
+		var moved = Math.abs(yaw) > GYRO_CLAIM || Math.abs(pitch) > GYRO_CLAIM;
+		if (moved)
 			padMode = true;
-		if (!padMode)
+		if (!padMode || !gyroClaimed && !moved)
 			return;
-		var s = SaveData.gyroAim();
-		gyroOffX += -yaw * s * elapsed;
-		gyroOffY += -pitch * s * elapsed;
-		var len = Math.sqrt(gyroOffX * gyroOffX + gyroOffY * gyroOffY);
+		var cam = FlxG.camera;
+		if (cam == null)
+			return;
+		if (!gyroClaimed)
+		{
+			gyroViewX = worldViewX(padAimX(), cam);
+			gyroViewY = worldViewY(padAimY(), cam);
+			gyroOriginX = gyroViewX;
+			gyroOriginY = gyroViewY;
+			gyroClaimed = true;
+		}
+		integrateGyro(pitch, yaw, elapsed, SaveData.gyroAim(), cam);
+	}
+
+	static function integrateGyro(pitch:Float, yaw:Float, elapsed:Float, sensitivity:Float, cam:flixel.FlxCamera):Void
+	{
+		gyroViewX += -yaw * sensitivity * elapsed * cam.zoom;
+		gyroViewY += -pitch * sensitivity * elapsed * cam.zoom;
+		clampGyroView();
+	}
+
+	static function recenterGyro(cam:flixel.FlxCamera):Void
+	{
+		if (!gyroClaimed || cam == null)
+			return;
+		var x = worldViewX(padAimX(), cam);
+		var y = worldViewY(padAimY(), cam);
+		gyroViewX = x + (gyroViewX - x) * 0.82;
+		gyroViewY = y + (gyroViewY - y) * 0.82;
+		gyroOriginX = x;
+		gyroOriginY = y;
+		clampGyroView();
+	}
+
+	static function clampGyroView():Void
+	{
+		var dx = gyroViewX - gyroOriginX;
+		var dy = gyroViewY - gyroOriginY;
+		var len = Math.sqrt(dx * dx + dy * dy);
 		if (len > GYRO_RANGE)
 		{
-			gyroOffX *= GYRO_RANGE / len;
-			gyroOffY *= GYRO_RANGE / len;
+			gyroViewX = gyroOriginX + dx * GYRO_RANGE / len;
+			gyroViewY = gyroOriginY + dy * GYRO_RANGE / len;
 		}
 	}
 

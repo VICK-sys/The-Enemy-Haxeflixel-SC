@@ -4,7 +4,6 @@ import flixel.FlxG;
 import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.FlxSubState;
-import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import ui.MenuList;
@@ -15,13 +14,11 @@ class OptionsSubState extends FlxSubState
 {
 	static inline var RESET_WINDOW:Float = 3.0;
 	static inline var HUE_STEP:Float = 1 / 360.0;
-	static inline var VOICE_STEP:Float = 0.05;
 	static inline var TOP:Float = 150;
 	static inline var STEP:Float = 34;
+	static inline var JA_STEP:Float = 44;
 	static inline var TAB_GAP:Float = 22;
 	static inline var TAIL_GAP:Float = 18;
-	static inline var ROW_SIZE:Int = 22;
-	static inline var TAB_SIZE:Int = 20;
 	static inline var TAB_COLOR:Int = 0xFFE8C860;
 	static inline var DIM:Int = 0xFF9A9A9A;
 	static inline var PREVIEW_SCALE:Float = 6;
@@ -51,7 +48,6 @@ class OptionsSubState extends FlxSubState
 	static inline var LANGUAGE:Int = 12;
 	static inline var CONTROLS:Int = 13;
 	static inline var RESET:Int = 14;
-	static inline var VOICE:Int = 15;
 	static inline var RESOLUTION:Int = 16;
 	static inline var IDLE_FPS:Int = 17;
 	static inline var MUSIC:Int = 18;
@@ -61,19 +57,28 @@ class OptionsSubState extends FlxSubState
 	static inline var GYRO:Int = 22;
 	static inline var DMGNUM:Int = 23;
 	static inline var DASHTRAIL:Int = 24;
+	static inline var INSTANT_QUIT:Int = 25;
+	static inline var CHATSCALE:Int = 26;
 
 	static inline var TAB:Int = -1;
 	static inline var BACK:Int = -2;
 	static inline var BLANK:Int = -3;
 
+	static var CUSTOM_ITEMS:Array<Int> = [LANGUAGE, CONTROLS, AIMDEAD, PADICONS, GYRO,
+		#if desktop
+		INSTANT_QUIT,
+		#end
+		RESET];
+
 	static var PAGES:Array<{key:String, items:Array<Int>}> = [
 		{key: "options.page.graphics", items: [DISPLAY, RESOLUTION, ASPECT, VSYNC, FRAMERATE, IDLE_FPS]},
-		{key: "options.page.visual", items: [CAMERA, SHAKE, FREEZE, DMGNUM, DASHTRAIL, HUD, FPS]},
+		{key: "options.page.visual", items: [CAMERA, CHATSCALE, SHAKE, FREEZE, DMGNUM, DASHTRAIL, HUD, FPS]},
 		{key: "options.page.sounds", items: [VOLUME, MUSIC, SFX, SOUND3D]},
-		{key: "options.page.custom", items: [VOICE, LANGUAGE, CONTROLS, AIMDEAD, PADICONS, GYRO, RESET]}
+		{key: "options.page.custom", items: CUSTOM_ITEMS}
 	];
 
 	static var FPS_STEPS:Array<Int> = [60, 120, 144, 165, 240];
+	static var CHAT_STEPS:Array<Float> = [0.7, 1.0, 1.33, 1.67, 2.0];
 	static var ASPECTS:Array<String> = ["auto", "4:3", "16:9", "16:10", "21:9"];
 	static var DISPLAYS:Array<String> = ["windowed", "borderless", "fullscreen"];
 
@@ -92,8 +97,6 @@ class OptionsSubState extends FlxSubState
 	private var huePending:Bool = false;
 	private var skinClock:Float = 0;
 	private var settleClock:Float = 0;
-	private var sample:FlxSound;
-	private var samples:Map<String, FlxSound> = new Map();
 
 	public function new(?cam:FlxCamera)
 	{
@@ -108,7 +111,7 @@ class OptionsSubState extends FlxSubState
 		add(shade);
 
 		title = new FlxText(0, 40, FlxG.width, Lang.t("options.title"));
-		title.setFormat(Lang.font(), 44, FlxColor.WHITE, CENTER);
+		title.setFormat(Lang.titleFont(), Lang.titleSize(), FlxColor.WHITE, CENTER);
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 3);
 		add(title);
 
@@ -118,13 +121,14 @@ class OptionsSubState extends FlxSubState
 				widest = p.items.length;
 		rows = widest + 2;
 
-		list = new MenuList([for (i in 0...rows) ""], TOP, STEP, ROW_SIZE);
+		list = new MenuList([for (i in 0...rows) ""], TOP, STEP, Lang.bodySize());
 		list.onChoose = choose;
 		list.onAdjust = adjust;
 		list.repeatFor = canRepeat;
 		list.marker.scale.set(1.6, 1.6);
 		list.marker.updateHitbox();
-		list.rowAt(0).size = TAB_SIZE;
+		list.rowAt(0).size = Lang.smallSize();
+		list.rowAt(0).font = Lang.smallFont();
 		add(list);
 
 		preview = new FlxSprite();
@@ -183,6 +187,7 @@ class OptionsSubState extends FlxSubState
 	function buildPage():Void
 	{
 		var items = PAGES[page].items;
+		var step = Lang.code == Lang.JA ? JA_STEP : STEP;
 
 		ids = [TAB];
 		for (item in items)
@@ -207,7 +212,7 @@ class OptionsSubState extends FlxSubState
 			if (kind == BACK)
 				y += TAIL_GAP;
 			list.place(i, y);
-			y += STEP;
+			y += step;
 		}
 
 		refreshLabels();
@@ -308,7 +313,7 @@ class OptionsSubState extends FlxSubState
 	{
 		return switch (ids[row])
 		{
-			case COLOR, VOLUME, MUSIC, SFX, CAMERA, SHAKE, FREEZE, VOICE, AIMDEAD: true;
+			case COLOR, VOLUME, MUSIC, SFX, CAMERA, CHATSCALE, SHAKE, FREEZE, AIMDEAD: true;
 			default: false;
 		}
 	}
@@ -329,12 +334,13 @@ class OptionsSubState extends FlxSubState
 			case FRAMERATE: Lang.t("options.framerate", [fpsLabel()]);
 			case ASPECT: Lang.t("options.aspect", [aspectLabel()]);
 			case CAMERA: Lang.t("options.camera", [Math.round(SaveData.cameraLean() * 100)]);
+			case CHATSCALE: Lang.t("options.chatScale", [Math.round(SaveData.chatScale() * 100)]);
 			case SHAKE: Lang.t("options.shake", [Math.round(SaveData.shakeAmount() * 100)]);
 			case FREEZE: Lang.t("options.freeze", [Math.round(SaveData.freezeAmount() * 100)]);
 			case COLOR: Lang.t("options.color", [Math.round(SaveData.playerHue() * 360)]);
-			case VOICE: Lang.t("options.voice", [pitchLabel()]);
 			case DMGNUM: Lang.t("options.dmgnum", [onOff(SaveData.damageNumbers())]);
 			case DASHTRAIL: Lang.t("options.dashtrail", [onOff(SaveData.dashTrail())]);
+			case INSTANT_QUIT: Lang.t("options.instantQuit", [onOff(SaveData.instantQuit())]);
 			case HUD: Lang.t("options.hud", [onOff(SaveData.showHud())]);
 			case SOUND3D: Lang.t("options.sound3d", [onOff(SaveData.sound3d())]);
 			case AIMDEAD: Lang.t("options.aimdead", [SaveData.aimDeadzone() <= 0 ? Lang.t("common.off") : Std.string(Math.round(SaveData.aimDeadzone() * 100)) + "%"]);
@@ -346,22 +352,6 @@ class OptionsSubState extends FlxSubState
 			case RESET: Lang.t(resetArmed ? "options.resetBestConfirm" : "options.resetBest");
 			default: "";
 		}
-	}
-
-	function hearVoice():Void
-	{
-		if (sample != null && sample.playing)
-			sample.stop();
-		var line = "voice/hurt" + (1 + Std.random(systems.PlayerCombat.HURT_LINES));
-		sample = samples.get(line);
-		if (sample == null)
-		{
-			sample = FlxG.sound.load(util.Paths.sound(line), systems.PlayerCombat.VOICE, false, FlxG.sound.defaultSoundGroup);
-			samples.set(line, sample);
-		}
-		sample.volume = systems.PlayerCombat.VOICE;
-		sample.pitch = SaveData.voicePitch();
-		sample.play(true);
 	}
 
 	function gyroLabel():String
@@ -378,13 +368,6 @@ class OptionsSubState extends FlxSubState
 
 	function onOff(b:Bool):String
 		return Lang.t(b ? "common.on" : "common.off");
-
-	function pitchLabel():String
-	{
-		var v = Math.round(SaveData.voicePitch() * 100);
-		var frac = v % 100;
-		return Std.int(v / 100) + "." + (frac < 10 ? "0" + frac : "" + frac);
-	}
 
 	static function windowed():Bool
 		return SaveData.displayMode() == "windowed";
@@ -422,11 +405,21 @@ class OptionsSubState extends FlxSubState
 	function switchLanguage(dir:Int = 1):Void
 	{
 		Lang.cycle(dir);
+		applyLanguage();
+	}
+
+	function applyLanguage():Void
+	{
 		title.text = Lang.t("options.title");
-		title.font = Lang.font();
+		title.font = Lang.titleFont();
+		title.size = Lang.titleSize();
 		for (i in 0...rows)
-			list.rowAt(i).font = Lang.font();
-		refreshLabels();
+		{
+			var row = list.rowAt(i);
+			row.font = i == 0 ? Lang.smallFont() : Lang.bodyFont();
+			row.size = i == 0 ? Lang.smallSize() : Lang.bodySize();
+		}
+		buildPage();
 	}
 
 	function choose(row:Int):Void
@@ -436,8 +429,6 @@ class OptionsSubState extends FlxSubState
 			case LANGUAGE:
 				switchLanguage();
 				return;
-			case VOICE:
-				hearVoice();
 			case CONTROLS:
 				openSubState(new ControlsSubState(cam));
 			case RESET:
@@ -488,6 +479,9 @@ class OptionsSubState extends FlxSubState
 				SaveData.setAspect(cycled(ASPECTS, SaveData.aspect(), dir));
 			case CAMERA:
 				SaveData.setCameraLean(SaveData.cameraLean() + dir * 0.1);
+			case CHATSCALE:
+				SaveData.setChatScale(cycled(CHAT_STEPS, SaveData.chatScale(), dir));
+				ui.ChatWindow.refreshScale();
 			case SHAKE:
 				SaveData.setShakeAmount(SaveData.shakeAmount() + dir * 0.1);
 			case FREEZE:
@@ -497,12 +491,12 @@ class OptionsSubState extends FlxSubState
 				hueDirty = true;
 				huePending = true;
 				settleClock = SETTLE_GAP;
-			case VOICE:
-				SaveData.setVoicePitch(SaveData.voicePitch() + dir * VOICE_STEP);
 			case DMGNUM:
 				SaveData.setDamageNumbers(!SaveData.damageNumbers());
 			case DASHTRAIL:
 				SaveData.setDashTrail(!SaveData.dashTrail());
+			case INSTANT_QUIT:
+				SaveData.setInstantQuit(!SaveData.instantQuit());
 			case HUD:
 				SaveData.setShowHud(!SaveData.showHud());
 			case SOUND3D:

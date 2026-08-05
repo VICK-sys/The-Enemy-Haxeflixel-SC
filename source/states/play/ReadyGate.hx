@@ -53,7 +53,7 @@ class ReadyGate
 		layers.tagLayer.add(bubble);
 
 		prompt = new FlxText(0, PROMPT_Y, FlxG.width, "");
-		prompt.setFormat(Lang.font(), 24, FlxColor.WHITE, CENTER);
+		prompt.setFormat(Lang.bodyFont(), Lang.bodySize(), FlxColor.WHITE, CENTER);
 		prompt.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		prompt.visible = false;
 	}
@@ -156,7 +156,7 @@ class ReadyGate
 			return "";
 		if (Net.isHost)
 			return Lang.t("ready.waiting", [quorum.got(), quorum.need()]);
-		return Lang.t("ready.waiting", [1, Net.guestCount + 1]);
+		return Lang.t("ready.waiting", [1, (netSync == null ? 0 : netSync.peerCount()) + 1]);
 	}
 
 	function markReady(quiet:Bool = false):Void

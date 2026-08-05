@@ -23,6 +23,11 @@ class TutorialSubState extends FlxSubState
 	static inline var PAGES:Int = 6;
 	static inline var FADE_TIME:Float = 0.35;
 	static inline var OPEN_TIME:Float = 0.2;
+	static inline var PANEL_X:Float = 240;
+	static inline var PANEL_WIDTH:Float = 800;
+	static inline var DESC_Y:Float = 480;
+	static inline var NAV_Y:Float = 596;
+	static inline var INSTRUCTION_SIZE:Int = 16;
 
 	static var KEYS:Array<String> = ["move", "attack", "super", "scrap", "health", "ready"];
 
@@ -63,9 +68,10 @@ class TutorialSubState extends FlxSubState
 		panel.cameras = [camUI];
 		add(panel);
 
-		titleText = uiText(100, 36);
-		descText = uiText(524, 16);
-		pageText = uiText(596, 16);
+		titleText = uiText(100, Lang.titleSize());
+		titleText.font = Lang.titleFont();
+		descText = uiText(DESC_Y, INSTRUCTION_SIZE);
+		pageText = uiText(NAV_Y, INSTRUCTION_SIZE);
 
 		buildPage();
 		beginOpen();
@@ -75,8 +81,8 @@ class TutorialSubState extends FlxSubState
 
 	function uiText(y:Float, size:Int):FlxText
 	{
-		var t = new FlxText(0, y, FlxG.width, "");
-		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
+		var t = new FlxText(PANEL_X, y, PANEL_WIDTH, "");
+		t.setFormat(Lang.fontFor(size), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		t.cameras = [camUI];
 		add(t);

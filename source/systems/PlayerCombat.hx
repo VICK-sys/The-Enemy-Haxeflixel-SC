@@ -221,7 +221,7 @@ class PlayerCombat
 		var line = voices.get(name);
 		if (line == null)
 		{
-			line = FlxG.sound.load(Paths.sound(name), VOICE, false, FlxG.sound.defaultSoundGroup);
+			line = FlxG.sound.create(Paths.sound(name)).setup(VOICE);
 			voices.set(name, line);
 		}
 

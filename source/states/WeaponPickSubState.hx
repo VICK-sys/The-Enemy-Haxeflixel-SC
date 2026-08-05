@@ -53,9 +53,9 @@ class WeaponPickSubState extends FlxSubState
 	static inline var OUTLINE_PX:Float = ICON_SCALE;
 	static inline var OUTLINE_COLOR:Int = 0xFBFBFB;
 
-	static inline var CARD_W:Int = 240;
+	static inline var CARD_W:Int = 288;
 	static inline var CARD_H:Int = 300;
-	static inline var CARD_GAP:Int = 24;
+	static inline var CARD_GAP:Int = 20;
 	static inline var CARD_TOP:Float = 210;
 	static inline var ICON_TOP:Float = 40;
 	static inline var LABEL_TOP:Float = 200;
@@ -126,15 +126,16 @@ class WeaponPickSubState extends FlxSubState
 		overlay.cameras = [camUI];
 		add(overlay);
 
-		uiText(96, 40, Lang.t("weaponPick.title"));
-		uiText(150, 16, Lang.t("weaponPick.sub"));
+		var title = uiText(96, Lang.titleSize(), Lang.t("weaponPick.title"));
+		title.font = Lang.titleFont();
+		uiText(150, Lang.smallSize(), Lang.t("weaponPick.sub"));
 
 		var total = KEYS.length * CARD_W + (KEYS.length - 1) * CARD_GAP;
 		var x0 = (FlxG.width - total) / 2;
 		for (i in 0...KEYS.length)
 			cards.push(buildCard(i, x0 + i * (CARD_W + CARD_GAP)));
 
-		uiText(560, 16, Lang.t("weaponPick.hint"));
+		uiText(560, Lang.smallSize(), Lang.t("weaponPick.hint"));
 
 		refresh();
 		FlxG.mouse.visible = true;
@@ -176,16 +177,16 @@ class WeaponPickSubState extends FlxSubState
 		c.baseY = c.icon.y;
 
 		c.label = new FlxText(x, CARD_TOP + LABEL_TOP, CARD_W, nameOf(i));
-		c.label.setFormat(Lang.font(), 26, FlxColor.WHITE, CENTER);
+		c.label.setFormat(Lang.bodyFont(), Lang.bodySize(), FlxColor.WHITE, CENTER);
 		c.label.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		ui(c.label);
 
 		var blurb = new FlxText(x + 8, CARD_TOP + BLURB_TOP, CARD_W - 16, blurbOf(i));
-		blurb.setFormat(Lang.font(), 13, TEXT_DIM, CENTER);
+		blurb.setFormat(Lang.smallFont(), Lang.smallSize(), TEXT_DIM, CENTER);
 		ui(blurb);
 
 		var num = new FlxText(x, CARD_TOP + 8, CARD_W - 12, "" + (slot + 1));
-		num.setFormat(Lang.font(), 16, TEXT_DIM, RIGHT);
+		num.setFormat(Lang.smallFont(), Lang.smallSize(), TEXT_DIM, RIGHT);
 		ui(num);
 
 		return c;
@@ -210,7 +211,7 @@ class WeaponPickSubState extends FlxSubState
 	function uiText(y:Float, size:Int, s:String):FlxText
 	{
 		var t = new FlxText(0, y, FlxG.width, s);
-		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
+		t.setFormat(Lang.fontFor(size), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		return ui(t);
 	}

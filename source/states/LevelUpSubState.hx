@@ -27,6 +27,7 @@ class LevelUpSubState extends FlxSubState
 	static inline var PANEL_H:Float = 430;
 	static inline var ROW:Float = 40;
 	static inline var FADE_TIME:Float = 0.18;
+	static inline var AUTO_BUY_GAP:Float = 0.12;
 	static inline var ARROW_W:Float = 30;
 	static inline var ARROW_PAD:Float = 9;
 	static inline var LESS_X:Float = LEFT_X + LEFT_W - 198;
@@ -36,7 +37,9 @@ class LevelUpSubState extends FlxSubState
 
 	private var camUI:FlxCamera;
 	public var onSpent:Void->Void;
+	public var automated:Bool = false;
 
+	private var autoBuyTimer:Float = 0;
 	private var pick:Int = 0;
 	private var pieces:Array<FlxSprite> = [];
 	private var fade:Float = 0;
@@ -62,8 +65,9 @@ class LevelUpSubState extends FlxSubState
 	{
 		ui(shade());
 
-		var title = text(LEFT_X, 62, 900, Lang.t("level.title"), 40, GOLD, LEFT);
-		var sub = text(LEFT_X, 108, 900, Lang.t("level.sub"), 18, DIM, LEFT);
+		var title = text(LEFT_X, 62, 900, Lang.t("level.title"), Lang.titleSize(), GOLD, LEFT);
+		title.font = Lang.titleFont();
+		var sub = text(LEFT_X, 108, 900, Lang.t("level.sub"), Lang.smallSize(), DIM, LEFT);
 		ui(title);
 		ui(sub);
 
@@ -72,7 +76,7 @@ class LevelUpSubState extends FlxSubState
 
 		for (i in 0...3)
 		{
-			ui(text(LEFT_X + 24, TOP + 20 + i * 32, 200, "", 20, DIM, LEFT));
+			ui(text(LEFT_X + 24, TOP + 20 + i * 32, 200, "", Lang.smallSize(), DIM, LEFT));
 			head.push(cast state().members[state().members.length - 1]);
 		}
 
@@ -83,30 +87,30 @@ class LevelUpSubState extends FlxSubState
 		for (i in 0...STATS.length)
 		{
 			var y = TOP + 140 + i * ROW;
-			var n = text(LEFT_X + 28, y, 260, Lang.t("stat." + STATS[i]), 24, FlxColor.WHITE, LEFT);
-			var v = text(LEFT_X + LEFT_W - 160, y, 100, "", 24, FlxColor.WHITE, RIGHT);
+			var n = text(LEFT_X + 28, y, 260, Lang.t("stat." + STATS[i]), Lang.bodySize(), FlxColor.WHITE, LEFT);
+			var v = text(LEFT_X + LEFT_W - 160, y, 100, "", Lang.bodySize(), FlxColor.WHITE, RIGHT);
 			ui(n);
 			ui(v);
 			rows.push(n);
 			vals.push(v);
 		}
 
-		less = text(LESS_X, 0, ARROW_W, "<", 24, GOLD, CENTER);
-		more = text(MORE_X, 0, ARROW_W, ">", 24, GOLD, CENTER);
+		less = text(LESS_X, 0, ARROW_W, "<", Lang.bodySize(), GOLD, CENTER);
+		more = text(MORE_X, 0, ARROW_W, ">", Lang.bodySize(), GOLD, CENTER);
 		ui(less);
 		ui(more);
 
-		accept = text(LEFT_X, TOP + PANEL_H - 58, LEFT_W, Lang.t("level.done"), 26, FlxColor.WHITE, CENTER);
+		accept = text(LEFT_X, TOP + PANEL_H - 58, LEFT_W, Lang.t("level.done"), Lang.bodySize(), FlxColor.WHITE, CENTER);
 		ui(accept);
 
 		var derived = ["health", "dash", "supergain", "damage", "speed"];
 		for (i in 0...derived.length)
 		{
 			var y = TOP + 40 + i * 52;
-			var n = text(RIGHT_X + 24, y, 250, Lang.t("derived." + derived[i]), 22, DIM, LEFT);
-			var a = text(RIGHT_X + 232, y, 156, "", 22, FlxColor.WHITE, RIGHT);
-			var g = text(RIGHT_X + 394, y, 30, ">", 22, DIM, CENTER);
-			var b = text(RIGHT_X + 426, y, 134, "", 22, FlxColor.WHITE, RIGHT);
+			var n = text(RIGHT_X + 24, y, 250, Lang.t("derived." + derived[i]), Lang.smallSize(), DIM, LEFT);
+			var a = text(RIGHT_X + 232, y, 156, "", Lang.smallSize(), FlxColor.WHITE, RIGHT);
+			var g = text(RIGHT_X + 394, y, 30, ">", Lang.smallSize(), DIM, CENTER);
+			var b = text(RIGHT_X + 426, y, 134, "", Lang.smallSize(), FlxColor.WHITE, RIGHT);
 			ui(n);
 			ui(a);
 			ui(g);
@@ -116,7 +120,7 @@ class LevelUpSubState extends FlxSubState
 			outNext.push(b);
 		}
 
-		var keys = text(0, FlxG.height - 62, FlxG.width, Lang.t("level.keys"), 18, DIM, CENTER);
+		var keys = text(0, FlxG.height - 62, FlxG.width, Lang.t("level.keys"), Lang.smallSize(), DIM, CENTER);
 		ui(keys);
 
 		refresh();
@@ -147,7 +151,7 @@ class LevelUpSubState extends FlxSubState
 	function text(x:Float, y:Float, w:Float, t:String, size:Int, color:Int, align:FlxTextAlign):FlxText
 	{
 		var f = new FlxText(x, y, w, t);
-		f.setFormat(Lang.font(), size, color, align);
+		f.setFormat(Lang.fontFor(size), size, color, align);
 		f.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		return f;
 	}
@@ -295,6 +299,17 @@ class LevelUpSubState extends FlxSubState
 		}
 		applyFade();
 
+		if (automated)
+		{
+			autoBuyTimer -= elapsed;
+			if (autoBuyTimer <= 0)
+			{
+				autoBuyTimer = AUTO_BUY_GAP;
+				buyEvenly();
+			}
+			return;
+		}
+
 		var m = FlxG.mouse.getViewPosition(camUI);
 		var over = rowAt(m.x, m.y);
 		if (over >= 0 || arrowAt(m.x, m.y) != 0)
@@ -350,6 +365,21 @@ class LevelUpSubState extends FlxSubState
 			util.MenuSfx.cancel();
 			leave();
 		}
+	}
+
+	function buyEvenly():Void
+	{
+		var next = -1;
+		for (i in 0...STATS.length)
+			if (Levels.canSpendOn(i) && (next < 0 || Levels.points(i) < Levels.points(next)))
+				next = i;
+		if (next < 0)
+		{
+			leave();
+			return;
+		}
+		pick = next;
+		buy();
 	}
 
 

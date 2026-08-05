@@ -4,11 +4,23 @@ import flixel.FlxG;
 
 class Music
 {
+	static var runTracks:Array<String> = ["stage/outerDrylands", "stage/jungleJam"];
+	static var runTrack:String = null;
 	static var current:String = null;
 	static var base:Float = 1;
 	static var hooked:Bool = false;
 
 	public static var held(default, null):Bool = false;
+
+	public static function rollRunTrack():Void
+		runTrack = runTracks[Std.random(runTracks.length)];
+
+	public static function getRunTrack():String
+	{
+		if (runTrack == null)
+			rollRunTrack();
+		return runTrack;
+	}
 
 	public static function hold():Void
 	{

@@ -130,7 +130,7 @@ class Fx
 		{
 			p.loadGraphic(Paths.image("effects/charge_glow"), true, POP_W, POP_H);
 			p.animation.add("pop", [0, 1, 2, 3], POP_FPS, false);
-			p.animation.finishCallback = function(_) p.kill();
+			p.animation.onFinish.add(function(_) p.kill());
 			p.antialiasing = false;
 			p.scale.set(POP_SCALE, POP_SCALE);
 			p.updateHitbox();

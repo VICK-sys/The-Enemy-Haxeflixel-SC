@@ -30,6 +30,7 @@ class ShopRound
 	private var holding:Bool = false;
 	private var done:Bool = false;
 	private var spentHere:Bool = false;
+	private var automatedHere:Bool = false;
 	private var clock:Float = 0;
 	private var quorum:AckQuorum = new AckQuorum();
 
@@ -110,7 +111,9 @@ class ShopRound
 		if (!shop.open || status.dead || host.restarting || host.subState != null)
 			return;
 		spentHere = false;
+		automatedHere = util.Controls.pilot;
 		var screen = new LevelUpSubState(hud.camUI);
+		screen.automated = automatedHere;
 		screen.onSpent = syncScrap;
 		screen.closeCallback = onScreenClosed;
 		host.openPanel(screen);
@@ -132,6 +135,12 @@ class ShopRound
 	{
 		if (Net.active)
 			Net.send({t: "lvlout"});
+		if (automatedHere)
+		{
+			automatedHere = false;
+			shop.setOpen(false);
+			return;
+		}
 		if (!spentHere)
 			return;
 		reportDone();

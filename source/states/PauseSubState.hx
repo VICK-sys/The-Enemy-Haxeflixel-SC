@@ -57,12 +57,12 @@ class PauseSubState extends FlxSubState
 		add(overlay);
 
 		var title = new FlxText(0, 190, FlxG.width, Lang.t("pause.title"));
-		title.setFormat(Lang.font(), 48, FlxColor.WHITE, CENTER);
+		title.setFormat(Lang.titleFont(), Lang.titleSize(), FlxColor.WHITE, CENTER);
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		title.cameras = [camUI];
 		add(title);
 
-		list = new MenuList([for (k in rowKeys()) labelFor(k)], afk == null ? 300 : 272, 66, 32);
+		list = new MenuList([for (k in rowKeys()) labelFor(k)], afk == null ? 300 : 272, 66, Lang.bodySize());
 		list.onChoose = choose;
 		list.cameras = [camUI];
 		add(list);
@@ -92,12 +92,12 @@ class PauseSubState extends FlxSubState
 	function relabel(title:FlxText):Void
 	{
 		title.text = Lang.t("pause.title");
-		title.font = Lang.font();
+		title.font = Lang.titleFont();
 
 		var keys = rowKeys();
 		for (i in 0...keys.length)
 		{
-			list.rowAt(i).font = Lang.font();
+			list.rowAt(i).font = Lang.bodyFont();
 			list.setLabel(i, labelFor(keys[i]));
 		}
 	}
@@ -112,11 +112,6 @@ class PauseSubState extends FlxSubState
 			close();
 		}
 
-		if (FlxG.keys.justPressed.MINUS)
-			FlxG.sound.changeVolume(-0.1);
-
-		if (FlxG.keys.justPressed.PLUS)
-			FlxG.sound.changeVolume(0.1);
 	}
 
 	function choose(i:Int):Void
@@ -140,16 +135,28 @@ class PauseSubState extends FlxSubState
 				list.enabled = false;
 				FlxG.mouse.visible = false;
 				Music.release();
-				net.Net.stop();
 				if (util.CustomArena.fromEditor)
+				{
+					net.Net.stop();
 					new IrisWipe(this).close(function() FlxG.switchState(() -> new EditorState()));
+				}
 				else if (inLobby)
 				{
+					net.Net.stop();
 					util.Lobby.leave();
 					new IrisWipe(this).close(function() FlxG.switchState(() -> new MainMenuState()));
 				}
 				else
+				{
+					if (net.Net.isHost)
+					{
+						net.Net.send({t: "toLobby"});
+						net.Net.inGame = false;
+					}
+					else if (net.Net.isClient)
+						net.Net.stop();
 					new IrisWipe(this).close(function() FlxG.switchState(() -> new LobbyState()));
+				}
 		}
 	}
 }

@@ -292,6 +292,19 @@ class SaveData
 		save.flush();
 	}
 
+	public static function instantQuit():Bool
+	{
+		ensure();
+		return save.data.instantQuit != null ? save.data.instantQuit : true;
+	}
+
+	public static function setInstantQuit(b:Bool):Void
+	{
+		ensure();
+		save.data.instantQuit = b;
+		save.flush();
+	}
+
 	public static function sound3d():Bool
 	{
 		ensure();

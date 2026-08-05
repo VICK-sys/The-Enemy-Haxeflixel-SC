@@ -23,9 +23,9 @@ class MainMenuState extends FlxState
 	static inline var SPLASH_THROB:Float = 0.09;
 	static inline var SPLASH_SPEED:Float = 3.4;
 	static inline var SPLASH_COUNT:Int = 9;
-	static inline var SPLASH_SIZE:Int = 30;
-	static inline var SPLASH_SIZE_MIN:Int = 14;
 	static inline var SPLASH_MAX_W:Float = 360;
+	static inline var MENU_Y:Float = 400;
+	static inline var MENU_STEP:Float = 48;
 
 	static inline var TITLE_SCALE:Float = 0.5;
 	static inline var TITLE_Y:Float = 72;
@@ -35,6 +35,9 @@ class MainMenuState extends FlxState
 	static inline var BOB_AMP:Float = 10;
 	static inline var BOB_SPEED:Float = 1.9;
 
+	static inline var VERSION_PAD:Float = 16;
+	static inline var VERSION_COLOR:Int = 0xFF8C8C8C;
+
 	static inline var SHUT_FLATTEN:Float = 0.3;
 	static inline var SHUT_PINCH:Float = 0.17;
 	static inline var SHUT_FADE:Float = 0.08;
@@ -42,6 +45,7 @@ class MainMenuState extends FlxState
 
 	private var list:MenuList;
 	private var best:FlxText;
+	private var version:FlxText;
 	private var wipe:IrisWipe;
 	private var splash:FlxText;
 	private var splashTime:Float = 0;
@@ -59,8 +63,6 @@ class MainMenuState extends FlxState
 	private var shutY:Int = 0;
 	private var shutW:Int = 0;
 	private var shutH:Int = 0;
-	private var maps:Array<Int>;
-	private var mapPick:Int = 0;
 	private var shutCurW:Int = 0;
 	private var shutCurH:Int = 0;
 	private var actions:Array<String> = [];
@@ -72,13 +74,10 @@ class MainMenuState extends FlxState
 		FlxG.mouse.visible = true;
 		DiscordPresence.menu();
 		util.CustomArena.clear();
-		util.Detour.reset();
 
 		addBands();
 
 		addTitle();
-
-		findMaps();
 
 		var labels = [Lang.t("menu.play")];
 		actions = ["play"];
@@ -88,16 +87,20 @@ class MainMenuState extends FlxState
 		labels.push(Lang.t("menu.quit"));
 		actions.push("quit");
 		#end
-		list = new MenuList(labels, 360, 72, 44);
+		list = new MenuList(labels, MENU_Y, MENU_STEP, Lang.bodySize());
 		list.onChoose = choose;
-		list.onAdjust = adjustMap;
 		add(list);
 
-		best = new FlxText(16, FlxG.height - 30, 0, "");
-		best.setFormat(Lang.font(), 16, FlxColor.WHITE, LEFT);
+		best = new FlxText(16, FlxG.height - 50, 0, "");
+		best.setFormat(Lang.smallFont(), Lang.smallSize(), FlxColor.WHITE, LEFT);
 		best.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(best);
 		refreshBest();
+
+		version = new FlxText(0, FlxG.height - 50, FlxG.width - VERSION_PAD, util.Version.label());
+		version.setFormat(Lang.smallFont(), Lang.smallSize(), VERSION_COLOR, RIGHT);
+		version.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		add(version);
 
 		subStateClosed.add(function(_)
 		{
@@ -157,14 +160,11 @@ class MainMenuState extends FlxState
 	function addSplash(titleRight:Float, titleBottom:Float):Void
 	{
 		splash = new FlxText(0, 0, 0, Lang.t("menu.splash." + FlxG.random.int(0, SPLASH_COUNT - 1)));
-		splash.setFormat(Lang.font(), SPLASH_SIZE, FlxColor.YELLOW, LEFT);
+		splash.setFormat(Lang.titleFont(), Lang.titleSize(), FlxColor.YELLOW, LEFT);
 		splash.updateHitbox();
 
 		if (splash.width > SPLASH_MAX_W)
-		{
-			var fit = Std.int(SPLASH_SIZE * SPLASH_MAX_W / splash.width);
-			splash.setFormat(Lang.font(), fit < SPLASH_SIZE_MIN ? SPLASH_SIZE_MIN : fit, FlxColor.YELLOW, LEFT);
-		}
+			splash.setFormat(Lang.smallFont(), Lang.smallSize(), FlxColor.YELLOW, LEFT);
 
 		splash.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		splash.updateHitbox();
@@ -290,6 +290,13 @@ class MainMenuState extends FlxState
 	{
 		if (leaving || busy)
 			return;
+		#if desktop
+		if (actions[i] == "quit" && SaveData.instantQuit())
+		{
+			quit();
+			return;
+		}
+		#end
 
 		busy = true;
 		list.enabled = false;
@@ -311,53 +318,16 @@ class MainMenuState extends FlxState
 		}
 	}
 
-
-	function findMaps():Void
-	{
-		maps = [0];
-		for (s in 1...util.MapStore.SLOTS + 1)
-			if (util.MapStore.load(s) != null)
-				maps.push(s);
-
-		mapPick = 0;
-	}
-
-	function playLabel():String
-		return maps[mapPick] == 0 ? Lang.t("menu.play") : Lang.t("menu.playSlot", [maps[mapPick]]);
-
-	function adjustMap(i:Int, dir:Int):Void
-	{
-		if (i != 0 || maps.length <= 1)
-			return;
-		mapPick = (mapPick + dir + maps.length) % maps.length;
-		list.setLabel(0, playLabel());
-	}
-
-	function loadPick():Void
-	{
-		util.CustomArena.clear();
-		if (maps[mapPick] == 0)
-			return;
-
-		var m = util.MapStore.load(maps[mapPick]);
-		if (m != null)
-			util.CustomArena.fromStored(m, maps[mapPick]);
-	}
-
-	function startGame():Void
-	{
-		leaving = true;
-		list.enabled = false;
-		loadPick();
-		wipe.close(function()
-		{
-			FlxG.mouse.visible = false;
-			FlxG.switchState(() -> new PlayState());
-		});
-	}
-
 	function quit():Void
 	{
+		#if desktop
+		if (SaveData.instantQuit())
+		{
+			exitImmediately();
+			return;
+		}
+		#end
+
 		leaving = true;
 		list.enabled = false;
 
@@ -378,6 +348,12 @@ class MainMenuState extends FlxState
 			lime.system.System.exit(0);
 		});
 		#end
+	}
+
+	function exitImmediately():Void
+	{
+		DiscordPresence.shutdown();
+		lime.system.System.exit(0);
 	}
 
 	#if desktop

@@ -5,6 +5,7 @@ import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxText;
 import flixel.tweens.FlxEase;
+import util.Lang;
 import util.Paths;
 
 class ScrapDemo extends TutorialDemo
@@ -58,7 +59,7 @@ class ScrapDemo extends TutorialDemo
 		icon.updateHitbox();
 		icon.setPosition(COUNT_X, COUNT_Y - icon.height * 0.5);
 
-		count = label(COUNT_Y - 18, 26, "0");
+		count = label(COUNT_Y - 18, Lang.bodySize(), "0");
 		count.alignment = LEFT;
 		count.x = COUNT_X + icon.width + 14;
 

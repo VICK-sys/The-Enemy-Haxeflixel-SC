@@ -26,13 +26,13 @@ class PerfLog
 		if (out == null)
 		{
 			out = File.write("perflog.txt");
-			out.writeString("t\tkind\tavgMs\tworstMs\tfps\tenemies\tpaths\tprojectiles\twave\n");
+			out.writeString("t\tkind\tavgMs\tworstMs\tfps\tenemies\tpaths\tprojectiles\tmounds\twave\n");
 		}
 		startStamp = haxe.Timer.stamp();
 		#end
 	}
 
-	public function frame(enemies:Int, paths:Int, projectiles:Int, wave:Int):Void
+	public function frame(enemies:Int, paths:Int, projectiles:Int, mounds:Int, wave:Int):Void
 	{
 		#if sys
 		var now = haxe.Timer.stamp();
@@ -47,7 +47,7 @@ class PerfLog
 
 		if (ms > GAP_MS)
 		{
-			out.writeString(fmt(t) + "\tgap\t" + fmt(ms) + "\t" + fmt(ms) + "\t\t" + enemies + "\t" + paths + "\t" + projectiles + "\t" + wave + "\n");
+			out.writeString(fmt(t) + "\tgap\t" + fmt(ms) + "\t" + fmt(ms) + "\t\t" + enemies + "\t" + paths + "\t" + projectiles + "\t" + mounds + "\t" + wave + "\n");
 			out.flush();
 			secAccum = 0;
 			secFrames = 0;
@@ -62,14 +62,14 @@ class PerfLog
 
 		if (ms > SPIKE_MS)
 		{
-			out.writeString(fmt(t) + "\tSPIKE\t" + fmt(ms) + "\t" + fmt(ms) + "\t\t" + enemies + "\t" + paths + "\t" + projectiles + "\t" + wave + "\n");
+			out.writeString(fmt(t) + "\tSPIKE\t" + fmt(ms) + "\t" + fmt(ms) + "\t\t" + enemies + "\t" + paths + "\t" + projectiles + "\t" + mounds + "\t" + wave + "\n");
 			out.flush();
 		}
 
 		if (secAccum >= 1000)
 		{
 			var avg = secAccum / secFrames;
-			out.writeString(fmt(t) + "\tsec\t" + fmt(avg) + "\t" + fmt(secWorst) + "\t" + fmt(1000 / avg) + "\t" + enemies + "\t" + paths + "\t" + projectiles + "\t" + wave + "\n");
+			out.writeString(fmt(t) + "\tsec\t" + fmt(avg) + "\t" + fmt(secWorst) + "\t" + fmt(1000 / avg) + "\t" + enemies + "\t" + paths + "\t" + projectiles + "\t" + mounds + "\t" + wave + "\n");
 			out.flush();
 			secAccum = 0;
 			secFrames = 0;
