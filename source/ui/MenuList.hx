@@ -19,6 +19,9 @@ class MenuList extends FlxGroup
 	static inline var BOB:Float = 4;
 	static inline var BOB_SPEED:Float = 5;
 
+	static inline var ARROW_LEFT:String = "<";
+	static inline var ARROW_RIGHT:String = ">";
+
 	static inline var HOLD_DELAY:Float = 0.34;
 	static inline var HOLD_SLOW:Float = 0.055;
 	static inline var HOLD_FAST:Float = 0.008;
@@ -44,6 +47,7 @@ class MenuList extends FlxGroup
 	private var blipWait:Float = 0;
 	private var seenResize:Int = -1;
 	private var settleTimer:Float = 0;
+	private var mouseAt:flixel.math.FlxPoint = new flixel.math.FlxPoint();
 
 	static inline var SETTLE_TIME:Float = 0.5;
 
@@ -53,7 +57,7 @@ class MenuList extends FlxGroup
 		for (i in 0...labels.length)
 		{
 			var t = new FlxText(0, startY + i * spacing, 0, labels[i]);
-			t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
+			t.setFormat(Lang.fontFor(size), size, FlxColor.WHITE, CENTER);
 			t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 			t.screenCenter(X);
 			rows.push(t);
@@ -158,13 +162,11 @@ class MenuList extends FlxGroup
 		{
 			lastMouseX = FlxG.mouse.x;
 			lastMouseY = FlxG.mouse.y;
-			for (i in 0...rows.length)
+			var hovered = hoveredRow();
+			if (hovered >= 0 && hovered != index)
 			{
-				if (i != index && selectable(i) && FlxG.mouse.overlaps(rows[i], rowCamera(i)))
-				{
-					index = i;
-					blip();
-				}
+				index = hovered;
+				blip();
 			}
 		}
 
@@ -176,7 +178,10 @@ class MenuList extends FlxGroup
 		updateAdjust(elapsed);
 
 		var clicked = FlxG.mouse.justPressed && FlxG.mouse.overlaps(rows[index], rowCamera(index));
-		if (util.Controls.menuAccept() || FlxG.keys.justPressed.SPACE || clicked)
+		var nudge = clicked ? arrowDir(index) : 0;
+		if (nudge != 0)
+			adjust(nudge);
+		else if (util.Controls.menuAccept() || FlxG.keys.justPressed.SPACE || clicked)
 		{
 			util.MenuSfx.click();
 			if (onChoose != null)
@@ -270,12 +275,57 @@ class MenuList extends FlxGroup
 		onAdjust(index, dir);
 	}
 
-	function overRow():Bool
+	public function arrowDir(i:Int):Int
 	{
+		FlxG.mouse.getWorldPosition(rowCamera(i), mouseAt);
+		return arrowDirAt(i, mouseAt.x);
+	}
+
+	function arrowDirAt(i:Int, mouseX:Float):Int
+	{
+		if (onAdjust == null)
+			return 0;
+		var row = rows[i];
+		var label = row.text;
+		var leftAt = label.indexOf(ARROW_LEFT);
+		var rightAt = label.lastIndexOf(ARROW_RIGHT);
+		var hasLeft = leftAt >= 0;
+		var hasRight = rightAt >= 0;
+		if (!hasLeft && !hasRight)
+			return 0;
+		var split = row.x + row.width * 0.5;
+		if (hasLeft && hasRight)
+		{
+			var left = arrowCenter(row, leftAt);
+			var right = arrowCenter(row, rightAt);
+			if (left != null && right != null)
+				split = (left + right) * 0.5;
+		}
+		var dir = mouseX < split ? -1 : 1;
+		if (dir < 0 && !hasLeft)
+			return 0;
+		if (dir > 0 && !hasRight)
+			return 0;
+		return dir;
+	}
+
+	function arrowCenter(row:FlxText, at:Int):Null<Float>
+	{
+		var bounds = row.textField.getCharBoundaries(at);
+		return bounds == null ? null : row.x + bounds.x + bounds.width * 0.5;
+	}
+
+	function overRow():Bool
+		return hoveredRow() >= 0;
+
+	function hoveredRow():Int
+	{
+		if (selectable(index) && rows[index].visible && FlxG.mouse.overlaps(rows[index], rowCamera(index)))
+			return index;
 		for (i in 0...rows.length)
 			if (selectable(i) && rows[i].visible && FlxG.mouse.overlaps(rows[i], rowCamera(i)))
-				return true;
-		return false;
+				return i;
+		return -1;
 	}
 
 	function rowCamera(i:Int):flixel.FlxCamera

@@ -19,9 +19,10 @@ class SoundTray extends FlxSoundTray
 	static inline var BAR_GAP:Int = 2;
 	static inline var BAR_BASE_H:Int = 3;
 	static inline var PAD_TOP:Int = 5;
-	static inline var PANEL_H:Int = 40;
+	static inline var PANEL_H:Int = 48;
+	static inline var TEXT_BASELINE:Int = 38;
+	static inline var TEXT_PAD:Int = 4;
 	static inline var MIN_W:Int = 92;
-	static inline var FONT_SIZE:Int = 16;
 	static inline var QUIET:Int = 0x5FD16A;
 	static inline var MID:Int = 0xE8C860;
 	static inline var LOUD:Int = 0xF04034;
@@ -37,6 +38,12 @@ class SoundTray extends FlxSoundTray
 	static inline var SETTLED:Float = 999;
 	static inline var TONE_TIME:Float = 0.3;
 	static inline var BLIP_VOL:Float = 0.5;
+
+	static inline var MASTER:Int = 0;
+	static inline var SOUND:Int = 1;
+	static inline var MUSIC:Int = 2;
+	static inline var CHANNELS:Int = 3;
+	static inline var STEP:Float = 0.1;
 
 	static inline var HIDDEN:Int = 0;
 	static inline var SLIDE_IN:Int = 1;
@@ -58,6 +65,7 @@ class SoundTray extends FlxSoundTray
 	var inFrom:Float = 0;
 	var alphaFrom:Float = 0;
 	var panelW:Int = MIN_W;
+	var channel:Int = MASTER;
 	var fontCache:Map<String, String> = new Map();
 
 	public function new()
@@ -79,8 +87,6 @@ class SoundTray extends FlxSoundTray
 		text = new TextField();
 		text.selectable = false;
 		text.mouseEnabled = false;
-		text.y = PAD_TOP + 14;
-		text.height = 22;
 		addChild(text);
 
 		for (i in 0...BAR_COUNT)
@@ -94,6 +100,72 @@ class SoundTray extends FlxSoundTray
 		rebuild(word("tray.master", "MASTER") + "  100%");
 		y = -height;
 		visible = false;
+	}
+
+	public function listen():Void
+	{
+		FlxG.sound.volumeUpKeys = [];
+		FlxG.sound.volumeDownKeys = [];
+		FlxG.signals.postUpdate.add(readKeys);
+	}
+
+	function readKeys():Void
+	{
+		if (util.Controls.typing)
+			return;
+
+		if (FlxG.keys.justPressed.COMMA)
+			turn(-1);
+		else if (FlxG.keys.justPressed.PERIOD)
+			turn(1);
+
+		if (FlxG.keys.justPressed.PLUS || FlxG.keys.justPressed.NUMPADPLUS)
+			nudge(STEP);
+		else if (FlxG.keys.justPressed.MINUS || FlxG.keys.justPressed.NUMPADMINUS)
+			nudge(-STEP);
+	}
+
+	function turn(dir:Int):Void
+	{
+		channel = (channel + dir + CHANNELS) % CHANNELS;
+		showAnim(level(), volumeUpSound);
+	}
+
+	function nudge(delta:Float):Void
+	{
+		var v = level() + delta;
+		if (v < 0)
+			v = 0;
+		if (v > 1)
+			v = 1;
+		switch (channel)
+		{
+			case SOUND: util.SaveData.setSfxVolume(v);
+			case MUSIC: util.SaveData.setMusicVolume(v);
+			default: util.SaveData.setVolume(v);
+		}
+		util.SaveData.applySettings();
+		showAnim(v, delta > 0 ? volumeUpSound : volumeDownSound);
+	}
+
+	function level():Float
+	{
+		return switch (channel)
+		{
+			case SOUND: util.SaveData.sfxVolume();
+			case MUSIC: util.SaveData.musicVolume();
+			default: util.SaveData.volume();
+		}
+	}
+
+	function channelName():String
+	{
+		return switch (channel)
+		{
+			case SOUND: word("tray.sound", "SOUND");
+			case MUSIC: word("tray.music", "MUSIC");
+			default: word("tray.master", "MASTER");
+		}
 	}
 
 	override public function showAnim(volume:Float, ?sound:FlxSoundAsset, duration = 1.0, label = "VOLUME"):Void
@@ -111,7 +183,7 @@ class SoundTray extends FlxSoundTray
 		tone = target;
 		toneClock = 0;
 		advanceTone(0);
-		rebuild(muted ? word("tray.muted", "MUTED") : word("tray.master", "MASTER") + "  " + Math.round(volume * 100) + "%");
+		rebuild(muted ? word("tray.muted", "MUTED") : channelName() + "  " + Math.round(volume * 100) + "%");
 		retimeBars(was);
 
 		if (!held)
@@ -263,6 +335,9 @@ class SoundTray extends FlxSoundTray
 		text.text = word("tray.master", "MASTER") + "  100%";
 		var w = Std.int(text.textWidth) + 24;
 		text.text = label;
+		var metrics = text.getLineMetrics(0);
+		text.height = metrics.height + TEXT_PAD;
+		text.y = TEXT_BASELINE - metrics.ascent;
 		if (w < MIN_W)
 			w = MIN_W;
 		if (w != panelW || panel.bitmapData == null)
@@ -291,7 +366,7 @@ class SoundTray extends FlxSoundTray
 
 	function format():TextFormat
 	{
-		var fmt = new TextFormat(fontName(util.Lang.display()), FONT_SIZE, 0xFFFFFF);
+		var fmt = new TextFormat(fontName(util.Lang.smallFont()), util.Lang.smallSize(), 0xFFFFFF);
 		fmt.align = TextFormatAlign.CENTER;
 		return fmt;
 	}

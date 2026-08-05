@@ -8,6 +8,12 @@ class Lang
 	public static inline var JA:String = "ja";
 	public static inline var ES:String = "es";
 
+	static inline var BODY_SIZE:Int = 48;
+	static inline var TITLE_SIZE:Int = 24;
+	static inline var SMALL_SIZE:Int = 24;
+	static inline var JA_SIZE:Int = 24;
+	static inline var SMALL_STEP:Int = 8;
+
 	public static var codes(default, null):Array<String> = [EN, ES, JA];
 	public static var code(default, null):String = EN;
 
@@ -44,11 +50,32 @@ class Lang
 		return was;
 	}
 
-	public static function font():String
-		return code == JA ? Paths.font("DotGothic16-Regular") : Paths.font("modernDos");
+	public static function bodyFont():String
+		return code == JA ? Paths.font("DotGothic16-Regular") : Paths.font("Unbalanced");
 
-	public static function display():String
-		return code == EN ? Paths.font("runescape_uf") : font();
+	public static function bodySize():Int
+		return code == JA ? JA_SIZE : BODY_SIZE;
+
+	public static function titleFont():String
+		return code == JA ? Paths.font("DotGothic16-Regular") : Paths.font("Kirbys-Adventure");
+
+	public static function titleSize():Int
+		return code == JA ? JA_SIZE : TITLE_SIZE;
+
+	public static function smallFont():String
+		return code == JA ? Paths.font("DotGothic16-Regular") : Paths.font("5mikropix");
+
+	public static function smallSize():Int
+		return code == JA ? JA_SIZE : SMALL_SIZE;
+
+	public static function fontFor(size:Int):String
+		return size == bodySize() ? bodyFont() : smallFont();
+
+	public static function chatSize(scale:Float):Int
+	{
+		var steps = Std.int(SMALL_SIZE * scale / SMALL_STEP + 0.5);
+		return (steps < 1 ? 1 : steps) * SMALL_STEP;
+	}
 
 	public static function t(key:String, ?args:Array<Dynamic>):String
 	{

@@ -72,7 +72,7 @@ class MenuSlash
 		var total:Float = 0;
 
 		var probe = new FlxText(0, 0, 0, "");
-		probe.setFormat(Lang.font(), Std.int(row.size), FlxColor.WHITE, LEFT);
+		probe.setFormat(row.font, Std.int(row.size), FlxColor.WHITE, LEFT);
 		for (i in 0...label.length)
 		{
 			probe.text = label.charAt(i);
@@ -97,7 +97,7 @@ class MenuSlash
 	function makeShard(ch:String, x:Float, w:Float):FlxText
 	{
 		var t = new FlxText(x, row.y, 0, ch);
-		t.setFormat(Lang.font(), Std.int(row.size), row.color, LEFT);
+		t.setFormat(row.font, Std.int(row.size), row.color, LEFT);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 
 		t.moves = true;
