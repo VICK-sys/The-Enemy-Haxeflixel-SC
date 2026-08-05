@@ -13,6 +13,7 @@ class ArrowRain
 	static inline var DROP_HEIGHT:Float = 450;
 	static inline var LAUNCH_COUNT:Int = 3;
 	static inline var LAUNCH_SPEED:Float = 1000;
+	static inline var BASE_DAMAGE:Float = 1;
 
 	public var arrows:FlxTypedGroup<RainArrow>;
 	public var markers:FlxTypedGroup<FlxSprite>;
@@ -113,10 +114,12 @@ class ArrowRain
 		}
 		if (cosmetic)
 			return;
+		var boss = cfg.bossScale == null ? 1 : cfg.bossScale;
+		var hit = cfg.damage == null ? BASE_DAMAGE : cfg.damage;
 		if (a.superShot)
-			hits.blastRadialSuper(ix, iy, cfg.hitRadius, 1, 1, cfg.bossScale == null ? 1 : cfg.bossScale);
+			hits.blastRadialSuper(ix, iy, cfg.hitRadius, 1, cfg.superDamage == null ? hit : cfg.superDamage, boss);
 		else
-			hits.blastRadial(ix, iy, cfg.hitRadius, 1, 1, cfg.bossScale == null ? 1 : cfg.bossScale);
+			hits.blastRadial(ix, iy, cfg.hitRadius, 1, hit, boss);
 	}
 }
 

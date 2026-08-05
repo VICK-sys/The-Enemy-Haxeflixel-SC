@@ -49,7 +49,7 @@ class BossFinish
 			fromZoom = FlxG.camera.zoom;
 			toZoom = fromZoom * ZOOM_IN;
 			if (whoosh == null)
-				whoosh = FlxG.sound.load(Paths.sound("slowmo"), VOLUME, false, FlxG.sound.defaultSoundGroup);
+				whoosh = FlxG.sound.create(Paths.sound("slowmo")).setup(VOLUME);
 			whoosh.volume = VOLUME;
 			whoosh.play(true);
 		}

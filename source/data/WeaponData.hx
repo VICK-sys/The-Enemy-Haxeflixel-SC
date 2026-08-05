@@ -90,6 +90,8 @@ typedef ArrowRainConfig = {
 	fallSpeed:Float,
 	hitRadius:Float,
 	rechargeTime:Float,
+	?damage:Float,
+	?superDamage:Float,
 	?bossScale:Float
 }
 

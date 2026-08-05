@@ -20,7 +20,6 @@ class EnemyDirector
 	static inline var WAVE_TIMEOUT:Float = 75;
 
 	public var wave:Int = 0;
-	public var spawning:Bool = true;
 
 	private var queued:Array<String> = [];
 	private var dripTimer:Float = 0;
@@ -31,8 +30,6 @@ class EnemyDirector
 	public var onWave:Int->Void;
 	public var onBoss:Void->Void;
 	public var onWaveCleared:Void->Void;
-	public var bossVeto:Int->Bool;
-	public var onBossSpawn:Enemies->Void;
 	public var onBossPack:Array<Enemies>->Void;
 	public var onProbe:(Float, Float, Float) -> Void;
 
@@ -58,9 +55,13 @@ class EnemyDirector
 	private var bossWave:Int;
 	private var bossPending:Bool = false;
 	private var bossTimer:Float = 0;
-	private var bossesFought:Int = 0;
-	private var forcedBoss:String = null;
-	private var forcedCount:Int = 0;
+	private var bossMembers:Int = 0;
+	private var forcedBosses:Array<String> = null;
+	private var activeBossKinds:Array<String> = null;
+	private var beatenBossKinds:Map<String, Bool> = new Map();
+	private var spentBossPairs:Map<String, Bool> = new Map();
+	private var bossFallCallback:(Float, Float, Bool) -> Void;
+	private var bossDefeatedCallback:Void->Void;
 
 	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat, fx:Fx)
 	{
@@ -81,6 +82,7 @@ class EnemyDirector
 		spawner.anchor = anchorBody;
 		gunfire = new EnemyShots(arena, status, fx);
 		bossDeath = new BossDeath(layers);
+		bossDeath.onFall = normalBossDown;
 	}
 
 	function get_shots():FlxTypedGroup<EnemyShot>
@@ -148,11 +150,11 @@ class EnemyDirector
 	public var onBossFall(get, set):(Float, Float, Bool) -> Void;
 
 	function get_onBossFall()
-		return bossDeath.onFall;
+		return bossFallCallback;
 
 	function set_onBossFall(f:(Float, Float, Bool) -> Void)
 	{
-		bossDeath.onFall = f;
+		bossFallCallback = f;
 		return f;
 	}
 
@@ -170,11 +172,11 @@ class EnemyDirector
 	public var onBossDefeated(get, set):Void->Void;
 
 	function get_onBossDefeated()
-		return bossDeath.onDefeated;
+		return bossDefeatedCallback;
 
 	function set_onBossDefeated(f:Void->Void)
 	{
-		bossDeath.onDefeated = f;
+		bossDefeatedCallback = f;
 		return f;
 	}
 
@@ -203,12 +205,6 @@ class EnemyDirector
 
 	public function update(elapsed:Float):Void
 	{
-		if (!spawning)
-		{
-			updateRigs(elapsed);
-			return;
-		}
-
 		if (bossPending)
 			updateBossIntro(elapsed);
 		else if (!lobbyDown && (net.Net.active || !status.dead))
@@ -225,18 +221,7 @@ class EnemyDirector
 			return;
 
 		bossPending = false;
-		spawnBossPack(bossCount());
-	}
-
-	function bossCount():Int
-	{
-		if (forcedCount > 0)
-		{
-			var n = forcedCount;
-			forcedCount = 0;
-			return n;
-		}
-		return bossesFought > 0 && FlxG.random.float() < waveData.duoChance ? 2 : 1;
+		spawnBossPack(bossKinds());
 	}
 
 	public function bossAlive():Bool
@@ -247,12 +232,11 @@ class EnemyDirector
 		return false;
 	}
 
-	public function summonBoss(kind:String, count:Int = 1):Bool
+	public function summonBoss(kinds:Array<String>):Bool
 	{
-		if (bossPending || bossAlive() || !spawning)
+		if (bossPending || bossMembers > 0 || bossAlive())
 			return false;
-		forcedBoss = kind;
-		forcedCount = count;
+		forcedBosses = sanitizeBossKinds(kinds);
 		queued.resize(0);
 		betweenWaves = 0;
 		waveClock = 0;
@@ -265,16 +249,15 @@ class EnemyDirector
 
 	function bossKind():String
 	{
-		if (forcedBoss != null)
-		{
-			var forced = forcedBoss;
-			forcedBoss = null;
-			return data.EnemyData.EnemyDataRegistry.has(forced) ? forced : "domo";
-		}
 		var roster = bossRoster();
 		if (roster.length == 0)
 			return "domo";
-		var pick = roster[FlxG.random.int(0, roster.length - 1)];
+		var fresh:Array<String> = [];
+		for (kind in roster)
+			if (!beatenBossKinds.exists(kind))
+				fresh.push(kind);
+		var choices = fresh.length > 0 ? fresh : roster;
+		var pick = choices[FlxG.random.int(0, choices.length - 1)];
 		return data.EnemyData.EnemyDataRegistry.has(pick) ? pick : "domo";
 	}
 
@@ -289,33 +272,93 @@ class EnemyDirector
 		return roster;
 	}
 
-	function spawnBossPack(count:Int):Void
+	function bossKinds():Array<String>
 	{
-		bossesFought++;
-		var pack = [];
-		var s = waveData.scaling;
-		var kind = bossKind();
-		if (data.EnemyData.EnemyDataRegistry.get(kind).worm != null)
+		if (forcedBosses != null)
 		{
-			spawnWorm(kind);
-			return;
+			var forced = forcedBosses;
+			forcedBosses = null;
+			return forced;
 		}
-		for (i in 0...count)
+
+		var pairs:Array<Array<String>> = [];
+		if (waveData.bossPairs != null)
+			for (pair in waveData.bossPairs)
+			{
+				var clean = sanitizeBossKinds(pair);
+				if (clean.length > 1)
+					pairs.push(clean);
+			}
+		for (pair in pairs)
 		{
-			var boss = new Enemies(kind);
-			boss.applyScale(ramp(s.bossHpPerWave), ramp(s.bossSpeedPerWave), ramp(s.bossDamagePerWave));
-			spawner.placeAtEdge(boss);
-			register(boss);
-			bossDeath.watch(boss);
-			pack.push(boss);
-			if (onBossSpawn != null)
-				onBossSpawn(boss);
+			var key = pair.join("|");
+			if (spentBossPairs.exists(key) || !allBossesBeaten(pair))
+				continue;
+			spentBossPairs.set(key, true);
+			return pair.copy();
+		}
+		return [bossKind()];
+	}
+
+	function allBossesBeaten(kinds:Array<String>):Bool
+	{
+		for (kind in kinds)
+			if (!beatenBossKinds.exists(kind))
+				return false;
+		return true;
+	}
+
+	function sanitizeBossKinds(kinds:Array<String>):Array<String>
+	{
+		var clean:Array<String> = [];
+		var seen:Map<String, Bool> = new Map();
+		var hasWorm = false;
+		if (kinds != null)
+			for (kind in kinds)
+			{
+				if (!data.EnemyData.EnemyDataRegistry.has(kind) || seen.exists(kind))
+					continue;
+				var isWorm = data.EnemyData.EnemyDataRegistry.get(kind).worm != null;
+				if (isWorm && hasWorm)
+					continue;
+				seen.set(kind, true);
+				hasWorm = hasWorm || isWorm;
+				clean.push(kind);
+			}
+		if (clean.length == 0)
+			clean.push("domo");
+		return clean;
+	}
+
+	function spawnBossPack(kinds:Array<String>):Void
+	{
+		var selected = sanitizeBossKinds(kinds);
+		bossMembers = selected.length;
+		activeBossKinds = selected.copy();
+		var pack:Array<Enemies> = [];
+		for (kind in selected)
+		{
+			if (data.EnemyData.EnemyDataRegistry.get(kind).worm != null)
+				pack = pack.concat(spawnWorm(kind));
+			else
+				pack.push(spawnBoss(kind));
 		}
 		if (onBossPack != null)
 			onBossPack(pack);
 	}
 
-	function spawnWorm(kind:String):Void
+	function spawnBoss(kind:String):Enemies
+	{
+		var s = waveData.scaling;
+		var boss = new Enemies(kind);
+		boss.applyScale(ramp(s.bossHpPerWave), ramp(s.bossSpeedPerWave), ramp(s.bossDamagePerWave));
+		spawner.placeAtEdge(boss);
+		register(boss);
+		bossDeath.watch(boss);
+		return boss;
+	}
+
+	function spawnWorm(kind:String):Array<Enemies>
 	{
 		var wcfg = data.EnemyData.EnemyDataRegistry.get(kind).worm;
 		var s = waveData.scaling;
@@ -338,14 +381,11 @@ class EnemyDirector
 			e.applyScale(ramp(s.bossHpPerWave), ramp(s.bossSpeedPerWave), ramp(s.bossDamagePerWave));
 			register(e);
 			segs.push(e);
-			if (i == 0 && onBossSpawn != null)
-				onBossSpawn(e);
 		}
 		worm = new WormFlock(layers, fx, arena.width, arena.height);
 		worm.floorAt = arena.floorColorAt;
 		worm.adopt(segs);
-		if (onBossPack != null)
-			onBossPack(segs);
+		return segs;
 	}
 
 	function wormDown():Void
@@ -358,8 +398,28 @@ class EnemyDirector
 			onBossKill(wasX, wasY);
 		if (onBossDrops != null)
 			onBossDrops(wasX, wasY);
-		if (onBossDefeated != null)
-			onBossDefeated();
+		finishBossMember(wasX, wasY);
+	}
+
+	function normalBossDown(x:Float, y:Float):Void
+		finishBossMember(x, y);
+
+	function finishBossMember(x:Float, y:Float):Void
+	{
+		if (bossMembers <= 0)
+			return;
+		bossMembers--;
+		var last = bossMembers == 0;
+		if (last && activeBossKinds != null)
+		{
+			for (kind in activeBossKinds)
+				beatenBossKinds.set(kind, true);
+			activeBossKinds = null;
+		}
+		if (bossFallCallback != null)
+			bossFallCallback(x, y, last);
+		if (last && bossDefeatedCallback != null)
+			bossDefeatedCallback();
 	}
 
 	function updateWaves(elapsed:Float):Void
@@ -415,13 +475,6 @@ class EnemyDirector
 		e.applyScale(ramp(s.hpPerWave), ramp(s.speedPerWave), ramp(s.damagePerWave));
 	}
 
-	public function resumeAfter(atWave:Int, atBossWave:Int):Void
-	{
-		wave = atWave;
-		bossWave = atBossWave;
-		betweenWaves = breatherTime();
-	}
-
 	public function isBossWave(n:Int):Bool
 	{
 		if (n < bossWave)
@@ -439,8 +492,6 @@ class EnemyDirector
 
 		if (isBossWave(wave))
 		{
-			if (bossVeto != null && bossVeto(bossWave))
-				return;
 			if (onBoss != null)
 				onBoss();
 			bossPending = true;
@@ -612,6 +663,7 @@ class EnemyDirector
 				var l = Math.sqrt(vx * vx + vy * vy);
 				if (l <= 0)
 					continue;
+				f.interruptAttack();
 				f.velocity.set(vx / l * FLING_SPEED, vy / l * FLING_SPEED);
 				f.drag.set(FLING_DRAG, FLING_DRAG);
 				f.stun = FLING_STUN;
@@ -744,6 +796,22 @@ class EnemyDirector
 
 	public function enemyCount():Int
 		return rigs.length;
+
+	public function waveProgress():Float
+	{
+		var repeating = wave > bossWave && waveData.bossRepeat > 0;
+		var span = repeating ? waveData.bossRepeat : bossWave;
+		if (span <= 0)
+			return 0;
+		var step = repeating ? wave - bossWave : wave;
+		var done = step <= 0 ? 0 : (step - 1) % span + 1;
+		if (done > span)
+			done = span;
+		return done / span;
+	}
+
+	public function moundCount():Int
+		return worm == null ? 0 : worm.moundCount();
 
 	public function eachEnemy(f:Enemies->Void):Void
 	{

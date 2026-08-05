@@ -69,7 +69,10 @@ typedef WormData = {
 	shotSpread:Float,
 	shotSpeed:Float,
 	shotDamage:Float,
-	shotRange:Float
+	shotRange:Float,
+	?burstCount:Int,
+	?flankGap:Float,
+	?flankStride:Int
 }
 
 typedef DomoData = {
@@ -116,6 +119,7 @@ typedef EnemyData = {
 	animations:Array<EnemyAnimData>,
 	hp:Int,
 	speed:Float,
+	?walkPulse:Array<Float>,
 	aggroRange:Float,
 	stopThreshold:Float,
 	attackRange:Float,
@@ -145,6 +149,8 @@ typedef EnemyData = {
 	?chargeSpeed:Float,
 	?chargeTime:Float,
 	?chargeRecover:Float,
+	?chargeCooldown:Float,
+	?chargeLift:Float,
 	shadowOffX:Float,
 	shadowOffXFlip:Float,
 	shadowOffY:Float,

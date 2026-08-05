@@ -71,10 +71,10 @@
 	"bowCharge": {
 		"minTime": 0.15,
 		"fullTime": 1.0,
-		"damage": 4,
-		"fullMult": 1.5,
+		"damage": 6,
+		"fullMult": 1.8,
 		"sweetWindow": 0.25,
-		"sweetMult": 1.65,
+		"sweetMult": 2.2,
 		"speedBonus": 0.8,
 		"sizeBonus": 0.7,
 		"knockBonus": 1.5,
@@ -86,9 +86,11 @@
 		"stagger": 0.35,
 		"spread": 130,
 		"fallSpeed": 1600,
-		"hitRadius": 80,
+		"hitRadius": 95,
 		"rechargeTime": 9.0,
-		"bossScale": 0.2
+		"damage": 2,
+		"superDamage": 2,
+		"bossScale": 0.3
 	},
 	"hook": {
 		"range": 700,
@@ -173,7 +175,6 @@
 		"knock": 1.8,
 		"hitBrace": 6,
 		"cooldown": 1.1,
-		"deflects": false,
 		"effect": "spear",
 		"hitLift": 15,
 		"hitPush": -30,

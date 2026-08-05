@@ -26,6 +26,7 @@ class EnemyBrain
 
 	public function interrupt():Void
 	{
+		state = Following;
 		wanderCountdown = 0;
 		idleCountdown = 0;
 	}
@@ -113,7 +114,7 @@ class EnemyBrain
 			e.pathing.notifyBlocked();
 		}
 
-		if (distance <= e.attackRange && e.pathing.losClear)
+		if (e.attackCooldown <= 0 && distance <= e.attackRange && e.pathing.losClear)
 		{
 			state = Attacking;
 			return;
@@ -146,8 +147,9 @@ class EnemyBrain
 		}
 		else
 		{
-			e.velocity.set(e.pathing.moveX * e.speed, e.pathing.moveY * e.speed);
 			e.animation.play("walk");
+			var gait = e.gaitScale();
+			e.velocity.set(e.pathing.moveX * e.speed * gait, e.pathing.moveY * e.speed * gait);
 		}
 	}
 

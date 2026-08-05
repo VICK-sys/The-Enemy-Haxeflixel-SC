@@ -44,7 +44,9 @@ The hammer's melee, built from the `swing` config block: long reach, a wide arc,
 
 A landed hit carries the swing to its contact pose before the hitstop bites. Damage is dealt on the frame the button goes down, while the arc is still wound back behind the player, so freezing the world there held the weapon at the wind up rather than on the target. A connecting swing now jumps to `IMPACT_AT` of its arc, and the freeze sits on the blow going through instead of the pose before it. The jump only ever moves the swing forward, so a second enemy in the same swing cannot rewind it, and an aimed weapon ignores it since it does not sweep.
 
-Each fire spawns a slash effect and strikes every enemy inside its arc. It also opens a short guard window, during which it deflects enemy shots. The window runs for `GUARD_TIME` rather than only the frame of the click, so a swing catches bullets that arrive mid-animation. A deflected shot keeps the exact round the enemy fired, sprite and all. It is the same bullet sent back, so it looks like the same bullet. Only `friendly` changes, which is what decides who it can hurt. It leaves along the swing's aim, bent a little by the path it came in on: the new heading is the aim direction plus a fraction of the old one, so a crossing round carries some of its momentum through the deflect instead of snapping straight back the way it came.
+Each fire spawns a slash effect and strikes every enemy inside its arc. The hammer swing and crossbow bash also open a short guard window that deflects enemy shots. The window runs for `GUARD_TIME` rather than only the input frame, so it catches bullets that arrive mid-animation. A deflected shot keeps the exact round the enemy fired, sprite and all. It is the same bullet sent back, so it looks like the same bullet. Only `friendly` changes, which is what decides who it can hurt. It leaves along the attack's aim, bent a little by the path it came in on. The new heading is the aim direction plus a fraction of the old one. A crossing round therefore carries some of its momentum through the deflect.
+
+The bash guard uses a player-centred 180 degree cone with a 190 px radius. Its origin sits 30 px behind the player along the aim and 15 px above. The spear effect still owns the bash damage volume.
 
 The hammer's block also carries a `cooldown`. Each swing starts it, and both the next swing and the throw wait for it out. Catching a thrown hammer starts the shorter `catchCooldown` from the thrown block, so a catch cannot chain straight into a hit. The reload bar above the player shows the wait, the same way it shows a reload. Dexterity shortens it like every other recovery.
 
@@ -70,7 +72,7 @@ The string draws taut from hand to yoyo. An earlier pass simulated it as a loose
 
 Two floors guard the rest of that. The yoyo will not sit closer to the hand than a minimum while it is out, so aiming at your own feet throws it clear rather than parking it on your chest, and it cannot be caught in the first fraction of a second, so a tap still reads as a throw rather than a flicker.
 
-Damage repeats rather than landing once. Each enemy the yoyo touches is struck, then sits out `hitGap` before it can be struck again, so parking the yoyo on something grinds it down while sweeping across a crowd clips each of them. The push follows the string: out shoves a target away, coming home drags one toward the player. It does not touch enemy fire; the hammer keeps the deflect to itself.
+Damage repeats rather than landing once. Each enemy the yoyo touches is struck, then sits out `hitGap` before it can be struck again, so parking the yoyo on something grinds it down while sweeping across a crowd clips each of them. The push follows the string: out shoves a target away, coming home drags one toward the player. It does not touch enemy fire. The hammer swing and crossbow bash deflect shots instead.
 
 Holding costs. The throw runs for `holdTime` and then tires out on its own and returns, and a throw that ran itself out pays `restCooldown` rather than the short `cooldown` a released one pays. Letting go early is therefore worth doing. The reload bar above the player shows the wait, the same way it shows a reload.
 
@@ -92,9 +94,7 @@ Running dry starts a reload, whichever trigger emptied the cylinder. R reloads e
 
 The super is the twin gun. It does not zero the meter. The meter drains across `twinTime` and the super ends when it runs out, then the normal cooldown starts. While it lasts, every trigger pull fires a second round offset beside the first at `twinScale` of the hand's damage, and a mirrored revolver rides the other hand. The whole meter locks while any super runs, so neither hand winds the next super while this one is out.
 
-Activating it forces both guns into a reload, whatever the cylinder held, and every reload while the twin is out runs at `TWIN_RELOAD` of the normal time, a little under a third, since two hands spin two cylinders at once and the forced one on activation should not be what the super costs you. The second gun keeps its own cylinder. It arrives empty, fills with the forced reload, and pays for its own copy of every shot, one round for a hand shot and `bigCost` for a big one. Both cylinders fill from the same reload, so they stay in step, and the HUD stacks a second pip column beside the first while the twin is out.
-
-The second column counts a round the moment the trigger asks for it, not when the delayed shot leaves the barrel. Counting the real cylinder left the column a round ahead of the first for the length of the stagger, and the reload froze that reading for its whole run, so the last round looked like one the second gun never fired. It fires it. Only the readout lagged, and it now reports where the cylinder is about to be rather than where it was.
+Activating it forces both guns into a reload, whatever the cylinder held, and every reload while the twin is out runs at `TWIN_RELOAD` of the normal time, a little under a third, since two hands spin two cylinders at once and the forced one on activation should not be what the super costs you. The second gun keeps its own cylinder. It arrives empty, fills with the forced reload, and pays for its own copy of every shot, one round for a hand shot and `bigCost` for a big one. Both cylinders fill from the same reload, so they stay in step. The HUD keeps one ammo readout while the twin is active.
 
 Reloading swaps the held revolver to the `revolver_reload` strip, eleven frames of the cylinder swinging out, spinning and seating again, and steps through them off reload progress.
 
@@ -159,6 +159,8 @@ A shot released on the sweet spot flies as `perfect_arrow` rather than the usual
 The bow's secondary. The bow rises above the player's head and points skyward. Firing launches a fanned burst of arrows up from it. A staggered volley then falls onto a scatter of points around the cursor.
 
 Each impact point shows a ground marker during the descent. The falling arrow fades in over the first part of its drop rather than popping into view. That fade keys to distance fallen, so it stays proportional if the drop height or fall speed change. A landing arrow damages enemies in a radius with outward knockback. The rain ignores walls.
+
+The landing damage is data. `damage` covers an ordinary rain arrow and `superDamage` covers a storm drop, so the super can be weighted apart from the secondary that shares its machinery. Either one absent falls back, and both scale against a boss body through `bossScale`.
 
 Impact points are floor coordinates. The marker, the arrow's descent and the blast all read the same point through `rainAt`.
 

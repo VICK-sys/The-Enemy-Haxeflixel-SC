@@ -10,14 +10,17 @@ import data.EnemyData.EnemyDataRegistry;
 class Enemies extends FlxSprite
 {
 	static inline var FLASH_TIME:Float = 0.08;
+	static inline var DEFAULT_GAIT_SCALE:Float = 1;
 
 	static inline var ENTER_CLIMB:Float = 0.7;
 	static inline var ENTER_SIDE:Float = 0.714;
 
 	public var speed:Float = 300;
+	private var walkPulse:Array<Float> = null;
 	public var aggroRange:Float = 200;
 	public var stopThreshold:Float = 170;
 	public var attackRange:Float = 150;
+	public var attackCooldown:Float = 0;
 	public var contactDamage:Float = 0.25;
 	public var contactPush:Float = 0;
 	public var shotDamage:Float = 0.25;
@@ -107,6 +110,13 @@ class Enemies extends FlxSprite
 
 	private var brain:EnemyBrain = new EnemyBrain();
 
+	public function gaitScale():Float
+	{
+		var current = animation.curAnim;
+		if (walkPulse == null || walkPulse.length == 0 || current == null || current.name != "walk")
+			return DEFAULT_GAIT_SCALE;
+		return walkPulse[current.curFrame % walkPulse.length];
+	}
 
     public function new(kind:String, x:Float=0, y:Float=0)
     {
@@ -127,6 +137,7 @@ class Enemies extends FlxSprite
 
 		hp = data.hp;
 		speed = data.speed;
+		walkPulse = data.walkPulse;
 		aggroRange = data.aggroRange;
 		stopThreshold = data.stopThreshold;
 		attackRange = data.attackRange;
@@ -191,6 +202,8 @@ class Enemies extends FlxSprite
 			if (data.chargeSpeed != null) charge.chargeSpeed = data.chargeSpeed;
 			if (data.chargeTime != null) charge.chargeTime = data.chargeTime;
 			if (data.chargeRecover != null) charge.recoverTime = data.chargeRecover;
+			if (data.chargeCooldown != null) charge.cooldownTime = data.chargeCooldown;
+			if (data.chargeLift != null) charge.lift = data.chargeLift;
 			attack = charge;
 		}
 
@@ -216,10 +229,7 @@ class Enemies extends FlxSprite
 		var shaken = !poise && stunLock <= 0;
 
 		if (shaken)
-		{
-			brain.interrupt();
-			attack.reset();
-		}
+			interruptAttack();
 
 		hp -= damage;
 		flashTimer = FLASH_TIME;
@@ -228,6 +238,7 @@ class Enemies extends FlxSprite
 		if (hp <= 0)
 		{
 			isDead = true;
+			attack.reset();
 			flung = true;
 			velocity.set(pushX * knockbackTaken * knockScale() * CORPSE_KNOCK, pushY * knockbackTaken * knockScale() * CORPSE_KNOCK);
 			drag.set(knockbackDrag, knockbackDrag);
@@ -248,6 +259,12 @@ class Enemies extends FlxSprite
 
 	function knockScale():Float
 		return big ? BIG_KNOCK : NORMAL_KNOCK;
+
+	public function interruptAttack():Void
+	{
+		brain.interrupt();
+		attack.reset();
+	}
 
 	public function brace(frames:Int, amp:Float, pushX:Float, pushY:Float):Void
 	{
@@ -313,6 +330,8 @@ class Enemies extends FlxSprite
 			elapsed *= WorldClock.scale;
 
 		super.update(elapsed);
+		if (attackCooldown > 0)
+			attackCooldown -= elapsed;
 
 		if (throwGrace > 0)
 			throwGrace -= elapsed;
@@ -337,7 +356,10 @@ class Enemies extends FlxSprite
 		}
 
 		if (seized)
+		{
+			attack.reset();
 			return;
+		}
 
 		if (braceFrames > 0)
 		{

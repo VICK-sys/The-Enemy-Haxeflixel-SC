@@ -9,9 +9,9 @@
 		{ "name": "walk", "prefix": "Body", "fps": 8, "loop": true },
 		{ "name": "head", "prefix": "Head", "fps": 8, "loop": true },
 		{ "name": "body", "prefix": "Body", "fps": 8, "loop": true },
-		{ "name": "mound", "prefix": "Mound", "fps": 8, "loop": true },
+		{ "name": "mound", "prefix": "Mound0004", "fps": 8, "loop": true },
 		{ "name": "hurt", "prefix": "Body", "fps": 8, "loop": false },
-		{ "name": "death", "prefix": "Body", "fps": 8, "loop": false }
+		{ "name": "death", "prefix": "Death", "fps": 12, "loop": false }
 	],
 	"hp": 9,
 	"speed": 430,
@@ -27,7 +27,7 @@
 	"stunTime": 0.06,
 	"shadowOffX": 17,
 	"shadowOffXFlip": 17,
-	"shadowOffY": 92,
+	"shadowOffY": 128,
 	"shadowScaleX": 8,
 	"hitOffX": 25,
 	"hitOffXFlip": 25,

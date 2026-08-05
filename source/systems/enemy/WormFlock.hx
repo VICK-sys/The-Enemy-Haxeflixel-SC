@@ -24,13 +24,20 @@ typedef WormChain =
 	charge:Float,
 	liftFrom:Float,
 	face:Float,
-	faceSet:Bool
+	faceSet:Bool,
+	markX:Float,
+	markY:Float,
+	marked:Bool,
+	flank:Float
 }
 
 typedef WormPuff =
 {
 	sprite:FlxSprite,
-	life:Float
+	hold:Float,
+	closing:Bool,
+	flash:Float,
+	color:Int
 }
 
 class WormFlock
@@ -48,18 +55,34 @@ class WormFlock
 	static inline var DIG_VOL:Float = 0.55;
 	static inline var GLOW_TIME:Float = 0.35;
 	static inline var GLOW_HOLD:Float = 0.6;
-	static inline var PUFF_LIFE:Float = 0.4;
-	static inline var PUFF_GROW:Float = 2.2;
 	static inline var SURFACE_MARK:Float = 0.04;
 	static inline var AIM_TURN:Float = 3.5;
 	static inline var COIL_PACE:Float = 0.55;
 	static inline var CHARGE_RAMP:Float = 0.28;
+	static inline var MIN_LENGTH:Int = 2;
+	static inline var MOUND_HOLD:Float = 3.0;
+	static inline var MARK_STEP:Float = 48;
+	static inline var MARK_FLASH:Float = 1.0;
+	static inline var MOUND_SCALE:Float = 6;
+	static inline var ARC_SHAPE:Float = 2;
+	static inline var SHOT_ART:String = "bullets/round_bullet_enemy";
+	static inline var SHOT_SFX:String = "enemies/shoot";
+	static inline var FLASH_REACH:Float = 140;
 
 	public var done(default, null):Bool = false;
 	public var lastX(default, null):Float = 0;
 	public var lastY(default, null):Float = 0;
 
 	public var floorAt:(Float, Float) -> Int;
+
+	public function moundCount():Int
+	{
+		var count = 0;
+		for (p in puffs)
+			if (p.sprite.visible)
+				count++;
+		return count;
+	}
 
 	private var cfg:WormData;
 	private var chains:Array<WormChain> = [];
@@ -115,7 +138,11 @@ class WormFlock
 			charge: 0,
 			liftFrom: 0,
 			face: 0,
-			faceSet: false
+			faceSet: false,
+			markX: 0,
+			markY: 0,
+			marked: false,
+			flank: 0
 		});
 	}
 
@@ -139,6 +166,19 @@ class WormFlock
 
 	function dropPart(s:Enemies):Void
 		glow.remove(s);
+
+	function retireAfterDeath(s:Enemies):Void
+	{
+		s.animation.onFinish.add(function(name:String)
+		{
+			if (name == "death" && s.exists)
+				s.kill();
+		});
+		if (s.animation.name != "death")
+			s.animation.play("death", true);
+		if (s.animation.finished)
+			s.kill();
+	}
 
 	public function update(elapsed:Float):Void
 	{
@@ -165,6 +205,14 @@ class WormFlock
 			chains.push(s);
 		}
 
+		var j = chains.length;
+		while (j-- > 0)
+			if (chains[j].segs.length < MIN_LENGTH)
+			{
+				collapse(chains[j]);
+				chains.splice(j, 1);
+			}
+
 		if (chains.length == 0)
 		{
 			done = true;
@@ -189,7 +237,6 @@ class WormFlock
 		hush();
 		for (p in puffs)
 		{
-			p.life = 0;
 			p.sprite.visible = false;
 			layers.shadowLayer.remove(p.sprite, true);
 			p.sprite.destroy();
@@ -225,7 +272,7 @@ class WormFlock
 		}
 
 		if (digLoop == null)
-			digLoop = FlxG.sound.load(Paths.sound("wyrm_dig"), DIG_VOL, true, FlxG.sound.defaultSoundGroup);
+			digLoop = FlxG.sound.create(Paths.sound("wyrm_dig")).setup(DIG_VOL, true);
 		if (!digLoop.playing)
 			digLoop.play(true);
 		util.Sfx.tune(digLoop, bx, by, DIG_VOL);
@@ -289,7 +336,7 @@ class WormFlock
 		var r = lift / cfg.lift;
 		if (r > 1)
 			r = 1;
-		return cfg.underTime + (1 - Math.asin(r) / Math.PI) * cfg.overTime;
+		return cfg.underTime + (1 - Math.asin(Math.pow(r, 1 / ARC_SHAPE)) / Math.PI) * cfg.overTime;
 	}
 
 	inline function liftOf(s:Enemies):Float
@@ -312,7 +359,7 @@ class WormFlock
 			fx.sparksAt(lastX, lastY);
 			dropPart(s);
 			if (s.exists)
-				s.kill();
+				retireAfterDeath(s);
 
 			var right = c.segs.splice(k + 1, c.segs.length);
 			c.segs.pop();
@@ -345,11 +392,43 @@ class WormFlock
 					charge: 0,
 					liftFrom: 0,
 					face: 0,
-					faceSet: false
+					faceSet: false,
+			markX: 0,
+			markY: 0,
+			marked: false,
+			flank: 0
 				});
 			}
 			return;
 		}
+	}
+
+	function collapse(c:WormChain):Void
+	{
+		for (s in c.segs)
+		{
+			lastX = s.x + s.width * 0.5;
+			lastY = s.y + s.height * 0.5;
+			fx.sparksAt(lastX, lastY);
+			breach(lastX, s.feetY);
+			util.Sfx.at("wyrm_surface", lastX, lastY, 0.8);
+			dropPart(s);
+			if (s.exists)
+			{
+				s.hp = 0;
+				s.isDead = true;
+				s.buried = false;
+				s.velocity.set(0, 0);
+				s.drag.set(0, 0);
+				s.flashTimer = 0;
+				s.color = 0xFFFFFF;
+				s.alpha = 1;
+				s.setColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
+				s.animation.play("death", true);
+				retireAfterDeath(s);
+			}
+		}
+		c.segs.resize(0);
 	}
 
 	function headLift(clock:Float):Float
@@ -359,7 +438,7 @@ class WormFlock
 		if (t < cfg.underTime)
 			return 0;
 		var u = (t - cfg.underTime) / cfg.overTime;
-		return Math.sin(u * Math.PI) * cfg.lift;
+		return Math.pow(Math.sin(u * Math.PI), ARC_SHAPE) * cfg.lift;
 	}
 
 	function advance(c:WormChain, elapsed:Float):Void
@@ -372,6 +451,7 @@ class WormFlock
 		if (!rushing)
 			c.clock += elapsed;
 		c.shot -= elapsed;
+		c.flank -= elapsed;
 		if (c.chargeCd > 0)
 			c.chargeCd -= elapsed;
 
@@ -511,7 +591,8 @@ class WormFlock
 			if (up)
 			{
 				util.Sfx.at("wyrm_surface", hx, hy, 0.85);
-				breach(hx, hy + head.shadowOffY - head.height * 0.5);
+				flashMark(hx, hy + head.shadowOffY - head.height * 0.5);
+				burstOut(head);
 			}
 			else
 				util.Sfx.at("digging", hx, hy, 0.5);
@@ -538,6 +619,12 @@ class WormFlock
 
 		for (idx in 0...c.segs.length)
 			place(c, idx, elapsed, hx, hy, lift);
+
+		if (c.flank <= 0)
+		{
+			c.flank = flankGap();
+			flankOut(c);
+		}
 	}
 
 	function place(c:WormChain, idx:Int, elapsed:Float, hx:Float, hy:Float, headHigh:Float):Void
@@ -596,11 +683,7 @@ class WormFlock
 		{
 			s.buried = !up;
 			if (up)
-			{
 				lit = GLOW_TIME;
-				if (idx > 0)
-					breach(px, s.feetY);
-			}
 		}
 		if (lit > 0)
 			lit = lit > elapsed ? lit - elapsed : 0;
@@ -611,9 +694,15 @@ class WormFlock
 		s.lift = up ? lift : 0;
 		s.shadowScaleX = up ? 8 : 0;
 
-		var want = up ? (idx == 0 ? "head" : "body") : "mound";
-		if (s.animation.name != want)
-			s.animation.play(want);
+		s.visible = up;
+		if (up)
+		{
+			var want = idx == 0 ? "head" : "body";
+			if (s.animation.name != want)
+				s.animation.play(want);
+		}
+		else if (idx == 0)
+			layMark(c, px, s.feetY);
 
 		if (up)
 		{
@@ -642,64 +731,183 @@ class WormFlock
 			if (idx == 0)
 				s.angle = 0;
 			if (s.flashTimer <= 0)
-			{
 				s.setColorTransform(1, 1, 1, s.alpha, 0, 0, 0, 0);
-				if (floorAt != null)
-					s.color = floorAt(px, s.feetY);
-			}
 		}
 
 	}
 
-	function breach(px:Float, py:Float):Void
+	inline function flankGap():Float
+		return cfg.flankGap == null ? 0 : cfg.flankGap;
+
+	inline function flankStride():Int
+		return cfg.flankStride == null || cfg.flankStride < 1 ? 1 : cfg.flankStride;
+
+	function burstOut(from:Enemies):Void
 	{
-		var s:FlxSprite = null;
-		for (p in puffs)
-			if (p.life <= 0 && !p.sprite.visible)
+		var n = cfg.burstCount == null ? 0 : cfg.burstCount;
+		for (i in 0...n)
+		{
+			var rad = i / n * Math.PI * 2;
+			from.requestShot(Math.cos(rad), Math.sin(rad), cfg.shotDamage, cfg.shotSpeed, cfg.shotRange,
+				SHOT_ART, SHOT_SFX);
+		}
+	}
+
+	function flankOut(c:WormChain):Void
+	{
+		if (flankGap() <= 0)
+			return;
+		var stride = flankStride();
+		var idx = stride;
+		while (idx < c.segs.length)
+		{
+			var s = c.segs[idx];
+			if (!s.buried && s.exists && !s.isDead)
 			{
-				s = p.sprite;
-				p.life = PUFF_LIFE;
+				var ahead = c.segs[idx - 1];
+				var dx = ahead.x - s.x;
+				var dy = ahead.y - s.y;
+				var len = Math.sqrt(dx * dx + dy * dy);
+				if (len > 0.001)
+				{
+					dx /= len;
+					dy /= len;
+					s.requestShot(-dy, dx, cfg.shotDamage, cfg.shotSpeed, cfg.shotRange, SHOT_ART, null);
+					s.requestShot(dy, -dx, cfg.shotDamage, cfg.shotSpeed, cfg.shotRange, SHOT_ART, null);
+				}
+			}
+			idx += stride;
+		}
+	}
+
+	function flashMark(px:Float, py:Float):Void
+	{
+		var near:WormPuff = null;
+		var best = FLASH_REACH * FLASH_REACH;
+		for (p in puffs)
+		{
+			if (!p.sprite.visible)
+				continue;
+			var dx = p.sprite.x + p.sprite.width * 0.5 - px;
+			var dy = p.sprite.y + p.sprite.height * 0.5 - py;
+			var d = dx * dx + dy * dy;
+			if (d < best)
+			{
+				best = d;
+				near = p;
+			}
+		}
+		if (near == null)
+			near = moundAt(px, py);
+		near.flash = MARK_FLASH;
+	}
+
+	function layMark(c:WormChain, px:Float, py:Float):Void
+	{
+		if (c.marked)
+		{
+			var dx = px - c.markX;
+			var dy = py - c.markY;
+			if (dx * dx + dy * dy < MARK_STEP * MARK_STEP)
+				return;
+		}
+		for (p in puffs)
+		{
+			if (!p.sprite.visible || p.closing)
+				continue;
+			var dx = p.sprite.x + p.sprite.width * 0.5 - px;
+			var dy = p.sprite.y + p.sprite.height * 0.5 - py;
+			if (dx * dx + dy * dy < MARK_STEP * MARK_STEP)
+			{
+				c.markX = px;
+				c.markY = py;
+				c.marked = true;
+				return;
+			}
+		}
+		c.markX = px;
+		c.markY = py;
+		c.marked = true;
+		moundAt(px, py);
+	}
+
+	function breach(px:Float, py:Float):Void
+		moundAt(px, py);
+
+	function closeMound(p:WormPuff):Void
+	{
+		p.hold = 0;
+		p.closing = true;
+		p.sprite.animation.play("burrow", true, true);
+	}
+
+	function moundAt(px:Float, py:Float):WormPuff
+	{
+		var slot:WormPuff = null;
+		for (p in puffs)
+			if (!p.sprite.visible)
+			{
+				slot = p;
 				break;
 			}
-		if (s == null)
+		if (slot == null)
 		{
-			s = new FlxSprite();
+			var s = new FlxSprite();
 			s.frames = Paths.sparrow("enemies/worm");
-			s.animation.addByPrefix("puff", "Mound", 8, false);
+			s.animation.addByIndices("surface", "Mound", [0, 2, 4], "", 8, false);
+			s.animation.addByPrefix("burrow", "Mound", 8, false);
 			s.antialiasing = false;
 			layers.shadowLayer.add(s);
-			puffs.push({sprite: s, life: PUFF_LIFE});
+			slot = {sprite: s, hold: 0, closing: false, flash: 0, color: 0xFFFFFF};
+			puffs.push(slot);
 		}
-		s.animation.play("puff", true);
-		s.color = 0xFFFFFF;
-		s.alpha = 0.85;
-		s.scale.set(4, 4);
+		slot.hold = MOUND_HOLD;
+		slot.closing = false;
+		slot.flash = 0;
+		var s = slot.sprite;
+		s.setColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
+		s.animation.play("surface", true);
+		slot.color = floorAt != null ? floorAt(px, py) : 0xFFFFFF;
+		s.color = slot.color;
+		s.alpha = 1;
+		s.scale.set(MOUND_SCALE, MOUND_SCALE);
 		s.updateHitbox();
 		s.setPosition(px - s.width * 0.5, py - s.height * 0.5);
 		s.visible = true;
+		return slot;
 	}
 
 	function updatePuffs(elapsed:Float):Void
 	{
 		for (p in puffs)
 		{
-			if (p.life <= 0)
+			if (!p.sprite.visible)
 				continue;
-			p.life -= elapsed;
-			var t = p.life / PUFF_LIFE;
-			if (t <= 0)
+			if (p.flash > 0)
+			{
+				p.flash -= elapsed;
+				if (p.flash <= 0)
+				{
+					p.flash = 0;
+					p.sprite.setColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
+					p.sprite.color = p.color;
+				}
+				else
+				{
+					var add = Std.int(255 * p.flash / MARK_FLASH);
+					p.sprite.setColorTransform(1, 1, 1, 1, add, add, add, 0);
+				}
+			}
+			if (!p.sprite.animation.finished)
+				continue;
+			if (p.closing)
 			{
 				p.sprite.visible = false;
-				p.life = 0;
 				continue;
 			}
-			p.sprite.alpha = t * 0.85;
-			var k = 4 + (1 - t) * PUFF_GROW;
-			var cx = p.sprite.x + p.sprite.width * 0.5;
-			var cy = p.sprite.y + p.sprite.height * 0.5;
-			p.sprite.scale.set(k, k);
-			p.sprite.updateHitbox();
-			p.sprite.setPosition(cx - p.sprite.width * 0.5, cy - p.sprite.height * 0.5);
+			p.hold -= elapsed;
+			if (p.hold <= 0)
+				closeMound(p);
 		}
 	}
 

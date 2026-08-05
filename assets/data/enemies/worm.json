@@ -31,7 +31,7 @@
 		},
 		{
 			"name": "mound",
-			"prefix": "Mound",
+			"prefix": "Mound0004",
 			"fps": 8,
 			"loop": true
 		},
@@ -43,8 +43,8 @@
 		},
 		{
 			"name": "death",
-			"prefix": "Head",
-			"fps": 8,
+			"prefix": "Death",
+			"fps": 12,
 			"loop": false
 		}
 	],
@@ -71,13 +71,16 @@
 		"chargeRange": 1100,
 		"chargeTurn": 0.7,
 		"volleyGap": 0.7,
-		"shotCooldown": 1.8,
+		"shotCooldown": 2.8,
 		"shotMinParts": 4,
-		"shotCount": 5,
+		"shotCount": 3,
 		"shotSpread": 35,
-		"shotSpeed": 1570,
+		"shotSpeed": 620,
 		"shotDamage": 0.25,
-		"shotRange": 99999
+		"shotRange": 99999,
+		"burstCount": 5,
+		"flankGap": 1.5,
+		"flankStride": 3
 	},
 	"contactDamage": 0.5,
 	"contactPush": 700,
@@ -86,7 +89,7 @@
 	"stunTime": 0.06,
 	"shadowOffX": 17,
 	"shadowOffXFlip": 17,
-	"shadowOffY": 92,
+	"shadowOffY": 128,
 	"shadowScaleX": 8,
 	"hitOffX": 25,
 	"hitOffXFlip": 25,

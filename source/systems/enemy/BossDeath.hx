@@ -22,9 +22,8 @@ class BossDeath
 	static inline var SHAKE_DUR:Float = 1.0;
 	static inline var SHAKE_AMP:Float = 12;
 
-	public var onDefeated:Void->Void;
 	public var onDrops:(Float, Float) -> Void;
-	public var onFall:(Float, Float, Bool) -> Void;
+	public var onFall:(Float, Float) -> Void;
 	public var onKill:(Float, Float) -> Void;
 
 	private var layers:RenderLayers;
@@ -101,10 +100,7 @@ class BossDeath
 			onDrops(cx, cy);
 		w.boss.kill();
 		watched.remove(w);
-		var last = watched.length == 0;
 		if (onFall != null)
-			onFall(cx, cy, last);
-		if (last && onDefeated != null)
-			onDefeated();
+			onFall(cx, cy);
 	}
 }

@@ -115,7 +115,7 @@ class BossShow
 	function normal():Void
 	{
 		showDecor(true);
-		Music.play(QuietRoom.track(), 0.3);
+		Music.play(Music.getRunTrack(), 0.3);
 		FlxTween.tween(FlxG.camera, {zoom: PlayState.BASE_ZOOM}, 0.8);
 	}
 

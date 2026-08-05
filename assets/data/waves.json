@@ -12,10 +12,15 @@
 		"domo",
 		"worm"
 	],
+	"bossPairs": [
+		[
+			"domo",
+			"worm"
+		]
+	],
 	"debugBosses": [
 		"rofel"
 	],
-	"duoChance": 0.5,
 	"scaling": {
 		"hpPerWave": 0.1,
 		"speedPerWave": 0.025,
