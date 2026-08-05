@@ -93,6 +93,8 @@ class AfkPilot
 	var scraps:Scraps;
 	var gate:ReadyGate;
 	var arena:Arena;
+	var shop:Shop;
+	var shopMove:{x:Float, y:Float} = {x: 0, y: 0};
 
 	var homeX:Float = 0;
 	var homeY:Float = 0;
@@ -127,6 +129,9 @@ class AfkPilot
 		this.arena = arena;
 	}
 
+	public function useShop(shop:Shop):Void
+		this.shop = shop;
+
 	public function set(enabled:Bool):Void
 	{
 		if (on == enabled)
@@ -159,7 +164,7 @@ class AfkPilot
 
 		for (a in [
 			Controls.UP, Controls.DOWN, Controls.LEFT, Controls.RIGHT, Controls.DASH, Controls.ATTACK, Controls.SECOND,
-			Controls.SUPER, Controls.RELOAD, Controls.ACCEPT
+			Controls.SUPER, Controls.RELOAD, Controls.ACCEPT, Controls.INTERACT
 		])
 			Controls.pilotHold(a, false);
 
@@ -178,7 +183,19 @@ class AfkPilot
 			strafeSign = -strafeSign;
 		}
 
-		tapReady();
+		if (!status.dead && shop != null && shop.open && shop.inReach())
+		{
+			stuckTimer = 0;
+			unstickTimer = 0;
+			Controls.pilotAimAt(Shop.spotX(), Shop.spotY());
+			Controls.pilotHold(Controls.INTERACT, true);
+			lastX = player.x;
+			lastY = player.y;
+			return;
+		}
+
+		if (shop == null || !shop.open)
+			tapReady();
 
 		if (status.dead)
 		{
@@ -441,6 +458,13 @@ class AfkPilot
 
 	function plan(target:Enemies):{x:Float, y:Float}
 	{
+		if (shop != null && shop.open)
+		{
+			shopMove.x = Shop.spotX() - px();
+			shopMove.y = Shop.spotY() - player.feetY;
+			return shopMove;
+		}
+
 		var heal = healthLoot();
 		if (heal != null)
 			return toward(heal);

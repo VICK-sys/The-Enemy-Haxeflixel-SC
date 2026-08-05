@@ -18,7 +18,10 @@ class CoopGhost
 
 	public function new()
 	{
-		sprite = new FlxSprite();
+		var s = new systems.world.PropSprite();
+		s.layerMode = systems.world.PropSprite.SORTED;
+		s.sortY = RenderLayers.GHOST_BAND;
+		sprite = s;
 		load(0);
 		sprite.antialiasing = false;
 		sprite.scale.set(SCALE, SCALE);

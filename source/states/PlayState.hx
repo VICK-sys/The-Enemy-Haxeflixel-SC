@@ -40,6 +40,7 @@ class PlayState extends FlxState
 	static inline var DEFLECT_PUSH:Float = 1.2;
 	static inline var SHIELD_DAMAGE:Int = 1;
 	static inline var SHIELD_PUSH:Float = 0.15;
+	static inline var BOSS_NAME_DELAY:Float = 3;
 
 	private var fx:Fx;
 	private var arena:Arena;
@@ -56,7 +57,6 @@ class PlayState extends FlxState
 	private var chat:ui.ChatWindow;
 	private var round:states.play.ShopRound;
 	private var gate:states.play.ReadyGate;
-	private var quiet:states.play.QuietRoom;
 	private var boss:states.play.BossShow;
 	private var intro:states.play.RunIntro;
 	private var perf:PerfLog;
@@ -70,9 +70,11 @@ class PlayState extends FlxState
 	private var numbers:systems.DamageNumbers;
 	private var dashGhost:systems.DashGhost;
 	private var afk:systems.AfkPilot;
+	private var afkIndicator:systems.AfkIndicator;
 	private var wipe:IrisWipe;
 	public var restarting(default, null):Bool = false;
 	private var hadSub:Bool = false;
+	private var bossNameDelay:Float = BOSS_NAME_DELAY;
 
 	function setRestarting():Void
 		restarting = true;
@@ -92,7 +94,7 @@ class PlayState extends FlxState
 	function openPause():Void
 	{
 		DiscordPresence.paused();
-		var pause = new PauseSubState(hud.camUI, false, afk);
+		var pause = new PauseSubState(hud.camUI, false, Net.active ? afk : null);
 		pause.closeCallback = function()
 		{
 			if (Lang.consumeChanged())
@@ -127,49 +129,24 @@ class PlayState extends FlxState
 		openSubState(sub);
 	}
 
-	static inline var WHITE_OUT:Float = 1.2;
-
-	public function warnInto(go:Void->Void):Void
-	{
-		if (restarting)
-			return;
-		setRestarting();
-		director.spawning = false;
-		boss.warn(go);
-	}
-
-	public function leaveFor(go:Void->Void):Void
-	{
-		if (restarting)
-			return;
-		setRestarting();
-		wipe.close(go);
-	}
 	private var netSync:NetSync;
 	private var props:systems.world.PropWorld;
 	private var floor:flixel.tile.FlxTilemap;
-	private var bushes:systems.BushDrift;
-	private var petals:systems.PetalFall;
 
 	function beginRestart():Void
 	{
 		if (restarting)
 			return;
 		setRestarting();
-		util.Detour.abandon();
 		wipe.close(function() FlxG.resetState());
 	}
 
 	override public function create()
 	{
-		if (!util.Detour.resuming() && !util.Detour.inRoom)
-		{
-			util.Levels.startRun();
-			util.Run.reroll();
-			states.play.QuietRoom.rollTrack();
-			systems.TreeMan.reset();
-			util.Stats.beginRun();
-		}
+		util.Levels.startRun();
+		util.Run.reroll();
+		Music.rollRunTrack();
+		util.Stats.beginRun();
 		WorldClock.reset();
 		persistentUpdate = Net.active;
 		fx = new Fx();
@@ -202,22 +179,8 @@ class PlayState extends FlxState
 
 		round = new states.play.ShopRound(this, _player, layers);
 		gate = new states.play.ReadyGate(this, _player, layers);
-		quiet = new states.play.QuietRoom(this, _player);
-		if (!util.CustomArena.quiet)
-			for (s in round.solids())
-				props.solids.add(s);
-
-		bushes = new systems.BushDrift();
-		for (s in props.named("treeBush"))
-			bushes.add(s, false);
-		for (s in props.named("treeBush2"))
-			bushes.add(s, true);
-
-		for (s in props.named("treeBush2"))
-		{
-			petals = new systems.PetalFall(s, "props/treeBush2");
-			break;
-		}
+		for (s in round.solids())
+			props.solids.add(s);
 
 		status = new PlayerCombat(_player, fx);
 		timeStop = new TimeStop(_player, layers.playerShadow, status);
@@ -228,7 +191,7 @@ class PlayState extends FlxState
 		burst = new systems.DeathBurst();
 		insert(members.indexOf(layers.entityLayer), burst.group);
 		ghost = new systems.CoopGhost();
-		insert(members.indexOf(layers.entityLayer), ghost.sprite);
+		layers.entityLayer.add(ghost.sprite);
 		ritual = new systems.ReviveRitual(burst, ghost);
 		backGear = new systems.BackGear();
 		backGear.paint(SaveData.playerHue());
@@ -245,6 +208,8 @@ class PlayState extends FlxState
 		director.solids = props.solids;
 		combat = new Weapons(_player, heldSprite, arena, director, status, fx, pickups, scraps);
 		afk = new systems.AfkPilot(_player, status, combat, director, pickups, scraps, gate, arena);
+		afk.useShop(round.shop);
+		afkIndicator = new systems.AfkIndicator(layers, _player, ghost);
 
 		add(combat.swing.slashes);
 		add(combat.bash.slashes);
@@ -268,9 +233,6 @@ class PlayState extends FlxState
 
 		reloadBar = new ui.ReloadBar(_player);
 		add(reloadBar.group);
-
-		if (petals != null)
-			add(petals.group);
 
 		add(timeStop.overlay);
 
@@ -296,14 +258,17 @@ class PlayState extends FlxState
 		round.wire(status, director, hud);
 		gate.wire(status, director, hud);
 		gate.blocked = round.shop.inReach;
-		gate.onCommit = round.shutShop;
+		gate.onCommit = function()
+		{
+			round.shutShop();
+			hud.slideDisplayIn();
+		};
 		boss = new states.play.BossShow(arena, hud, props, round, scraps, pickups, floor);
-		intro = new states.play.RunIntro(this, combat, hud);
-		add(intro.flyIn.sprite);
+		intro = new states.play.RunIntro(this, hud);
 		director.onWave = onWaveStarted;
 		director.onWaveCleared = onWaveCleared;
 		director.onBoss = boss.begin;
-		director.onBossPack = hud.showBossBar;
+		director.onBossPack = hud.trackBosses;
 		director.onBossDefeated = onBossDown;
 		director.onBossDrops = boss.dropLoot;
 		combat.hits.wantHeal = anyoneHurt;
@@ -312,7 +277,6 @@ class PlayState extends FlxState
 		director.onBossKill = bossFinish.trigger;
 		director.onFriendlyShot = onDeflectedShot;
 		director.onShieldShot = onShieldedShot;
-		director.bossVeto = function(w) return quiet.tryDetour(w, director, status, combat);
 		perf = new PerfLog();
 
 		_player.setHue(SaveData.playerHue());
@@ -330,6 +294,7 @@ class PlayState extends FlxState
 			netSync.onBossDefeatedEvt = onBossDown;
 			netSync.onBossKillEvt = bossFinish.trigger;
 			netSync.onDropped = onNetDropped;
+			netSync.onReturnLobby = returnToLobby;
 			netSync.startRevive = ritual.begin;
 			netSync.reviveDone = function() return ritual.done;
 			afk.findPeer = netSync.nearestLivingPeer;
@@ -339,37 +304,16 @@ class PlayState extends FlxState
 		DiscordPresence.beginRun();
 
 		combat.equip(WeaponPickSubState.lastPick);
-		var resumed = util.Detour.resuming();
-		if (resumed)
-			util.Detour.restore(status, combat, director);
+		intro.armForRun();
+		if (!Net.isClient)
+			gate.arm();
 
-		if (util.CustomArena.quiet)
-		{
-			round.shop.setVisible(false);
-			quiet.enter(combat, director, heldSprite, hud);
-		}
-		else
-		{
-			if (resumed)
-				hud.showWave(director.wave);
-			else
-				intro.armForRun();
-			if (!Net.isClient)
-				gate.arm();
-		}
-
-		Music.play(states.play.QuietRoom.track(), 0.3);
+		Music.play(Music.getRunTrack(), 0.3);
 
 		arena.raiseWhite(this);
 
 		wipe = new IrisWipe(this);
-		if (util.Detour.consumeWhite())
-		{
-			wipe.visible = false;
-			arena.fadeFromWhite(WHITE_OUT);
-		}
-		else
-			wipe.open();
+		wipe.open();
 
 		super.create();
 	}
@@ -385,9 +329,10 @@ class PlayState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+
 		EnemyNav.resetBudget();
 
-		if (afk.on && status.dead && (!Net.active || (netSync != null && netSync.runFailed)))
+		if (afk.on && (!Net.active || (status.dead && netSync != null && netSync.runFailed)))
 			afk.set(false);
 		afk.update(elapsed);
 
@@ -416,9 +361,6 @@ class PlayState extends FlxState
 		director.collide();
 
 		status.update(elapsed);
-
-		if (status.consumeJustDied())
-			intro.drop();
 
 		if (status.consumeJustBurst())
 		{
@@ -449,6 +391,8 @@ class PlayState extends FlxState
 		if (ghost.sprite.exists)
 			ghost.track(_player.x + _player.width * 0.5, _player.y + _player.height * 0.5, _player.flipX);
 		ghost.update(elapsed);
+		afkIndicator.on = afk.on;
+		afkIndicator.update();
 		director.update(step);
 		pickups.update();
 		scraps.update(elapsed);
@@ -463,10 +407,7 @@ class PlayState extends FlxState
 		dashGhost.update(elapsed, status.guarding);
 		props.update();
 		drawBoxes();
-		bushes.update(step);
 		round.updateShop(elapsed);
-		if (petals != null)
-			petals.update(step);
 		heldSprite.alpha = props.buried ? 0 : 1;
 		combat.swing.slashes.visible = !props.buried;
 		combat.gigaSwing.slashes.visible = !props.buried;
@@ -486,9 +427,11 @@ class PlayState extends FlxState
 			_player.animation.name);
 		director.updateShots();
 		if (netSync != null)
+		{
+			netSync.afk = afk.on;
 			netSync.update(elapsed);
+		}
 		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
-		hud.setTwinAmmo(combat.revolver.displayTwinRounds, combat.revolver.capacity, combat.weapon == 1 && combat.revolver.twinActive);
 		hud.setBowLoaded(!combat.bow.recovering, combat.weapon == 2);
 		var recharging = combat.weapon == 1 ? combat.revolver.isReloading
 			: combat.weapon == 2 ? combat.bow.recovering
@@ -501,8 +444,9 @@ class PlayState extends FlxState
 		reloadBar.update(recharging && !combat.disabled && !status.dead, rechargeAt);
 		hud.setShown(SaveData.showHud());
 		hud.setExp(util.Levels.exp);
+		feedReadouts(elapsed);
+		hud.setBossOcclusion(director.bodies.members, FlxG.camera);
 		hud.update(elapsed);
-		intro.update(elapsed);
 
 		if (subState == null && !status.dead && !restarting)
 			util.Stats.tick(elapsed);
@@ -516,13 +460,34 @@ class PlayState extends FlxState
 
 		round.updateHold(elapsed);
 		gate.update(elapsed);
-		quiet.update(elapsed);
 		debugKeys();
 
 		var projectiles = live(director.shots.countLiving()) + live(combat.revolver.bullets.countLiving())
 			+ live(combat.bow.arrows.countLiving()) + live(combat.bow.rain.arrows.countLiving())
 			+ (combat.throwAttack.airborne ? 1 : 0) + (combat.hookAttack.hook.exists ? 1 : 0);
-		perf.frame(director.enemyCount(), EnemyNav.usedBudget(), projectiles, director.wave);
+		perf.frame(director.enemyCount(), EnemyNav.usedBudget(), projectiles, director.moundCount(), director.wave);
+	}
+
+	function feedReadouts(elapsed:Float):Void
+	{
+		if (!boss.fighting)
+		{
+			bossNameDelay = BOSS_NAME_DELAY;
+			hud.showWaveLabel();
+			hud.setTicks(director.waveProgress());
+			return;
+		}
+
+		if (bossNameDelay > 0)
+			bossNameDelay -= elapsed;
+
+		if (bossNameDelay <= 0)
+		{
+			var title = hud.bossTitle();
+			if (title != "")
+				hud.setDisplayLabel(title);
+		}
+		hud.setTicks(hud.bossFraction(), true);
 	}
 
 	function updateCameraLean():Void
@@ -589,6 +554,17 @@ class PlayState extends FlxState
 		}
 	}
 
+	function returnToLobby():Void
+	{
+		if (restarting)
+			return;
+		setRestarting();
+		Net.inGame = false;
+		if (subState != null)
+			closeSubState();
+		wipe.close(function() FlxG.switchState(() -> new LobbyState()));
+	}
+
 	function drawBoxes():Void
 	{
 		if (!boxes.on)
@@ -639,7 +615,7 @@ class PlayState extends FlxState
 				boxes.box(s.x, s.y, s.width, s.height, systems.HitboxView.LOOT);
 	}
 
-	static var SUMMONS:Array<String> = ["worm", "domo", "rofel"];
+	static var SUMMONS:Array<Array<String>> = [["worm"], ["domo"], ["rofel"], ["domo", "worm"]];
 
 	function summonKeys():Void
 	{
@@ -653,24 +629,17 @@ class PlayState extends FlxState
 			pick = 1;
 		else if (FlxG.keys.justPressed.EIGHT)
 			pick = 2;
+		else if (FlxG.keys.justPressed.SEVEN)
+			pick = 3;
 		if (pick < 0)
 			return;
 
-		var kind = SUMMONS[pick];
-		if (!data.EnemyData.EnemyDataRegistry.has(kind))
-			return;
-		director.summonBoss(kind);
+		director.summonBoss(SUMMONS[pick]);
 	}
 
 	function debugKeys():Void
 	{
 		summonKeys();
-
-		if (FlxG.keys.justPressed.MINUS)
-			FlxG.sound.changeVolume(-0.1);
-
-		if (FlxG.keys.justPressed.PLUS)
-			FlxG.sound.changeVolume(0.1);
 
 		#if debug
 		if (FlxG.keys.justPressed.FIVE)

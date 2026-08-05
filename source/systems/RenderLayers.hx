@@ -15,6 +15,8 @@ class RenderLayers
 	static inline var BURIED_BAND:Float = -400000;
 	static inline var AIRBORNE_BAND:Float = 400000;
 
+	public static inline var GHOST_BAND:Float = 900000;
+
 	public static inline var GEAR_BIAS:Float = -1;
 	public static inline var HELD_BIAS:Float = 1;
 

@@ -61,6 +61,9 @@ class DeathBurst
 
 	public function update(elapsed:Float):Void
 	{
+		if (group.countLiving() > 0 && systems.world.PropBlock.solids != null)
+			FlxG.collide(group, systems.world.PropBlock.solids);
+
 		if (life >= WHITE_HOLD + FADE_TIME || group.countLiving() <= 0)
 			return;
 

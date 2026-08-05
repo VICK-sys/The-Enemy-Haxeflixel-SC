@@ -93,7 +93,7 @@ class Shop
 		door = FlxG.sound.create(Paths.sound("garageDoor")).setup(0.5);
 
 		prompt = new FlxText(0, 0, PROMPT_W, "");
-		prompt.setFormat(Lang.font(), 20, FlxColor.WHITE, CENTER);
+		prompt.setFormat(Lang.bodyFont(), Lang.bodySize(), FlxColor.WHITE, CENTER);
 		prompt.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		prompt.visible = false;
 	}

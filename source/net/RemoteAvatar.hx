@@ -51,6 +51,7 @@ class RemoteAvatar
 	private var sparked:Bool = false;
 	private var puffCount:Int = -1;
 	private var puff:FlxSprite;
+	private var afk:systems.AfkIndicator;
 
 	public var fx:systems.Fx;
 	private var ritual:systems.ReviveRitual;
@@ -65,7 +66,7 @@ class RemoteAvatar
 	static inline var BUBBLE_UP:Float = 67;
 	static inline var GHOST_ART_TOP:Float = 8;
 	static inline var BUBBLE_GAP:Float = 11;
-	static inline var TAG_UP:Float = 95;
+	static inline var TAG_UP:Float = 130;
 	static inline var TAG_WIDTH:Float = 320;
 	static inline var NOTE_UP:Float = 119;
 	static inline var NOTE_COLOR:Int = 0xFFE8C860;
@@ -103,7 +104,7 @@ class RemoteAvatar
 		burst = new systems.DeathBurst();
 		layers.host.insert(layers.host.members.indexOf(layers.entityLayer), burst.group);
 		ghost = new systems.CoopGhost();
-		layers.host.insert(layers.host.members.indexOf(layers.entityLayer), ghost.sprite);
+		layers.entityLayer.add(ghost.sprite);
 		gear = new systems.BackGear();
 		gear.sprite.visible = false;
 		layers.entityLayer.add(gear.sprite);
@@ -128,13 +129,13 @@ class RemoteAvatar
 		layers.shadowLayer.add(shadow);
 
 		tag = new FlxText(0, 0, TAG_WIDTH, "");
-		tag.setFormat(Lang.font(), 18, FlxColor.WHITE, CENTER);
+		tag.setFormat(Lang.smallFont(), Lang.smallSize(), util.HuePalette.nameTint(hue), CENTER);
 		tag.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		tag.visible = false;
 		layers.tagLayer.add(tag);
 
 		note = new FlxText(0, 0, TAG_WIDTH, "");
-		note.setFormat(Lang.font(), 16, NOTE_COLOR, CENTER);
+		note.setFormat(Lang.smallFont(), Lang.smallSize(), NOTE_COLOR, CENTER);
 		note.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		note.visible = false;
 		layers.tagLayer.add(note);
@@ -147,6 +148,8 @@ class RemoteAvatar
 		bubble.visible = false;
 		layers.tagLayer.add(bubble);
 
+		afk = new systems.AfkIndicator(layers, sprite, ghost);
+
 		layers.trackPart(gear.sprite, sprite, RenderLayers.GEAR_BIAS);
 		layers.trackPart(held, sprite, RenderLayers.HELD_BIAS);
 		layers.trackPart(twinHeld, sprite, RenderLayers.HELD_BIAS);
@@ -154,6 +157,9 @@ class RemoteAvatar
 
 	public function setReady(on:Bool):Void
 		bubble.visible = on;
+
+	public function setAfk(on:Bool):Void
+		afk.on = on;
 
 	public function clearDeath():Void
 	{
@@ -246,6 +252,7 @@ class RemoteAvatar
 		hue = h;
 		skin = sk;
 		gearIdx = gr;
+		tag.color = util.HuePalette.nameTint(h);
 		gear.paint(h, sk, gr);
 		dashGhost.paint(h);
 		if (weaponIdx >= 0)
@@ -302,6 +309,7 @@ class RemoteAvatar
 
 		var dead:Bool = m.dd == true;
 		guarding = m.dg == true;
+		setAfk(m.af == true);
 
 		if (m.pf != null)
 		{
@@ -444,9 +452,11 @@ class RemoteAvatar
 		tag.x = sprite.x + sprite.width * 0.5 - TAG_WIDTH * 0.5;
 		tag.y = sprite.y - TAG_UP;
 
-		note.visible = sprite.visible && leveling;
+		note.visible = sprite.visible && leveling && !afk.on;
 		note.x = tag.x;
 		note.y = sprite.y - NOTE_UP;
+
+		afk.update();
 
 		if (bubble.visible)
 		{
