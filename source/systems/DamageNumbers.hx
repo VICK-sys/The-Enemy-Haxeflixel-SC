@@ -13,7 +13,6 @@ class DamageNumbers
 	public static inline var BLOCKED:Int = 3;
 
 	static inline var POOL:Int = 48;
-	static inline var FONT_SIZE:Int = 24;
 	static inline var BIG_AT:Float = 4.5;
 	static inline var BASE_SCALE:Float = 0.8;
 	static inline var PER_DAMAGE:Float = 0.05;
@@ -77,7 +76,7 @@ class DamageNumbers
 	public function applyLanguage():Void
 	{
 		for (t in texts)
-			t.setFormat(util.Lang.font(), FONT_SIZE, FlxColor.WHITE, CENTER);
+			t.setFormat(util.Lang.bodyFont(), util.Lang.bodySize(), FlxColor.WHITE, CENTER);
 	}
 
 	public function pop(x:Float, y:Float, amount:Float, kind:Int, ?from:Dynamic):Void
