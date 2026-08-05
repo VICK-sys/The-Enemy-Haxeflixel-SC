@@ -67,6 +67,32 @@ class ScrapPickup extends FlxSprite
 		placeShadow();
 	}
 
+	public function settle(map:flixel.tile.FlxTilemap, solids:flixel.group.FlxGroup.FlxTypedGroup<FlxSprite>, arenaW:Float, arenaH:Float):Void
+	{
+		y = restY;
+
+		if (arenaW > width)
+		{
+			if (x < 0)
+				x = 0;
+			else if (x + width > arenaW)
+				x = arenaW - width;
+		}
+		if (arenaH > height)
+		{
+			if (y < 0)
+				y = 0;
+			else if (y + height > arenaH)
+				y = arenaH - height;
+		}
+
+		systems.world.CircleCollide.resolve(this, width * 0.5, map, solids);
+
+		restY = y;
+		y = restY + Math.sin(bob) * BOB_AMP;
+		placeShadow();
+	}
+
 	public function pullTo(px:Float, py:Float, speed:Float, elapsed:Float):Void
 	{
 		var dx = px - (x + width / 2);

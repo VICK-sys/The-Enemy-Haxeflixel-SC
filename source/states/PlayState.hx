@@ -187,6 +187,8 @@ class PlayState extends FlxState
 		pickups = new Pickups(_player, status, layers.shadowLayer);
 		insert(members.indexOf(layers.entityLayer), pickups.group);
 		scraps = new Scraps(_player, status, layers.shadowLayer);
+		scraps.arena = arena;
+		scraps.solids = props.solids;
 		insert(members.indexOf(layers.entityLayer), scraps.group);
 		burst = new systems.DeathBurst();
 		insert(members.indexOf(layers.entityLayer), burst.group);

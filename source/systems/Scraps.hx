@@ -18,6 +18,8 @@ class Scraps
 	static inline var HOLD:Float = 20;
 
 	public var group:FlxTypedGroup<ScrapPickup>;
+	public var arena:systems.world.Arena;
+	public var solids:FlxTypedGroup<flixel.FlxSprite>;
 
 	private var player:Player;
 	private var status:PlayerCombat;
@@ -62,6 +64,9 @@ class Scraps
 		{
 			if (s == null || !s.exists)
 				continue;
+
+			if (arena != null)
+				s.settle(arena.map, solids, arena.width, arena.height);
 
 			var dx = px - (s.x + s.width / 2);
 			var dy = py - (s.y + s.height / 2);
