@@ -10,7 +10,7 @@ class Counter extends TextField
 	static inline var MEGABYTE:Float = 1024 * 1024;
 	static inline var PLAIN:Int = 0xFFFFFF;
 	static inline var ALARM:Int = 0x560101;
-	static inline var SIZE:Int = 12;
+	static inline var SIZE:Int = 24;
 
 	private var times:Array<Float> = [];
 	private var clock:Float = 0;
@@ -26,7 +26,7 @@ class Counter extends TextField
 		selectable = false;
 		mouseEnabled = false;
 		autoSize = LEFT;
-		defaultTextFormat = new TextFormat("_sans", SIZE, PLAIN);
+		defaultTextFormat = format(PLAIN);
 		text = "FPS: 0\nMEM: 0 MB";
 	}
 
@@ -51,8 +51,11 @@ class Counter extends TextField
 
 		text = line;
 		var at = line.indexOf("\n") + 1;
-		setTextFormat(new TextFormat("_sans", SIZE, alarm ? ALARM : PLAIN), at, line.length);
+		setTextFormat(format(alarm ? ALARM : PLAIN), at, line.length);
 	}
+
+	function format(color:Int):TextFormat
+		return new TextFormat("_sans", SIZE, color);
 
 	static function size(bytes:Float):String
 	{
