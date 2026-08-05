@@ -108,7 +108,7 @@ class EditorState extends FlxState
 		insert(11, spawnMark);
 
 		spawnLabel = new FlxText(0, 0, 120, "SPAWN");
-		spawnLabel.setFormat(null, 20, 0xFF7CFC00, CENTER);
+		spawnLabel.setFormat(util.Lang.smallFont(), util.Lang.smallSize(), 0xFF7CFC00, CENTER);
 		spawnLabel.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		insert(12, spawnLabel);
 
@@ -118,7 +118,7 @@ class EditorState extends FlxState
 		insert(13, shopMark);
 
 		shopLabel = new FlxText(0, 0, 120, "SHOP");
-		shopLabel.setFormat(null, 20, 0xFFFFC24A, CENTER);
+		shopLabel.setFormat(util.Lang.smallFont(), util.Lang.smallSize(), 0xFFFFC24A, CENTER);
 		shopLabel.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		insert(14, shopLabel);
 

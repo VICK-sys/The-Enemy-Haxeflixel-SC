@@ -14,6 +14,7 @@ import openfl.geom.Rectangle;
 import data.PropData.PropDataRegistry;
 import util.Library;
 import util.Paths;
+import util.Lang;
 
 class LibraryPanel
 {
@@ -89,7 +90,7 @@ class LibraryPanel
 		shell.push(rect(px - 2, py - 2, pw + 4, ph + 4, EDGE));
 		shell.push(rect(px, py, pw, ph, PANEL));
 
-		title = text(px, py + 14, pw, "ASSET LIBRARY", 20, FlxColor.WHITE, CENTER);
+		title = text(px, py + 14, pw, "ASSET LIBRARY", Lang.bodySize(), FlxColor.WHITE, CENTER);
 
 		for (i in 0...TABS.length)
 			button(px + 16 + i * 186, py + 50, 178, TABS[i], tabAction(i));
@@ -102,7 +103,7 @@ class LibraryPanel
 			var y = listY + i * ROW_H;
 			var bg = rect(listX, y, 300, ROW_H - 2, CHIP);
 			rowBgs.push(bg);
-			rowLabels.push(text(listX + 10, y + 5, 284, "", 15, DIM, LEFT));
+			rowLabels.push(text(listX + 10, y + 5, 284, "", Lang.smallSize(), DIM, LEFT));
 		}
 
 		button(listX, listY + ROWS * ROW_H + 6, 142, "PREV", function() flip(-1));
@@ -118,7 +119,7 @@ class LibraryPanel
 		layerBtn = button(prevX, prevY + PREV_H + 44, 296, "", cycleLayer);
 		baseBtn = button(prevX + 304, prevY + PREV_H + 44, 144, "BASE BAND", baseBand);
 
-		hint = text(px + 16, py + ph - 64, pw - 32, "", 13, DIM, CENTER);
+		hint = text(px + 16, py + ph - 64, pw - 32, "", Lang.smallSize(), DIM, CENTER);
 
 		show(false);
 	}
@@ -135,7 +136,7 @@ class LibraryPanel
 	function text(x:Float, y:Float, w:Float, t:String, size:Int, color:Int, align:FlxTextAlign):FlxText
 	{
 		var f = new FlxText(x, y, w, t);
-		f.setFormat(null, size, color, align);
+		f.setFormat(Lang.fontFor(size), size, color, align);
 		f.cameras = [cam];
 		state.add(f);
 		return f;
@@ -145,7 +146,7 @@ class LibraryPanel
 	{
 		btnEdges.push(rect(x - 1, y - 1, w + 2, 30, EDGE));
 		btnBgs.push(rect(x, y, w, 28, CHIP));
-		btnLabels.push(text(x, y + 5, w, label, 15, DIM, CENTER));
+		btnLabels.push(text(x, y + 5, w, label, Lang.smallSize(), DIM, CENTER));
 		rects.push(FlxRect.get(x, y, w, 28));
 		actions.push(action);
 		return btnBgs.length - 1;

@@ -2,8 +2,6 @@ package util;
 
 class CustomArena
 {
-	public static inline var QUIET_SLOT:Int = -2;
-
 	public static var csv:String = null;
 	public static var spawnX:Float = 0;
 	public static var spawnY:Float = 0;
@@ -20,11 +18,6 @@ class CustomArena
 
 	static function get_active():Bool
 		return csv != null;
-
-	public static var quiet(get, never):Bool;
-
-	static function get_quiet():Bool
-		return active && slot == QUIET_SLOT;
 
 	public static function set(csv:String, sx:Float, sy:Float, props:Array<data.PropData.PropPlace>):Void
 	{

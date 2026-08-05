@@ -6,6 +6,7 @@ import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
+import util.Lang;
 
 class EditorHud
 {
@@ -47,12 +48,12 @@ class EditorHud
 		state.add(hintBar);
 
 		hint = new FlxText(leftInset, FlxG.height - BAR + 8, canvasW, "");
-		hint.setFormat(null, 14, 0xFFB8B8B8, CENTER);
+		hint.setFormat(Lang.smallFont(), Lang.smallSize(), 0xFFB8B8B8, CENTER);
 		hint.cameras = [cam];
 		state.add(hint);
 
 		flashText = new FlxText(leftInset, topInset + 22, canvasW, "");
-		flashText.setFormat(null, 26, FlxColor.WHITE, CENTER);
+		flashText.setFormat(Lang.bodyFont(), Lang.bodySize(), FlxColor.WHITE, CENTER);
 		flashText.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		flashText.cameras = [cam];
 		state.add(flashText);
@@ -73,17 +74,17 @@ class EditorHud
 		state.add(sheet);
 
 		sheetTitle = new FlxText(panelX, panelY + 14, pw, "CONTROLS");
-		sheetTitle.setFormat(null, 20, FlxColor.WHITE, CENTER);
+		sheetTitle.setFormat(Lang.bodyFont(), Lang.bodySize(), FlxColor.WHITE, CENTER);
 		sheetTitle.cameras = [cam];
 		state.add(sheetTitle);
 
 		sheetKeys = new FlxText(panelX + 18, panelY + 54, 168, KEYS.join("\n"));
-		sheetKeys.setFormat(null, 15, FlxColor.WHITE, RIGHT);
+		sheetKeys.setFormat(Lang.smallFont(), Lang.smallSize(), FlxColor.WHITE, RIGHT);
 		sheetKeys.cameras = [cam];
 		state.add(sheetKeys);
 
 		sheetActions = new FlxText(panelX + 208, panelY + 54, pw - 222, ACTIONS.join("\n"));
-		sheetActions.setFormat(null, 15, 0xFFB8B8B8, LEFT);
+		sheetActions.setFormat(Lang.smallFont(), Lang.smallSize(), 0xFFB8B8B8, LEFT);
 		sheetActions.cameras = [cam];
 		state.add(sheetActions);
 

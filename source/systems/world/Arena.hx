@@ -28,7 +28,6 @@ class Arena
 	static inline var FLASH_IN:Int = 6;
 	static inline var FLASH_WAIT:Int = 7;
 	static inline var FLASH_KEEP:Int = 8;
-	static inline var FADE_OUT:Int = 9;
 
 	public var map:FlxTilemap;
 	public var spawnX:Float;
@@ -50,7 +49,6 @@ class Arena
 	private var flashPeak:Void->Void;
 	private var flashDone:Void->Void;
 	private var flashHold:Float = 0;
-	private var fadeSpan:Float = 0;
 	private var introTimer:Float = 0;
 	private var gridActive:Bool = false;
 	private var state:FlxState;
@@ -107,14 +105,6 @@ class Arena
 		introPhase = BOSS_IN;
 		introTimer = SHAKE_TIME;
 		systems.Fx.shake(0.012, SHAKE_TIME);
-	}
-
-	public function fadeFromWhite(time:Float):Void
-	{
-		whiteOverlay.alpha = 1;
-		fadeSpan = time;
-		introPhase = FADE_OUT;
-		introTimer = time;
 	}
 
 	public function raiseWhite(state:flixel.FlxState):Void
@@ -247,16 +237,6 @@ class Arena
 		}
 		else if (introPhase == FLASH_KEEP)
 			whiteOverlay.alpha = 1;
-		else if (introPhase == FADE_OUT)
-		{
-			introTimer -= elapsed;
-			whiteOverlay.alpha = fadeSpan > 0 ? Math.max(0, introTimer) / fadeSpan : 0;
-			if (introTimer <= 0)
-			{
-				whiteOverlay.alpha = 0;
-				introPhase = IDLE;
-			}
-		}
 	}
 
 	function get_width():Float

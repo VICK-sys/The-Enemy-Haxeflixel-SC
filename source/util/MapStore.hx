@@ -41,17 +41,6 @@ class MapStore
 	}
 	#end
 
-	public static function builtin(name:String):StoredMap
-	{
-		var path = Paths.json("maps/" + name);
-		if (!openfl.utils.Assets.exists(path))
-			return null;
-		var raw = openfl.utils.Assets.getText(path);
-		if (raw == null)
-			return null;
-		return try Json.parse(raw) catch (e:Dynamic) null;
-	}
-
 	public static function load(slot:Int):StoredMap
 	{
 		var raw:String = null;

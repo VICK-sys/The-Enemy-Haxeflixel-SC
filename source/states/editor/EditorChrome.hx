@@ -8,6 +8,7 @@ import flixel.math.FlxRect;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import flixel.util.FlxSpriteUtil;
+import util.Lang;
 
 class EditorChrome
 {
@@ -70,12 +71,12 @@ class EditorChrome
 		line(sidebarW, 0, 1, FlxG.height, CHIP_EDGE);
 		line(sidebarW, topbarH, FlxG.width - sidebarW, 1, CHIP_EDGE);
 
-		var title = label(14, 10, sidebarW - 28, "MAP EDITOR", 20, FlxColor.WHITE, LEFT);
+		var title = label(100, 0, sidebarW - 114, "MAP EDITOR", Lang.titleSize(), FlxColor.WHITE, LEFT, Lang.titleFont());
 		title.bold = true;
 
 		line(palX - pad - 1, palY - pad - 1, Std.int(palW + pad * 2 + 2), Std.int(palH + pad * 2 + 2), CHIP_EDGE);
 		line(palX - pad, palY - pad, Std.int(palW + pad * 2), Std.int(palH + pad * 2), 0xFF0E0E0E);
-		palHint = label(palX, palY + palH / 2 - 10, palW, "", 15, TEXT_DIM, CENTER);
+		palHint = label(palX, palY + palH / 2 - 10, palW, "", Lang.smallSize(), TEXT_DIM, CENTER);
 
 		slotChip = chip(sidebarW + 12, 8, 108, "SLOT 1", function() if (onSlot != null) onSlot());
 		modeChip = chip(sidebarW + 128, 8, 300, "BRUSH 1X1", function() if (onModeChip != null) onModeChip());
@@ -116,7 +117,7 @@ class EditorChrome
 			ui(dot);
 			eyeDots.push(dot);
 
-			var l = label(54, y + 9, sidebarW - 70, names[i], 18, FlxColor.WHITE, LEFT);
+			var l = label(54, y + 9, sidebarW - 70, names[i], Lang.smallSize(), FlxColor.WHITE, LEFT);
 			rowLabels.push(l);
 
 			var mi = i;
@@ -150,10 +151,10 @@ class EditorChrome
 		ui(s);
 	}
 
-	function label(x:Float, y:Float, w:Float, text:String, size:Int, color:Int, align:FlxTextAlign):FlxText
+	function label(x:Float, y:Float, w:Float, text:String, size:Int, color:Int, align:FlxTextAlign, ?font:String):FlxText
 	{
 		var t = new FlxText(x, y, w, text);
-		t.setFormat(null, size, color, align);
+		t.setFormat(font == null ? Lang.fontFor(size) : font, size, color, align);
 		t.cameras = [cam];
 		state.add(t);
 		return t;
@@ -171,7 +172,7 @@ class EditorChrome
 		ui(bg);
 		chipBgs.push(bg);
 
-		var l = label(x, y + 5, w, text, 15, TEXT_DIM, CENTER);
+		var l = label(x, y + 5, w, text, Lang.smallSize(), TEXT_DIM, CENTER);
 		chipLabels.push(l);
 
 		hit(x, y, w, 28, action);

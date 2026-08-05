@@ -129,6 +129,8 @@ The editor sorts its own prop group by the same rule. It re-sorts live during a 
 
 In play the comparison runs every frame against the player's feet, and it holds no state. Nothing toggles when the player crosses the line. An approach that never goes behind therefore cannot leave a prop drawn on the wrong side.
 
+The downed player ghost is the one thing that ignores its own position. It carries a fixed sort value above every prop, so it stays visible over a building the body went down behind. That value still sits under the overhead setting, so a canopy placed over the ground draws over the ghost as well.
+
 ## Occluding weapon effects
 
 Weapon effects sit above the entity layer, so they read clearly over characters. That alone would let a slash or an arrow paint straight over a building the player stands behind.
@@ -160,6 +162,8 @@ The segment between attacker and target gates damage. If a prop sits across that
 Both directions run through a single funnel. One handles what the player deals, and one handles what the player takes. Contact damage, shots and every weapon inherit the rule, and none of them knows about it.
 
 Enemies also refuse to spawn on a prop's footprint. An enemy that arrives inside a building lands on the wrong side of it, with no way out.
+
+The scattered pieces of a dead player read the same boxes. A death beside a building piles the debris against its wall instead of throwing it across the floor inside.
 
 Cover measures between the two ground points. Each fighter uses its own feet line, the same one its collision and its depth use. It does not use the bottom of the sprite or the body centre.
 
