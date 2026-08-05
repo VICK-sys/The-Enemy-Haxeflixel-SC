@@ -5,6 +5,8 @@ import flixel.util.FlxSave;
 
 class SaveData
 {
+	static inline var WEAPON_RECORDS:Int = 4;
+
 	static var save:FlxSave;
 
 	static function ensure():Void
@@ -36,6 +38,8 @@ class SaveData
 	{
 		ensure();
 		save.data.bestWave = 0;
+		for (i in 0...WEAPON_RECORDS)
+			Reflect.setField(save.data, "st_wave" + i, 0);
 		save.flush();
 	}
 

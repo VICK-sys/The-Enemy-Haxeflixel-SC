@@ -92,6 +92,8 @@ The selected weapon appears in the player's hand when PlayState opens. The tutor
 
 The screen remembers the last choice, so a repeat run or a map playtest is one keypress. It also ignores input for a moment after it opens. The keypress that started the run therefore cannot confirm it by accident.
 
+Each card shows that weapon's highest wave. The Stats screen shows the all-weapons result as Best Wave.
+
 Online, the lobby opens this screen instead. A substate over PlayState would freeze the sim while the network kept feeding it packets. The lobby runs the same card screen through `OnlineState`, while nobody is in the game yet. Both routes write the same `lastPick` that PlayState equips.
 
 ## PlayState debug keys

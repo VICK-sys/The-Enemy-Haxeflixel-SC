@@ -41,7 +41,7 @@ class StatsSubState extends LobbyPanel
 		]);
 
 		block(leftX, y + BLOCK_GAP, "stats.bestRun", [
-			{key: "stats.wave", value: Std.string(SaveData.bestWave())},
+			{key: "stats.globalWave", value: Std.string(SaveData.bestWave())},
 			{key: "stats.kills", value: count(Stats.BEST_KILLS)},
 			{key: "stats.time", value: Stats.clock(Stats.total(Stats.BEST_TIME))}
 		]);

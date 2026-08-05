@@ -16,6 +16,7 @@ private class Card
 	public var bg:FlxSprite;
 	public var icon:FlxSprite;
 	public var label:FlxText;
+	public var record:FlxText;
 	public var ring:Array<FlxSprite> = [];
 	public var baseY:Float = 0;
 	public var off:Float = 0;
@@ -60,6 +61,9 @@ class WeaponPickSubState extends FlxSubState
 	static inline var ICON_TOP:Float = 40;
 	static inline var LABEL_TOP:Float = 200;
 	static inline var BLURB_TOP:Float = 240;
+	static inline var RECORD_TOP:Float = 8;
+	static inline var RECORD_LEFT:Float = 12;
+	static inline var RECORD_RIGHT:Float = 64;
 
 	static inline var FLOAT_AMP:Float = 7;
 	static inline var FLOAT_SPEED:Float = 3.2;
@@ -189,6 +193,13 @@ class WeaponPickSubState extends FlxSubState
 		num.setFormat(Lang.smallFont(), Lang.smallSize(), TEXT_DIM, RIGHT);
 		ui(num);
 
+		var best = util.Stats.weaponBest(i);
+		c.record = new FlxText(x + RECORD_LEFT, CARD_TOP + RECORD_TOP, CARD_W - RECORD_RIGHT,
+			Lang.t("weaponPick.record", [best > 0 ? Std.string(best) : "-"]));
+		c.record.setFormat(Lang.smallFont(), Lang.smallSize(), TEXT_DIM, LEFT);
+		c.record.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		ui(c.record);
+
 		return c;
 	}
 
@@ -225,6 +236,7 @@ class WeaponPickSubState extends FlxSubState
 			c.edge.visible = on;
 			c.bg.color = on ? CARD_ON : CARD;
 			c.label.color = on ? FlxColor.WHITE : TEXT_DIM;
+			c.record.color = on ? FlxColor.WHITE : TEXT_DIM;
 			c.icon.alpha = on ? 1 : 0.55;
 			for (o in c.ring)
 				o.visible = on;
