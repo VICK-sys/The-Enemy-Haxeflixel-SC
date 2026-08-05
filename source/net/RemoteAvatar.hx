@@ -66,6 +66,7 @@ class RemoteAvatar
 	static inline var BUBBLE_UP:Float = 67;
 	static inline var GHOST_ART_TOP:Float = 8;
 	static inline var BUBBLE_GAP:Float = 11;
+	static inline var LABEL_BOX_OVERLAP:Float = 14;
 	static inline var TAG_UP:Float = 130;
 	static inline var TAG_WIDTH:Float = 320;
 	static inline var NOTE_UP:Float = 119;
@@ -149,6 +150,7 @@ class RemoteAvatar
 		layers.tagLayer.add(bubble);
 
 		afk = new systems.AfkIndicator(layers, sprite, ghost);
+		afk.stackAbove(tag);
 
 		layers.trackPart(gear.sprite, sprite, RenderLayers.GEAR_BIAS);
 		layers.trackPart(held, sprite, RenderLayers.HELD_BIAS);
@@ -468,7 +470,12 @@ class RemoteAvatar
 			else
 			{
 				bubble.x = sprite.x + sprite.width * 0.5 - bubble.width * 0.5;
-				bubble.y = sprite.y - bubble.height - BUBBLE_UP;
+				var labelTop = sprite.y - BUBBLE_UP;
+				if (tag.visible && tag.text != "")
+					labelTop = tag.y;
+				if (afk.text.visible)
+					labelTop = afk.text.y;
+				bubble.y = labelTop - bubble.height + LABEL_BOX_OVERLAP;
 			}
 		}
 	}

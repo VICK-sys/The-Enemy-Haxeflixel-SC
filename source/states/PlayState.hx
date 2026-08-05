@@ -212,6 +212,7 @@ class PlayState extends FlxState
 		afk = new systems.AfkPilot(_player, status, combat, director, pickups, scraps, gate, arena);
 		afk.useShop(round.shop);
 		afkIndicator = new systems.AfkIndicator(layers, _player, ghost);
+		gate.useAfkIndicator(afkIndicator);
 
 		add(combat.swing.slashes);
 		add(combat.bash.slashes);

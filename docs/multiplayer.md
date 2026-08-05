@@ -109,7 +109,9 @@ Chat is a fixed overlay in the top-left corner. Messages draw without a panel an
 
 Players set a name in the online menu. The save file keeps it, and it floats above their head for everyone else. A name announces once on entry rather than in every packet. That leaves a question. How does someone arriving late learn names sent before they connected? Everyone re-announces whenever a player joins, so the whole party greets a latecomer.
 
-Avatar snapshots include AFK state. Each screen shows a yellow `AFK` label above a player while their AFK pilot runs.
+Avatar snapshots include AFK state. A remote player's name stays visible during AFK. The yellow `AFK` label stacks above the name.
+
+The ready bubble stays above the compact label stack. Local and remote bubbles both clear an active `AFK` label.
 
 Peer names use `5mikropix` at size 24 with a 2 px black outline. Each name takes a brighter version of that peer's character hue. Chat sender names use the same hue mapping. The face covers kana but not the full kanji set, so some Japanese player names show missing glyphs.
 

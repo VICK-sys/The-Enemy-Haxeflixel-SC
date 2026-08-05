@@ -131,7 +131,7 @@ The gate holds the wave through a flag of its own rather than the shop's, so a s
 
 ### AfkPilot
 
-AFK mode puts a yellow `AFK` label above the player while the pilot controls them. The label follows the body or floating ghost. It disappears when AFK mode ends.
+AFK mode puts a yellow `AFK` label above the player while the pilot controls them. Remote names stay visible below it. Ready bubbles move above the label stack.
 
 An AFK pilot delays ready input while the shop is open. It walks to the shop and uses it when it reaches the counter.
 
@@ -405,7 +405,7 @@ A GLSL fragment shader that distorts a sprite's texture coordinates with time-dr
 
 ### SaveData
 
-The persistent save: best wave reached, the settings, the last joined IP, and the online player name. The settings are the master, music and sound effect volumes, display mode, V-Sync, framerate, aspect ratio, screenshake and freeze-frame amounts, HUD visibility, 3D sound, FPS counter visibility, instant quit, and language. A call to `applySettings()` pushes them into the engine. It runs at boot and whenever an option changes. The master volume sets `FlxG.sound.volume`, and the music and sound volumes set the two default flixel sound groups, so the final level of any sound is its own volume times its group times the master.
+The persistent save keeps one overall wave record and one record for each weapon. Reset Best Wave clears all five records. It also keeps settings, the last joined IP, and the online player name. The settings are the master, music and sound effect volumes, display mode, V-Sync, framerate, aspect ratio, screenshake and freeze-frame amounts, HUD visibility, 3D sound, FPS counter visibility, instant quit, and language. A call to `applySettings()` pushes them into the engine. It runs at boot and whenever an option changes. The master volume sets `FlxG.sound.volume`, and the music and sound volumes set the two default flixel sound groups, so the final level of any sound is its own volume times its group times the master.
 
 ### The fire family and Domo
 

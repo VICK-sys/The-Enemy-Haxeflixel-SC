@@ -19,6 +19,7 @@ class ReadyGate
 {
 	static inline var SCALE:Float = 4;
 	static inline var LIFT:Float = 67;
+	static inline var LABEL_BOX_OVERLAP:Float = 14;
 	static inline var PROMPT_Y:Float = 150;
 	static inline var WAIT_CAP:Float = 90;
 
@@ -35,6 +36,7 @@ class ReadyGate
 
 	private var bubble:FlxSprite;
 	private var prompt:FlxText;
+	private var afk:systems.AfkIndicator;
 	public var ready(default, null):Bool = false;
 	private var quorum:AckQuorum = new AckQuorum();
 	private var clock:Float = 0;
@@ -75,6 +77,9 @@ class ReadyGate
 		sync.onReadyGo = release;
 		sync.onReadyArm = arm;
 	}
+
+	public function useAfkIndicator(indicator:systems.AfkIndicator):Void
+		afk = indicator;
 
 	public function arm():Void
 	{
@@ -235,6 +240,6 @@ class ReadyGate
 		if (!bubble.visible)
 			return;
 		bubble.x = player.x + player.width * 0.5 - bubble.width * 0.5;
-		bubble.y = player.y - bubble.height - LIFT;
+		bubble.y = afk != null && afk.text.visible ? afk.text.y - bubble.height + LABEL_BOX_OVERLAP : player.y - bubble.height - LIFT;
 	}
 }
