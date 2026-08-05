@@ -9,7 +9,8 @@
 | `offsetX`, `offsetY` | Float | sprite draw offset relative to the hitbox |
 | `animations` | Array | `{name, prefix, fps, loop}`. `name` is what the code plays (`idle`, `walk`, `hurt`, `death`, and `sstart`/`sloop`/`send` for shooters). `prefix` is the atlas frame prefix |
 | `hp` | Int | hits to kill |
-| `speed` | Float | movement speed while chasing |
+| `speed` | Float | average movement speed while chasing |
+| `walkPulse` | Array | optional. Chase speed scale for each walk animation frame. Missing or empty data keeps speed flat |
 | `aggroRange` | Float | chasing starts inside this distance and ends outside it. Wave spawns override it, so they never stop chasing |
 | `stopThreshold` | Float | a chaser with line of sight stops approaching inside this distance |
 | `attackRange` | Float | the attack starts inside this distance, and needs line of sight |
@@ -21,7 +22,8 @@
 | `dropChance` | Float | chance from 0 to 1 of dropping a health pickup on death |
 | `knockback`, `knockbackDrag`, `stunTime` | Float | optional. Knockback taken when hit, its decay, and stun duration |
 | `wanderSpeed` | Float | optional. Walking speed while wandering |
-| `chargeWindup`, `chargeSpeed`, `chargeTime`, `chargeRecover` | Float | optional, chargers only. Charge attack overrides |
+| `chargeWindup`, `chargeSpeed`, `chargeTime`, `chargeRecover`, `chargeCooldown` | Float | optional, chargers only. Charge attack overrides. Cooldown starts after recovery |
+| `chargeLift` | Float | optional, chargers only. Peak height of the lunge arc, in pixels. Zero or absent keeps the lunge flat |
 | `shootWindup`, `shootStep`, `shootGap`, `shootDisengage` | Float | optional, shooters only. Shoot cycle overrides |
 | `shadowOffX`, `shadowOffXFlip`, `shadowOffY`, `shadowScaleX` | Float | shadow placement and width |
 | `hitOffX`, `hitOffXFlip`, `hitOffY` | Float | where the 40x40 contact hitbox sits |
@@ -38,7 +40,9 @@ To add an enemy type, do three things. Put an atlas under `assets/images/enemies
 | `spawnBatch`, `spawnEvery` | a wave arrives in pulses of `spawnBatch` enemies, `spawnEvery` seconds apart, instead of all at once. A batch of 0 restores the single burst |
 | `bossWaveMin`, `bossWaveRange` | the first boss wave is `bossWaveMin + random(0..bossWaveRange)`, rolled once per run |
 | `bossRepeat` | waves between bosses after the first. 0 means the boss happens once and never again |
-| `duoChance` | chance a boss wave after the run's first brings the Rofel Duo, two Rofels in one encounter, instead of one |
+| `bosses` | boss kinds available as solo encounters. The director prefers kinds not yet defeated in the current run |
+| `bossPairs` | boss kind arrays unlocked after every member is defeated in the current run. Each pair appears once per run. Duplicate and unknown kinds are removed |
+| `debugBosses` | boss kinds added to the solo roster in debug builds |
 | `waves` | array of `{types}` spawn pools. The first entry is wave 1, and the last entry repeats for every later wave. Repeat a type inside a pool to weight it |
 | `scaling` | how a wave hardens with its number, applied to every enemy as it spawns |
 
@@ -86,8 +90,8 @@ Combat balance for every weapon system, one object per system. Field names match
 | `hitstop`, `hitstopScale`, `hitShake` | how hard a connecting melee blow bites: frames held, the speed held at, and the shake. Set per weapon, so the hammer can land heavier than the yoyo |
 | `revolver` | cylinder size and damage. Reload time, which is flat and does not follow the number of rounds missing. Fan interval and jitter. Bullet speed, range, hit radius and knockback |
 | `thrown` | throw distance, return speed, and the `catchCooldown` a catch starts |
-| `bowCharge` | charged shot. A press below `minTime` is a plain tap shot. `fullTime` is the time to full charge, and `maxDamage` is the damage there. The `speedBonus`/`sizeBonus`/`knockBonus` multipliers scale across the charge range |
-| `arrowRain` | volley size, drop delay and stagger, spread, fall speed, hit radius |
+| `bowCharge` | charged shot. A press below `minTime` is a plain tap shot. `damage` is the tap damage, `fullTime` is the time to full charge, and `fullMult` multiplies the damage there. A release inside `sweetWindow` of full takes `sweetMult` instead. The `speedBonus`/`sizeBonus`/`knockBonus` multipliers scale across the charge range |
+| `arrowRain` | volley size, drop delay and stagger, spread, fall speed, hit radius. `damage` is what one landing arrow deals, `superDamage` is what a storm drop deals instead, and `bossScale` scales both against a boss body. Each falls back to the one before it |
 | `hook` | grab flight range. Pull speed and timeout. Grab and hold distances. Spin windup. Throw speed, duration and hit radius. Release stun, and the damage for enemies you cannot grab |
 | `deadEye` | white flash length, sepia strength, fade-out length, cursor radius that paints a mark, delay between shots, damage per round |
 | `superOrbit` | blade count, fire gate |
@@ -121,13 +125,7 @@ Playing one sets `CustomArena`, a static the Arena constructor checks. When set,
 
 The main menu clears `CustomArena` on entry, so a normal PLAY is always the stock arena. Online runs start only from the menu, so custom maps cannot desync a co-op session.
 
-`CustomArena` also records which slot a map came from. The quiet room is not a user slot. It ships as a built-in map, `assets/data/maps/treeRoom.json`, and `MapStore.builtin("treeRoom")` loads it on both targets. `Detour` marks it with the reserved slot -2, and that slot value is what makes a run quiet. A quiet run has no waves and hands you no weapon.
-
-A false `EnemyDirector.spawning` stops wave pacing and the boss intro. The per-enemy tick still runs, so anything already placed still behaves. A true `Weapons.disabled` drops every attack input and hides the held sprite. The weapon card and the tutorial both stay shut.
-
-The quiet room also takes its own music. `track()` answers `stage/Man_music` there. Everywhere else it answers the run's stage track, drawn at random from a pool when the run starts and held for the rest of it. Both stage music calls read it, so the track holds across a detour and on the path back from a boss rather than changing under the player. The main menu keeps `stage/gloomDoomWoods`, which is why that one is not in the gameplay pool.
-
-The slot number carries this rather than a field in the map file. A field would not survive the next save, because the editor writes the map from its own document. The reserved slot keeps that rule intact: the editor never writes slot -2, and the built-in file never changes, so the marker cannot be lost.
+`CustomArena` also records which editor slot supplied the map. The editor keeps that value while it returns from playtesting.
 
 ## Paintable tilesets - assets/data/tilesets.json
 
@@ -223,7 +221,7 @@ The screen shows what a point buys before you spend it. The left panel holds the
 | Field | Meaning |
 |---|---|
 | `scrapValue` | scrap paid for one piece picked up. It is one, and the costs are scaled to match, so the counter only ever moves by what you walked over |
-| `hitbox` | `[x, y, w, h]` in art pixels, the band a prop blocks. A prop without one is walked straight through, which is what trees want and what buildings do not |
+| `hitbox` | `[x, y, w, h]` in art pixels, the band a prop blocks. A prop without one is walked straight through |
 | `baseCost`, `costStep` | each stat prices itself: its next point costs `baseCost + costStep x points already in it`. Feeding one stat makes that stat dearer and leaves the others at their own price, so a specialist pays a premium and a spread stays cheap |
 | `vigorPerPoint` | health added per point |
 | `enduranceDashPerPoint`, `enduranceSuperPerPoint` | fraction off the dash cooldown, and fraction on to super meter gained per kill. The cooldown cut compounds, each point trimming a fraction of what remains, so the timer thins forever without ever reaching zero |
@@ -263,16 +261,6 @@ A hidden number, rolled once per run, in the manner of the one Undertale keeps. 
 `Run.allows` is the whole runtime surface. Anything else, like pinning a value for a test, goes through the save value directly.
 
 The value persists in the save, beside the best wave and the settings. It survives a restart until something rerolls it.
-
-`treeRoom` is the first event to read it. On a save that rolled 66, one boss wave turns into a visit to the quiet room. `Detour` holds that logic.
-
-Three things must hold. The value sits in the window, a 1 in 66 roll comes up, and the run is solo. The room itself ships with the game, so no map file can be missing. It fires at most once. The menu and the restart both clear the mark.
-
-The visit saves the run before it swaps arenas: wave, boss wave, health, super meter, kills and weapon. Walking back out ends it, and `resumeAfter` puts the director where it was.
-
-The way out is the way in. `PlayState` records the feet line you arrived on, and watches for a return to it. You spawn on that line, so the check arms only after you climb 240 px away from it. Without the arming step you would leave on the frame you arrived. Nothing else ends the visit, so the room holds you for as long as you want it.
-
-That boss wave is spent. The run picks up on the wave after it, and the next boss arrives on its usual schedule.
 
 ## Themes - assets/data/themes.json
 

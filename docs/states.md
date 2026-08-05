@@ -8,7 +8,7 @@ The intro logo. ENTER skips it. It applies the saved settings on boot, then swit
 
 ## MainMenuState
 
-PLAY, OPTIONS and QUIT on a black background. QUIT is desktop only. Two pairs of scrolling `JaggedBand` teeth frame the screen. A dark, slow, coarse pair sits behind a bright accent pair, and the two drift opposite ways for depth. The title is the logo art rather than set type, drawn twice: a silhouette behind, offset down and right, then the logo itself. The whole assembly rides a slow sine, and the splash rides it too so it stays pinned to the logo's corner. The silhouette is tinted the dark band maroon rather than black, because black on a black background is not a shadow, it is nothing. A yellow splash line lies angled across the title's lower-right corner and throbs in and out. The best wave sits in the corner, over menu music.
+PLAY, ONLINE, OPTIONS and QUIT on a black background. ONLINE and QUIT are desktop only. Two pairs of scrolling `JaggedBand` teeth frame the screen. A dark, slow, coarse pair sits behind a bright accent pair, and the two drift opposite ways for depth. The title is the logo art rather than set type, drawn twice: a silhouette behind, offset down and right, then the logo itself. The whole assembly rides a slow sine, and the splash rides it too so it stays pinned to the logo's corner. The silhouette is tinted the dark band maroon rather than black, because black on a black background is not a shadow, it is nothing. A yellow splash line lies angled across the title's lower-right corner and throbs in and out. The best wave sits in the corner, over menu music.
 
 Navigate with W/S or the arrows plus ENTER, or with mouse hover and click.
 
@@ -16,17 +16,17 @@ The online menu carries a COLOR row. Left and right walk the player's hue one de
 
 Two throttles keep that cheap. The character rebake runs at most twenty times a second however fast the number climbs, so a full sweep costs about fifty bakes rather than three hundred and sixty. The save waits for the value to sit still for a moment before it writes, so a sweep is one write rather than one per degree. Both key on time rather than on the key being down, so anything that drives the row gets the same protection.
 
-PLAY fades to black and switches to PlayState. Left and right on that row choose the map. The options are the stock arena, or any editor slot holding a save. The row always opens on the stock arena. It therefore reads PLAY, rather than naming a slot you edited last. OPTIONS opens `OptionsSubState`.
+PLAY fades to black and opens the lobby. It does not select or load editor slots. ONLINE opens `OnlineState`. OPTIONS opens `OptionsSubState`.
 
 The editor has no row of its own. F7 opens it. It stays off the menu on purpose. The editor serves whoever builds the game, and is not something to offer a player.
 
-QUIT collapses the OS window like a CRT switching off. Three chained `FlxTween.num` tweens drive the window size and opacity. The frame drops first, so the window can shrink freely. The height then squeezes to a horizontal sliver while the width holds. The width then pinches to a dot and the window fades out. When the last tween finishes, it shuts down Discord presence and exits.
+QUIT collapses the OS window like a CRT switching off. Three chained `FlxTween.num` tweens drive the window size and opacity. The frame drops first, so the window can shrink freely. The height then squeezes to a horizontal sliver while the width holds. The width then pinches to a dot and the window fades out. When the last tween finishes, it shuts down Discord presence and exits. The desktop `INSTANT QUIT` option bypasses the menu slash and every exit effect. It shuts down Discord presence and closes the process immediately.
 
 Windows will not shrink a window past about 36 px. That is why the end of the vanish uses opacity rather than size. The collapse is desktop only. Other targets keep the plain fade-to-black exit.
 
 ## OptionsSubState
 
-The options panel over the menu. It holds master, music and sound effect volumes, the display mode, V-Sync, the framerate, the aspect ratio, the camera lean, screenshake and freeze-frame sliders, the HUD toggle, the 3D sound toggle, an FPS counter toggle, the language, a CONTROLS row, and a reset-best-wave action. Adjust a row with A/D or the arrows, or click to step it. Reset-best-wave asks for a second press within a few seconds to confirm. Every setting applies at once and persists in the save file. ESC or BACK closes the panel.
+The options panel over the menu. It holds master, music and sound effect volumes, display settings, visual settings, controls and utility toggles. Desktop builds include `INSTANT QUIT`, which defaults to OFF. The visual page includes chat scale. It changes the open chat at once and persists through the existing `chatScale` save field. Adjust a row with A/D or the arrows, or click to step it. A live language change reapplies each font and its role size before relabeling the rows. Japanese rows use a 44 px pitch for the taller DotGothic glyphs. Reset-best-wave asks for a second press within a few seconds to confirm. Every setting applies at once and persists in the save file. ESC or BACK closes the panel.
 
 The display mode picks windowed, borderless, or exclusive fullscreen. V-Sync cannot change on a live window, so the toggle instead caps the framerate to the display's refresh rate, which gives the same pacing. With V-Sync off, the framerate row picks the cap directly, and it drives the update rate too. The aspect ratio row constrains the display region to 4:3, 16:9, 16:10 or 21:9 through a custom scale mode. The whole 16:9 frame scales to fit inside that region, so nothing is ever covered or cut, and the space outside the frame fills with bars on the plain stage. The bars fill with `assets/images/ui/side_art.png` when that file exists, and a flat dark panel when it does not. AUTO fits the window itself, and any leftover margins still take the art.
 
@@ -44,7 +44,7 @@ Two things are not rebindable, and the footer says so per device: the mouse alwa
 
 It builds the systems in `create()`, calls them in order in `update()`, and handles the debug keys. It holds almost no gameplay logic of its own. What it does own is the wiring that needs two systems at once, plus the camera. The deflected-shot handler is one such piece, since it needs the director and the hit pipeline together.
 
-The camera leans toward the cursor rather than sitting on the player. It feeds `targetOffset` a fraction of the cursor's offset from the view centre, so the player drifts under half the way to the edge at full reach instead of pinning against it. That offset comes from the view rather than from world space on purpose. The cursor's world position moves with the camera, so deriving the lean from it would feed back into itself.
+The camera leans toward the cursor rather than sitting on the player. It feeds `targetOffset` a fraction of the cursor offset from the view centre. Mouse and claimed gyro aim move their world point with camera scroll, so their screen cursor stays fixed. Stick aim stays player anchored.
 
 `BASE_ZOOM` pulls the frame back so more of the arena is in shot, and `FOLLOW_LERP` sets how fast the camera closes on its target. Both live at the top of the state. How far the cursor drags the frame is a player setting rather than a constant, since playtesting split on it: see the camera lean row under OptionsSubState.
 
@@ -57,6 +57,8 @@ ESC opens it. It freezes the game, pauses all audio, and dims the screen. ESC cl
 It holds audio through `Music.hold` rather than pausing the sound front end directly, because pausing what is playing is only half the job. Timers and tweens live on global plugins, so they keep running while a substate is open even though the state itself does not update. Both of the boss show's music changes start from inside a timer, a beat after the boss arrives and a beat after it dies, so pausing on either of those beats let the new track start after the pause had already silenced the old one, and it played over the menu. While the hold is up `Music.play` still loads and swaps the track, then pauses it, so the resume on close picks it up where the player expects. The hold clears on close, on quit, and in `destroy`, since a track left held would follow the player into the next state as silence.
 
 A HELP row opens the same seven page popup the first run shows, so the controls are never more than a pause away. Opened from here its footer reads CLOSE rather than PLAY, since closing it lands back on the pause menu rather than into the game.
+
+BACK TO LOBBY returns to the walkable lobby. In co-op, a host sends the connected party there without closing the session. A guest choosing the row still leaves the session. The host can start another run through the existing lobby path.
 
 QUIT TO MENU returns to the editor instead when the run came from a playtest. The editor sets that flag itself. The state does not infer it from the map being custom. The menu can start a custom map too, and those runs belong back at the menu.
 
@@ -72,7 +74,7 @@ The controls popup, shown the first time PlayState opens each session. Seven pag
 
 The scrap page runs the whole economy in one loop: an enemy falls, the pieces burst out, the player walks the line of them and a counter ticks up as each is crossed. The ready page shows a rest: the prompt throbs until the ready bubble pops over the player's head, and the next wave announces itself below them, clear of the bubble. The abilities page left with time stop when time stop was parked; if the ability comes back, its page comes back with it.
 
-The popup fades in on open. ENTER or ESC freezes the demo and fades it back out before the game starts. The wave timer stays frozen while the popup is open.
+The popup fades in on open. ENTER or ESC freezes the demo and fades it back out before the game starts. The wave timer stays frozen while the popup is open. Instruction and navigation text use the panel width and a 16 px font, so multiline pages stay above the lower border.
 
 The weapons page reads its line-up from the pick screen rather than listing the weapons itself, so the two cannot disagree about which weapon is number one. The super page animates the hammer's bounce, the leap and spin and the ring of the slam under it. It hangs the hammer off the same hand the held weapon uses and rotates that point with the player, so the two turn as one body rather than the weapon orbiting at arm's length. The bounce's own pivot is measured against a player whose sprite is being lifted by an offset, so read plainly it lands at the feet. The turn is taken about the point flixel actually rotates the sprite around, which is the graphic's origin less its draw offset, not the hitbox centre. Those sit 58 px apart on this character, which is the whole width of the gap the weapon used to leave. The scrap page puts its counter where the real one sits, low and to the left, so the page and the game agree on where to look. It also stands its enemy on the player's own line, and the health page floats its repair kit at the player's middle. Centring both on the same point is not enough, since that centres the collision box and every character carries a different one, which left the enemy standing thirty pixels lower than the player it shares the floor with.
 
@@ -86,7 +88,7 @@ Each page's demo is its own class under `states/tutorial/`: MoveDemo, AttackDemo
 
 The run's one weapon choice, opened as PlayState starts. Four cards: hammer, revolver, crossbow and yoyo. Choose with 1-4, A/D, the arrows or the mouse, then confirm with ENTER or a click. The pick locks for the whole run. There is no mid-run switching, only the chosen weapon's primary and secondary attacks.
 
-Confirming reports where the chosen card's icon sat. The weapon then flies from that card into the player's hand. The throw belongs to `WeaponFlyIn`, which waits until every substate clears. The tutorial opens straight after the pick on a first run. The throw therefore waits on it, rather than playing behind the panel.
+The selected weapon appears in the player's hand when PlayState opens. The tutorial opens at the start of the first run.
 
 The screen remembers the last choice, so a repeat run or a map playtest is one keypress. It also ignores input for a moment after it opens. The keypress that started the run therefore cannot confirm it by accident.
 
@@ -94,7 +96,7 @@ Online, the lobby opens this screen instead. A substate over PlayState would fre
 
 ## PlayState debug keys
 
-CONTROL with a number summons a boss straight into the run, whatever the build: 0 the magma wyrm, 9 Domo, 8 Rofel. It goes through the same `summonBoss` a real boss wave uses, so the banner, the alarm and the music all play and it is refused while a boss is already out.
+CONTROL with a number summons a boss encounter straight into the run, whatever the build. 0 summons the magma wyrm. 9 summons Domo. 8 summons Rofel. 7 summons Domo and the magma wyrm together. Each key uses the same `summonBoss` path as a boss wave. The path plays the banner, alarm and music. It refuses while another boss encounter is active.
 
 They answer to CONTROL rather than the bare number because they are not behind `#if debug` any more. The summons used to sit in that block with the rest of the debug row, which meant they did nothing at all in the build you actually play, and the row is the only way to reach a boss without grinding waves. The genuinely destructive keys, killing yourself, reviving and the hitbox overlay, are still debug only and still bare.
 
@@ -102,7 +104,7 @@ They answer to CONTROL rather than the bare number because they are not behind `
 
 The room you stand in before a run, reached from PLAY. It is a plain walled room built the way any custom map is, through `CustomArena`, so it gets collision, camera bounds and a background from the same code a real stage does. Its floor is a rock tile repeated over the room rather than the stage art, which `Arena.tileBackground` fills in: a stage background is one image stretched to the map, which on a room this size read as a blown up logo. The tile is scaled before it repeats, by the same four the rest of the art uses, so the rock sits at the size of everything else. Combat, waves and the HUD are simply absent rather than switched off, since nothing here builds them.
 
-Four signs stand in it, START, HOST, JOIN and PLAYER, each a spot with a label. Walking within reach of one offers it on the interact key, the same key the shop uses. START begins the run. HOST opens the port and shows how many have joined. JOIN takes an address typed in and connects. PLAYER is where you dress: left and right walk the color round, letters spell a name, and the interact key closes it. It recolors the character standing in front of the sign rather than a preview of one, since the lobby already has the real body on screen. Color used to sit in the options menu behind a preview sprite; it lives here now and the menu no longer carries it.
+Five signs stand in it: START, ONLINE, PLAYER, WEAPON and STATS. Walking within reach of one offers it on the interact key. START begins the run. ONLINE opens the host and join choices. A client cannot select HOST. An active host cannot select JOIN. PLAYER uses the character crate art and opens dress-up for color, skin, gear and name. WEAPON uses the tool-box art and opens the weapon cards. STATS uses the open-book art and opens the saved results. Desktop lobbies also contain the C prop. C shows no interaction prompt. Interacting with C shuts down Discord presence and closes the process immediately. It does not run an exit animation or network transition. The nearest textured interaction gains a one-source-pixel white outline while it is in range.
 
 Presence is its own small thing rather than the game's netcode. `NetSync` is built around a running fight and wants a director, a HUD and a weapon set, none of which exist here, so the lobby sends its own `lob` message a few times a second carrying position, facing, animation, colors and name, and renders whoever answers with `RemoteAvatar`, which is the same body the fight uses. A peer that stops speaking for five seconds is dropped, which is what a guest closing its window looks like from the host's side.
 

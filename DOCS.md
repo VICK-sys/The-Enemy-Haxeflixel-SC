@@ -6,6 +6,7 @@ The pages split by concern. Start with the part your change touches.
 
 | Page | What is in it |
 | --- | --- |
+| [docs/map.md](docs/map.md) | every file in `source/`, what it owns and where to start reading |
 | [docs/states.md](docs/states.md) | the screens and how the game moves between them |
 | [docs/editor.md](docs/editor.md) | the map editor: chrome, tools, art import, props, depth and cover |
 | [docs/systems.md](docs/systems.md) | per-run systems, entities and utilities |
