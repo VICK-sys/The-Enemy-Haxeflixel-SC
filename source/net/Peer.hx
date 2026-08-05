@@ -22,6 +22,7 @@ class Peer
 
 		avatar.setLeveling(false);
 		avatar.setReady(false);
+		avatar.setAfk(false);
 		avatar.setName("PLAYER " + (id + 1));
 	}
 
@@ -56,6 +57,7 @@ class Peer
 		id = -1;
 		avatar.setLeveling(false);
 		avatar.setReady(false);
+		avatar.setAfk(false);
 		avatar.clearDeath();
 		avatar.sprite.visible = false;
 		avatar.held.visible = false;

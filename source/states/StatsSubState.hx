@@ -9,8 +9,6 @@ import util.Stats;
 
 class StatsSubState extends LobbyPanel
 {
-	static inline var HEAD_SIZE:Int = 26;
-	static inline var ROW_SIZE:Int = 22;
 	static inline var STEP:Float = 30;
 	static inline var HEAD_GAP:Float = 40;
 	static inline var BLOCK_GAP:Float = 34;
@@ -68,12 +66,12 @@ class StatsSubState extends LobbyPanel
 
 	function named(colX:Float, top:Float, headKey:String, rows:Array<{name:String, value:String}>):Float
 	{
-		label(colX - KEY_W, top, KEY_W + VAL_GAP + VAL_W, Lang.t(headKey), HEAD_SIZE, FlxColor.WHITE, CENTER);
+		label(colX - KEY_W, top, KEY_W + VAL_GAP + VAL_W, Lang.t(headKey), Lang.bodySize(), FlxColor.WHITE, CENTER);
 		var y = top + HEAD_GAP;
 		for (r in rows)
 		{
-			label(colX - KEY_W, y, KEY_W, r.name, ROW_SIZE, LobbyPanel.DIM, RIGHT);
-			label(colX + VAL_GAP, y, VAL_W, r.value, ROW_SIZE, FlxColor.WHITE, LEFT);
+			label(colX - KEY_W, y, KEY_W, r.name, Lang.smallSize(), LobbyPanel.DIM, RIGHT);
+			label(colX + VAL_GAP, y, VAL_W, r.value, Lang.smallSize(), FlxColor.WHITE, LEFT);
 			y += STEP;
 		}
 		return y;

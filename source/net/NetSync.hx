@@ -32,7 +32,9 @@ class NetSync
 	public var onBossKillEvt:(Float, Float) -> Void;
 	public var onDropped:Void->Void;
 	public var onRestart:Void->Void;
+	public var onReturnLobby:Void->Void;
 	public var runFailed(default, null):Bool = false;
+	public var afk:Bool = false;
 	public var makeFx:RemoteAvatar->RemoteFx;
 
 	private var player:Player;
@@ -153,21 +155,25 @@ class NetSync
 				oldBoss();
 		};
 
-		var oldSpawn = director.onBossSpawn;
-		director.onBossSpawn = function(b)
+		var oldPack = director.onBossPack;
+		director.onBossPack = function(pack)
 		{
-			if (b.netId < 0)
-				b.netId = nextEnemyId++;
-			Net.send({t: "bossSpawn", id: b.netId});
-			if (oldSpawn != null)
-				oldSpawn(b);
+			var ids:Array<Int> = [];
+			for (boss in pack)
+			{
+				if (boss.netId < 0)
+					boss.netId = nextEnemyId++;
+				ids.push(boss.netId);
+			}
+			Net.send({t: "bossPack", ids: ids});
+			if (oldPack != null)
+				oldPack(pack);
 		};
 
 		var oldFall = director.onBossFall;
 		director.onBossFall = function(x, y, last)
 		{
-			if (!last)
-				Net.send({t: "bossFall", x: r1(x), y: r1(y)});
+			Net.send({t: "bossFall", x: r1(x), y: r1(y)});
 			if (oldFall != null)
 				oldFall(x, y, last);
 		};
@@ -396,6 +402,10 @@ class NetSync
 				if (onRestart != null)
 					onRestart();
 
+			case "toLobby" if (Net.isClient):
+				if (onReturnLobby != null)
+					onReturnLobby();
+
 			case "imp" if (Net.isClient):
 				var p = roster.get(msg.f);
 				if (p != null && p.fx != null)
@@ -466,9 +476,9 @@ class NetSync
 				if (onBossEvt != null)
 					onBossEvt();
 
-			case "bossSpawn" if (Net.isClient):
+			case "bossPack" if (Net.isClient):
 				bossDown = false;
-				mirror.expectBoss(msg.id);
+				mirror.expectBossPack(msg.ids);
 
 			case "bossKill" if (Net.isClient):
 				if (onBossKillEvt != null)
@@ -482,7 +492,6 @@ class NetSync
 				{
 					bossDown = true;
 					bossBeat++;
-					mirror.blastLastBoss();
 					new FlxTimer().start(0.9, function(_)
 					{
 						if (onBossDefeatedEvt != null)
@@ -620,6 +629,7 @@ class NetSync
 
 		Net.send({
 			t: "av",
+			af: afk,
 			x: r1(player.x),
 			y: r1(player.y),
 			hu: SaveData.playerHue(),

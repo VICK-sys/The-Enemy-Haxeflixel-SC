@@ -17,23 +17,27 @@ import util.IrisWipe;
 import util.Lang;
 import util.Lobby;
 import util.Music;
+import util.Paths;
 import util.SaveData;
 
 typedef LobbySign =
 {
 	x:Float,
 	y:Float,
-	key:String,
+	key:Null<String>,
 	act:Void->Void,
 	sprite:FlxSprite,
+	highlight:FlxSprite,
 	label:FlxText
 }
 
 class LobbyState extends FlxState
 {
+
 	static inline var REACH:Float = 130;
 	static inline var SIGN_W:Int = 96;
 	static inline var SIGN_H:Int = 116;
+	static inline var SIGN_ART_SCALE:Float = 4;
 	static inline var SEND_FRAMES:Int = 3;
 	static inline var STALE:Float = 5;
 	static inline var DASH_LINES:Int = 2;
@@ -108,11 +112,15 @@ class LobbyState extends FlxState
 		FlxG.cameras.add(camUI, false);
 
 		addSign(Lobby.width() * 0.28, Lobby.height() * 0.34, "lobby.start", startRun);
-		addSign(Lobby.width() * 0.55, Lobby.height() * 0.28, "lobby.host", hostGame);
-		addSign(Lobby.width() * 0.75, Lobby.height() * 0.33, "lobby.join", askIp);
-		addSign(Lobby.width() * 0.40, Lobby.height() * 0.58, "lobby.player", dressUp);
-		addSign(Lobby.width() * 0.62, Lobby.height() * 0.58, "lobby.weapon", pickWeapon);
-		addSign(Lobby.width() * 0.84, Lobby.height() * 0.58, "lobby.stats", showStats);
+		#if !html5
+		addSign(Lobby.width() * 0.55, Lobby.height() * 0.28, "lobby.online", openOnline);
+		#end
+		addSign(Lobby.width() * 0.40, Lobby.height() * 0.58, "lobby.player", dressUp, "ui/player_customization");
+		addSign(Lobby.width() * 0.62, Lobby.height() * 0.58, "lobby.weapon", pickWeapon, "ui/weapon_box");
+		addSign(Lobby.width() * 0.84, Lobby.height() * 0.58, "lobby.stats", showStats, "ui/stats");
+		#if desktop
+		addSign(Lobby.width() * 0.16, Lobby.height() * 0.58, null, exitImmediately, "fun/C");
+		#end
 
 		cursor = new FlxSprite();
 		cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", SaveData.playerHue()));
@@ -122,7 +130,7 @@ class LobbyState extends FlxState
 		add(cursor);
 
 		prompt = new FlxText(0, 0, FlxG.width, "");
-		prompt.setFormat(Lang.font(), 20, FlxColor.WHITE, CENTER);
+		prompt.setFormat(Lang.bodyFont(), Lang.bodySize(), FlxColor.WHITE, CENTER);
 		prompt.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		prompt.scrollFactor.set(0, 0);
 		prompt.cameras = [camUI];
@@ -130,7 +138,7 @@ class LobbyState extends FlxState
 		add(prompt);
 
 		status = new FlxText(0, 0, FlxG.width, "");
-		status.setFormat(Lang.font(), 16, 0xFFB8B8B8, CENTER);
+		status.setFormat(Lang.smallFont(), Lang.smallSize(), 0xFFB8B8B8, CENTER);
 		status.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		status.scrollFactor.set(0, 0);
 		status.cameras = [camUI];
@@ -148,7 +156,7 @@ class LobbyState extends FlxState
 
 		wipe = new IrisWipe(this);
 		wipe.open();
-		Music.play(states.play.QuietRoom.track(), 0.3);
+		Music.play(Music.getRunTrack(), 0.3);
 		super.create();
 
 		if (!LobbyHelpSubState.shown)
@@ -158,19 +166,54 @@ class LobbyState extends FlxState
 		}
 	}
 
-	function addSign(x:Float, y:Float, key:String, act:Void->Void):Void
+	function addSign(x:Float, y:Float, key:Null<String>, act:Void->Void, ?art:String):Void
 	{
-		var s = new FlxSprite(x - SIGN_W * 0.5, y - SIGN_H);
-		s.makeGraphic(SIGN_W, SIGN_H, 0xFFF2F2F2);
+		var s = new FlxSprite();
+		var highlight:FlxSprite = null;
+		if (art == null)
+		{
+			s.makeGraphic(SIGN_W, SIGN_H, 0xFFF2F2F2);
+			s.setPosition(x - SIGN_W * 0.5, y - SIGN_H);
+		}
+		else
+		{
+			s.loadGraphic(Paths.image(art));
+			s.antialiasing = false;
+			s.scale.set(SIGN_ART_SCALE, SIGN_ART_SCALE);
+			s.updateHitbox();
+			s.setPosition(x - s.width * 0.5, y - s.height);
+
+			highlight = new FlxSprite();
+			highlight.loadGraphic(util.Outline.graphic(art));
+			highlight.antialiasing = false;
+			highlight.scale.set(SIGN_ART_SCALE, SIGN_ART_SCALE);
+			highlight.updateHitbox();
+			highlight.setPosition(s.x - SIGN_ART_SCALE, s.y - SIGN_ART_SCALE);
+			highlight.visible = false;
+			layers.entityLayer.add(highlight);
+		}
 		layers.entityLayer.add(s);
 
-		var t = new FlxText(0, 0, 200, Lang.t(key));
-		t.setFormat(Lang.font(), 20, 0xFF1A1A1A, CENTER);
+		var t = new FlxText(0, 0, 200, key == null ? "" : Lang.t(key));
+		t.setFormat(Lang.bodyFont(), Lang.bodySize(), 0xFF1A1A1A, CENTER);
 		t.x = x - 100;
 		t.y = y - SIGN_H * 0.62;
+		t.visible = art == null;
 		layers.tagLayer.add(t);
 
-		signs.push({x: x, y: y, key: key, act: act, sprite: s, label: t});
+		signs.push({x: x, y: y, key: key, act: act, sprite: s, highlight: highlight, label: t});
+	}
+
+	function setSignHighlight(near:LobbySign):Void
+	{
+		for (sign in signs)
+		{
+			if (sign.highlight == null)
+				continue;
+			var on = sign == near;
+			sign.sprite.visible = !on;
+			sign.highlight.visible = on;
+		}
 	}
 
 	function nearest():LobbySign
@@ -263,6 +306,7 @@ class LobbyState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+
 		util.Controls.setAimAnchor(player.x + player.width * 0.5, player.y + player.height * 0.5);
 		player.blockMovement = leaving || subState != null;
 
@@ -302,6 +346,7 @@ class LobbyState extends FlxState
 
 		if (subState != null)
 		{
+			setSignHighlight(null);
 			player.velocity.set(0, 0);
 			if (player.animation.name == "walk")
 				player.animation.play("idle");
@@ -311,7 +356,9 @@ class LobbyState extends FlxState
 		dashTick(elapsed);
 
 		var near = nearest();
-		prompt.text = near == null ? "" : Lang.t("lobby.prompt", [util.Controls.bindName(util.Controls.INTERACT), Lang.t(near.key)]);
+		setSignHighlight(near);
+		prompt.text = near == null || near.key == null ? "" : Lang.t("lobby.prompt",
+			[util.Controls.bindName(util.Controls.INTERACT), Lang.t(near.key)]);
 		if (near != null && util.Controls.justPressed(util.Controls.INTERACT))
 			near.act();
 
@@ -321,6 +368,8 @@ class LobbyState extends FlxState
 
 	function statusLine():String
 	{
+		if (Net.rejected)
+			return Lang.t("lobby.versionMismatch", [Net.hostVersion == "" ? Lang.t("lobby.versionUnknown") : Net.hostVersion, util.Version.id]);
 		if (Net.isHost && Net.mode != Off)
 			return Lang.t("lobby.hosting", [Net.hostPort, Net.guestCount]);
 		if (Net.isClient)
@@ -351,7 +400,8 @@ class LobbyState extends FlxState
 				ha: 0,
 				hf: false,
 				dg: guardTimer > 0,
-				pf: puffs
+				pf: puffs,
+				v: util.Version.id
 			});
 
 		for (msg in Net.poll())
@@ -390,6 +440,12 @@ class LobbyState extends FlxState
 		var id:Int = from;
 		if (id == Net.selfId)
 			return;
+		if (Net.isHost && !util.Version.matches(m.v))
+		{
+			Net.kick(id);
+			drop(id);
+			return;
+		}
 		var av = peers.get(id);
 		if (av == null)
 		{
@@ -445,12 +501,25 @@ class LobbyState extends FlxState
 		openSubState(new WeaponPickSubState(camUI));
 	}
 
+	#if !html5
+	function openOnline():Void
+	{
+		prompt.text = "";
+		util.Controls.resetDevices();
+		var panel = new OnlineSubState(camUI);
+		panel.onHost = hostGame;
+		panel.onJoin = askIp;
+		openSubState(panel);
+	}
+	#end
+
 	function repaint():Void
 	{
 		var hue = SaveData.playerHue();
 		player.setHue(hue);
 		player.applySkin();
 		backGear.paint(hue);
+		dashGhost.paint(hue);
 		cursor.loadGraphic(util.HuePalette.graphic("ui/mouse", hue));
 	}
 
@@ -469,6 +538,14 @@ class LobbyState extends FlxState
 		util.Controls.resetDevices();
 		openSubState(panel);
 	}
+
+	#if desktop
+	function exitImmediately():Void
+	{
+		util.DiscordPresence.shutdown();
+		lime.system.System.exit(0);
+	}
+	#end
 
 	function askIp():Void
 	{

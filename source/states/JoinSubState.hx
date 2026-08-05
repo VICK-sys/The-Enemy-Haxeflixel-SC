@@ -43,15 +43,17 @@ class JoinSubState extends LobbyPanel
 		rowX = px + (panelW - ROW_W) * 0.5;
 		rowY = py + 126;
 
-		label(rowX, py + 96, ROW_W, Lang.t("lobby.joinAddress"), 20, LobbyPanel.DIM, LEFT);
+		wellLabel(rowX, rowY, ROW_W, "lobby.joinAddress");
 		well(rowX, rowY, ROW_W, ROW_H);
 
-		ghost = label(rowX + 34, rowY + 18, 0, LOCAL, 30, LobbyPanel.DIM, LEFT);
+		ghost = label(rowX + 34, rowY + 18, 0, LOCAL, Lang.bodySize(), LobbyPanel.DIM, LEFT);
 		ghost.alpha = 0.35;
-		ipText = label(rowX + 18, rowY + 18, 0, "", 30, FlxColor.WHITE, LEFT);
-		caret = plate(rowX + 18, rowY + 17, 3, 20, FlxColor.WHITE);
+		ipText = label(rowX + 18, rowY + 18, 0, "", Lang.bodySize(), FlxColor.WHITE, LEFT);
+		var m = ipText.textField.getLineMetrics(0);
+		var capH = m.ascent - m.descent;
+		caret = plate(rowX + 18, ipText.y + m.ascent - capH, 3, capH, FlxColor.WHITE);
 
-		note = label(rowX, py + 226, ROW_W, "", 22, LobbyPanel.DIM, LEFT);
+		note = label(rowX, py + 226, ROW_W, "", Lang.smallSize(), LobbyPanel.DIM, LEFT);
 
 		hints(Lang.t("lobby.joinHints"), py + H - 92);
 		hints(Lang.t("lobby.joinHints2"), py + H - 64);

@@ -12,6 +12,7 @@ class LobbyPanel extends FlxSubState
 {
 	static inline var DEL_FIRST:Float = 0.35;
 	static inline var DEL_NEXT:Float = 0.045;
+	static inline var LABEL_GAP:Float = 8;
 
 	public static inline var INK:Int = 0xFF12141A;
 	public static inline var EDGE:Int = 0xFF3C4356;
@@ -44,13 +45,14 @@ class LobbyPanel extends FlxSubState
 		plate(px - 3, py - 3, panelW + 6, panelH + 6, EDGE);
 		plate(px, py, panelW, panelH, INK);
 
-		var title = label(px, py + 26, panelW, Lang.t(titleKey), 34, FlxColor.WHITE, CENTER);
+		var title = label(px, py + 26, panelW, Lang.t(titleKey), Lang.titleSize(), FlxColor.WHITE, CENTER);
+		title.font = Lang.titleFont();
 		title.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 	}
 
 	function hints(text:String, y:Float):FlxText
 	{
-		var t = label(px, y, panelW, text, 18, DIM, CENTER);
+		var t = label(px, y, panelW, text, Lang.smallSize(), DIM, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 1);
 		return t;
 	}
@@ -73,9 +75,16 @@ class LobbyPanel extends FlxSubState
 	function label(x:Float, y:Float, w:Float, text:String, size:Int, color:Int, align:flixel.text.FlxTextAlign):FlxText
 	{
 		var t = new FlxText(x, y, w, text);
-		t.setFormat(Lang.font(), size, color, align);
+		t.setFormat(Lang.fontFor(size), size, color, align);
 		t.cameras = [camUI];
 		add(t);
+		return t;
+	}
+
+	function wellLabel(x:Float, wellY:Float, w:Float, key:String):FlxText
+	{
+		var t = label(x, 0, w, Lang.t(key), Lang.smallSize(), DIM, LEFT);
+		t.y = wellY - LABEL_GAP - t.textField.getLineMetrics(0).ascent;
 		return t;
 	}
 

@@ -42,7 +42,7 @@ class HostSubState extends LobbyPanel
 
 		if (failed)
 		{
-			label(px, py + 150, panelW, Lang.t("lobby.hostFailed"), 26, LobbyPanel.BAD, CENTER);
+			label(px, py + 150, panelW, Lang.t("lobby.hostFailed"), Lang.bodySize(), LobbyPanel.BAD, CENTER);
 			hints(Lang.t("lobby.backHint"), py + H - 74);
 			super.create();
 			return;
@@ -50,15 +50,15 @@ class HostSubState extends LobbyPanel
 
 		var rowX = px + (panelW - ROW_W) * 0.5;
 
-		label(rowX, py + 96, ROW_W, Lang.t("lobby.hostAddress"), 20, LobbyPanel.DIM, LEFT);
+		wellLabel(rowX, py + 126, ROW_W, "lobby.hostAddress");
 		well(rowX, py + 126, ROW_W, ROW_H);
 		var shown = Net.localAddress();
 		label(rowX + 18, py + 126 + 18, ROW_W - 36,
 			shown == "" ? Lang.t("lobby.hostNoAddress") : shown + ":" + Net.hostPort,
-			30, shown == "" ? LobbyPanel.DIM : LobbyPanel.GOOD, LEFT);
+			Lang.bodySize(), shown == "" ? LobbyPanel.DIM : LobbyPanel.GOOD, LEFT);
 
-		joined = label(rowX, py + 216, ROW_W, "", 24, FlxColor.WHITE, LEFT);
-		note = label(rowX, py + 250, ROW_W, "", 20, LobbyPanel.BAD, LEFT);
+		joined = label(rowX, py + 216, ROW_W, "", Lang.bodySize(), FlxColor.WHITE, LEFT);
+		note = label(rowX, py + 250, ROW_W, "", Lang.smallSize(), LobbyPanel.BAD, LEFT);
 
 		hints(Lang.t("lobby.hostHints"), py + H - 74);
 		refresh();

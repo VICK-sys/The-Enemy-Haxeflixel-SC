@@ -63,9 +63,10 @@ class LobbyHelpSubState extends FlxSubState
 		panel.makeGraphic(800, 560, 0xFF4A4550);
 		add(panel);
 
-		titleText = uiText(110, 36);
-		bodyText = uiText(200, 20);
-		pageText = uiText(596, 16);
+		titleText = uiText(110, Lang.titleSize());
+		titleText.font = Lang.titleFont();
+		bodyText = uiText(200, Lang.bodySize());
+		pageText = uiText(596, Lang.smallSize());
 
 		buildPage();
 		beginOpen();
@@ -76,7 +77,7 @@ class LobbyHelpSubState extends FlxSubState
 	function uiText(y:Float, size:Int):FlxText
 	{
 		var t = new FlxText(260, y, 760, "");
-		t.setFormat(Lang.font(), size, FlxColor.WHITE, CENTER);
+		t.setFormat(Lang.fontFor(size), size, FlxColor.WHITE, CENTER);
 		t.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		add(t);
 		return t;

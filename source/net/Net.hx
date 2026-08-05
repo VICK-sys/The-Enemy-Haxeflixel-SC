@@ -16,6 +16,7 @@ enum abstract NetMode(Int)
 
 class Net
 {
+
 	public static inline var PORT:Int = 7777;
 	public static inline var PORT_TRIES:Int = 10;
 	public static inline var MAX_GUESTS:Int = 7;
@@ -30,6 +31,8 @@ class Net
 	public static var dropped:Bool = false;
 	public static var selfId:Int = HOST_ID;
 	public static var inGame:Bool = false;
+	public static var rejected:Bool = false;
+	public static var hostVersion:String = "";
 
 	public static var active(get, never):Bool;
 	public static var isHost(get, never):Bool;
@@ -128,6 +131,8 @@ class Net
 	{
 		#if desktop
 		stop();
+		rejected = false;
+		hostVersion = "";
 		try
 		{
 			var target = address;
@@ -185,6 +190,17 @@ class Net
 		selfId = HOST_ID;
 		connected = false;
 		inGame = false;
+	}
+
+	public static function kick(id:Int):Void
+	{
+		#if desktop
+		if (mode != HostMode)
+			return;
+		var i = ids.indexOf(id);
+		if (i >= 0)
+			losePeer(i);
+		#end
 	}
 
 	public static function send(msg:Dynamic):Void
@@ -267,7 +283,7 @@ class Net
 			addPeer(incoming, id);
 			connected = true;
 
-			try incoming.output.writeString(Json.stringify({t: "hello", f: HOST_ID, id: id, go: inGame}) + "\n") catch (e:Dynamic) {}
+			try incoming.output.writeString(Json.stringify({t: "hello", f: HOST_ID, id: id, go: inGame, v: util.Version.id}) + "\n") catch (e:Dynamic) {}
 			send({t: "join", id: id});
 			localEvents.push({t: "join", f: HOST_ID, id: id});
 		}
@@ -331,7 +347,16 @@ class Net
 					write(Json.stringify(msg) + "\n", sock);
 			}
 			else if (msg.t == "hello")
+			{
+				if (!util.Version.matches(msg.v))
+				{
+					hostVersion = msg.v == null ? "" : Std.string(msg.v);
+					rejected = true;
+					markDropped();
+					return;
+				}
 				selfId = msg.id;
+			}
 
 			out.push(msg);
 		}

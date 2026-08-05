@@ -14,7 +14,11 @@ Puppets live in a `PuppetDirector`. That `EnemyDirector` subclass swaps spawning
 
 A landed client attack draws its own feedback at once, then sends a damage *claim*. That feedback is sparks, sound and a hit flash. The host applies the claim and owns the result. The death comes back in the next snapshot. The client takes the kill for the super meter if it claimed that enemy recently.
 
-The shop round runs on four messages. The host's `lvl` opens every peer's shop. A player entering sends `lvlin`, which puts the LEVELING note over them on every other screen. Closing the menu, or a shop timing out unvisited, sends `lvldone`, and the host releases with `lvlgo` once everyone has reported. Nobody is pulled into a menu by someone else; the broadcast opens shops, not screens. When a boss dies, the host drops five scrap and a health pickup where it fell; each guest drops its own five scrap at the mirrored blast, and the health pickup reaches them through the snapshot like any other. A duo member that falls mid-fight sends `bossFall` with its position, so guests blast and loot that spot too, and `bossDead` stays the encounter-over signal that restores the arena. The guest boss bar collects every `bossSpawn` id into one pack, which is how it pools the duo's health the way the host's does.
+The shop round runs on four messages. The host's `lvl` opens every peer's shop. A player entering sends `lvlin`, which puts the LEVELING note over them on every other screen. Closing the menu, or a shop timing out unvisited, sends `lvldone`, and the host releases with `lvlgo` once everyone has reported. Nobody is pulled into a menu by someone else. The broadcast opens shops, not screens.
+
+Each defeated boss kind sends `bossFall` with its position. Guests blast that point and drop five local scrap. The host health pickup reaches guests through the snapshot. `bossDead` remains the single encounter completion signal that restores the arena.
+
+The host sends one `bossPack` message with every member ID after it spawns the encounter. The guest waits until every listed puppet exists before it creates one boss bar. The Domo and wyrm pair therefore includes Domo, the wyrm head and every segment in the same health total.
 
 ## What each side sees
 
@@ -25,11 +29,15 @@ Both players see each other as a `RemoteAvatar`: player sprite, held weapon and 
 - `Net` - the transport: non-blocking TCP, newline-delimited JSON, host, join, poll and send. It marks itself dropped on error, and switches off `FlxG.autoPause` so an alt-tabbed host cannot freeze the session.
 - `NetSync` - all replication logic, on both sides.
 - `PuppetDirector` and `RemoteAvatar` - the client's enemies and the other players' bodies.
-- `states/OnlineState` - the lobby: IP entry, name entry and the weapon pick.
+- `states/OnlineState` - the main menu online screen: host, join, name, color and weapon rows.
 
 The save file keeps the last IP.
 
-The lobby menu uses the same `MenuSlash` confirm as the main menu. HOST and JOIN both stay on the lobby screen. Every path that hands control back to the list therefore runs one `releaseMenu()`. It restores the shattered row and re-enables input. Those paths are a failed host, a failed connection, a cancelled IP entry, and a lost peer.
+The main menu ONLINE row opens `OnlineState`. Its list uses the same `MenuSlash` confirm as the main menu. Every path that hands control back to the list runs one `releaseMenu()`. It restores the shattered row and re-enables input.
+
+The walkable lobby has one ONLINE sign. It opens `OnlineSubState` before any host or join panel. The substate disables HOST for clients and JOIN for active hosts.
+
+When a host chooses BACK TO LOBBY during a run, it sends `toLobby` before changing state. Every guest follows without closing the session or showing a connection error. The existing `go` message can start the same party again. A guest choosing the row still leaves the session. QUIT TO MENU still closes the session.
 
 ESC resolves in one place and means the narrowest thing available. It cancels IP entry while typing. It stops hosting, or disconnects, when a session is open. It leaves the lobby only when idle at the list.
 
@@ -97,7 +105,13 @@ The host greets a latecomer with word that a run is already going. They skip the
 
 ## Names
 
+Chat is a fixed overlay in the top-left corner. Messages draw without a panel and wrap across 68 percent of the screen. Text uses a 2 px black outline. The idle log stays visible for five seconds after chat activity, then fades out over one second. Press T to restore the history and show the bare input line, emoji choices and message actions. Those controls hide when chat loses focus, so the idle log does not take mouse input. Chat scale lives on the visual options page and updates the overlay immediately.
+
 Players set a name in the online menu. The save file keeps it, and it floats above their head for everyone else. A name announces once on entry rather than in every packet. That leaves a question. How does someone arriving late learn names sent before they connected? Everyone re-announces whenever a player joins, so the whole party greets a latecomer.
+
+Avatar snapshots include AFK state. Each screen shows a yellow `AFK` label above a player while their AFK pilot runs.
+
+Peer names use `5mikropix` at size 24 with a 2 px black outline. Each name takes a brighter version of that peer's character hue. Chat sender names use the same hue mapping. The face covers kana but not the full kanji set, so some Japanese player names show missing glyphs.
 
 That is also why the host raises a join event for itself. It never receives its own broadcasts, so otherwise it alone would stay silent. Tags live above the depth sort rather than in it. A name sorted by its own feet would slide behind anyone standing further up the screen. Only other players get a tag, since your own would sit in the middle of your view.
 

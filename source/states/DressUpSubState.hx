@@ -3,6 +3,7 @@ package states;
 import flixel.FlxCamera;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.sound.FlxSound;
 import flixel.text.FlxText;
 import flixel.util.FlxColor;
 import util.HuePalette;
@@ -30,8 +31,9 @@ class DressUpSubState extends LobbyPanel
 	static inline var ROW_NAME:Float = 112;
 	static inline var ROW_SKIN_Y:Float = 224;
 	static inline var ROW_GEAR_Y:Float = 330;
-	static inline var ROW_COLOR_Y:Float = 434;
-	static inline var ROW_HINTS:Float = 518;
+	static inline var ROW_VOICE_Y:Float = 436;
+	static inline var ROW_COLOR_Y:Float = 528;
+	static inline var ROW_HINTS:Float = 612;
 	static inline var REPEAT_FIRST:Float = 0.30;
 	static inline var REPEAT_NEXT:Float = 0.09;
 	static inline var CARET_RATE:Float = 3.4;
@@ -39,10 +41,13 @@ class DressUpSubState extends LobbyPanel
 	static inline var PREVIEW_SCALE:Float = 5;
 	static inline var GEAR_DX:Float = -21.25;
 	static inline var GEAR_DY:Float = 32.5;
+	static inline var VOICE_STEP:Float = 0.05;
+	static inline var VOICE_GAP:Float = 0.16;
 	static inline var ROW_SKIN:Int = 0;
 	static inline var ROW_GEAR:Int = 1;
-	static inline var ROW_COLOR:Int = 2;
-	static inline var ROWS:Int = 3;
+	static inline var ROW_VOICE:Int = 2;
+	static inline var ROW_COLOR:Int = 3;
+	static inline var ROWS:Int = 4;
 
 	public var onDone:Void->Void;
 
@@ -53,11 +58,17 @@ class DressUpSubState extends LobbyPanel
 	private var counter:FlxText;
 	private var skinText:FlxText;
 	private var gearText:FlxText;
+	private var voiceText:FlxText;
 	private var skinLabel:FlxText;
 	private var gearLabel:FlxText;
+	private var voiceLabel:FlxText;
 	private var colorLabel:FlxText;
 	private var skinArrows:Array<FlxText> = [];
 	private var gearArrows:Array<FlxText> = [];
+	private var voiceArrows:Array<FlxText> = [];
+	private var sample:FlxSound;
+	private var samples:Map<String, FlxSound> = new Map();
+	private var voiceClock:Float = 0;
 	private var previewGear:systems.BackGear;
 	private var ringBars:Array<FlxSprite> = [];
 	private var chips:Array<FlxSprite> = [];
@@ -77,7 +88,7 @@ class DressUpSubState extends LobbyPanel
 
 	public function new(camUI:FlxCamera)
 	{
-		super(camUI, 1060, 566);
+		super(camUI, 1060, 660);
 	}
 
 	override public function create():Void
@@ -106,37 +117,46 @@ class DressUpSubState extends LobbyPanel
 		dressPreview();
 
 		var colX = px + MARGIN + BOX_W + COL_GAP;
-		label(colX, py + ROW_NAME - LABEL_GAP, FIELD_W, Lang.t("lobby.nameLabel"), 20, LobbyPanel.DIM, LEFT);
+		rowLabel(colX, py + ROW_NAME, FIELD_W, "lobby.nameLabel");
 
 		var fieldY = py + ROW_NAME;
 		well(colX, fieldY, FIELD_W, FIELD_H);
 
-		ghostText = label(colX + 32, fieldY + 14, 0, Lang.t("online.defaultName"), 30, LobbyPanel.DIM, LEFT);
+		ghostText = label(colX + 32, fieldY + 14, 0, Lang.t("online.defaultName"), Lang.bodySize(), LobbyPanel.DIM, LEFT);
 		ghostText.alpha = 0.35;
 
-		nameText = label(colX + 16, fieldY + 14, 0, "", 30, FlxColor.WHITE, LEFT);
+		nameText = label(colX + 16, fieldY + 14, 0, "", Lang.bodySize(), FlxColor.WHITE, LEFT);
 
-		caret = plate(colX + 16, fieldY + 13, 3, 20, FlxColor.WHITE);
+		var nameMetrics = nameText.textField.getLineMetrics(0);
+		var capH = nameMetrics.ascent - nameMetrics.descent;
+		caret = plate(colX + 16, nameText.y + nameMetrics.ascent - capH, 3, capH, FlxColor.WHITE);
 
-		counter = label(colX, fieldY + 20, FIELD_W - 16, "", 18, LobbyPanel.DIM, RIGHT);
+		counter = label(colX, fieldY + 20, FIELD_W - 16, "", Lang.smallSize(), LobbyPanel.DIM, RIGHT);
 
 		var skinY = py + ROW_SKIN_Y;
-		skinLabel = label(colX, skinY - LABEL_GAP, FIELD_W, Lang.t("lobby.skinLabel"), 20, LobbyPanel.DIM, LEFT);
+		skinLabel = rowLabel(colX, skinY, FIELD_W, "lobby.skinLabel");
 		well(colX, skinY, FIELD_W, SKIN_H);
-		skinArrows.push(label(colX + ARROW_IN, skinY + TEXT_DROP, 0, "<", 24, LobbyPanel.DIM, LEFT));
-		skinArrows.push(label(colX + FIELD_W - ARROW_IN - 16, skinY + TEXT_DROP, 0, ">", 24, LobbyPanel.DIM, LEFT));
-		skinText = label(colX, skinY + TEXT_DROP, FIELD_W, "", 24, FlxColor.WHITE, CENTER);
+		skinArrows.push(label(colX + ARROW_IN, skinY + TEXT_DROP, 0, "<", Lang.bodySize(), LobbyPanel.DIM, LEFT));
+		skinArrows.push(label(colX + FIELD_W - ARROW_IN - 16, skinY + TEXT_DROP, 0, ">", Lang.bodySize(), LobbyPanel.DIM, LEFT));
+		skinText = label(colX, skinY + TEXT_DROP, FIELD_W, "", Lang.bodySize(), FlxColor.WHITE, CENTER);
 
 		var gearY = py + ROW_GEAR_Y;
-		gearLabel = label(colX, gearY - LABEL_GAP, FIELD_W, Lang.t("lobby.gearLabel"), 20, LobbyPanel.DIM, LEFT);
+		gearLabel = rowLabel(colX, gearY, FIELD_W, "lobby.gearLabel");
 		well(colX, gearY, FIELD_W, SKIN_H);
-		gearArrows.push(label(colX + ARROW_IN, gearY + TEXT_DROP, 0, "<", 24, LobbyPanel.DIM, LEFT));
-		gearArrows.push(label(colX + FIELD_W - ARROW_IN - 16, gearY + TEXT_DROP, 0, ">", 24, LobbyPanel.DIM, LEFT));
-		gearText = label(colX, gearY + TEXT_DROP, FIELD_W, "", 24, FlxColor.WHITE, CENTER);
+		gearArrows.push(label(colX + ARROW_IN, gearY + TEXT_DROP, 0, "<", Lang.bodySize(), LobbyPanel.DIM, LEFT));
+		gearArrows.push(label(colX + FIELD_W - ARROW_IN - 16, gearY + TEXT_DROP, 0, ">", Lang.bodySize(), LobbyPanel.DIM, LEFT));
+		gearText = label(colX, gearY + TEXT_DROP, FIELD_W, "", Lang.bodySize(), FlxColor.WHITE, CENTER);
+
+		var voiceY = py + ROW_VOICE_Y;
+		voiceLabel = rowLabel(colX, voiceY, FIELD_W, "lobby.voiceLabel");
+		well(colX, voiceY, FIELD_W, SKIN_H);
+		voiceArrows.push(label(colX + ARROW_IN, voiceY + TEXT_DROP, 0, "<", Lang.bodySize(), LobbyPanel.DIM, LEFT));
+		voiceArrows.push(label(colX + FIELD_W - ARROW_IN - 16, voiceY + TEXT_DROP, 0, ">", Lang.bodySize(), LobbyPanel.DIM, LEFT));
+		voiceText = label(colX, voiceY + TEXT_DROP, FIELD_W, "", Lang.bodySize(), FlxColor.WHITE, CENTER);
 
 		stripX = px + (panelW - STEPS * CHIP_W) * 0.5;
 		stripY = py + ROW_COLOR_Y;
-		colorLabel = label(stripX, stripY - LABEL_GAP, STEPS * CHIP_W, Lang.t("lobby.colorLabel"), 20, LobbyPanel.DIM, LEFT);
+		colorLabel = rowLabel(stripX, stripY, STEPS * CHIP_W, "lobby.colorLabel");
 
 		plate(stripX - 3, stripY - 3, STEPS * CHIP_W + 6, CHIP_H + 6, LobbyPanel.EDGE);
 
@@ -168,6 +188,13 @@ class DressUpSubState extends LobbyPanel
 		super.create();
 	}
 
+	function rowLabel(x:Float, wellY:Float, w:Float, key:String):FlxText
+	{
+		var t = label(x, 0, w, Lang.t(key), Lang.smallSize(), LobbyPanel.DIM, LEFT);
+		t.y = wellY - LABEL_GAP - t.textField.getLineMetrics(0).ascent;
+		return t;
+	}
+
 	function dressPreview():Void
 	{
 		previewGear.paint(SaveData.playerHue(), skin, gear);
@@ -191,17 +218,47 @@ class DressUpSubState extends LobbyPanel
 	{
 		skinText.text = util.Skins.nameOf(skin);
 		gearText.text = util.Skins.gearNameOf(gear);
+		voiceText.text = pitchLabel() + "x";
+	}
+
+	function pitchLabel():String
+	{
+		var v = Math.round(SaveData.voicePitch() * 100);
+		var frac = v % 100;
+		return Std.int(v / 100) + "." + (frac < 10 ? "0" + frac : "" + frac);
+	}
+
+	function hearVoice():Void
+	{
+		if (voiceClock > 0)
+			return;
+		voiceClock = VOICE_GAP;
+		if (sample != null && sample.playing)
+			sample.stop();
+		var line = "voice/hurt" + (1 + Std.random(systems.PlayerCombat.HURT_LINES));
+		sample = samples.get(line);
+		if (sample == null)
+		{
+			sample = FlxG.sound.create(util.Paths.sound(line)).setup(systems.PlayerCombat.VOICE);
+			samples.set(line, sample);
+		}
+		sample.volume = systems.PlayerCombat.VOICE;
+		sample.pitch = SaveData.voicePitch();
+		sample.play(true);
 	}
 
 	function refreshFocus():Void
 	{
 		skinLabel.color = focus == ROW_SKIN ? FlxColor.WHITE : LobbyPanel.DIM;
 		gearLabel.color = focus == ROW_GEAR ? FlxColor.WHITE : LobbyPanel.DIM;
+		voiceLabel.color = focus == ROW_VOICE ? FlxColor.WHITE : LobbyPanel.DIM;
 		colorLabel.color = focus == ROW_COLOR ? FlxColor.WHITE : LobbyPanel.DIM;
 		for (a in skinArrows)
 			a.color = focus == ROW_SKIN ? FlxColor.WHITE : LobbyPanel.DIM;
 		for (a in gearArrows)
 			a.color = focus == ROW_GEAR ? FlxColor.WHITE : LobbyPanel.DIM;
+		for (a in voiceArrows)
+			a.color = focus == ROW_VOICE ? FlxColor.WHITE : LobbyPanel.DIM;
 		for (b in ringBars)
 			b.color = focus == ROW_COLOR ? FlxColor.WHITE : LobbyPanel.DIM;
 	}
@@ -222,6 +279,16 @@ class DressUpSubState extends LobbyPanel
 
 	function turnModel(turn:Int):Void
 	{
+		if (focus == ROW_VOICE)
+		{
+			var was = SaveData.voicePitch();
+			SaveData.setVoicePitch(was + turn * VOICE_STEP);
+			refreshSkin();
+			if (SaveData.voicePitch() != was)
+				hearVoice();
+			return;
+		}
+
 		if (focus == ROW_SKIN)
 		{
 			skin = (skin + turn + util.Skins.count()) % util.Skins.count();
@@ -261,6 +328,9 @@ class DressUpSubState extends LobbyPanel
 		super.update(elapsed);
 
 		tickArm(elapsed);
+
+		if (voiceClock > 0)
+			voiceClock -= elapsed;
 
 		blink += elapsed * CARET_RATE;
 		caret.visible = Math.sin(blink) > -0.2;

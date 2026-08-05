@@ -35,8 +35,6 @@ class PuppetMirror
 	private var clock:Float = 0;
 	private var pendingBossIds:Array<Int> = [];
 	private var bossPack:Array<Enemies> = [];
-	private var lastBossX:Float = 0;
-	private var lastBossY:Float = 0;
 
 	public function new(director:EnemyDirector, pickups:Pickups, scraps:Scraps, status:PlayerCombat, hud:Hud, layers:RenderLayers)
 	{
@@ -51,13 +49,32 @@ class PuppetMirror
 	public function noteClaim(netId:Int):Void
 		claimedAt.set(netId, clock);
 
-	public function expectBoss(id:Int):Void
-		pendingBossIds.push(id);
+	public function expectBossPack(ids:Array<Int>):Void
+	{
+		resetBossPack();
+		if (ids == null)
+			return;
+		for (id in ids)
+		{
+			var boss = puppets.get(id);
+			if (boss != null)
+				bossPack.push(boss);
+			else
+				pendingBossIds.push(id);
+		}
+		showBossPackWhenReady();
+	}
 
 	public function resetBossPack():Void
 	{
 		pendingBossIds = [];
 		bossPack = [];
+	}
+
+	function showBossPackWhenReady():Void
+	{
+		if (pendingBossIds.length == 0 && bossPack.length > 0)
+			hud.trackBosses(bossPack);
 	}
 
 	public function update(elapsed:Float):Void
@@ -159,12 +176,7 @@ class PuppetMirror
 			if (pendingBossIds.remove(id))
 			{
 				bossPack.push(e);
-				hud.showBossBar(bossPack);
-			}
-			if (e.bossBody)
-			{
-				lastBossX = e.x + e.width / 2;
-				lastBossY = e.y + e.height / 2;
+				showBossPackWhenReady();
 			}
 		}
 
@@ -214,9 +226,6 @@ class PuppetMirror
 			}
 		}
 	}
-
-	public function blastLastBoss():Void
-		blastAt(lastBossX, lastBossY);
 
 	public function blastAt(x:Float, y:Float):Void
 	{
