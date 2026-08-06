@@ -9,29 +9,6 @@ typedef EnemyAnimData = {
 	loop:Bool
 }
 
-typedef GunData = {
-	image:String,
-	bullet:String,
-	speed:Float,
-	count:Int,
-	spread:Float,
-	damage:Float,
-	burst:Int,
-	burstInterval:Float,
-	cooldown:Float,
-	range:Float,
-	muzzle:Float
-}
-
-typedef BossData = {
-	moveSpeed:Float,
-	prefMin:Float,
-	prefMax:Float,
-	strafeWeight:Float,
-	gunDist:Float,
-	guns:Array<GunData>
-}
-
 typedef FlankData = {
 	standoff:Float,
 	minDist:Float,
@@ -125,7 +102,6 @@ typedef EnemyData = {
 	attackRange:Float,
 	attack:String,
 	?big:Bool,
-	?boss:BossData,
 	?domo:DomoData,
 	?flank:FlankData,
 	?worm:WormData,

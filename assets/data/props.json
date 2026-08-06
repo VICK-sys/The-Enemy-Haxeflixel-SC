@@ -20,13 +20,6 @@
 			"rect": [],
 			"scale": 2,
 			"hitbox": [3, 88, 288, 64]
-		},
-		{
-			"name": "rofelfanHouse",
-			"sheet": "props/rofelfanHouse",
-			"rect": [],
-			"scale": 2,
-			"hitbox": [14, 104, 124, 28]
 		}
 	]
 }

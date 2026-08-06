@@ -232,7 +232,7 @@ class Fx
 	public static function bossBlast(cx:Float, cy:Float):FlxSprite
 	{
 		var boom = new FlxSprite();
-		boom.loadGraphic(Paths.image("effects/rofel_explosion"), true, 80, 48);
+		boom.loadGraphic(Paths.image("effects/boss_explosion"), true, 80, 48);
 		boom.animation.add("boom", [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11], 14, false);
 		boom.antialiasing = false;
 		boom.scale.set(9, 9);
@@ -240,7 +240,7 @@ class Fx
 		boom.x = cx - boom.width / 2;
 		boom.y = cy - boom.height / 2;
 		boom.animation.play("boom");
-		util.Sfx.at("rofel_explode", cx, cy, 0.9);
+		util.Sfx.at("boss_explode", cx, cy, 0.9);
 		shake(0.02, 0.5);
 		return boom;
 	}

@@ -170,16 +170,6 @@ class Enemies extends FlxSprite
 			grabbable = false;
 			explodes = true;
 		}
-		else if (data.attack == "boss")
-		{
-			bossBody = true;
-			gun = new FlxSprite();
-			gun.antialiasing = false;
-			attack = new RofelBoss(gun, data.boss);
-			selfDriven = true;
-			grabbable = false;
-			explodes = true;
-		}
 		else if (data.attack == "flank")
 		{
 			attack = new FlankAttack(data.flank);

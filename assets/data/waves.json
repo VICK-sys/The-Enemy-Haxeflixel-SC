@@ -18,9 +18,6 @@
 			"worm"
 		]
 	],
-	"debugBosses": [
-		"rofel"
-	],
 	"scaling": {
 		"hpPerWave": 0.1,
 		"speedPerWave": 0.025,
