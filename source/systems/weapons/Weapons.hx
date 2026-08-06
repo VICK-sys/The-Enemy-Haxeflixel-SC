@@ -34,6 +34,31 @@ class Weapons
 	public var disabled:Bool = false;
 	public var inputBlocked:Bool = false;
 
+	public var recovering(get, never):Bool;
+	public var recoverProgress(get, never):Float;
+
+	function get_recovering():Bool
+	{
+		return switch (weapon)
+		{
+			case 1: revolver.isReloading;
+			case 2: bow.recovering;
+			case 3: yoyoJab.recovering;
+			default: swing.recovering;
+		}
+	}
+
+	function get_recoverProgress():Float
+	{
+		return switch (weapon)
+		{
+			case 1: revolver.reloadProgress;
+			case 2: bow.recoverProgress;
+			case 3: yoyoJab.recoverProgress;
+			default: swing.recoverProgress;
+		}
+	}
+
 	private var wasBlocked:Bool = false;
 	public var onAttack:(WeaponMode, Float, Float, Float, Float, Float, Float, Float, Float, Bool) -> Void;
 	public var onSuper:Int -> Void;
@@ -59,6 +84,7 @@ class Weapons
 		gigaSwing.onConnect = gigaHit(gigaSwing);
 		giga = new GigaCharge(held, fx, weaponCfg.giga);
 		yoyoJab = new YoyoJab(director, hits, fx);
+		yoyoJab.usePickups(pickups);
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		revolver = new RevolverAttack(arena, director, fx, hits, status);
 		revolver.onTwinShot = function(tx:Float, ty:Float, dx:Float, dy:Float, deg:Float, big:Bool)
@@ -173,6 +199,8 @@ class Weapons
 		revolver.placeTwin(held.sprite, player.x + player.width * 0.5, player.y + player.height * 0.5, handX(), handY(), gunAim.dx, gunAim.dy);
 		if (held.kind == HeldWeapon.REVOLVER && revolver.isReloading)
 			held.reloadPose(revolver.reloadProgress);
+		if (held.kind == HeldWeapon.BOW && bow.recovering)
+			held.reloadPose(bow.recoverProgress);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
 		if (status.dead && flurry.active)
@@ -196,6 +224,17 @@ class Weapons
 		yoyoJab.flight.setHue(util.SaveData.playerHue());
 		arrowStorm.paint(util.SaveData.playerHue());
 		bow.rain.hue = util.SaveData.playerHue();
+	}
+
+	public function setBuried(on:Bool):Void
+	{
+		held.sprite.alpha = on ? 0 : 1;
+		swing.slashes.visible = !on;
+		gigaSwing.slashes.visible = !on;
+		flurrySwing.slashes.visible = !on;
+		flurryFinish.slashes.visible = !on;
+		yoyoJab.flight.string.visible = !on;
+		yoyoJab.flight.yoyo.visible = !on;
 	}
 
 	public var meleeShown(get, never):Float;

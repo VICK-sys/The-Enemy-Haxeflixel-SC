@@ -74,6 +74,8 @@ Two floors guard the rest of that. The yoyo will not sit closer to the hand than
 
 Damage repeats rather than landing once. Each enemy the yoyo touches is struck, then sits out `hitGap` before it can be struck again, so parking the yoyo on something grinds it down while sweeping across a crowd clips each of them. The push follows the string: out shoves a target away, coming home drags one toward the player. It does not touch enemy fire. The hammer swing and crossbow bash deflect shots instead.
 
+The deployed yoyo also collects a repair kit inside its hit circle. Full health keeps the kit on the ground.
+
 Holding costs. The throw runs for `holdTime` and then tires out on its own and returns, and a throw that ran itself out pays `restCooldown` rather than the short `cooldown` a released one pays. Letting go early is therefore worth doing. The reload bar above the player shows the wait, the same way it shows a reload.
 
 The held sprite hides for as long as the yoyo is out, since the yoyo is the held weapon. Q recalls it and spends the super. Right click recalls it and throws the grab.
@@ -109,6 +111,8 @@ The HUD prints `displayRounds` against `capacity`. That is `rounds` at rest. Dur
 `rounds` itself does not move until the reload finishes, so nothing can fire off a half-full display. The blue bar stays with the crossbow's arrow rain, which is a continuous charge with no count to show.
 
 The crossbow borrows the same bar. Every shot puts the bow on `shotCooldown`, and that cooldown drives the bar exactly as a reload does, with its own crank sound. Full charge used to skip the crank, which made the bar appear on some shots and not others, and a reload you cannot predict reads as a broken one. Full charge keeps the pierce as its reward. The crank runs a second, the length of its sound, so the two end together.
+
+The held crossbow animates through the same cooldown. Its sheet `crossbow_reload` holds a shoot row and an 11 frame crank row, and `HeldWeapon.bowFrame` maps the recover progress to a frame: the first `XBOW_SHOOT_CUT` of the cooldown steps through the shoot frames, the rest scrubs the crank row, the same progress-drives-the-frame pattern as the revolver. The recoil kick is separate and unchanged. The mapping is a pure function of the progress, so the puppet mirror sends one number in the `rl` field, now for the bow as well as the revolver, and both machines land on the same frame.
 
 ### The reload bar
 

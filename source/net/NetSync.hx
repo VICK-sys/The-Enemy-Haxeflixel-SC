@@ -27,6 +27,7 @@ class NetSync
 	static inline var DRAG_PULL:Float = 10;
 
 	public var onWaveEvt:Int->Void;
+	public var onWaveClearedEvt:Void->Void;
 	public var onBossEvt:Void->Void;
 	public var onBossDefeatedEvt:Void->Void;
 	public var onBossKillEvt:(Float, Float) -> Void;
@@ -35,6 +36,7 @@ class NetSync
 	public var onReturnLobby:Void->Void;
 	public var runFailed(default, null):Bool = false;
 	public var afk:Bool = false;
+	public var leveling:Bool = false;
 	public var makeFx:RemoteAvatar->RemoteFx;
 
 	private var player:Player;
@@ -64,6 +66,10 @@ class NetSync
 
 	public var onPeerLost:Int->Void;
 
+	static inline var GREET_GRACE_FRAMES:Int = 180;
+
+	private var names:Map<Int, String> = new Map();
+	private var greeted:Map<Int, Bool> = new Map();
 	private var deathWave:Int = -1;
 	private var deathBoss:Int = -1;
 	private var bossBeat:Int = 0;
@@ -137,6 +143,29 @@ class NetSync
 	public function peerCount():Int
 		return roster.count();
 
+	function sysNotice(text:String):Void
+	{
+		systems.chat.ChatLog.notice(text);
+		Net.send({t: "chatN", x: text});
+	}
+
+	public function kickByName(name:String):Bool
+	{
+		if (!Net.isHost)
+			return false;
+		var want = name.toLowerCase();
+		for (id in names.keys())
+			if (names.get(id).toLowerCase() == want)
+			{
+				Net.kick(id);
+				return true;
+			}
+		return false;
+	}
+
+	public function eachPeerIcon(f:(Float, Int, Bool, Float) -> Void):Void
+		roster.eachLive(function(p) f(p.avatar.hue, p.avatar.skin, p.dead || p.avatar.healthFrac <= 0, p.avatar.healthFrac));
+
 	function wireHost():Void
 	{
 		var oldWave = director.onWave;
@@ -145,6 +174,14 @@ class NetSync
 			Net.send({t: "wave", n: n});
 			if (oldWave != null)
 				oldWave(n);
+		};
+
+		var oldWaveCleared = director.onWaveCleared;
+		director.onWaveCleared = function()
+		{
+			Net.send({t: "waveClear"});
+			if (oldWaveCleared != null)
+				oldWaveCleared();
 		};
 
 		var oldBoss = director.onBoss;
@@ -171,11 +208,11 @@ class NetSync
 		};
 
 		var oldFall = director.onBossFall;
-		director.onBossFall = function(x, y, last)
+		director.onBossFall = function(x, y, last, domo)
 		{
-			Net.send({t: "bossFall", x: r1(x), y: r1(y)});
+			Net.send({t: "bossFall", x: r1(x), y: r1(y), d: domo ? 1 : 0});
 			if (oldFall != null)
-				oldFall(x, y, last);
+				oldFall(x, y, last, domo);
 		};
 
 		var oldKill = director.onBossKill;
@@ -261,9 +298,9 @@ class NetSync
 	public function peersHurt():Bool
 	{
 		var hurt = false;
-		roster.eachAvatar(function(a)
+		roster.eachLive(function(p)
 		{
-			if (a.healthFrac < 0.999)
+			if (!p.dead && p.avatar.healthFrac < 0.999)
 				hurt = true;
 		});
 		return hurt;
@@ -351,6 +388,13 @@ class NetSync
 				var p = roster.get(msg.f);
 				if (p != null)
 					p.avatar.setName(msg.n);
+				names.set(msg.f, msg.n);
+				if (Net.isHost && !greeted.exists(msg.f))
+				{
+					greeted.set(msg.f, true);
+					if (frame > GREET_GRACE_FRAMES)
+						sysNotice(util.Lang.t("chat.joined", [msg.n]));
+				}
 
 			case "chat", "chatE", "chatD":
 				systems.chat.ChatLog.receive(msg);
@@ -394,6 +438,13 @@ class NetSync
 				announceName();
 
 			case "bye":
+				if (Net.isHost)
+				{
+					var name = names.get(msg.id);
+					sysNotice(util.Lang.t("chat.left", [name == null ? "PLAYER " + (msg.id + 1) : name]));
+				}
+				names.remove(msg.id);
+				greeted.remove(msg.id);
 				roster.drop(msg.id);
 				if (onPeerLost != null)
 					onPeerLost(msg.id);
@@ -413,7 +464,7 @@ class NetSync
 
 			case "hit" if (Net.isHost):
 				var e = findEnemy(msg.id);
-				if (e != null && !e.isDead)
+				if (e != null && !e.isDead && !e.buried)
 				{
 					combat.hits.applyHit(e, msg.px, msg.py, clampHit(msg.d), false);
 					var stun:Float = msg.s;
@@ -470,6 +521,10 @@ class NetSync
 				if (onWaveEvt != null)
 					onWaveEvt(msg.n);
 
+			case "waveClear" if (Net.isClient):
+				if (onWaveClearedEvt != null)
+					onWaveClearedEvt();
+
 			case "boss" if (Net.isClient):
 				bossDown = false;
 				mirror.resetBossPack();
@@ -485,7 +540,7 @@ class NetSync
 					onBossKillEvt(msg.x, msg.y);
 
 			case "bossFall" if (Net.isClient):
-				mirror.blastAt(msg.x, msg.y);
+				mirror.blastAt(msg.x, msg.y, msg.d == 1);
 
 			case "bossDead" if (Net.isClient):
 				if (!bossDown)
@@ -580,6 +635,9 @@ class NetSync
 		return found;
 	}
 
+	public static inline var DEAD_BIT:Int = 1;
+	public static inline var BURIED_BIT:Int = 2;
+
 	function sendSnapshot():Void
 	{
 		var en:Array<Array<Dynamic>> = [];
@@ -589,7 +647,7 @@ class NetSync
 				e.netId = nextEnemyId++;
 			var row:Array<Dynamic> = [
 				e.netId, e.kind, r1(e.x), r1(e.y), e.flipX ? 1 : 0,
-				e.animation.name, e.hp, e.isDead ? 1 : 0
+				e.animation.name, e.hp, (e.isDead ? DEAD_BIT : 0) | (e.buried ? BURIED_BIT : 0)
 			];
 			if (e.gun != null && e.gun.graphic != null)
 			{
@@ -610,7 +668,8 @@ class NetSync
 		Net.send({t: "snap", w: director.wave, en: en, pk: pk});
 	}
 
-	static inline var REVOLVER_WEAPON:Int = 1;
+	static inline var REVOLVER_WEAPON:Int = systems.weapons.HeldWeapon.REVOLVER;
+	static inline var BOW_WEAPON:Int = systems.weapons.HeldWeapon.BOW;
 
 	function twinState(player:entities.Player):Array<Float>
 	{
@@ -630,6 +689,7 @@ class NetSync
 		Net.send({
 			t: "av",
 			af: afk,
+			lv: leveling,
 			x: r1(player.x),
 			y: r1(player.y),
 			hu: SaveData.playerHue(),
@@ -643,10 +703,12 @@ class NetSync
 			hf: held.flipX,
 			hg: held.flipY,
 			ho: [r1(held.x - player.x), r1(held.y - player.y), r2(held.scale.x), r2(combat.held.charge)],
-			rl: combat.weapon == REVOLVER_WEAPON && combat.revolver.isReloading ? r2(combat.revolver.reloadProgress) : -1,
+			rl: combat.weapon == REVOLVER_WEAPON && combat.revolver.isReloading ? r2(combat.revolver.reloadProgress) : combat.weapon == BOW_WEAPON
+				&& combat.bow.recovering ? r2(combat.bow.recoverProgress) : -1,
 			tw: twinState(player),
 			bd: [r1(player.angle), r1(player.offset.y - player.baseOffsetY), r2(player.scale.x), r2(player.scale.y)],
 			dd: status.dead && !status.throes,
+			dy: status.throes ? r2(status.throeRamp) : -1,
 			dg: status.guarding,
 			pf: status.puffs,
 			hl: r2(status.healthMax > 0 ? status.health / status.healthMax : 1),
@@ -685,7 +747,7 @@ class NetSync
 		{
 			deathWave = director.wave;
 			deathBoss = bossBeat;
-			hud.showRespawn();
+			hud.showRespawn(deathWave + RESPAWN_WAVES);
 		}
 		if (director.wave >= deathWave + RESPAWN_WAVES || bossBeat > deathBoss)
 		{

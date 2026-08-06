@@ -51,6 +51,10 @@ class RemoteAvatar
 	private var sparked:Bool = false;
 	private var puffCount:Int = -1;
 	private var puff:FlxSprite;
+	private var throeing:Bool = false;
+	private var throeOX:Float = 0;
+	private var throeOY:Float = 0;
+	private var throeRamp:Float = 0;
 	private var afk:systems.AfkIndicator;
 
 	public var fx:systems.Fx;
@@ -60,6 +64,8 @@ class RemoteAvatar
 	static inline var REVOLVER_INDEX:Int = 1;
 	static inline var REV_FRAMES:Int = 11;
 	static inline var REV_CELL:Int = 32;
+	static inline var XBOW_CELL_W:Int = 39;
+	static inline var XBOW_CELL_H:Int = 32;
 	static inline var TWIN_SHADE:Int = 0xFF8A8A8A;
 	static inline var BOW_INDEX:Int = 2;
 	static inline var OFFSET_Y:Float = 56;
@@ -69,7 +75,7 @@ class RemoteAvatar
 	static inline var LABEL_BOX_OVERLAP:Float = 14;
 	static inline var TAG_UP:Float = 130;
 	static inline var TAG_WIDTH:Float = 320;
-	static inline var NOTE_UP:Float = 119;
+	static inline var NOTE_BOX_OVERLAP:Float = 20;
 	static inline var NOTE_COLOR:Int = 0xFFE8C860;
 	static inline var GLOW_RAMP:Float = 0.3;
 	static inline var GLOW_BASE:Float = 0.5;
@@ -122,7 +128,7 @@ class RemoteAvatar
 		twinHeld.scale.set(4, 4);
 		twinHeld.color = TWIN_SHADE;
 		twinHeld.visible = false;
-		layers.entityLayer.add(twinHeld);
+		layers.host.insert(layers.host.members.indexOf(layers.entityLayer), twinHeld);
 
 		shadow = new FlxSprite(0, 0, Paths.image("effects/shadow"));
 		shadow.scale.set(4, 4);
@@ -154,7 +160,6 @@ class RemoteAvatar
 
 		layers.trackPart(gear.sprite, sprite, RenderLayers.GEAR_BIAS);
 		layers.trackPart(held, sprite, RenderLayers.HELD_BIAS);
-		layers.trackPart(twinHeld, sprite, RenderLayers.HELD_BIAS);
 	}
 
 	public function setReady(on:Bool):Void
@@ -165,11 +170,25 @@ class RemoteAvatar
 
 	public function clearDeath():Void
 	{
+		applyThroes(-1);
 		wasDead = false;
 		wasReviving = false;
 		ritual.cancel();
 		burst.clear();
 		ghost.hide();
+	}
+
+	public function hideAll():Void
+	{
+		sprite.visible = false;
+		held.visible = false;
+		twinHeld.visible = false;
+		gear.sprite.visible = false;
+		shadow.visible = false;
+		tag.visible = false;
+		note.visible = false;
+		bubble.visible = false;
+		dashGhost.clear();
 	}
 
 	public function consumeSpark():Bool
@@ -260,7 +279,7 @@ class RemoteAvatar
 		if (weaponIdx >= 0)
 		{
 			reloadGfx = false;
-			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
+			loadHeldArt();
 		}
 		var was = sprite.animation.name;
 		sprite.frames = util.HuePalette.sparrow(util.Skins.of(sk), h);
@@ -276,6 +295,14 @@ class RemoteAvatar
 		sprite.scale.set(4, 4);
 	}
 
+	function loadHeldArt():Void
+	{
+		if (weaponIdx == BOW_INDEX)
+			held.loadGraphic(util.HuePalette.graphic("items/crossbow_reload", hue), true, XBOW_CELL_W, XBOW_CELL_H);
+		else
+			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
+	}
+
 	function setReloadArt(on:Bool):Void
 	{
 		if (on == reloadGfx)
@@ -284,12 +311,14 @@ class RemoteAvatar
 		if (on)
 			held.loadGraphic(util.HuePalette.graphic("items/revolver_reload", hue), true, REV_CELL, REV_CELL);
 		else
-			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[weaponIdx], hue));
+			loadHeldArt();
 		held.origin.set(held.width * 0.5, held.height * 0.5);
 	}
 
 	public function setLeveling(on:Bool):Void
 	{
+		if (leveling == on)
+			return;
 		leveling = on;
 		if (on)
 			note.text = Lang.t("hud.leveling");
@@ -298,11 +327,53 @@ class RemoteAvatar
 	public function setName(name:String):Void
 		tag.text = name;
 
+	function applyThroes(ramp:Float):Void
+	{
+		if (ramp < 0)
+		{
+			if (throeing)
+			{
+				throeing = false;
+				sprite.offset.set(throeOX, throeOY);
+				sprite.setColorTransform(1, 1, 1, 1, 0, 0, 0, 0);
+			}
+			return;
+		}
+
+		if (!throeing)
+		{
+			throeing = true;
+			throeOX = sprite.offset.x;
+			throeOY = sprite.offset.y;
+			throeRamp = 0;
+			sprite.animation.play("hurt", true);
+		}
+		if (ramp > throeRamp)
+			throeRamp = ramp;
+	}
+
+	function updateThroes(elapsed:Float):Void
+	{
+		if (!throeing)
+			return;
+		throeRamp += elapsed / systems.PlayerCombat.THROES;
+		if (throeRamp > 1)
+			throeRamp = 1;
+		sprite.offset.set(throeOX + flixel.FlxG.random.float(-systems.PlayerCombat.THROES_SHAKE, systems.PlayerCombat.THROES_SHAKE),
+			throeOY + flixel.FlxG.random.float(-systems.PlayerCombat.THROES_SHAKE, systems.PlayerCombat.THROES_SHAKE));
+
+		var lit = Math.pow(throeRamp, systems.PlayerCombat.WHITEN);
+		var add = Std.int(255 * lit);
+		var keep = 1 - lit;
+		sprite.setColorTransform(keep, keep, keep, 1, add, add, add, 0);
+	}
+
 	public function apply(m:Dynamic):Void
 	{
+		var deathRamp:Float = m.dy == null ? -1.0 : (m.dy : Float);
 		targetX = m.x;
 		targetY = m.y;
-		if (!haveTarget || Math.abs(sprite.x - targetX) + Math.abs(sprite.y - targetY) > SNAP_DIST)
+		if (!haveTarget || (!throeing && deathRamp < 0 && Math.abs(sprite.x - targetX) + Math.abs(sprite.y - targetY) > SNAP_DIST))
 		{
 			sprite.x = targetX;
 			sprite.y = targetY;
@@ -312,6 +383,7 @@ class RemoteAvatar
 		var dead:Bool = m.dd == true;
 		guarding = m.dg == true;
 		setAfk(m.af == true);
+		setLeveling(m.lv == true);
 
 		if (m.pf != null)
 		{
@@ -325,6 +397,7 @@ class RemoteAvatar
 		{
 			burst.burst(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue, sprite.flipX, util.Skins.of(skin));
 			ghost.show(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, hue);
+			util.Sfx.at("player_explode", sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, systems.PlayerCombat.BOOM);
 		}
 		else if (!dead && wasDead)
 		{
@@ -345,7 +418,7 @@ class RemoteAvatar
 		sprite.flipX = m.fx;
 		if (m.hu != null)
 			setLook(m.hu, m.sk == null ? skin : m.sk, m.gr == null ? gearIdx : m.gr);
-		if (m.an != null && sprite.animation.name != m.an && sprite.animation.getByName(m.an) != null)
+		if (!throeing && deathRamp < 0 && m.an != null && sprite.animation.name != m.an && sprite.animation.getByName(m.an) != null)
 			sprite.animation.play(m.an);
 
 		var wi:Int = m.wi;
@@ -353,7 +426,7 @@ class RemoteAvatar
 		{
 			weaponIdx = wi;
 			reloadGfx = false;
-			held.loadGraphic(util.HuePalette.graphic(WEAPON_IMAGES[wi], hue));
+			loadHeldArt();
 
 			if (wi == REVOLVER_INDEX || wi == BOW_INDEX)
 				held.origin.set(held.width * 0.5, held.height * 0.5);
@@ -370,6 +443,8 @@ class RemoteAvatar
 				idx = REV_FRAMES - 1;
 			held.animation.frameIndex = idx;
 		}
+		else if (weaponIdx == BOW_INDEX)
+			held.animation.frameIndex = rl >= 0 ? HeldWeapon.bowFrame(rl) : 0;
 		held.visible = m.hv;
 		held.angle = m.ha;
 		held.flipX = m.hf;
@@ -411,9 +486,11 @@ class RemoteAvatar
 		if (bd != null)
 		{
 			sprite.angle = bd[0];
-			sprite.offset.y = OFFSET_Y + bd[1];
+			if (!throeing && deathRamp < 0)
+				sprite.offset.y = OFFSET_Y + bd[1];
 			sprite.scale.set(bd[2], bd[3]);
 		}
+		applyThroes(deathRamp);
 
 		shadow.visible = sprite.visible;
 	}
@@ -423,6 +500,7 @@ class RemoteAvatar
 		dashGhost.enabled = util.SaveData.dashTrail();
 		dashGhost.update(elapsed, guarding && !wasDead);
 		glowTick(elapsed);
+		updateThroes(elapsed);
 		if (wasDead && ghost.sprite.exists)
 			ghost.track(sprite.x + sprite.width * 0.5, sprite.y + sprite.height * 0.5, sprite.flipX);
 		burst.update(elapsed);
@@ -434,9 +512,12 @@ class RemoteAvatar
 			sprite.animation.name);
 		if (!haveTarget)
 			return;
-		var k = Math.min(1, LERP * elapsed);
-		sprite.x += (targetX - sprite.x) * k;
-		sprite.y += (targetY - sprite.y) * k;
+		if (!throeing)
+		{
+			var k = Math.min(1, LERP * elapsed);
+			sprite.x += (targetX - sprite.x) * k;
+			sprite.y += (targetY - sprite.y) * k;
+		}
 
 		held.x = sprite.x + heldOX;
 		held.y = sprite.y + heldOY;
@@ -456,7 +537,7 @@ class RemoteAvatar
 
 		note.visible = sprite.visible && leveling && !afk.on;
 		note.x = tag.x;
-		note.y = sprite.y - NOTE_UP;
+		note.y = tag.y - note.height + NOTE_BOX_OVERLAP;
 
 		afk.update();
 
@@ -473,6 +554,8 @@ class RemoteAvatar
 				var labelTop = sprite.y - BUBBLE_UP;
 				if (tag.visible && tag.text != "")
 					labelTop = tag.y;
+				if (note.visible)
+					labelTop = note.y;
 				if (afk.text.visible)
 					labelTop = afk.text.y;
 				bubble.y = labelTop - bubble.height + LABEL_BOX_OVERLAP;

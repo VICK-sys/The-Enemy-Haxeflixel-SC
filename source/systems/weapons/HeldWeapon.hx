@@ -22,6 +22,12 @@ class HeldWeapon
 	static inline var SWING_SCALE:Float = 2.5;
 	static inline var REV_FRAMES:Int = 11;
 	static inline var REV_CELL:Int = 32;
+	static inline var XBOW_CELL_W:Int = 39;
+	static inline var XBOW_CELL_H:Int = 32;
+	static inline var XBOW_SHOOT_FRAMES:Int = 5;
+	static inline var XBOW_RELOAD_START:Int = 11;
+	static inline var XBOW_RELOAD_FRAMES:Int = 11;
+	static inline var XBOW_SHOOT_CUT:Float = 0.2;
 	static inline var REV_KICK:Float = 16;
 	static inline var REV_BACK:Float = 11;
 	static inline var REV_TIME:Float = 0.4;
@@ -164,12 +170,32 @@ class HeldWeapon
 
 	public function reloadPose(p:Float):Void
 	{
-		if (kind == REVOLVER)
+		if (kind == REVOLVER || kind == BOW)
 			reloadP = p;
+	}
+
+	public static function bowFrame(p:Float):Int
+	{
+		if (p < XBOW_SHOOT_CUT)
+		{
+			var idx = Std.int(p / XBOW_SHOOT_CUT * XBOW_SHOOT_FRAMES);
+			return idx > XBOW_SHOOT_FRAMES - 1 ? XBOW_SHOOT_FRAMES - 1 : idx;
+		}
+		var idx = Std.int((p - XBOW_SHOOT_CUT) / (1 - XBOW_SHOOT_CUT) * XBOW_RELOAD_FRAMES);
+		if (idx > XBOW_RELOAD_FRAMES - 1)
+			idx = XBOW_RELOAD_FRAMES - 1;
+		return XBOW_RELOAD_START + idx;
 	}
 
 	function updateReload():Void
 	{
+		if (kind == BOW)
+		{
+			sprite.animation.frameIndex = reloadP >= 0 ? bowFrame(reloadP) : 0;
+			reloadP = -1;
+			return;
+		}
+
 		if (reloadP >= 0)
 		{
 			if (!reloadGfx)
@@ -301,13 +327,14 @@ class HeldWeapon
 	{
 		if (kind == REVOLVER && reloadGfx)
 			sprite.loadGraphic(util.HuePalette.graphic("items/revolver_reload", util.SaveData.playerHue()), true, REV_CELL, REV_CELL);
+		else if (kind == BOW)
+			sprite.loadGraphic(util.HuePalette.graphic("items/crossbow_reload", util.SaveData.playerHue()), true, XBOW_CELL_W, XBOW_CELL_H);
 		else
 		{
 			var img = switch (kind)
 			{
-				case 1: "items/revolver";
-				case 2: "items/crossbow";
-				case 3: "items/yoyo";
+				case REVOLVER: "items/revolver";
+				case HOOK: "items/yoyo";
 				default: "items/hammer";
 			};
 			sprite.loadGraphic(util.HuePalette.graphic(img, util.SaveData.playerHue()));
