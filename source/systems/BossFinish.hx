@@ -18,6 +18,7 @@ class BossFinish
 	static inline var FADE:Float = 0.35;
 
 	public var active(get, never):Bool;
+	public var baseZoom:Void->Float;
 
 	private var player:Player;
 	private var fx:Fx;
@@ -26,7 +27,6 @@ class BossFinish
 	private var atX:Float = 0;
 	private var atY:Float = 0;
 	private var fromZoom:Float = 1;
-	private var toZoom:Float = 1;
 	private var whoosh:FlxSound;
 
 	public function new(player:Player, fx:Fx)
@@ -47,7 +47,6 @@ class BossFinish
 		{
 			running = true;
 			fromZoom = FlxG.camera.zoom;
-			toZoom = fromZoom * ZOOM_IN;
 			if (whoosh == null)
 				whoosh = FlxG.sound.create(Paths.sound("slowmo")).setup(VOLUME);
 			whoosh.volume = VOLUME;
@@ -63,7 +62,7 @@ class BossFinish
 		clock = 0;
 		hush();
 		fx.slowFactor = 1;
-		FlxG.camera.zoom = fromZoom;
+		FlxG.camera.zoom = baseZoom != null ? baseZoom() : fromZoom;
 		FlxG.camera.targetOffset.set(0, 0);
 	}
 
@@ -97,11 +96,13 @@ class BossFinish
 			reach = 1 - FlxEase.quadInOut(out);
 		}
 
+		var base = baseZoom != null ? baseZoom() : fromZoom;
 		fx.slowFactor = 1 + (SLOW - 1) * reach;
-		FlxG.camera.zoom = fromZoom + (toZoom - fromZoom) * reach;
+		FlxG.camera.zoom = base + (base * ZOOM_IN - base) * reach;
 
 		var pmx = player.x + player.width * 0.5;
 		var pmy = player.y + player.height * 0.5;
 		FlxG.camera.targetOffset.set((atX - pmx) * PULL * reach, (atY - pmy) * PULL * reach);
+		FlxG.camera.snapToTarget();
 	}
 }

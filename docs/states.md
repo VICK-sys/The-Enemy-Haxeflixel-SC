@@ -52,9 +52,11 @@ The camera leans toward the cursor rather than sitting on the player. It feeds `
 
 ## PauseSubState
 
-ESC opens it. It freezes the game, pauses all audio, and dims the screen. ESC closes it again. The volume keys still work while it is open.
+ESC opens it. Solo play freezes. Active one-shot game sounds stop. Reusable game sounds hold their position. Music continues through a quiet low-pass filter. The screen dims. ESC closes it again. The volume keys still work while it is open.
 
-It holds audio through `Music.hold` rather than pausing the sound front end directly, because pausing what is playing is only half the job. Timers and tweens live on global plugins, so they keep running while a substate is open even though the state itself does not update. Both of the boss show's music changes start from inside a timer, a beat after the boss arrives and a beat after it dies, so pausing on either of those beats let the new track start after the pause had already silenced the old one, and it played over the menu. While the hold is up `Music.play` still loads and swaps the track, then pauses it, so the resume on close picks it up where the player expects. The hold clears on close, on quit, and in `destroy`, since a track left held would follow the player into the next state as silence.
+During a run, the right side lists the current level and four attributes. Lobby pause omits this panel.
+
+`Music.hold` also covers track changes from global timers. Those timers can run while a substate is open. A new track starts muffled while the hold remains active. Release restores normal music and resumes only recorded reusable sounds. One-shot sounds do not resume. This prevents old effects from consuming OpenFL's 32 channels and delaying new sounds. Closing, quitting, and destroying the panel all clear the hold.
 
 A HELP row opens the same seven page popup the first run shows, so the controls are never more than a pause away. Opened from here its footer reads CLOSE rather than PLAY, since closing it lands back on the pause menu rather than into the game.
 
@@ -92,13 +94,13 @@ The selected weapon appears in the player's hand when PlayState opens. The tutor
 
 The screen remembers the last choice, so a repeat run or a map playtest is one keypress. It also ignores input for a moment after it opens. The keypress that started the run therefore cannot confirm it by accident.
 
-Each card shows that weapon's highest wave. The Stats screen shows the all-weapons result as Best Wave.
+Each card shows its highest wave at reduced opacity along the card top. The placement keeps tall weapons clear of the text. The Stats screen shows the all-weapons result as Best Wave.
 
 Online, the lobby opens this screen instead. A substate over PlayState would freeze the sim while the network kept feeding it packets. The lobby runs the same card screen through `OnlineState`, while nobody is in the game yet. Both routes write the same `lastPick` that PlayState equips.
 
 ## PlayState debug keys
 
-CONTROL with a number summons a boss encounter straight into the run, whatever the build. 0 summons the magma wyrm. 9 summons Domo. 8 summons Rofel. 7 summons Domo and the magma wyrm together. Each key uses the same `summonBoss` path as a boss wave. The path plays the banner, alarm and music. It refuses while another boss encounter is active.
+CONTROL with a number summons a boss encounter straight into the run, whatever the build. 0 summons the magma wyrm. 9 summons Domo. 7 summons Domo and the magma wyrm together. Each key uses the same `summonBoss` path as a boss wave. The path plays the banner, alarm and music. It refuses while another boss encounter is active.
 
 They answer to CONTROL rather than the bare number because they are not behind `#if debug` any more. The summons used to sit in that block with the rest of the debug row, which meant they did nothing at all in the build you actually play, and the row is the only way to reach a boss without grinding waves. The genuinely destructive keys, killing yourself, reviving and the hitbox overlay, are still debug only and still bare.
 
@@ -106,7 +108,7 @@ They answer to CONTROL rather than the bare number because they are not behind `
 
 The room you stand in before a run, reached from PLAY. It is a plain walled room built the way any custom map is, through `CustomArena`, so it gets collision, camera bounds and a background from the same code a real stage does. Its floor is a rock tile repeated over the room rather than the stage art, which `Arena.tileBackground` fills in: a stage background is one image stretched to the map, which on a room this size read as a blown up logo. The tile is scaled before it repeats, by the same four the rest of the art uses, so the rock sits at the size of everything else. Combat, waves and the HUD are simply absent rather than switched off, since nothing here builds them.
 
-Five signs stand in it: START, ONLINE, PLAYER, WEAPON and STATS. Walking within reach of one offers it on the interact key. START begins the run. ONLINE opens the host and join choices. A client cannot select HOST. An active host cannot select JOIN. PLAYER uses the character crate art and opens dress-up for color, skin, gear and name. WEAPON uses the tool-box art and opens the weapon cards. STATS uses the open-book art and opens the saved results. Desktop lobbies also contain the C prop. C shows no interaction prompt. Interacting with C shuts down Discord presence and closes the process immediately. It does not run an exit animation or network transition. The nearest textured interaction gains a one-source-pixel white outline while it is in range.
+Five signs stand in it: START, ONLINE, PLAYER, WEAPON and STATS. Walking within reach of one offers it on the interact key. START begins the run. ONLINE opens the host and join choices. A client cannot select HOST. An active host cannot select JOIN. PLAYER uses the character crate art and opens dress-up for color, skin, gear and name. The player editor keeps the preview on the left. It compacts the name, body, module, and sound rows above the color strip. Name typing starts only after the player clicks the name field. WEAPON uses the tool-box art and opens the weapon cards. STATS uses the open-book art and opens the saved results. Desktop lobbies also contain the C prop. C shows no interaction prompt. Interacting with C shuts down Discord presence and closes the process immediately. It does not run an exit animation or network transition. The nearest textured interaction gains a one-source-pixel white outline while it is in range.
 
 Presence is its own small thing rather than the game's netcode. `NetSync` is built around a running fight and wants a director, a HUD and a weapon set, none of which exist here, so the lobby sends its own `lob` message a few times a second carrying position, facing, animation, colors and name, and renders whoever answers with `RemoteAvatar`, which is the same body the fight uses. A peer that stops speaking for five seconds is dropped, which is what a guest closing its window looks like from the host's side.
 

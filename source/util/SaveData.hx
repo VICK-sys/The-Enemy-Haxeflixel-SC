@@ -485,6 +485,7 @@ class SaveData
 		ensure();
 		save.data.aimDeadzone = v < 0 ? 0 : (v > 0.3 ? 0.3 : v);
 		save.flush();
+		Controls.refreshSettings();
 	}
 
 	public static function padIcons():String
@@ -513,6 +514,7 @@ class SaveData
 		ensure();
 		save.data.gyroAim = v;
 		save.flush();
+		Controls.refreshSettings();
 	}
 
 	public static function lobbyHelpSeen():Bool
@@ -554,19 +556,6 @@ class SaveData
 		save.flush();
 	}
 
-	public static function runValue():Int
-	{
-		ensure();
-		return save.data.runValue != null ? save.data.runValue : 0;
-	}
-
-	public static function setRunValue(v:Int):Void
-	{
-		ensure();
-		save.data.runValue = v;
-		save.flush();
-	}
-
 	public static function controls():{keys:Array<Int>, pad:Array<Int>}
 	{
 		ensure();
@@ -592,8 +581,8 @@ class SaveData
 		applyFramerate();
 		systems.Fx.shakeScale = shakeAmount();
 		systems.Fx.freezeScale = freezeAmount();
-		states.PlayState.cursorLean = cameraLean();
 		Sfx.positional = sound3d();
+		Controls.refreshSettings();
 		AspectBars.apply();
 		if (Main.counter != null)
 			Main.counter.visible = showFps();

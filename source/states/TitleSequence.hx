@@ -17,6 +17,7 @@ class TitleSequence extends FlxState
     private var modLogoAnimated:FlxSprite;
     private var canSkip:Bool = false;
     private var skipped:Bool = false;
+    private var closing:Bool = false;
     private var wipe:IrisWipe;
 
     override public function create()
@@ -25,11 +26,7 @@ class TitleSequence extends FlxState
         util.Lang.init();
         util.Controls.init();
         SaveData.applySettings();
-        FlxG.sound.onVolumeChange.add(function(v:Float)
-        {
-            if (!FlxG.sound.muted)
-                SaveData.setVolume(v);
-        });
+        FlxG.sound.onVolumeChange.add(storeVolume);
         DiscordPresence.menu();
 
         new FlxTimer().start(3, function(timer:FlxTimer) {
@@ -70,10 +67,25 @@ class TitleSequence extends FlxState
         }
     }
 
+    function storeVolume(v:Float):Void
+    {
+        if (!FlxG.sound.muted)
+            SaveData.setVolume(v);
+    }
+
     function die(tween:FlxTween):Void {
+        if (closing)
+            return;
+        closing = true;
         if (wipe == null)
             wipe = new IrisWipe(this);
         wipe.close(function() FlxG.switchState(() -> new MainMenuState()));
+    }
+
+    override public function destroy():Void
+    {
+        FlxG.sound.onVolumeChange.remove(storeVolume);
+        super.destroy();
     }
 
 }

@@ -289,9 +289,11 @@ class Net
 		}
 	}
 
+	static var drainScratch:haxe.io.Bytes = haxe.io.Bytes.alloc(8192);
+
 	static function drain(i:Int):Bool
 	{
-		var bytes = haxe.io.Bytes.alloc(8192);
+		var bytes = drainScratch;
 		while (true)
 		{
 			try

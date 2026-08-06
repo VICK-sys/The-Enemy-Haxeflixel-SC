@@ -14,15 +14,19 @@ Puppets live in a `PuppetDirector`. That `EnemyDirector` subclass swaps spawning
 
 A landed client attack draws its own feedback at once, then sends a damage *claim*. That feedback is sparks, sound and a hit flash. The host applies the claim and owns the result. The death comes back in the next snapshot. The client takes the kill for the super meter if it claimed that enemy recently.
 
-The shop round runs on four messages. The host's `lvl` opens every peer's shop. A player entering sends `lvlin`, which puts the LEVELING note over them on every other screen. Closing the menu, or a shop timing out unvisited, sends `lvldone`, and the host releases with `lvlgo` once everyone has reported. Nobody is pulled into a menu by someone else. The broadcast opens shops, not screens.
+Clients ignore buried targets before feedback or a damage claim. The host rejects claims that arrive after a target burrows.
 
-Each defeated boss kind sends `bossFall` with its position. Guests blast that point and drop five local scrap. The host health pickup reaches guests through the snapshot. `bossDead` remains the single encounter completion signal that restores the arena.
+The shop round runs on five messages. The host's `lvl` opens every peer's shop. A player entering sends `lvlin`, which puts the IN SHOP note over them on every other screen. Leaving sends `lvlout` to clear the note. Closing the menu, or a shop timing out unvisited, sends `lvldone`, and the host releases with `lvlgo` once everyone has reported. Nobody is pulled into a menu by someone else. The broadcast opens shops, not screens. Avatar packets also carry the current shop-screen state. Each packet reapplies the state, so the next snapshot clears any stale note.
+
+Each defeated boss sends `bossFall` with its position and Domo effect flag. Guests always drop five local scrap. The wyrm blasts that point. Domo starts `DomoDeathFx` from its dead snapshot and skips the blast. The host health pickup reaches guests through the snapshot. `bossDead` remains the encounter completion signal.
 
 The host sends one `bossPack` message with every member ID after it spawns the encounter. The guest waits until every listed puppet exists before it creates one boss bar. The Domo and wyrm pair therefore includes Domo, the wyrm head and every segment in the same health total.
 
 ## What each side sees
 
 Both players see each other as a `RemoteAvatar`: player sprite, held weapon and shadow. It streams alongside the snapshots. Waves, boss cinematics, enemy shots and pickups ride on top of the snapshot stream as small events. Each player picks up drops locally and confirms them with the host, so both sides agree. Death in co-op does not end the run. The player respawns after a few seconds with half health, and R-restart is off.
+
+Avatar packets carry death-throes progress. Remote bodies freeze, play the hurt animation, shake, whiten, and burst before the ghost appears.
 
 ## Files
 
@@ -97,15 +101,15 @@ One subtlety is worth knowing. The host never receives its own broadcasts. So wh
 
 The client's copy of the host's world lives in `PuppetMirror`. The boss's held gun rides its snapshot row, image, place and angle, since the attack logic that drives it runs only on the host and a puppet's gun would otherwise stay a blank sprite. It holds puppet enemies and pickups, driven by snapshots and interpolated between them. It also holds the kill-credit window for this player's damage claims. Nothing in it decides anything. It only shows what the host said.
 
-`RemoteArms` is the streamed grab-arms channel. It stays out of `RemoteFx`, because it is the one effect that lerps state every frame rather than replaying an event. One shared function builds the boss death blast, `Fx.bossBlast`, so the host's real death and a client's mirror cannot drift apart.
+`RemoteArms` is the streamed grab-arms channel. It stays out of `RemoteFx` because it lerps state every frame. `Fx.bossBlast` builds the shared boss blast. `DomoDeathFx` builds Domo's shared red shake and shard breakup.
 
 ## Joining late
 
-The host greets a latecomer with word that a run is already going. They skip the lobby and drop straight into it.
+The host greets a latecomer with word that a run is already going. The guest starts the run transition instead of remaining in the lobby while snapshots arrive.
 
 ## Names
 
-Chat is a fixed overlay in the top-left corner. Messages draw without a panel and wrap across 68 percent of the screen. Text uses a 2 px black outline. The idle log stays visible for five seconds after chat activity, then fades out over one second. Press T to restore the history and show the bare input line, emoji choices and message actions. Those controls hide when chat loses focus, so the idle log does not take mouse input. Chat scale lives on the visual options page and updates the overlay immediately.
+Chat is a compact overlay in the top-left corner. Messages draw without a panel and wrap across 68 percent of the screen. Text uses a 2 px black outline. The feed keeps the newest four lines at the bottom. New messages push older rows upward and out of the viewport. Press Enter to focus the composer below the feed. Focus does not expand the history or move its rows. The idle feed stays visible for five seconds after chat activity, then fades out over one second. Emoji choices and message actions hide when chat loses focus. Closed chat does not take mouse input. Enter is reserved for chat during a network session. The ready prompt uses Z when the ready bind is Enter. Chat scale lives on the visual options page and updates the overlay immediately.
 
 Players set a name in the online menu. The save file keeps it, and it floats above their head for everyone else. A name announces once on entry rather than in every packet. That leaves a question. How does someone arriving late learn names sent before they connected? Everyone re-announces whenever a player joins, so the whole party greets a latecomer.
 

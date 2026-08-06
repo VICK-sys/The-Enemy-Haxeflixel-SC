@@ -54,7 +54,6 @@ fields are documented in [data-files.md](data-files.md).
 | `ChargeAttack.hx` | the windup, charge, arc and recover attack, and `chargeLift` | `update`, `reset` |
 | `FlankAttack.hx` | the circling attack style | `update`, `reset` |
 | `DomoBoss.hx` | Domo's dash, shots and the `ramming` flag | `update`, `reset` |
-| `RofelBoss.hx` | Rofel's attack pattern | `update`, `reset` |
 | `WormPart.hx` | the stub attack for wyrm segments, which the flock drives instead | `update`, `reset` |
 | `EnemyShot.hx` | the enemy bullet, its life from `range / speed`, and the deflect | `fire`, `deflect`, `seize`, `hurl` |
 | `ShotSpec.hx` | one queued shot request, pooled on the enemy | `set`, `at` |
@@ -102,7 +101,7 @@ Movement between screens is described in [states.md](states.md).
 | `RunIntro.hx` | the first tutorial prompt | `armForRun`, `openTutorialIfNew` |
 | `ReadyGate.hx` | the between wave ready gate and its net wait | `arm`, `wire`, `peerLost` |
 | `ShopRound.hx` | the shop round, its solids and its net wait | `wire`, `updateShop`, `onWaveCleared` |
-| `BossShow.hx` | the boss intro, the warning and the loot drop | `begin`, `warn`, `dropLoot`, `defeated` |
+| `BossShow.hx` | the boss intro, the warning and the loot drop | `begin`, `dropLoot`, `defeated` |
 
 ### `source/states/editor/`
 
@@ -166,7 +165,8 @@ Behaviour is described in [systems.md](systems.md).
 | `EnemySpawner.hx` | placing enemies at edges, near points, and the stuck rescue | `placeAtEdge`, `placeNear`, `checkStuck`, `rescue` |
 | `EnemyRig.hx` | one enemy plus its shadow, hitbox and stuck timers | `new` |
 | `EnemyShots.hx` | the enemy bullet pool, wall raycasts and the shield and friendly hooks | `emit`, `update` |
-| `BossDeath.hx` | the boss fall, explosion and drop sequence | `watch`, `onDrops` |
+| `BossDeath.hx` | normal boss defeat timing, drops and completion | `watch`, `onDrops` |
+| `DomoDeathFx.hx` | Domo's red shake and shard breakup | `new`, `update` |
 | `WormFlock.hx` | the magma wyrm: chains, trail, lift, charges, volleys, dirt mounds and collapse | `adopt`, `update`, `retire`, `moundCount` |
 
 ### `source/systems/weapons/`
@@ -262,6 +262,7 @@ The protocol is described in [multiplayer.md](multiplayer.md).
 | `Music.hx` | music playback, run track selection and holds | `play`, `rollRunTrack`, `getRunTrack`, `hold`, `release` |
 | `MenuSfx.hx` | menu step, hover, click and cancel sounds | `step`, `hover`, `click`, `cancel` |
 | `Muffle.hx` | the low pass filter used when a panel is open | `set`, `clear` |
+| `SoundSweep.hx` | finishes sounds whose completion event never arrived, so channels do not leak | `init` |
 | `MenuSlash.hx` | the slash animation on a chosen menu row | `play` |
 | `IrisWipe.hx` | the iris open and close transition | `open`, `close` |
 | `Veil.hx` | the flat colour overlay | `make`, `fit` |
@@ -274,6 +275,5 @@ The protocol is described in [multiplayer.md](multiplayer.md).
 | `CustomArena.hx` | the arena loaded from a stored map or the editor | `set`, `fromStored`, `clear` |
 | `MapStore.hx` | reading and writing map slots | `load`, `store` |
 | `Library.hx` | imported tilesets, props and wall art, and their hitboxes | `ensure`, `rescan`, `addTileset`, `addProp`, `setHitbox` |
-| `Run.hx` | the per run seed and what it allows | `reroll`, `allows` |
 | `DiscordPresence.hx` | the Discord rich presence lines | `init`, `tick`, `playing`, `menu` |
 | `PerfLog.hx` | the frame time log written to `perflog.txt` | `frame` |

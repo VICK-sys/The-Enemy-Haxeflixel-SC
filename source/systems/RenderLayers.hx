@@ -28,7 +28,7 @@ class RenderLayers
 
 	private var player:Player;
 	private var heldSprite:FlxSprite;
-	private var flying:Array<FlxSprite> = [];
+	private var flying:Map<FlxSprite, Bool> = new Map();
 	private var rigOf:Map<FlxSprite, FlxSprite> = new Map();
 	private var rigBias:Map<FlxSprite, Float> = new Map();
 
@@ -87,10 +87,10 @@ class RenderLayers
 	{
 		if (s != null)
 		{
-			var held = flying.indexOf(s) >= 0;
+			var held = flying.exists(s);
 			if (s.exists && !held)
 			{
-				flying.push(s);
+				flying.set(s, true);
 				entityLayer.add(s);
 			}
 			else if (!s.exists && held)
@@ -137,7 +137,7 @@ class RenderLayers
 				return BURIED_BAND + e.feetY;
 			return e.lift > 0 ? AIRBORNE_BAND + e.feetY : e.feetY;
 		}
-		if (flying.indexOf(s) >= 0)
+		if (flying.exists(s))
 			return s.y + s.height * 0.5;
 		return Decor.sortValue(s);
 	}

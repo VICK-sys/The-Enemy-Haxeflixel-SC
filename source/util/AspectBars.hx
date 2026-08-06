@@ -18,7 +18,7 @@ class AspectBars
 
 	static inline var FILL:Int = 0x0A0A0C;
 	static inline var EDGE:Int = 0x2A2A30;
-	static inline var ART:String = "assets/images/ui/side_art.png";
+	static inline var ART:String = "ui/side_art";
 
 	static var holder:Sprite;
 	static var art:BitmapData;
@@ -34,8 +34,8 @@ class AspectBars
 		holder.mouseEnabled = false;
 		holder.mouseChildren = false;
 		parent.addChild(holder);
-		if (Assets.exists(ART))
-			art = Assets.getBitmapData(ART);
+		if (Assets.exists(Paths.image(ART)))
+			art = Assets.getBitmapData(Paths.image(ART));
 		Lib.current.stage.addEventListener(Event.RESIZE, function(_) apply());
 		FlxG.signals.postUpdate.add(watch);
 	}

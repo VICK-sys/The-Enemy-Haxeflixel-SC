@@ -26,6 +26,7 @@ class IrisWipe extends FlxTypedGroup<FlxSprite>
 	private var iris:FlxSprite;
 	private var bars:Array<FlxSprite> = [];
 	private var cam:FlxCamera;
+	private var motion:FlxTween;
 
 	public function new(state:FlxState)
 	{
@@ -103,10 +104,13 @@ class IrisWipe extends FlxTypedGroup<FlxSprite>
 
 	public function open(?onComplete:Void->Void):Void
 	{
+		if (motion != null)
+			motion.cancel();
 		visible = true;
 		setScale(0);
-		FlxTween.num(0, FULL_SCALE, OPEN_TIME, {ease: FlxEase.quadOut, onComplete: function(_)
+		motion = FlxTween.num(0, FULL_SCALE, OPEN_TIME, {ease: FlxEase.quadOut, onComplete: function(_)
 		{
+			motion = null;
 			visible = false;
 			if (onComplete != null)
 				onComplete();
@@ -115,10 +119,13 @@ class IrisWipe extends FlxTypedGroup<FlxSprite>
 
 	public function close(?onComplete:Void->Void):Void
 	{
+		if (motion != null)
+			motion.cancel();
 		visible = true;
 		setScale(FULL_SCALE);
-		FlxTween.num(FULL_SCALE, 0, CLOSE_TIME, {ease: FlxEase.quadIn, onComplete: function(_)
+		motion = FlxTween.num(FULL_SCALE, 0, CLOSE_TIME, {ease: FlxEase.quadIn, onComplete: function(_)
 		{
+			motion = null;
 			if (onComplete != null)
 				onComplete();
 		}}, setScale);

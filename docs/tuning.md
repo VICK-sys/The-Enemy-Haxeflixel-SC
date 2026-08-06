@@ -24,14 +24,14 @@ Gameplay numbers live in the JSON files under `assets/data/` (see Data). The rem
 | `states/PlayState.hx` | deflected shot hit radius, damage, knockback |
 | `entities/weapon/HookShot.hx` | hook speed, hit radius |
 | `entities/enemy/Enemies.hx` | wander and idle durations, hit flash time |
-| `entities/enemy/RofelBoss.hx` | gun sprite scale, shot sound (the movement and gun stats live in `rofel.json`) |
 | `entities/enemy/EnemyNav.hx` | waypoint radius, body radius default. The repath interval is in `tick()` |
 | `entities/enemy/ChargeAttack.hx` | `CROUCH`, the share of the jump height the windup dips first. The jump height itself is `chargeLift` in each enemy's JSON |
 | `systems/EnemyDirector.hx` | off-screen entry margin, boss intro delay, wave stall timeout |
 | `systems/enemy/EnemySpawner.hx` | edge spawn margins and spread, watchdog times, drive and progress thresholds, progress sample interval, local unstick rings, rescue distances |
 | `entities/enemy/EnemyBrain.hx` | wander and idle durations, walk-in lean and its slack |
 | `systems/EnemyShots.hx` | shot wall probe |
-| `systems/BossDeath.hx` | boss death shake duration and amplitude |
+| `systems/enemy/BossDeath.hx` | boss death shake duration and amplitude |
+| `systems/enemy/DomoDeathFx.hx` | Domo death shake, shard grid, motion and fade |
 | `entities/HealthPickup.hx` | pickup hover height and rate, white shine strength, shadow shrink |
 | `systems/Pickups.hx` | GRAB, the margin around the pickup that counts as contact |
 | `data/enemies/worm.json` | the wyrm: part count, spacing, hop height, wave shape and speed, turn rate, shot gate and cadence, bullet speed |

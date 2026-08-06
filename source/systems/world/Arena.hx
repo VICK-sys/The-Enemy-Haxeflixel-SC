@@ -25,9 +25,6 @@ class Arena
 	static inline var BOSS_REVEAL:Int = 3;
 	static inline var NORMAL_IN:Int = 4;
 	static inline var NORMAL_REVEAL:Int = 5;
-	static inline var FLASH_IN:Int = 6;
-	static inline var FLASH_WAIT:Int = 7;
-	static inline var FLASH_KEEP:Int = 8;
 
 	public var map:FlxTilemap;
 	public var spawnX:Float;
@@ -46,9 +43,6 @@ class Arena
 	private var pillars:Array<FlxSprite> = [];
 	private var pillarLayer:FlxTypedGroup<FlxSprite>;
 	private var introPhase:Int = 0;
-	private var flashPeak:Void->Void;
-	private var flashDone:Void->Void;
-	private var flashHold:Float = 0;
 	private var introTimer:Float = 0;
 	private var gridActive:Bool = false;
 	private var state:FlxState;
@@ -111,18 +105,6 @@ class Arena
 	{
 		state.remove(whiteOverlay, true);
 		state.add(whiteOverlay);
-	}
-
-	public function beginWhiteFlash(onPeak:Void->Void, onDone:Void->Void, hold:Float):Void
-	{
-		if (introPhase != IDLE || gridActive)
-			return;
-		flashPeak = onPeak;
-		flashDone = onDone;
-		flashHold = hold;
-		introPhase = FLASH_IN;
-		introTimer = SHAKE_TIME;
-		systems.Fx.shake(0.012, SHAKE_TIME);
 	}
 
 	public function endBossTransition():Void
@@ -207,36 +189,6 @@ class Arena
 				introPhase = IDLE;
 			}
 		}
-		else if (introPhase == FLASH_IN)
-		{
-			introTimer -= elapsed;
-			whiteOverlay.alpha = 1 - Math.max(0, introTimer) / SHAKE_TIME;
-			if (introTimer <= 0)
-			{
-				whiteOverlay.alpha = 1;
-				introPhase = FLASH_WAIT;
-				introTimer = flashHold;
-				var peak = flashPeak;
-				flashPeak = null;
-				if (peak != null)
-					peak();
-			}
-		}
-		else if (introPhase == FLASH_WAIT)
-		{
-			introTimer -= elapsed;
-			whiteOverlay.alpha = 1;
-			if (introTimer <= 0)
-			{
-				introPhase = FLASH_KEEP;
-				var done = flashDone;
-				flashDone = null;
-				if (done != null)
-					done();
-			}
-		}
-		else if (introPhase == FLASH_KEEP)
-			whiteOverlay.alpha = 1;
 	}
 
 	function get_width():Float

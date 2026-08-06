@@ -87,7 +87,7 @@ In tile mode, Ctrl-drag marks a rectangle on the map. Ctrl+C lifts those tiles i
 
 ## Importing art
 
-`util.Library` is the import path for art that was never part of the build. It scans `library/tilesets`, `library/props` and `library/walls` next to the executable. It loads each PNG off disk, and registers it in the bitmap cache. The key is the one `Paths.image` would have produced. The rest of the game therefore reaches a dropped-in file exactly as it reaches a baked one.
+`util.Library` is the import path for art that was never part of the build. It scans `library/tilesets`, `library/props` and `library/walls` next to the executable. Missing folders stay absent during startup. It loads each PNG off disk, and registers it in the bitmap cache. The key is the one `Paths.image` would have produced. The rest of the game therefore reaches a dropped-in file exactly as it reaches a baked one.
 
 `library/library.json` records what you turned into a tileset or a prop. Those registries append their entries to the ones parsed from `assets/data`. A version counter tells them when to rebuild the merged list.
 

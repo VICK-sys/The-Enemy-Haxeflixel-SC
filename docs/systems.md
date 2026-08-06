@@ -75,7 +75,7 @@ It cuts each prop out of its sheet once and keeps it in flixel's cache under its
 
 ### Fx
 
-Hitstop, which drops the time scale for a few frames on kills. Camera shakes, hit spark bursts, and the dash speed-line trail. It also holds `bossBlast`, the boss death explosion. One place builds it, so the host's real death and a client's mirrored one cannot drift apart.
+Hitstop drops the time scale for a few frames on kills. `Fx` also owns camera shakes, hit sparks, dash trails and the `bossBlast` death explosion.
 
 `Fx` owns the time scale outright, through `slowFactor`. Hitstop drops below it and returns to it rather than to full speed, so a hit landing during a slow-motion effect still bites and then hands the world back to the slow rather than snapping it back to normal.
 
@@ -83,11 +83,11 @@ Hitstop, which drops the time scale for a few frames on kills. Camera shakes, hi
 
 The kill camera. The blow that kills a boss eases the world down to a third speed, zooms the camera to just under twice the fight framing, and leans it most of the way onto the spot the boss died, holds all three, then eases everything back. It runs about three seconds and paces itself in real time, dividing out the time scale it is itself imposing.
 
-`PlayState` hands it the camera by skipping the cursor lean while it is running, so the two never fight over `targetOffset`. Opening a panel cancels it, which stops a paused menu inheriting the slow motion.
+`PlayState` hands it the camera by skipping the cursor lean while it is running, so the two never fight over `targetOffset`. Each step snaps camera follow to the eased target. Normal follow smoothing cannot lag behind a distant death. Opening a panel cancels it, which stops a paused menu inheriting the slow motion.
 
 It plays `slowmo` over the top, and owns that sound rather than firing and forgetting it. `FlxG.sound.play` hands back a pooled object, and the pool takes it again the moment it finishes. Holding that handle meant the fade on the way out could land on whatever unrelated sound had since been given the object. It loads its own instance instead, kept out of the pool, and replays it on each kill.
 
-`BossDeath` raises it on the frame it first sees a boss dead, which is the same frame the shake begins. The shake is paced by game time, so it stretches with the slow motion and the explosion lands after the camera has let go. The host relays the moment to clients, since a client never runs `BossDeath` itself.
+`BossDeath` raises it on the frame it first sees a boss dead. Domo turns red and shakes before breaking into falling shards. The wyrm keeps the shake and explosion. The effects use game time, so they stretch with the slow motion. The host relays the kill-camera moment to clients.
 
 ### RenderLayers
 
@@ -125,7 +125,7 @@ Boss waves can bring Domo and the magma wyrm as one encounter. The director unlo
 
 A downed player's revive is a ritual rather than a switch: the scattered body parts draw back together over three quarters of a second, hold and flash, and only then does the body return. The avatar packet carries a reviving flag alongside the dead flag, so every other machine runs the same ritual on its own copy of that player's parts and ghost at the same time. Without it the flag would only ever say dead or alive, and a revived friend would pop back in with nothing between. The flag going away before the ritual ends cancels it, which is what happens when a run ends underneath one.
 
-A run's big pauses wait for the players before they end. `ReadyGate` holds the countdown at the run's first wave, after every shop wave and after every boss, and prints a prompt until each player presses ENTER. Ordinary waves flow on the timer, so the gate marks the rests rather than nagging between every fight. It runs solo as well as online: a solo player readies and the wave starts at once, which is what makes the shop a safe place to think rather than a timer you can fumble. Readying also rolls the shop shutter down, so the shop's window is the whole rest rather than one visit. In co-op the shutter waits for the room rather than for one player: readying announces you and nothing else, and the door comes down on the same release that starts the wave, once everyone is in. Closing it on your own ready would shut your friends out of a shop they were still standing in. In co-op the host arms every machine, each player readies for themselves, and the wave starts only once everyone has. A ready player wears a speech bubble over their head, so the room can see who it is still waiting on. A player who is already down readies on their own without a bubble of their own, but the ready still crosses the wire, so everyone else draws one for them. That bubble hangs off the floating ghost rather than the hidden body, which stands where the player fell, and it rides the ghost's bob so it reads as attached. The host releases the hold anyway after 90 seconds, or the moment the last guest drops, so nobody can strand a lobby by walking away.
+A run's big pauses wait for the players before they end. `ReadyGate` holds the countdown at the run's first wave, after every shop wave and after every boss, and prints a prompt until each player uses the shown ready key. Solo uses the ready bind. Online keyboard play shows Z when that bind is Enter because Enter opens chat. Controller play keeps the ready button. Ordinary waves flow on the timer, so the gate marks the rests rather than nagging between every fight. It runs solo as well as online: a solo player readies and the wave starts at once, which is what makes the shop a safe place to think rather than a timer you can fumble. Readying also rolls the shop shutter down, so the shop's window is the whole rest rather than one visit. In co-op the shutter waits for the room rather than for one player: readying announces you and nothing else, and the door comes down on the same release that starts the wave, once everyone is in. Closing it on your own ready would shut your friends out of a shop they were still standing in. In co-op the host arms every machine, each player readies for themselves, and the wave starts only once everyone has. A ready player wears a speech bubble over their head, so the room can see who it is still waiting on. A player who is already down readies on their own without a bubble of their own, but the ready still crosses the wire, so everyone else draws one for them. That bubble hangs off the floating ghost rather than the hidden body, which stands where the player fell, and it rides the ghost's bob so it reads as attached. The host releases the hold anyway after 90 seconds, or the moment the last guest drops, so nobody can strand a lobby by walking away.
 
 The gate holds the wave through a flag of its own rather than the shop's, so a shop round and a ready round can both be open without either clearing the other. It also stands down while the shop is in reach, since the shop answers the same key.
 
@@ -147,13 +147,13 @@ Two rules keep the timers honest. Only a genuine engagement pauses them, meaning
 
 The rescue itself looks for clear ground in rings around where the enemy stands. It falls back to relocating near the player only when nothing close is free.
 
-`EnemyShots` owns the projectile group. It emits what an enemy queued, and kills shots on walls, props or the player. The shake-then-explode sequence lives in `BossDeath`. That has its own lifetime and touches nothing else. `EnemyRig` moved to its own file so the spawner can take one. The director forwards a callback that moved with a collaborator as a property. The network layer wraps them rather than simply setting them.
+`EnemyShots` owns the projectile group. It emits queued shots and kills them on walls, props or the player. `BossDeath` owns normal boss defeat timing. `DomoDeathFx` owns Domo's red shake and breakup. The wyrm keeps the shake and explosion. `EnemyRig` lives in its own file so the spawner can use it. The director exposes its callbacks as properties. The network layer wraps those callbacks.
 
 `applyWaveScale` scales every enemy as it spawns. It turns the wave number into health, speed and damage multipliers from the `scaling` block. The client applies the same thing in `addPuppet`. Each machine charges contact damage locally, and the two would otherwise differ.
 
-A randomly chosen wave, 4 to 8 and rolled once at startup, is the first boss wave. It fires the `onBoss` callback, which starts the intro cinematic. After a short intro delay it spawns a single `"rofel"` enemy instead of the normal count.
+A randomly chosen wave, 4 to 8 and rolled once at startup, is the first boss wave. It fires the `onBoss` callback, which starts the intro cinematic. After a short intro delay it spawns the boss pack instead of the normal count.
 
-When the boss dies the director runs a defeat sequence. The boss shakes in place, then plays an explosion animation with a boom sound. Once the explosion finishes, `onBossDefeated` fires. That reverts the arena and music to normal.
+When a boss dies, the director runs its defeat sequence. Domo turns red, shakes and breaks apart. The wyrm shakes and explodes. `onBossDefeated` fires after the final boss effect finishes. That restores normal arena and music state.
 
 The director is also the single home of enemy hit queries. `firstInCircle` and `eachInCircle` run the nearest-hitbox-point circle test every attack uses. Both see live enemies only, and `firstInCircle` can skip seized ones.
 
@@ -166,6 +166,8 @@ Spawned enemies pass through walls and prop footprints while entering. They turn
 The health pickup pool. The player collects one on contact, unless health is full.
 
 Contact carries a `GRAB` margin around the kit. The art is the smallest pickup in the game and the player's body box is only 42 by 44, so a plain overlap of the two meant clipping the corner of a small box against a small box, and a run past one often failed to take it. Scraps never had that problem because they magnet in. The margin widens the catch to 72 px from the player's centre, up from 43, without touching the art, the shadow or the drop maths.
+
+The deployed yoyo uses its hit circle as a second collection point. It cannot take a kit at full health.
 
 ### TimeStop
 
@@ -183,17 +185,23 @@ The shared menu widget used by the main menu and options. It is a centred column
 
 ### Hud
 
-The UI camera, health and super bars, wave counter and banner. Both bars sit in the one widget in the bottom left, where the narrow strip above the health bar reads the super meter. That strip used to be decoration, and the meter used to sit in the opposite corner, which put the two numbers you watch most at opposite ends of the screen. The red BOSS APPROACHING banner shares the same text and slides down from the top. Each new wave number flickers between full and dim while the fluorescent-light sound plays, including wave 1. The scrap counter is a picture of scrap next to a number, rather than a word next to a number. It needs no translation. It sits directly over the health widget, sharing its left edge, so everything the player watches is in one column in that corner rather than split across opposite ends of the screen. The icon anchors to that edge and the number runs off its right, so a four figure count grows into open space instead of moving the icon. The icon draws at the same scale as the rest of the UI. It was two thirds of it, which read as a different resolution to everything beside it. Both carry a soft drop shadow, because white on a dark arena floor was the only thing holding them apart from the background.
+The UI camera, health and super bars, wave counter and banner. Both bars sit in the one widget in the bottom left, where the narrow strip above the health bar reads the super meter. That strip used to be decoration, and the meter used to sit in the opposite corner, which put the two numbers you watch most at opposite ends of the screen. The red BOSS APPROACHING banner shares the same text and slides down from the top. A red warning icon plays a 5 frame spawn at 14 fps in the screen centre, blinks on a 2 frame loop at 10 fps, and leaves by playing the spawn backwards instead of fading out. Each new wave number flickers between full and dim while the fluorescent-light sound plays, including wave 1. The scrap counter is a picture of scrap next to a number, rather than a word next to a number. It needs no translation. It sits directly over the health widget, sharing its left edge, so everything the player watches is in one column in that corner rather than split across opposite ends of the screen. The icon anchors to that edge and the number runs off its right, so a four figure count grows into open space instead of moving the icon. The icon draws at the same scale as the rest of the UI. It was two thirds of it, which read as a different resolution to everything beside it. Both carry a soft drop shadow, because white on a dark arena floor was the only thing holding them apart from the background.
 
 It also owns the revolver ammo readout and the crossbow's blue gauge, which sits below the health bar. All three bars therefore stack in the one corner, super over health over the gauge. It holds the time-stop status label and its fading countdown. It also holds the death text with the best wave, and the custom cursor. It owns a `BossHud`, and hands boss tracking and the screen flash to it.
 
+Boss encounters replace the label and progress ticks with a full-scale health bar fitted inside the black display window. Its width extends 2 px past uniform scale.
+
+At wave clear, the display hides its label and progress for 0.2 seconds. It then shows the animated GOOD JOB message until the next wave starts. That swap also replaces the boss name and health bar after a boss clears. The host sends the clear event so every player sees the same display.
+
 The display rests against the top-right screen edge. The screen does not clip its top artwork.
+
+Each remote player icon has a small health bar above it. Its fill follows that player's streamed health.
 
 The crossbow arrow points upward 25 pixels below the ammo tube top. Revolver rounds stay centered as a stack.
 
-The ammo bar and health bar use separate PNG files. The HUD loads each complete canvas without cropping. HP and super fills use the health bar's local origin.
+The ammo bar and health bar use separate PNG files. The HUD loads each complete canvas without cropping. HP and super fills use the health bar's local origin. The super slot extends 2 px to meet its right frame edge. It uses an opaque black backing. Transparent fill gaps reveal black instead of the world.
 
-The health and ammo cluster fades to 30 percent when a boss crosses its screen bounds. Every non-boss enemy leaves it opaque.
+The health and ammo cluster fades to 75 percent when a boss crosses its screen bounds. Every non-boss enemy leaves it opaque.
 
 The HUD wears the player's color. Every piece of its art loads through the same hue rotation the character and their weapon use, so the gear frame, both bars and the ammo pips all turn with the player. The rotation only touches saturated pixels, so the white outlines and the grey bolts stay as drawn and only what was red follows the player. The ammo art is held out of the rotation by name: a bullet reads as brass and an arrow as red because that is what they are, not because of who is holding them, and a player picking a green tint should not end up with green brass. Each skinned sprite remembers the art it is wearing, which is what lets a color change in the options repaint pieces that are swapped at runtime, like the full and spent ammo pips. Repainting reseeds the bar widths, since loading a graphic drops the clip that draws a partial bar. The heal flash stays green whatever color the player picks, because there it is reporting healing rather than identity.
 
@@ -273,13 +281,13 @@ The shop blocks. Its hitbox covers the standing structure and stops short of the
 
 The shop hides and returns with the rest of the decor, so the boss whiteout takes it away and the arena restoring brings it back. It stops answering the interact key while hidden, so it cannot be entered through a boss fight. The prop blockers switch off with the decor too, and `PropBlock` ignores a switched-off blocker, so nothing hidden can stop a body, a shot or a sight line in the boss void.
 
-In co-op the shop round is shared but the shopping is not. The host's tenth wave broadcasts the round, every peer's shutter rolls up, and each player walks to their own shop and spends alone while the others keep playing. A player in the menu wears the LEVELING note. The wave stays held until every peer reports done, by shopping or by letting the shop time out, and the host's sixty second cap backstops the lot.
+In co-op the shop round is shared but the shopping is not. The host's tenth wave broadcasts the round, every peer's shutter rolls up, and each player walks to their own shop and spends alone while the others keep playing. A player in the menu wears the IN SHOP note. Avatar packets carry that state, so the note clears on every screen after the player exits. The wave stays held until every peer reports done, by shopping or by letting the shop time out, and the host's sixty second cap backstops the lot.
 
 An AFK pilot visits its local shop before it readies. It spreads affordable purchases across the four stats, then closes its local shop.
 
 ### BossHud
 
-BossHud keeps the pulsing red warning flash and tracks the current boss pack. The display ticks start full during the warning and then follow tracked HP after the pack arrives. A partial boss segment rounds up, so the final segment stays visible until tracked HP reaches zero. The name feeds Discord presence. It does not draw a boss health bar or title.
+BossHud keeps the pulsing red warning flash and tracks the current boss pack. The display health bar starts full during the warning and then follows tracked HP after the pack arrives. The name feeds Discord presence. `Hud` draws pooled health.
 
 ## Entities (source/entities/)
 
@@ -334,7 +342,7 @@ The tile A* with the box cast and the corridor rays is the navigation model, and
 
 ### Attack behaviours
 
-`AttackBehavior`, `ChargeAttack`, `FlankAttack` and `RofelBoss` are the attack style interface and its implementations. A charge is a windup, a straight lunge and a recovery.
+`AttackBehavior`, `ChargeAttack` and `FlankAttack` are the attack style interface and its implementations. A charge is a windup, a straight lunge and a recovery.
 
 An optional `chargeLift` turns that lunge into a jump, on the same terms the magma wyrm surfaces on. The sprite rides an offset above its own feet while the shadow, the hitbox and the sort key stay on the ground, so the enemy reads as airborne without leaving the floor it is measured against. The height follows a sine arc across the lunge, which lands it back at zero exactly when the lunge ends, and the windup dips the sprite a fraction of that height first so the jump has a squat in front of it. `RenderLayers` already draws anything with lift in the airborne band, so a jumper passes over the crowd it leaps into. A charger with no `chargeLift` is untouched and lunges flat.
 
@@ -348,15 +356,13 @@ Three things break a post. A target that closes inside `minDist` sends the woods
 
 A slide ends early if it stalls. The behaviour sets a velocity but a wall decides whether the body moves, and in the corridor the standoff circle does not fit. If half a second passes with neither the bearing nor the radius improving, the woodster plants and fires from where it is. Without that, a woodster pinned on a wall would grind against it for the whole `slideMax` before it took a shot.
 
-`RofelBoss` is the boss brain, ported from the RofelShooter game. It kites the player, keeping a preferred distance band and strafing sideways, bouncing off walls. It cycles through Rofel's five guns: pistol, shotgun, sniper, revolver and laser. Each carries its own bullet sprite, speed, spread, damage and burst pattern. A held gun sprite rotates to aim at the player and swaps per weapon. Enemies with the `"boss"` attack are `selfDriven`, so they skip the normal FSM and run this brain directly.
-
-It only fights what it can hit. While `fireClear` is down it holds its fire mid pattern, volley and cooldown frozen where they stood, and drops the kite for a straight hunt along the path toward the player. The moment the line opens the pattern resumes from where it paused. Domo gates the same way: the hover hunts instead of holding the band, and the decision roll never picks the shotgun without a line, taking the dash or the summon instead.
+Domo only fights what it can hit. While `fireClear` is down the hover hunts instead of holding the band, and the decision roll never picks the shotgun without a line, taking the dash or the summon instead.
 
 ### Shots
 
-`EnemyShot` is the pooled enemy projectile. It carries its damage, speed, range and optional sprite from the shot request, and sprite bullets rotate to face travel. It remembers where it was last frame, because the wall check needs the whole segment it travelled: the sniper round crosses 27 px a frame and a wall tile is 24, so a single probe point ahead of the bullet could land past a pillar it had passed through. The sweep from last position to next samples every step of the way.
+`EnemyShot` is the pooled enemy projectile. It carries its damage, speed, range and optional sprite from the shot request, and sprite bullets rotate to face travel. It remembers where it was last frame, because the wall check needs the whole segment it travelled: a fast round can cross more than a 24 px wall tile in one frame, so a single probe point ahead of the bullet could land past a pillar it had passed through. The sweep from last position to next samples every step of the way.
 
-`EnemyShots` refuses to spawn a shot whose path from the shooter's centre to its muzzle origin crosses a wall or a prop. The sniper's origin sits 194 px out from Rofel's body, which used to poke through cover and hit a player standing safely behind it. A gun pressed against a wall now just does not fire.
+`EnemyShots` refuses to spawn a shot whose path from the shooter's centre to its muzzle origin crosses a wall or a prop. A muzzle origin that sits far out from the body used to poke through cover and hit a player standing safely behind it. A gun pressed against a wall now just does not fire.
 
 `ShotSpec` is one queued shot request: direction, damage, speed, range, sprite, sound, and an optional spawn origin. Behaviours push these onto the enemy's `pendingShots`, and the director drains and fires them. That lets the boss fire multi-bullet volleys with per-shot parameters.
 
@@ -413,20 +419,22 @@ The basic ranks are the fire children. Their chase speed follows the six-frame w
 
 The turquoise champion notices the player inside 300 px and charges inside 260 px. Its grounded ball lunge covers 266 px. It uses a 0.25 second windup and a 0.15 second recovery. It waits three seconds after recovery. The basic green child keeps its contact push and recoil.
 
-Domo is the first boss and fights with `DomoBoss`. It does not walk into the player. Between attacks it holds a distance band the same way `RofelBoss` does, closing past `prefMax`, backing off inside `prefMin`, and drifting sideways the rest of the time on a strafe that flips on a timer and on wall contact. It moves slower than its own children, so the dash chain is what closes ground rather than the walk. Past `farDist` it only picks between summoning and dashing, since the shotgun would be wasted at range.
+Domo is the first boss and fights with `DomoBoss`. It does not walk into the player. Between attacks it holds a distance band, closing past `prefMax`, backing off inside `prefMin`, and drifting sideways the rest of the time on a strafe that flips on a timer and on wall contact. It moves slower than its own children, so the dash chain is what closes ground rather than the walk. Past `farDist` it only picks between summoning and dashing, since the shotgun would be wasted at range.
 
 The band restores the walk animation once a hurt animation has finished. Nothing else put it back, so a hit taken while chasing used to leave Domo sliding around on its last hurt frame for the rest of the fight. Domo carries its shotgun at all times rather than producing it to fire. It rides the enemy's gun sprite slot, held out from the body toward whoever the director is targeting and turned to that angle, flipped when aiming left so it never hangs upside down. That slot is already replicated, so remote players see it aimed too. The shotgun attack is three quick five-shot fans out of the barrel it was already pointing. It will not fire one from inside `shotMin`, which sits just under the near edge of its band. The fan is five pellets over 52 degrees, so it opens wide at range and only clips a player, but converge it on a 42 px body and all fifteen pellets of the three fans land, which is nearly twice what the player has. A dash that ended on top of someone used to be followed by exactly that, since the roll to attack again did not care how close the dash had left it. Too close now takes the dash or the summon instead, and the dash carries it back out. The fan at the end of each dash answers to the same floor, so a dash that lands on a player leaves the ram damage and nothing else. Every dash also ends in a fan, from `dashShots`, three shots off the first dash, four off the second and five off the last, so a chain that misses still leaves something behind it and the last one hurts most. The dash then hands to a beat of its own, `dashRest`: Domo plants, having just fired, and holds before winding into the next one. It brakes far harder there than anywhere else, since the normal brake takes most of that beat just to shed 1050 px a second and the pause read as a long slide rather than a stop. The beat runs after the last dash too, so the chain ends on the same rhythm before the cooldown takes over, and poise covers it like the rest of the attack. They aim wherever the barrel is pointing at that moment, which is at the player, so the punish for dodging a dash is the spray that follows it. The fan widens with its count off the same `shotSpread`, from 26 degrees to 52. The shotgun cannot be shot out of Domo. Any hit normally calls `attack.reset()`, which for a state machine means the whole attack is abandoned, so one bullet used to end the three-burst fan on its first shot. An enemy can now raise `poise`, and while it is up a hit still lands its damage and its flash but skips the interrupt, the reset, the knockback and the stun. Domo raises it for every attack it commits to, so none of the three can be shot out of it once it starts, including the gaps between the dashes in a chain. It only drops the guard while chasing, which is the window to punish. Poise goes up at the moment an attack is entered rather than at the end of the frame that entered it, since a hit landing in between would otherwise still cancel the attack on its opening frame. Death ignores poise, so it can always be killed mid-attack.
 
 The summon queues four basic fire children through `pendingSummons` on the enemy, drained by the director the same way pending shots are, one at each cardinal point around Domo. It is capped: the director retallies a census of living enemies by kind every frame, and Domo will not choose the summon while more fire children than `summonCap` are already out. The check runs again when the summon lands, so a call that was fair when chosen and crowded by the time it resolves still spawns nothing. The dash is three runs that commit to a heading and sail well past the player, covering about a thousand units against the four hundred a fleeing player manages in the same time. The turn rate is deliberately weak: over a whole dash it bends the heading toward the player by less than a third, enough to curve after someone who moved but nowhere near enough to track them down. Domo's chase is slower than the player at every wave it can appear on, so the dash is the only thing that closes distance, and it has to be dodgeable or nothing is. Both `poise` and `ramming` are derived from the phase every frame rather than switched on and off at the edges, because `reset()` carries no reference to the enemy: a hit landing mid-dash would otherwise leave the ram flag raised for good, flinging fire children at the player for the rest of the fight. While Domo is dashing it wears that `ramming` flag. The director interrupts each enemy attack before applying the fling. A charging child lands immediately and returns to following.
 
+Domo's death uses `DomoDeathFx`. It clones the current body, turns it solid red and shakes it. The clone then splits into 36 falling shards. The original body stays hidden. Host and guest puppets run the same controller, so snapshot removal cannot cut the effect short.
+
 Boss fights no longer swap into the warped checkerboard realm. The alarm, banner, boss music and camera pull survive on their own timer, and the arena, decor and shop all stay, so the fight happens in the room the run is played in.
 
 ### Boss roster
 
-`summonBoss(kinds)` starts one boss encounter from an array of kinds. It removes duplicate and unknown kinds, and permits only one wyrm. An empty result falls back to Domo. The summon clears the queued wave and plays the shared boss intro. It refuses while an encounter is arriving or active. CONTROL with 0, 9, 8 or 7 summons the magma wyrm, Domo, Rofel or the Domo and wyrm pair. These controls run on the host only.
+`summonBoss(kinds)` starts one boss encounter from an array of kinds. It removes duplicate and unknown kinds, and permits only one wyrm. An empty result falls back to Domo. The summon clears the queued wave and plays the shared boss intro. It refuses while an encounter is arriving or active. CONTROL with 0, 9 or 7 summons the magma wyrm, Domo or the Domo and wyrm pair. These controls run on the host only.
 
 
-Boss waves pick solo kinds from `bosses` in `waves.json`. They prefer kinds not yet defeated in the current run. Debug builds add `debugBosses` to that roster, so they reach the current pair one encounter later. Rofel stays in the debug list, but its assets remain bundled for network guests. `bossPairs` defines combined encounters. A pair unlocks after every member is defeated in the run and appears once. Forced debug and network summons bypass this unlock.
+Boss waves pick solo kinds from `bosses` in `waves.json`. They prefer kinds not yet defeated in the current run. Debug builds add the optional `debugBosses` list to that roster. `bossPairs` defines combined encounters. A pair unlocks after every member is defeated in the run and appears once. Forced debug and network summons bypass this unlock.
 
 `spawnBossPack` creates every selected kind before publishing one `onBossPack` callback. Normal bosses use `BossDeath` for their own kill and drop sequence. The wyrm reports one member defeat after its final segment retires. The director decrements one encounter counter for either path. It fires `onBossDefeated` exactly once when that counter reaches zero. The shared bar sums every body in the published pack, including all wyrm segments.
 
@@ -504,7 +512,7 @@ It shows the current wave or boss fight, plus the equipped weapon and kill count
 
 ### PerfLog
 
-A frame-time logger for native builds. It writes `perflog.txt` next to the executable. Each second gets one aggregate line of average, worst and fps. Spike frames and long gaps get an immediate line. Every line carries the live enemy count, pathfinding calls, projectile count, wyrm mound count and wave. The projectile count covers enemy shots, bullets, arrows, rain arrows, the thrown hammer and the yoyo.
+A frame-time logger for native debug builds. Release builds do not create a log. Debug builds write `perflog.txt` next to the executable. Each second gets one aggregate line of average, worst and fps. Spike frames and long gaps get an immediate line. Every line carries the live enemy count, pathfinding calls, projectile count, wyrm mound count and wave. The projectile count covers enemy shots, bullets, arrows, rain arrows, the thrown hammer and the yoyo.
 
 ---
 

@@ -32,7 +32,6 @@ import util.Lang;
 class PlayState extends FlxState
 {
 	public static inline var BASE_ZOOM:Float = 0.75;
-	public static var cursorLean:Float = 0.5;
 
 	static inline var FOLLOW_LERP:Float = 0.055;
 	static inline var DEFLECT_RADIUS:Float = 45;
@@ -75,6 +74,9 @@ class PlayState extends FlxState
 	public var restarting(default, null):Bool = false;
 	private var hadSub:Bool = false;
 	private var bossNameDelay:Float = BOSS_NAME_DELAY;
+	private var cursorLean:Float = 0.5;
+	private var myHue:Float = 0;
+	private var mySkin:Int = 0;
 
 	function setRestarting():Void
 		restarting = true;
@@ -89,7 +91,7 @@ class PlayState extends FlxState
 	}
 
 	function anyoneHurt():Bool
-		return status.health < status.healthMax || (netSync != null && netSync.peersHurt());
+		return (!status.dead && status.health < status.healthMax) || (netSync != null && netSync.peersHurt());
 
 	function openPause():Void
 	{
@@ -109,6 +111,7 @@ class PlayState extends FlxState
 			combat.repaint();
 			hud.repaint();
 			backGear.paint(SaveData.playerHue());
+			applyLocalSettings();
 		};
 		openPanel(pause);
 	}
@@ -133,6 +136,43 @@ class PlayState extends FlxState
 	private var props:systems.world.PropWorld;
 	private var floor:flixel.tile.FlxTilemap;
 
+	function chatCommand(text:String):Void
+	{
+		var t = StringTools.trim(text);
+		if (t.toLowerCase().indexOf("/kick") != 0)
+			return;
+		if (!Net.isHost)
+		{
+			systems.chat.ChatLog.notice(Lang.t("chat.kickDenied"));
+			return;
+		}
+		var name = StringTools.trim(t.substr(5));
+		if (netSync == null || !netSync.kickByName(name))
+			systems.chat.ChatLog.notice(Lang.t("chat.kickMissing", [name]));
+	}
+
+	function applyLocalSettings():Void
+	{
+		cursorLean = SaveData.cameraLean();
+		myHue = SaveData.playerHue();
+		mySkin = SaveData.playerSkin();
+		hud.setShown(SaveData.showHud());
+	}
+
+	function refreshCoopIcons():Void
+	{
+		if (!Net.active)
+		{
+			hud.coop.clear();
+			return;
+		}
+		hud.coop.begin();
+		hud.coop.add(myHue, mySkin, status.dead, -1);
+		if (netSync != null)
+			netSync.eachPeerIcon(hud.coop.add);
+		hud.coop.layout();
+	}
+
 	function beginRestart():Void
 	{
 		if (restarting)
@@ -144,7 +184,6 @@ class PlayState extends FlxState
 	override public function create()
 	{
 		util.Levels.startRun();
-		util.Run.reroll();
 		Music.rollRunTrack();
 		util.Stats.beginRun();
 		WorldClock.reset();
@@ -249,6 +288,7 @@ class PlayState extends FlxState
 
 		hud = new Hud(this, status);
 
+		systems.chat.ChatLog.onCommand = chatCommand;
 		chat = new ui.ChatWindow(hud.camUI);
 		add(chat);
 		hud.raiseCursor();
@@ -277,6 +317,8 @@ class PlayState extends FlxState
 		combat.hits.wantHeal = anyoneHurt;
 		boss.wantHeal = anyoneHurt;
 		bossFinish = new systems.BossFinish(_player, fx);
+		bossFinish.baseZoom = function() return boss.fighting ? BASE_ZOOM * states.play.BossShow.BOSS_PULL : BASE_ZOOM;
+
 		director.onBossKill = bossFinish.trigger;
 		director.onFriendlyShot = onDeflectedShot;
 		director.onShieldShot = onShieldedShot;
@@ -288,11 +330,12 @@ class PlayState extends FlxState
 		{
 			Net.inGame = true;
 			netSync = new NetSync(_player, status, arena, layers, director, combat, pickups, scraps, hud, heldSprite);
-			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av);
+			netSync.makeFx = function(av) return new net.RemoteFx(this, layers, director, combat.hits, fx, av, arena);
 			round.useNet(netSync);
 			round.onLostPeer = gate.peerLost;
 			gate.useNet(netSync);
 			netSync.onWaveEvt = onWaveStarted;
+			netSync.onWaveClearedEvt = hud.showWaveCleared;
 			netSync.onBossEvt = boss.begin;
 			netSync.onBossDefeatedEvt = onBossDown;
 			netSync.onBossKillEvt = bossFinish.trigger;
@@ -306,6 +349,7 @@ class PlayState extends FlxState
 
 		DiscordPresence.beginRun();
 
+		applyLocalSettings();
 		combat.equip(WeaponPickSubState.lastPick);
 		intro.armForRun();
 		if (!Net.isClient)
@@ -319,6 +363,7 @@ class PlayState extends FlxState
 		wipe.open();
 
 		super.create();
+
 	}
 
 	override public function destroy():Void
@@ -327,6 +372,9 @@ class PlayState extends FlxState
 		util.Stats.commit();
 		if (hud != null)
 			hud.dispose();
+		FlxG.timeScale = 1;
+		systems.chat.ChatLog.onCommand = null;
+		systems.world.PropBlock.solids = null;
 		super.destroy();
 	}
 
@@ -411,13 +459,7 @@ class PlayState extends FlxState
 		props.update();
 		drawBoxes();
 		round.updateShop(elapsed);
-		heldSprite.alpha = props.buried ? 0 : 1;
-		combat.swing.slashes.visible = !props.buried;
-		combat.gigaSwing.slashes.visible = !props.buried;
-		combat.flurrySwing.slashes.visible = !props.buried;
-		combat.flurryFinish.slashes.visible = !props.buried;
-		combat.yoyoJab.flight.string.visible = !props.buried;
-		combat.yoyoJab.flight.yoyo.visible = !props.buried;
+		combat.setBuried(props.buried);
 		combat.inputBlocked = inputLocked;
 		_player.blockMovement = inputLocked;
 		chat.show(Net.active);
@@ -436,20 +478,14 @@ class PlayState extends FlxState
 		}
 		hud.setAmmo(combat.revolver.displayRounds, combat.revolver.capacity, combat.revolver.isReloading, combat.weapon == 1);
 		hud.setBowLoaded(!combat.bow.recovering, combat.weapon == 2);
-		var recharging = combat.weapon == 1 ? combat.revolver.isReloading
-			: combat.weapon == 2 ? combat.bow.recovering
-			: combat.weapon == 3 ? combat.yoyoJab.recovering
-			: combat.swing.recovering;
-		var rechargeAt = combat.weapon == 1 ? combat.revolver.reloadProgress
-			: combat.weapon == 2 ? combat.bow.recoverProgress
-			: combat.weapon == 3 ? combat.yoyoJab.recoverProgress
-			: combat.swing.recoverProgress;
-		reloadBar.update(recharging && !combat.disabled && !status.dead, rechargeAt);
-		hud.setShown(SaveData.showHud());
+		reloadBar.update(combat.recovering && !combat.disabled && !status.dead, combat.recoverProgress);
 		hud.setExp(util.Levels.exp);
 		feedReadouts(elapsed);
 		hud.setBossOcclusion(director.bodies.members, FlxG.camera);
 		hud.update(elapsed);
+		refreshCoopIcons();
+		if (director.wave > 0)
+			hud.slideDisplayIn();
 
 		if (subState == null && !status.dead && !restarting)
 			util.Stats.tick(elapsed);
@@ -488,7 +524,7 @@ class PlayState extends FlxState
 		{
 			var title = hud.bossTitle();
 			if (title != "")
-				hud.setDisplayLabel(title);
+				hud.showBossLabel(title);
 		}
 		hud.setTicks(hud.bossFraction(), true);
 	}
@@ -534,6 +570,7 @@ class PlayState extends FlxState
 	function onWaveCleared():Void
 	{
 		util.Stats.addWave();
+		hud.showWaveCleared();
 		round.onWaveCleared();
 		var rest = director.wave % systems.Shop.EVERY == 0 || director.isBossWave(director.wave);
 		if (rest && !Net.isClient)
@@ -547,6 +584,9 @@ class PlayState extends FlxState
 		{
 			new flixel.util.FlxTimer().start(1.4, function(_)
 			{
+				if (restarting)
+					return;
+				setRestarting();
 				Net.stop();
 				wipe.close(function()
 				{
@@ -618,7 +658,7 @@ class PlayState extends FlxState
 				boxes.box(s.x, s.y, s.width, s.height, systems.HitboxView.LOOT);
 	}
 
-	static var SUMMONS:Array<Array<String>> = [["worm"], ["domo"], ["rofel"], ["domo", "worm"]];
+	static var SUMMONS:Array<Array<String>> = [["worm"], ["domo"], ["domo", "worm"]];
 
 	function summonKeys():Void
 	{
@@ -630,10 +670,8 @@ class PlayState extends FlxState
 			pick = 0;
 		else if (FlxG.keys.justPressed.NINE)
 			pick = 1;
-		else if (FlxG.keys.justPressed.EIGHT)
-			pick = 2;
 		else if (FlxG.keys.justPressed.SEVEN)
-			pick = 3;
+			pick = 2;
 		if (pick < 0)
 			return;
 
