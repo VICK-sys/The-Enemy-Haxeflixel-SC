@@ -29,6 +29,7 @@ class Main extends Sprite
 				tray.listen();
 		});
 		addChild(game);
+		util.SoundSweep.init();
 		keepPresenting();
 		ui.MenuCursor.init();
 		util.ScreenCapture.init();
