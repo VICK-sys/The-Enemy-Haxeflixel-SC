@@ -39,7 +39,7 @@ class ReadyDemo extends TutorialDemo
 		placeMid(bubble, midX(actor), midY(actor) - halfH(actor) + HEAD_PAD - BUBBLE_GAP - halfH(bubble));
 		bubble.visible = false;
 
-		prompt = label(PROMPT_Y, Lang.smallSize(), Lang.t("ready.prompt", [util.Controls.bindName(util.Controls.ACCEPT)]));
+		prompt = label(PROMPT_Y, Lang.smallSize(), Lang.t("ready.prompt", [util.Controls.readyBindName(net.Net.active)]));
 		wave = label(WAVE_Y, Lang.bodySize(), Lang.t("hud.wave", [2]));
 		wave.alpha = 0;
 

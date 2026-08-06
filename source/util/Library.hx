@@ -179,14 +179,7 @@ class Library
 		found.set(kind, names);
 
 		if (!FileSystem.exists(path))
-		{
-			try
-			{
-				FileSystem.createDirectory(path);
-			}
-			catch (e:Dynamic) {}
 			return;
-		}
 
 		var listing:Array<String> = try FileSystem.readDirectory(path) catch (e:Dynamic) [];
 		listing.sort(function(a, b) return a < b ? -1 : (a > b ? 1 : 0));

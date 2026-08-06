@@ -10,6 +10,7 @@ import systems.Pickups;
 import systems.Scraps;
 import systems.PlayerCombat;
 import systems.RenderLayers;
+import systems.enemy.DomoDeathFx;
 
 class PuppetMirror
 {
@@ -35,6 +36,7 @@ class PuppetMirror
 	private var clock:Float = 0;
 	private var pendingBossIds:Array<Int> = [];
 	private var bossPack:Array<Enemies> = [];
+	private var domoDeaths:Array<DomoDeathFx> = [];
 
 	public function new(director:EnemyDirector, pickups:Pickups, scraps:Scraps, status:PlayerCombat, hud:Hud, layers:RenderLayers)
 	{
@@ -108,6 +110,11 @@ class PuppetMirror
 				e.gun.angle += turn * k;
 			}
 		}
+
+		var i = domoDeaths.length;
+		while (i-- > 0)
+			if (domoDeaths[i].update(elapsed))
+				domoDeaths.splice(i, 1);
 	}
 
 	public function apply(msg:Dynamic):Void
@@ -142,14 +149,17 @@ class PuppetMirror
 			var anim:String = row[5];
 			if (anim != null && e.animation.name != anim && e.animation.getByName(anim) != null)
 				e.animation.play(anim);
-			if (anim != null)
-				e.buried = anim == "mound";
 
-			var dead = row[7] == 1;
+			var flags:Int = row[7];
+			e.buried = (flags & NetSync.BURIED_BIT) != 0;
+
+			var dead = (flags & NetSync.DEAD_BIT) != 0;
 			if (dead && !e.isDead)
 			{
 				e.isDead = true;
 				e.velocity.set(0, 0);
+				if (e.kind == "domo")
+					domoDeaths.push(new DomoDeathFx(layers, e));
 				var when = claimedAt.get(id);
 				if (when != null && clock - when < CLAIM_CREDIT)
 				{
@@ -227,10 +237,12 @@ class PuppetMirror
 		}
 	}
 
-	public function blastAt(x:Float, y:Float):Void
+	public function blastAt(x:Float, y:Float, domo:Bool):Void
 	{
 		for (i in 0...Scraps.BOSS_SCRAP)
 			scraps.drop(x, y);
+		if (domo)
+			return;
 		var boom = Fx.bossBlast(x, y);
 		layers.entityLayer.add(boom);
 		new FlxTimer().start(1.2, function(_)

@@ -124,9 +124,17 @@ class Controls
 			keys[ATTACK] = MOUSE_LEFT;
 		if (keys[SECOND] == FlxKey.NONE)
 			keys[SECOND] = MOUSE_RIGHT;
-		FlxG.gamepads.globalDeadZone = padDeadzone();
+		refreshSettings();
 		FlxG.signals.focusGained.add(resetDevices);
 		FlxG.signals.preUpdate.add(tick);
+	}
+
+	static var savedGyro:Float = 0;
+
+	public static function refreshSettings():Void
+	{
+		savedGyro = SaveData.gyroAim();
+		FlxG.gamepads.globalDeadZone = padDeadzone();
 	}
 
 	static function carry(saved:Array<Int>, defs:Array<Int>):Array<Int>
@@ -145,6 +153,9 @@ class Controls
 
 	public static function bindName(action:Int):String
 		return padLabels ? padName(pads[action]) : keyName(keys[action]);
+
+	public static function readyBindName(online:Bool):String
+		return online && !padLabels && keys[ACCEPT] == FlxKey.ENTER ? keyName(FlxKey.Z) : bindName(ACCEPT);
 
 	public static function padOf(action:Int):Int
 		return pads[action];
@@ -438,9 +449,6 @@ class Controls
 		for (i in 0...COUNT)
 			pilotWas[i] = pilotHeld[i];
 
-		if (FlxG.gamepads.globalDeadZone != padDeadzone())
-			FlxG.gamepads.globalDeadZone = padDeadzone();
-
 		if (firePinned && (pilot || (!pressed(ATTACK) && !pressed(SECOND))))
 			firePinned = false;
 
@@ -537,7 +545,7 @@ class Controls
 		}
 
 		#if (cpp && windows)
-		var gyroSens = SaveData.gyroAim();
+		var gyroSens = savedGyro;
 		if (gyroSens > 0)
 		{
 			if (Gyro.poll())
@@ -626,7 +634,7 @@ class Controls
 			gyroOriginY = gyroViewY;
 			gyroClaimed = true;
 		}
-		integrateGyro(pitch, yaw, elapsed, SaveData.gyroAim(), cam);
+		integrateGyro(pitch, yaw, elapsed, savedGyro, cam);
 	}
 
 	static function integrateGyro(pitch:Float, yaw:Float, elapsed:Float, sensitivity:Float, cam:flixel.FlxCamera):Void

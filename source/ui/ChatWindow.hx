@@ -32,6 +32,7 @@ class ChatWindow extends FlxSpriteGroup
 	static inline var STRIP0:Int = 28;
 	static inline var PALETTE0:Int = 28;
 	static inline var CHIP0:Int = 24;
+	static inline var HISTORY_LINES:Int = 4;
 	static inline var LOG_HOLD:Float = 5;
 	static inline var LOG_FADE:Float = 1;
 
@@ -55,7 +56,6 @@ class ChatWindow extends FlxSpriteGroup
 
 	var s:Float = 1;
 	var w:Int = 0;
-	var h:Int = 0;
 	var inputH:Int = INPUT0;
 	var pad:Int = PAD0;
 	var lineH:Int = LINE0;
@@ -69,10 +69,9 @@ class ChatWindow extends FlxSpriteGroup
 	var chipW:Int = CHIP0;
 	var composerY:Int = GAP0;
 
-	var scroll:Int = 0;
-	var lastVer:Int = -1;
-	var lastScroll:Int = -1;
+	var lastVer:Int = ChatLog.version;
 	var lastListH:Int = -1;
+	var lastFocused:Bool = false;
 	var replyKey:String = null;
 	var editKey:String = null;
 	var paletteOpen:Bool = false;
@@ -81,9 +80,10 @@ class ChatWindow extends FlxSpriteGroup
 	var hoverKey:String = null;
 	var hoverOwn:Bool = false;
 	var showing:Bool = true;
-	var idleAge:Float = 0;
+	var idleAge:Float = ChatLog.idleFor();
 	var logAlpha:Float = 1;
 	var wasFocused:Bool = false;
+	var submitted:Bool = false;
 
 	static var scratch:FlxText = null;
 
@@ -137,7 +137,6 @@ class ChatWindow extends FlxSpriteGroup
 		w = Std.int(FlxG.width * WRAP_RATIO) - INSET * 2;
 		if (w < 1)
 			w = 1;
-		h = FlxG.height - INSET * 2;
 		inputH = px(INPUT0);
 		pad = px(PAD0);
 		lineH = px(LINE0);
@@ -186,7 +185,6 @@ class ChatWindow extends FlxSpriteGroup
 	function relayout():Void
 	{
 		metrics();
-		setPosition(INSET, INSET);
 
 		input.font = Lang.smallFont();
 		input.size = bodySize;
@@ -220,7 +218,8 @@ class ChatWindow extends FlxSpriteGroup
 			chip.size = metaSize;
 			chip.fieldWidth = chipW;
 		}
-		composerY = gap;
+		composerY = listHeight() + gap;
+		anchorWindow();
 		placeComposer();
 
 		lastVer = -1;
@@ -298,18 +297,20 @@ class ChatWindow extends FlxSpriteGroup
 		input.text = "";
 		replyKey = null;
 		editKey = null;
-		scroll = 0;
+		submitted = true;
+		blurInput();
 	}
 
 	override public function update(elapsed:Float):Void
 	{
+		submitted = false;
 		super.update(elapsed);
 		if (!showing)
 			return;
 
 		var panelOpen = FlxG.state.subState != null;
-		if (panelOpen)
-			wantFocus = false;
+		if (panelOpen && wantFocus)
+			blurInput();
 		if (!wantFocus)
 			paletteOpen = false;
 		if (wantFocus && !input.hasFocus)
@@ -321,7 +322,7 @@ class ChatWindow extends FlxSpriteGroup
 		var mx = mp.x;
 		var my = mp.y;
 		mp.put();
-		var inside = mx >= x && mx < x + w && my >= y && my < y + h;
+		var inside = mx >= x && mx < x + w && my >= y && my < y + windowHeight();
 		var onRow = false;
 		if (inside)
 			for (hit in rowHits)
@@ -334,7 +335,7 @@ class ChatWindow extends FlxSpriteGroup
 		var onPalette = inside && paletteOpen && my >= input.y - paletteH && my < input.y;
 		var over = !panelOpen && wantFocus && (onRow || onInput || onPalette);
 
-		if (!panelOpen && !wantFocus && FlxG.keys.justPressed.T)
+		if (!panelOpen && !wantFocus && !submitted && FlxG.keys.justPressed.ENTER)
 			wantFocus = true;
 
 		if (FlxG.keys.justPressed.ESCAPE)
@@ -366,7 +367,7 @@ class ChatWindow extends FlxSpriteGroup
 		var caret = input.caretIndex;
 		if (caret < 0 || caret > input.text.length)
 			caret = input.text.length;
-		inputView.text = input.text.substr(0, caret) + "|" + input.text.substr(caret);
+		inputView.text = input.text == "" ? "" : input.text.substr(0, caret) + "|" + input.text.substr(caret);
 		inputView.visible = wantFocus;
 		hint.visible = wantFocus && input.text == "";
 		emojiBtnIcon.visible = wantFocus;
@@ -386,25 +387,21 @@ class ChatWindow extends FlxSpriteGroup
 				}
 			}
 
-		if (over && FlxG.mouse.wheel != 0)
-		{
-			scroll += FlxG.mouse.wheel > 0 ? 1 : -1;
-			var top = ChatLog.messages.length - 1;
-			scroll = scroll < 0 ? 0 : (scroll > top ? (top < 0 ? 0 : top) : scroll);
-		}
-
 		refreshStrip();
 
 		var changed = ChatLog.version != lastVer;
+		var focusChanged = wantFocus != lastFocused;
 		updateLogFade(elapsed, changed);
 
 		var listH = listHeight();
-		if (changed || scroll != lastScroll || listH != lastListH)
+		if (changed || listH != lastListH || focusChanged)
 		{
 			lastVer = ChatLog.version;
-			lastScroll = scroll;
 			lastListH = listH;
+			lastFocused = wantFocus;
 			buildRows(listH);
+			for (row in rows)
+				row.alpha = logAlpha;
 		}
 
 		updateHover(mx, my, over);
@@ -434,16 +431,20 @@ class ChatWindow extends FlxSpriteGroup
 	}
 
 	function listHeight():Int
+		return lineH * HISTORY_LINES + gap * (HISTORY_LINES + 1);
+
+	function windowHeight():Int
 	{
-		var lh = h;
-		if (wantFocus)
-			lh -= inputH;
+		var total = listHeight() + gap + inputH;
 		if (wantFocus && paletteOpen)
-			lh -= paletteH;
+			total += paletteH;
 		if (wantFocus && (replyKey != null || editKey != null))
-			lh -= stripH;
-		return lh;
+			total += stripH;
+		return total;
 	}
+
+	function anchorWindow():Void
+		setPosition(INSET, INSET);
 
 	function refreshStrip():Void
 	{
@@ -460,6 +461,8 @@ class ChatWindow extends FlxSpriteGroup
 			var m = ChatLog.get(replyKey);
 			stripText.text = Lang.t("chat.replyTo", [m == null ? "?" : m.name]);
 		}
+		composerY = listHeight() + gap;
+		anchorWindow();
 		placeComposer();
 	}
 
@@ -494,10 +497,10 @@ class ChatWindow extends FlxSpriteGroup
 	{
 		clearRows();
 
-		var actionW = wantFocus ? chipW * 3 + px(10) : 0;
+		var actionW = chipW * 3 + px(10);
 		var maxW = w - pad * 2 - actionW;
-		var idx = ChatLog.messages.length - 1 - scroll;
-		var used = gap;
+		var idx = ChatLog.messages.length - 1;
+		var used = 0;
 		var blocks:Array<{
 			message:ChatMsg,
 			lines:Array<Array<{sx:Float, text:String, color:Int, emoji:Int}>>,
@@ -513,13 +516,25 @@ class ChatWindow extends FlxSpriteGroup
 			var lines = layout(m, maxW);
 			var quote = m.reply != null && !m.deleted ? quoteH : 0;
 			var blockH = quote + lines.length * lineH;
-			if (used + blockH > listH - gap)
+			if (blocks.length == 0 && blockH > listH - gap * 2)
+			{
+				var keep = Std.int((listH - gap * 2 - quote) / lineH);
+				if (keep < 1)
+				{
+					quote = 0;
+					keep = 1;
+				}
+				lines.resize(keep);
+				blockH = quote + lines.length * lineH;
+			}
+			var spacing = blocks.length > 0 ? gap : 0;
+			if (used + spacing + blockH > listH - gap * 2)
 				break;
 			blocks.unshift({message: m, lines: lines, quote: quote, height: blockH});
-			used += blockH + gap;
+			used += spacing + blockH;
 		}
 
-		var top = gap;
+		var top = listH - gap - used;
 		for (block in blocks)
 		{
 			var m = block.message;
@@ -557,7 +572,6 @@ class ChatWindow extends FlxSpriteGroup
 			rowHits.push({key: m.key, own: m.sender == net.Net.selfId, ry: top, rh: blockH});
 			top += blockH + gap;
 		}
-		composerY = top;
 		placeComposer();
 	}
 
@@ -586,8 +600,11 @@ class ChatWindow extends FlxSpriteGroup
 			cx += tw;
 		}
 
-		var nm = m.name + ":";
-		put(nm, util.HuePalette.nameTint(m.hue), -1, measure(nm, bodySize) + px(4));
+		if (m.sender != ChatLog.NOTICE)
+		{
+			var nm = m.name + ":";
+			put(nm, util.HuePalette.nameTint(m.hue), -1, measure(nm, bodySize) + px(4));
+		}
 
 		if (m.deleted)
 		{

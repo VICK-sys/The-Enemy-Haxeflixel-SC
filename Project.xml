@@ -29,8 +29,10 @@
 
 	<set name="BUILD_DIR" value="export" />
 	<classpath name="source" />
-	<assets path="assets" />
-	<assets path="assets/images" include="*.xml" type="text" />
+	<assets path="assets" unless="windows" />
+	<assets path="assets" embed="true" if="windows" />
+	<assets path="assets/images" include="*.xml" type="text" unless="windows" />
+	<assets path="assets/images" include="*.xml" type="text" embed="true" if="windows" />
 
 	<!-- _______________________________ Libraries ______________________________ -->
 

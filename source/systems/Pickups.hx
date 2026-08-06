@@ -54,22 +54,50 @@ class Pickups
 
 	public function update():Void
 	{
-		if (status.dead)
+		if (status.dead || status.health >= status.healthMax)
 			return;
 		for (p in group.members)
 		{
 			if (p == null || !p.exists)
 				continue;
-			if (status.health >= status.healthMax)
-				return;
 			if (p.x + p.width + GRAB <= player.x || player.x + player.width <= p.x - GRAB
 				|| p.y + p.height + GRAB <= player.y || player.y + player.height <= p.y - GRAB)
 				continue;
-			status.heal(HealthPickup.HEAL);
-			FlxG.sound.play(Paths.sound("heal"), 0.7);
-			p.kill();
-			if (onCollect != null)
-				onCollect(p);
+			collect(p);
+			if (status.health >= status.healthMax)
+				return;
 		}
+	}
+
+	public function collectAt(cx:Float, cy:Float, radius:Float):Bool
+	{
+		if (status.dead || status.health >= status.healthMax || radius <= 0)
+			return false;
+		var radiusSq = radius * radius;
+		for (p in group.members)
+		{
+			if (p == null || !p.exists)
+				continue;
+			var right = p.x + p.width;
+			var bottom = p.y + p.height;
+			var nearX = cx < p.x ? p.x : (cx > right ? right : cx);
+			var nearY = cy < p.y ? p.y : (cy > bottom ? bottom : cy);
+			var dx = cx - nearX;
+			var dy = cy - nearY;
+			if (dx * dx + dy * dy > radiusSq)
+				continue;
+			collect(p);
+			return true;
+		}
+		return false;
+	}
+
+	function collect(p:HealthPickup):Void
+	{
+		status.heal(HealthPickup.HEAL);
+		FlxG.sound.play(Paths.sound("heal"), 0.7);
+		p.kill();
+		if (onCollect != null)
+			onCollect(p);
 	}
 }

@@ -12,6 +12,7 @@ class BossFall
 	public var baseX:Float = 0;
 	public var baseY:Float = 0;
 	public var explosion:FlxSprite;
+	public var domo:DomoDeathFx;
 
 	public function new(boss:Enemies)
 		this.boss = boss;
@@ -23,7 +24,7 @@ class BossDeath
 	static inline var SHAKE_AMP:Float = 12;
 
 	public var onDrops:(Float, Float) -> Void;
-	public var onFall:(Float, Float) -> Void;
+	public var onFall:(Float, Float, Bool) -> Void;
 	public var onKill:(Float, Float) -> Void;
 
 	private var layers:RenderLayers;
@@ -50,7 +51,12 @@ class BossDeath
 				continue;
 			}
 
-			if (w.phase == 0)
+			if (w.domo != null)
+			{
+				if (w.domo.update(elapsed))
+					finish(w);
+			}
+			else if (w.phase == 0)
 				updateShake(w, elapsed);
 			else if (w.explosion != null && w.explosion.animation.finished)
 				finish(w);
@@ -66,6 +72,8 @@ class BossDeath
 		w.baseY = w.boss.y;
 		w.boss.velocity.set(0, 0);
 		w.boss.allowCollisions = NONE;
+		if (w.boss.kind == "domo")
+			w.domo = new DomoDeathFx(layers, w.boss);
 		if (onKill != null)
 			onKill(w.baseX + w.boss.width * 0.5, w.baseY + w.boss.height * 0.5);
 	}
@@ -91,9 +99,12 @@ class BossDeath
 
 	function finish(w:BossFall):Void
 	{
-		layers.entityLayer.remove(w.explosion, true);
-		w.explosion.destroy();
-		w.explosion = null;
+		if (w.explosion != null)
+		{
+			layers.entityLayer.remove(w.explosion, true);
+			w.explosion.destroy();
+			w.explosion = null;
+		}
 		var cx = w.boss.x + w.boss.width / 2;
 		var cy = w.boss.y + w.boss.height / 2;
 		if (onDrops != null)
@@ -101,6 +112,6 @@ class BossDeath
 		w.boss.kill();
 		watched.remove(w);
 		if (onFall != null)
-			onFall(cx, cy);
+			onFall(cx, cy, w.boss.kind == "domo");
 	}
 }

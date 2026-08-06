@@ -12,10 +12,10 @@ import systems.world.PropBlock;
 class PlayerCombat
 {
 	public static inline var VOICE:Float = 0.5;
-	static inline var THROES:Float = 1.5;
-	static inline var THROES_SHAKE:Float = 7;
-	static inline var BOOM:Float = 0.9;
-	static inline var WHITEN:Float = 1.7;
+	public static inline var THROES:Float = 1.5;
+	public static inline var THROES_SHAKE:Float = 7;
+	public static inline var BOOM:Float = 0.9;
+	public static inline var WHITEN:Float = 1.7;
 	public static inline var HURT_LINES:Int = 4;
 	static inline var DEATH_LINES:Int = 3;
 	static inline var DASH_LINES:Int = 2;
@@ -237,6 +237,11 @@ class PlayerCombat
 	function get_throes():Bool
 		return dying > 0;
 
+	public var throeRamp(get, never):Float;
+
+	function get_throeRamp():Float
+		return dying > 0 ? 1 - dying / THROES : 0;
+
 	public function consumeJustDied():Bool
 	{
 		if (!justDied)
@@ -301,7 +306,7 @@ class PlayerCombat
 
 	public function dropScale():Float
 	{
-		if (healthMax <= 0)
+		if (dead || healthMax <= 0)
 			return 1;
 		var frac = health / healthMax;
 		if (frac < 0)

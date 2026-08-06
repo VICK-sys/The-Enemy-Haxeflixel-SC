@@ -369,7 +369,7 @@ class AfkPilot
 
 	function tapReady():Void
 	{
-		if (!gate.armed || gate.ready || status.dead || readyTimer > 0)
+		if (!gate.armed || gate.ready || readyTimer > 0)
 			return;
 		readyTimer = READY_GAP;
 		Controls.pilotHold(Controls.ACCEPT, true);

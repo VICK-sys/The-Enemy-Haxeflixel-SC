@@ -147,6 +147,7 @@ class LobbyState extends FlxState
 
 		chat = new ui.ChatWindow(camUI);
 		add(chat);
+		systems.chat.ChatLog.onCommand = chatCommand;
 		remove(cursor, true);
 		add(cursor);
 
@@ -428,6 +429,8 @@ class LobbyState extends FlxState
 				show(msg.f, msg);
 			case "go" if (Net.isClient):
 				beginRun();
+			case "hello" if (Net.isClient && msg.go == true):
+				beginRun();
 			default:
 				systems.chat.ChatLog.receive(msg);
 		}
@@ -452,6 +455,8 @@ class LobbyState extends FlxState
 			av = new RemoteAvatar(layers);
 			av.fx = fx;
 			peers.set(id, av);
+			if (Net.isHost)
+				sysNotice(Lang.t("chat.joined", [m.nm == null || m.nm == "" ? Lang.t("online.defaultName") : m.nm]));
 		}
 		seen.set(id, haxe.Timer.stamp());
 
@@ -459,9 +464,11 @@ class LobbyState extends FlxState
 		av.apply(m);
 	}
 
-	function drop(id:Int):Void
+	function drop(id:Int, quiet:Bool = false):Void
 	{
 		var av = peers.get(id);
+		if (av != null && !quiet && Net.isHost)
+			sysNotice(Lang.t("chat.left", [av.tag.text == "" ? Lang.t("online.defaultName") : av.tag.text]));
 		if (av != null)
 		{
 			av.setReady(false);
@@ -491,7 +498,38 @@ class LobbyState extends FlxState
 	function clearPeers():Void
 	{
 		for (id in [for (k in peers.keys()) k])
-			drop(id);
+			drop(id, true);
+	}
+
+	function sysNotice(text:String):Void
+	{
+		systems.chat.ChatLog.notice(text);
+		Net.send({t: "chatN", x: text});
+	}
+
+	function chatCommand(text:String):Void
+	{
+		var t = StringTools.trim(text);
+		if (t.toLowerCase().indexOf("/kick") != 0)
+			return;
+		if (!Net.isHost)
+		{
+			systems.chat.ChatLog.notice(Lang.t("chat.kickDenied"));
+			return;
+		}
+		var name = StringTools.trim(t.substr(5));
+		var want = name.toLowerCase();
+		for (id in [for (k in peers.keys()) k])
+		{
+			var av = peers.get(id);
+			if (av != null && av.tag.text.toLowerCase() == want)
+			{
+				Net.kick(id);
+				drop(id);
+				return;
+			}
+		}
+		systems.chat.ChatLog.notice(Lang.t("chat.kickMissing", [name]));
 	}
 
 	function pickWeapon():Void
@@ -581,5 +619,12 @@ class LobbyState extends FlxState
 		var pause = new PauseSubState(camUI, true);
 		pause.closeCallback = repaint;
 		openSubState(pause);
+	}
+
+	override public function destroy():Void
+	{
+		systems.chat.ChatLog.onCommand = null;
+		systems.world.PropBlock.solids = null;
+		super.destroy();
 	}
 }

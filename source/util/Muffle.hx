@@ -114,7 +114,7 @@ class Muffle
 		{
 			if (wearing != null)
 			{
-				AL.sourcei(handle, AL.DIRECT_FILTER, AL.FILTER_NULL);
+				AL.removeDirectFilter(handle);
 				wearing = null;
 			}
 			return;

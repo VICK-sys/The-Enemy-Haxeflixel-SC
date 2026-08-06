@@ -3,6 +3,7 @@ package systems.weapons;
 import flixel.FlxG;
 import entities.enemy.Enemies;
 import systems.enemy.EnemyDirector;
+import systems.Pickups;
 import data.WeaponData.WeaponDataRegistry;
 import util.Paths;
 
@@ -19,6 +20,7 @@ class YoyoJab
 	private var director:EnemyDirector;
 	private var hits:HitPipeline;
 	private var fx:systems.Fx;
+	private var pickups:Pickups;
 	private var struck:Array<Enemies> = [];
 	private var strikeAt:Array<Float> = [];
 	private var cooldown:Float = 0;
@@ -26,6 +28,9 @@ class YoyoJab
 	private var holdLeft:Float = 0;
 	private var tired:Bool = false;
 	private var spin:Float = 1;
+	private var catchSoundIn:Float = 0;
+
+	static inline var CATCH_SOUND_GAP:Float = 0.2;
 
 	public function new(director:EnemyDirector, hits:HitPipeline, fx:systems.Fx)
 	{
@@ -34,6 +39,9 @@ class YoyoJab
 		this.fx = fx;
 		flight = new YoyoFlight();
 	}
+
+	public function usePickups(pickups:Pickups):Void
+		this.pickups = pickups;
 
 	function get_active():Bool
 		return flight.active;
@@ -79,6 +87,8 @@ class YoyoJab
 	{
 		if (cooldown > 0)
 			cooldown -= elapsed;
+		if (catchSoundIn > 0)
+			catchSoundIn -= elapsed;
 		for (i in 0...strikeAt.length)
 			strikeAt[i] -= elapsed;
 
@@ -96,13 +106,21 @@ class YoyoJab
 		flight.update(elapsed, hx, hy, aimX, aimY);
 
 		if (flight.active)
+		{
+			if (pickups != null)
+				pickups.collectAt(flight.cx, flight.cy, cfg.hitRadius);
 			sweep(hx, hy);
+		}
 		else if (was)
 		{
 			cooldownTotal = (tired ? cfg.restCooldown : cfg.cooldown) * util.Levels.actionScale();
 			cooldown = cooldownTotal;
 			tired = false;
-			FlxG.sound.play(Paths.sound("weapon/catch"), 0.3);
+			if (catchSoundIn <= 0)
+			{
+				catchSoundIn = CATCH_SOUND_GAP;
+				FlxG.sound.play(Paths.sound("weapon/catch"), 0.3);
+			}
 		}
 	}
 

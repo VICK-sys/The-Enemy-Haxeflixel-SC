@@ -57,14 +57,22 @@ Q fires the super once the meter is full. Each weapon has its own.
 
 Requires [Haxe](https://haxe.org) 4.3 or newer. The library versions are pinned in `Project.xml`: flixel 6.2.0, openfl 9.5.2, lime 8.3.2. Install each with `haxelib install <name> <version>`. The Windows target also uses `hxdiscord_rpc` for Discord Rich Presence.
 
+Haxelib omits the toolchain-specific static Lime archive. Build and install it once:
+
 ```
-haxelib run lime build windows
+powershell -ExecutionPolicy Bypass -File tools/setup-static-lime.ps1
+```
+
+```
+haxelib run lime build windows -static
 haxelib run lime build html5
 ```
 
-A running copy of the game keeps a lock on `lime.ndll`, and the Windows link
-step then fails while copying its output. The error names the file rather than
-the cause. Close the game, or end the process, and build again:
+Windows static builds embed shipped assets and Lime runtime in `Enemy.exe`.
+HTML5 keeps its normal asset files.
+
+A running copy of the game locks `Enemy.exe` and prevents replacement. Close
+the game, or end the process, and build again:
 
 ```
 taskkill /F /IM Enemy.exe
@@ -73,7 +81,8 @@ taskkill /F /IM Enemy.exe
 "The process Enemy.exe not found" means no stale copy was running. That is the
 normal case and it is not an error.
 
-`tools/verify.ps1` builds both targets and runs this step for you:
+`tools/verify.ps1` builds both targets and runs this step for you. It removes
+Windows build intermediates and checks that the package contains only `Enemy.exe`.
 
 ```
 powershell -ExecutionPolicy Bypass -File tools/verify.ps1

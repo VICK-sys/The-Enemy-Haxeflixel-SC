@@ -40,8 +40,14 @@ param(
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
+if ([string]::IsNullOrWhiteSpace($env:PROCESSOR_ARCHITECTURE))
+{
+    $env:PROCESSOR_ARCHITECTURE = if ([Environment]::Is64BitOperatingSystem) { "AMD64" } else { "x86" }
+}
+
 $root = Split-Path -Parent $PSScriptRoot
 $exe = Join-Path $root "export\windows\bin\Enemy.exe"
+$windowsBin = Split-Path -Parent $exe
 $probeOut = Join-Path $root "probe_out.txt"
 
 function Write-Step([string]$text)
@@ -52,8 +58,6 @@ function Write-Step([string]$text)
 
 function Stop-Game
 {
-    # A running Enemy.exe holds lime.ndll and the Windows link step fails.
-    # No process is the normal case and is not an error.
     $running = Get-Process -Name "Enemy" -ErrorAction SilentlyContinue
     if ($null -eq $running)
     {
@@ -63,28 +67,88 @@ function Stop-Game
     Start-Sleep -Milliseconds 400
 }
 
+function Assert-StaticLimeArchive
+{
+    $limePaths = @(& haxelib path lime)
+    if ($LASTEXITCODE -ne 0)
+    {
+        throw "Could not locate Lime through Haxelib."
+    }
+
+    $limeSourceDirectory = $limePaths | Where-Object { $_ -match '[/\\]src[/\\]?$' } | Select-Object -First 1
+    if ([string]::IsNullOrWhiteSpace($limeSourceDirectory))
+    {
+        throw "Haxelib returned no Lime source directory."
+    }
+
+    $limeSourceDirectory = $limeSourceDirectory.TrimEnd([char[]]@('/', '\'))
+    $archive = Join-Path (Split-Path -Parent $limeSourceDirectory) "ndll\Windows64\liblime-19.lib"
+    if (-not (Test-Path -LiteralPath $archive))
+    {
+        throw "Static Lime archive is missing. Run tools/setup-static-lime.ps1 first."
+    }
+}
+
+function Finalize-SingleExePackage
+{
+    foreach ($name in @("icon.ico", "lime.ndll", "perflog.txt"))
+    {
+        $path = Join-Path $windowsBin $name
+        if (Test-Path -LiteralPath $path)
+        {
+            Remove-Item -LiteralPath $path -Force
+        }
+    }
+
+    $directories = @(Get-ChildItem -LiteralPath $windowsBin -Directory -Recurse | Sort-Object FullName -Descending)
+    foreach ($directory in $directories)
+    {
+        if (@(Get-ChildItem -LiteralPath $directory.FullName -Force).Count -eq 0)
+        {
+            Remove-Item -LiteralPath $directory.FullName -Force
+        }
+    }
+
+    $entries = @(Get-ChildItem -LiteralPath $windowsBin -Force)
+    $unexpected = @($entries | Where-Object { $_.FullName -ne $exe })
+    if ($unexpected.Count -gt 0)
+    {
+        $names = ($unexpected | Select-Object -ExpandProperty Name) -join ", "
+        throw "Windows package contains loose output: $names"
+    }
+}
+
 function Invoke-Build([string]$target, [switch]$WithProbe)
 {
     if ($target -eq "windows")
     {
+        Assert-StaticLimeArchive
         Stop-Game
     }
 
-    $label = if ($WithProbe) { "$target -Dprobe" } else { $target }
-    Write-Step "Building $label"
-
+    $arguments = @("run", "lime", "build", $target)
+    if ($target -eq "windows")
+    {
+        $arguments += "-static"
+    }
     if ($WithProbe)
     {
-        & haxelib run lime build $target -Dprobe
+        $arguments += "-Dprobe"
     }
-    else
-    {
-        & haxelib run lime build $target
-    }
+
+    $label = ($arguments | Select-Object -Skip 3) -join " "
+    Write-Step "Building $label"
+
+    & haxelib @arguments
 
     if ($LASTEXITCODE -ne 0)
     {
         throw "Build of $label failed with exit code $LASTEXITCODE."
+    }
+
+    if ($target -eq "windows")
+    {
+        Finalize-SingleExePackage
     }
 }
 

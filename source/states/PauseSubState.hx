@@ -9,16 +9,30 @@ import flixel.util.FlxColor;
 import ui.MenuList;
 import util.IrisWipe;
 import util.Lang;
+import util.Levels;
 import util.Music;
 
 class PauseSubState extends FlxSubState
 {
+	static inline var STATS_X:Float = 850;
+	static inline var STATS_TOP:Float = 250;
+	static inline var STATS_W:Float = 340;
+	static inline var STATS_VALUE_W:Float = 64;
+	static inline var STATS_GAP:Float = 12;
+	static inline var STATS_ROW_TOP:Float = 64;
+	static inline var STATS_STEP:Float = 42;
+	static inline var STATS_DIM:Int = 0xFFCFCAD4;
+
+	static var STAT_KEYS:Array<String> = ["level.level", "stat.vigor", "stat.endurance", "stat.strength", "stat.dexterity"];
 
 	private var camUI:FlxCamera;
 	private var list:MenuList;
 	private var leaving:Bool = false;
 	private var inLobby:Bool;
 	private var afk:systems.AfkPilot;
+	private var statsTitle:FlxText;
+	private var statNames:Array<FlxText> = [];
+	private var statValues:Array<FlxText> = [];
 
 	public function new(camUI:FlxCamera, inLobby:Bool = false, afk:systems.AfkPilot = null)
 	{
@@ -66,6 +80,8 @@ class PauseSubState extends FlxSubState
 		list.onChoose = choose;
 		list.cameras = [camUI];
 		add(list);
+		if (!inLobby)
+			addStats();
 
 		FlxG.mouse.visible = true;
 		Music.hold();
@@ -73,6 +89,47 @@ class PauseSubState extends FlxSubState
 		subStateClosed.add(function(_) relabel(title));
 
 		super.create();
+	}
+
+	function addStats():Void
+	{
+		statsTitle = statText(STATS_X, STATS_TOP, STATS_W, Lang.t("stats.title"), Lang.bodySize(), FlxColor.WHITE, CENTER);
+		add(statsTitle);
+		for (i in 0...STAT_KEYS.length)
+		{
+			var y = STATS_TOP + STATS_ROW_TOP + i * STATS_STEP;
+			var name = statText(STATS_X, y, STATS_W - STATS_VALUE_W - STATS_GAP, "", Lang.smallSize(), STATS_DIM, LEFT);
+			var value = statText(STATS_X + STATS_W - STATS_VALUE_W, y, STATS_VALUE_W, "", Lang.smallSize(), FlxColor.WHITE, RIGHT);
+			statNames.push(name);
+			statValues.push(value);
+			add(name);
+			add(value);
+		}
+		refreshStats();
+	}
+
+	function statText(x:Float, y:Float, width:Float, text:String, size:Int, color:Int, align:FlxTextAlign):FlxText
+	{
+		var out = new FlxText(x, y, width, text);
+		out.setFormat(Lang.fontFor(size), size, color, align);
+		out.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		out.cameras = [camUI];
+		return out;
+	}
+
+	function refreshStats():Void
+	{
+		if (statsTitle == null)
+			return;
+		statsTitle.text = Lang.t("stats.title");
+		statsTitle.font = Lang.bodyFont();
+		for (i in 0...STAT_KEYS.length)
+		{
+			statNames[i].text = Lang.t(STAT_KEYS[i]);
+			statNames[i].font = Lang.smallFont();
+			statValues[i].text = Std.string(i == 0 ? Levels.level() : Levels.shown(i - 1));
+			statValues[i].font = Lang.smallFont();
+		}
 	}
 
 	override public function close():Void
@@ -100,6 +157,7 @@ class PauseSubState extends FlxSubState
 			list.rowAt(i).font = Lang.bodyFont();
 			list.setLabel(i, labelFor(keys[i]));
 		}
+		refreshStats();
 	}
 
 	override public function update(elapsed:Float):Void

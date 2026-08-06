@@ -31,7 +31,6 @@ class EnemyDirector
 	public var onBoss:Void->Void;
 	public var onWaveCleared:Void->Void;
 	public var onBossPack:Array<Enemies>->Void;
-	public var onProbe:(Float, Float, Float) -> Void;
 
 	public var coopBodies(default, null):Array<FlxSprite> = [];
 	public var solids:FlxTypedGroup<FlxSprite>;
@@ -60,7 +59,7 @@ class EnemyDirector
 	private var activeBossKinds:Array<String> = null;
 	private var beatenBossKinds:Map<String, Bool> = new Map();
 	private var spentBossPairs:Map<String, Bool> = new Map();
-	private var bossFallCallback:(Float, Float, Bool) -> Void;
+	private var bossFallCallback:(Float, Float, Bool, Bool) -> Void;
 	private var bossDefeatedCallback:Void->Void;
 
 	public function new(player:Player, arena:Arena, layers:RenderLayers, status:PlayerCombat, fx:Fx)
@@ -147,12 +146,12 @@ class EnemyDirector
 		return f;
 	}
 
-	public var onBossFall(get, set):(Float, Float, Bool) -> Void;
+	public var onBossFall(get, set):(Float, Float, Bool, Bool) -> Void;
 
 	function get_onBossFall()
 		return bossFallCallback;
 
-	function set_onBossFall(f:(Float, Float, Bool) -> Void)
+	function set_onBossFall(f:(Float, Float, Bool, Bool) -> Void)
 	{
 		bossFallCallback = f;
 		return f;
@@ -398,13 +397,13 @@ class EnemyDirector
 			onBossKill(wasX, wasY);
 		if (onBossDrops != null)
 			onBossDrops(wasX, wasY);
-		finishBossMember(wasX, wasY);
+		finishBossMember(wasX, wasY, false);
 	}
 
-	function normalBossDown(x:Float, y:Float):Void
-		finishBossMember(x, y);
+	function normalBossDown(x:Float, y:Float, domo:Bool):Void
+		finishBossMember(x, y, domo);
 
-	function finishBossMember(x:Float, y:Float):Void
+	function finishBossMember(x:Float, y:Float, domo:Bool):Void
 	{
 		if (bossMembers <= 0)
 			return;
@@ -417,7 +416,7 @@ class EnemyDirector
 			activeBossKinds = null;
 		}
 		if (bossFallCallback != null)
-			bossFallCallback(x, y, last);
+			bossFallCallback(x, y, last, domo);
 		if (last && bossDefeatedCallback != null)
 			bossDefeatedCallback();
 	}
@@ -593,8 +592,10 @@ class EnemyDirector
 				e.velocity.set(0, 0);
 				e.drag.set(0, 0);
 				if (e.hitRecoil > 0)
-					shoveOff(e);
+					shoveOff(e, player.x + player.width * 0.5, player.feetY);
 			}
+			else if (!e.puppet && !e.seized && !e.buried && e.throwGrace <= 0 && WorldClock.scale > 0.05 && e.hitRecover > 0)
+				recoilOffBodies(e, rig);
 
 			gunfire.emit(e);
 			if (e.pendingSummons.length > 0)
@@ -608,10 +609,27 @@ class EnemyDirector
 	static inline var FLING_STUN:Float = 0.7;
 	static inline var FLING_DRAG:Float = 600;
 
-	function shoveOff(e:Enemies):Void
+	function recoilOffBodies(e:Enemies, rig:EnemyRig):Void
 	{
-		var px = player.x + player.width * 0.5;
-		var py = player.feetY;
+		for (body in coopBodies)
+		{
+			if (body == null || !body.exists || !body.visible)
+				continue;
+			if (rig.hitbox.x >= body.x + body.width || rig.hitbox.x + rig.hitbox.width <= body.x
+				|| rig.hitbox.y >= body.y + body.height || rig.hitbox.y + rig.hitbox.height <= body.y)
+				continue;
+			e.stun = e.hitRecover;
+			e.throwGrace = e.hitRecover;
+			e.velocity.set(0, 0);
+			e.drag.set(0, 0);
+			if (e.hitRecoil > 0)
+				shoveOff(e, body.x + body.width * 0.5, body.y + body.height);
+			return;
+		}
+	}
+
+	function shoveOff(e:Enemies, px:Float, py:Float):Void
+	{
 		var dx = e.x + e.width * 0.5 - px;
 		var dy = e.feetY - py;
 		var len = Math.sqrt(dx * dx + dy * dy);
@@ -759,8 +777,6 @@ class EnemyDirector
 
 	public function firstInCircle(cx:Float, cy:Float, radius:Float, skipSeized:Bool = false):Enemies
 	{
-		if (onProbe != null)
-			onProbe(cx, cy, radius);
 		for (rig in rigs)
 		{
 			var e = rig.enemy;
@@ -774,8 +790,6 @@ class EnemyDirector
 
 	public function eachInCircle(cx:Float, cy:Float, radius:Float, f:Enemies->Void):Void
 	{
-		if (onProbe != null)
-			onProbe(cx, cy, radius);
 		for (rig in rigs)
 		{
 			var e = rig.enemy;

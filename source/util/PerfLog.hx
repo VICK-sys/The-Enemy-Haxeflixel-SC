@@ -1,6 +1,6 @@
 package util;
 
-#if sys
+#if (sys && debug)
 import sys.io.File;
 import sys.io.FileOutput;
 #end
@@ -10,7 +10,7 @@ class PerfLog
 	static inline var SPIKE_MS:Float = 24;
 	static inline var GAP_MS:Float = 500;
 
-	#if sys
+	#if (sys && debug)
 	static var out:FileOutput;
 	#end
 
@@ -22,7 +22,7 @@ class PerfLog
 
 	public function new()
 	{
-		#if sys
+		#if (sys && debug)
 		if (out == null)
 		{
 			out = File.write("perflog.txt");
@@ -34,7 +34,7 @@ class PerfLog
 
 	public function frame(enemies:Int, paths:Int, projectiles:Int, mounds:Int, wave:Int):Void
 	{
-		#if sys
+		#if (sys && debug)
 		var now = haxe.Timer.stamp();
 		if (lastStamp < 0)
 		{

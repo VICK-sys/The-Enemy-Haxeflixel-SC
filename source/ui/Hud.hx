@@ -17,11 +17,16 @@ class Hud
 	static inline var BANNER_TIME:Float = 2;
 	static inline var BANNER_IN:Float = 0.35;
 	static inline var BANNER_OUT:Float = 0.3;
-	static inline var BOSS_BANNER_TIME:Float = 3.4;
-	static inline var BOSS_BANNER_DESC:Float = 2.5;
 	static inline var BOSS_BANNER_FADE:Float = 0.7;
-	static inline var BOSS_BANNER_TOP:Float = -70;
-	static inline var BOSS_BANNER_REST:Float = 250;
+	static inline var ALERT_W:Int = 112;
+	static inline var ALERT_H:Int = 80;
+	static inline var ALERT_FPS:Int = 14;
+	static inline var ALERT_HOLD_FPS:Int = 10;
+	static inline var ALERT_IN_FRAMES:Int = 5;
+	static inline var ALERT_TIME:Float = 3.4;
+	static inline var ALERT_OUT:Float = ALERT_IN_FRAMES / ALERT_FPS;
+	static inline var ALERT_SCALE:Float = 3;
+	static inline var ALERT_LIFT:Float = 0;
 	static inline var STOP_TIMER_FADE:Float = 4;
 	static inline var SCRAP_GAP:Float = 10;
 	static inline var SCRAP_LEFT:Float = 5;
@@ -36,13 +41,14 @@ class Hud
 	static inline var BAR_SETTLE:Float = 0.0005;
 	static inline var HEAL_FLASH:Float = 1.0;
 	static inline var HEAL_FADE:Float = 0.35;
-	static inline var OCCLUDED_ALPHA:Float = 0.3;
+	static inline var OCCLUDED_ALPHA:Float = 0.6;
 	static inline var OCCLUSION_FADE_SPEED:Float = 5;
 	static inline var OCCLUSION_PAD:Float = 12;
 
 	static inline var UI_SCALE:Float = 4 * states.PlayState.BASE_ZOOM;
-	static inline var HP_SCALE:Float = 2.5;
-	static inline var HP_FILL_SCALE_Y:Float = 2.75;
+	static inline var HP_SCALE:Float = UI_SCALE;
+	static inline var HP_FILL_SCALE_Y:Float = UI_SCALE * 1.1;
+	static inline var SUPER_EXTRA_W:Float = 2;
 	static inline var FRAME_X:Float = 16;
 
 	static inline var HP_X:Float = 64.5;
@@ -66,14 +72,18 @@ class Hud
 	static inline var DISPLAY_IN_TIME:Float = 0.65;
 	static inline var DISPLAY_SOUND:String = "display_on";
 	static inline var DISPLAY_VOL:Float = 0.65;
-	static inline var TICK_X:Float = 16;
-	static inline var TICK_Y:Float = 28;
-	static inline var WAVE_X:Float = 16;
-	static inline var WAVE_Y:Float = 13;
+	static inline var TICK_X:Float = 13.5;
+	static inline var TICK_Y:Float = 24;
+	static inline var BOSS_BAR_X:Float = 11;
+	static inline var BOSS_BAR_Y:Float = 15;
+	static inline var BOSS_BAR_SCALE:Float = DISPLAY_SCALE;
+	static inline var BOSS_BAR_EXTRA_W:Float = 2;
+	static inline var WAVE_X:Float = 14;
+	static inline var WAVE_Y:Float = 9;
 	static inline var WAVE_W:Float = 103;
 	static inline var WAVE_PAD:Float = 6;
 	static inline var WAVE_SIZE_MIN:Int = 12;
-	static inline var SCRAP_X:Float = 106;
+	static inline var SCRAP_X:Float = 96;
 	static inline var SCRAP_Y:Float = 45;
 	static inline var TICK_COUNT:Int = 11;
 	static inline var MAX_PIPS:Int = 12;
@@ -82,6 +92,12 @@ class Hud
 	static inline var WAVE_FLICKER_DIM:Float = 0.35;
 	static inline var WAVE_FLICKER_SOUND:String = "wave_flicker";
 	static inline var WAVE_FLICKER_VOLUME:Float = 0.5;
+	static inline var GOOD_JOB_DELAY:Float = 0.2;
+	static inline var GOOD_JOB_FPS:Int = 4;
+	static inline var GOOD_JOB_X:Float = 17;
+	static inline var GOOD_JOB_Y:Float = 13;
+	static inline var GOOD_JOB_W:Int = 80;
+	static inline var GOOD_JOB_H:Int = 16;
 
 	static var TICK_EDGE:Array<Int> = [0, 5, 12, 19, 26, 34, 42, 51, 59, 67, 74, 82];
 	static inline var AMMO_RIGHT:Float = 1264;
@@ -91,6 +107,7 @@ class Hud
 	static inline var CAP_GAP:Float = 6;
 
 	public var camUI:FlxCamera;
+	public var coop(default, null):CoopIcons;
 
 	private var state:FlxState;
 	private var status:PlayerCombat;
@@ -104,10 +121,11 @@ class Hud
 	private var scrapIconShade:FlxSprite;
 	private var expShown:Int = -1;
 	private var bannerText:FlxText;
+	private var bossWarning:FlxSprite;
 	private var deadText:FlxText;
 	private var bossHud:BossHud;
 	private var bannerTimer:Float = 0;
-	private var bossSlide:Bool = false;
+	private var alertTimer:Float = 0;
 	private var bannerFading:Bool = false;
 	private var bannerFadeTimer:Float = 0;
 	private var timeText:FlxText;
@@ -124,8 +142,16 @@ class Hud
 	private var pipTop:Float = 0;
 	private var displayPanel:FlxSprite;
 	private var displayTicks:FlxSprite;
+	private var goodJob:FlxSprite;
+	private var goodJobDelay:Float = 0;
+	private var waveCleared:Bool = false;
 	private var tickClip:FlxRect;
 	private var tickShown:Int = -1;
+	private var bossBarBack:FlxSprite;
+	private var bossBarFill:FlxSprite;
+	private var bossBarClip:FlxRect;
+	private var bossBarShown:Int = -1;
+	private var bossBarOn:Bool = false;
 	private var tubeOwner:String = null;
 	private var displayRestX:Float = 0;
 	private var displayStartOffset:Float = 0;
@@ -170,6 +196,8 @@ class Hud
 		camUI.bgColor.alpha = 0;
 		camUI.pixelPerfectRender = true;
 
+		coop = new CoopIcons(state, camUI);
+
 		hpFrame = makeHpSprite(FRAME_X, 0, "hp_frame");
 		var frameY = AMMO_BOTTOM - hpFrame.height;
 		hpFrame.y = frameY;
@@ -186,8 +214,11 @@ class Hud
 		hpBack = makeSlotBack(hpFill, "hp_bar");
 
 		superFill = makeHpSprite(FRAME_X + SUPER_X * HP_SCALE, frameY + SUPER_Y * HP_SCALE, "super_bar");
+		superFill.scale.x = HP_SCALE + SUPER_EXTRA_W / superFill.frameWidth;
+		superFill.updateHitbox();
+		superFill.setPosition(FRAME_X + SUPER_X * HP_SCALE, frameY + SUPER_Y * HP_SCALE);
 		superClip = FlxRect.get(0, 0, 0, superFill.frameHeight);
-		superBack = makeSlotBack(superFill, "super_bar");
+		superBack = makeSlotBack(superFill, "super_bar", true);
 
 		hpFlash = new FlxSprite(hpFill.x, hpFill.y);
 		hpFlash.loadGraphic(Paths.image("ui/hp_bar"));
@@ -230,6 +261,27 @@ class Hud
 		displayTicks.clipRect = tickClip;
 		state.add(piece(displayTicks));
 
+		goodJob = new FlxSprite();
+		paintGoodJob();
+		goodJob.cameras = [camUI];
+		goodJob.visible = false;
+		state.add(piece(goodJob));
+
+		bossBarBack = makeUiSprite(displayPanel.x,
+			DISPLAY_TOP + BOSS_BAR_Y * DISPLAY_SCALE, "fillEmptyBoss");
+		bossBarBack.scale.set(BOSS_BAR_SCALE + BOSS_BAR_EXTRA_W / bossBarBack.frameWidth, BOSS_BAR_SCALE);
+		bossBarBack.updateHitbox();
+		bossBarBack.visible = false;
+		state.add(piece(bossBarBack));
+
+		bossBarFill = makeUiSprite(bossBarBack.x, bossBarBack.y, "fillBoss");
+		bossBarFill.scale.set(BOSS_BAR_SCALE + BOSS_BAR_EXTRA_W / bossBarFill.frameWidth, BOSS_BAR_SCALE);
+		bossBarFill.updateHitbox();
+		bossBarClip = FlxRect.get(0, 0, 0, bossBarFill.frameHeight);
+		bossBarFill.clipRect = bossBarClip;
+		bossBarFill.visible = false;
+		state.add(piece(bossBarFill));
+
 		capTop = makeUiSprite(0, 0, "ammo_indicator");
 		capTop.flipY = true;
 		capBottom = makeUiSprite(0, 0, "ammo_indicator");
@@ -271,6 +323,19 @@ class Hud
 		state.add(piece(scrapIcon));
 		state.add(piece(expText));
 		setExp(0);
+		bossWarning = new FlxSprite();
+		paintBossAlert();
+		bossWarning.animation.onFinish.add(function(name)
+		{
+			if (name == "in")
+				bossWarning.animation.play("hold");
+			if (name == "out")
+				bossWarning.visible = false;
+		});
+		bossWarning.cameras = [camUI];
+		bossWarning.visible = false;
+		state.add(piece(bossWarning));
+
 		displayStartOffset = FlxG.width - displayRestX;
 		displayOffset = displayStartOffset;
 		layoutDisplay();
@@ -297,10 +362,15 @@ class Hud
 		hpFill.clipRect = null;
 		hpFlash.clipRect = null;
 		superFill.clipRect = null;
+		bossBarFill.clipRect = null;
 		hpClip.put();
 		hpClip = null;
 		superClip.put();
 		superClip = null;
+		bossBarClip.put();
+		bossBarClip = null;
+		cursorPoint.put();
+		cursorPoint = null;
 	}
 
 	public function setShown(on:Bool):Void
@@ -310,12 +380,18 @@ class Hud
 		hudOn = on;
 		for (p in pieces)
 			p.visible = on;
+		coop.setVisible(on);
 		if (on)
 		{
 			hideAmmo();
 			stopTimerText.visible = false;
+			waveText.visible = !waveCleared;
+			displayTicks.visible = !waveCleared;
+			goodJob.visible = waveCleared && goodJobDelay <= 0;
 			bannerText.visible = bannerTimer > 0 || bannerFading;
+			bossWarning.visible = alertTimer > 0;
 			deadText.visible = false;
+			applyDisplayMode();
 		}
 	}
 
@@ -348,6 +424,7 @@ class Hud
 		updateSuper(elapsed);
 		updateOcclusionFade(elapsed);
 		updateWaveFlicker(elapsed);
+		updateGoodJob(elapsed);
 
 		if (stopTimerText.alpha != stopTimerTarget)
 		{
@@ -362,6 +439,8 @@ class Hud
 
 		bossHud.update(elapsed);
 
+		updateAlert(elapsed);
+
 		if (bannerFading)
 		{
 			bannerFadeTimer -= elapsed;
@@ -374,7 +453,6 @@ class Hud
 				bannerText.scale.set(1, 1);
 				bannerText.angle = 0;
 				bannerText.y = 48;
-				bossSlide = false;
 			}
 		}
 
@@ -388,11 +466,6 @@ class Hud
 				bannerText.alpha = 1;
 				bannerText.angle = 0;
 				bannerText.y = 48;
-				bossSlide = false;
-			}
-			else if (bossSlide)
-			{
-				updateBossBanner();
 			}
 			else
 			{
@@ -502,7 +575,11 @@ class Hud
 	{
 		displayPanel.x = displayRestX + displayOffset;
 		displayTicks.x = displayPanel.x + TICK_X * DISPLAY_SCALE;
+		bossBarBack.x = displayPanel.x + BOSS_BAR_X * DISPLAY_SCALE;
+		bossBarFill.x = bossBarBack.x;
 		waveText.x = displayPanel.x + WAVE_X * DISPLAY_SCALE;
+		goodJob.setPosition(displayPanel.x + GOOD_JOB_X * DISPLAY_SCALE,
+			DISPLAY_TOP + GOOD_JOB_Y * DISPLAY_SCALE);
 		layoutScrap();
 	}
 
@@ -642,8 +719,35 @@ class Hud
 
 	public function showWave(n:Int):Void
 	{
+		waveCleared = false;
+		goodJobDelay = 0;
+		goodJob.visible = false;
+		waveText.visible = hudOn;
+		setBossBar(false);
+		applyDisplayMode();
 		waveLabel = Lang.t("hud.wave", [n]);
 		setDisplayLabel(waveLabel, true);
+	}
+
+	public function showWaveCleared():Void
+	{
+		waveCleared = true;
+		goodJobDelay = GOOD_JOB_DELAY;
+		goodJob.visible = false;
+		waveText.visible = false;
+		applyDisplayMode();
+	}
+
+	function updateGoodJob(elapsed:Float):Void
+	{
+		if (!waveCleared || goodJobDelay <= 0)
+			return;
+		goodJobDelay -= elapsed;
+		if (goodJobDelay > 0)
+			return;
+		goodJobDelay = 0;
+		goodJob.visible = hudOn;
+		goodJob.animation.play("pulse", true);
 	}
 
 	public function setDisplayLabel(text:String, playSound:Bool = false):Void
@@ -660,7 +764,34 @@ class Hud
 	}
 
 	public function showWaveLabel():Void
+	{
+		setBossBar(false);
 		setDisplayLabel(waveLabel);
+	}
+
+	public function showBossLabel(title:String):Void
+	{
+		setBossBar(true);
+		setDisplayLabel(title);
+	}
+
+	function setBossBar(on:Bool):Void
+	{
+		if (bossBarOn == on)
+			return;
+		bossBarOn = on;
+		tickShown = -1;
+		bossBarShown = -1;
+		applyDisplayMode();
+	}
+
+	function applyDisplayMode():Void
+	{
+		waveText.visible = hudOn && !bossBarOn && !waveCleared;
+		displayTicks.visible = hudOn && !bossBarOn && !waveCleared;
+		bossBarBack.visible = hudOn && bossBarOn && !waveCleared;
+		bossBarFill.visible = hudOn && bossBarOn && !waveCleared;
+	}
 
 	function fitDisplayLabel():Void
 	{
@@ -692,28 +823,37 @@ class Hud
 	public function showBoss():Void
 	{
 		bossHud.beginEncounter();
-		bannerText.color = 0xFFE0132D;
-		bannerText.text = Lang.t("hud.bossApproaching");
-		bannerText.visible = hudOn;
-		bannerText.alpha = 0;
-		bannerText.scale.set(1, 1);
-		bannerText.angle = 0;
-		bannerText.y = BOSS_BANNER_TOP;
-		bossSlide = true;
-		bannerTimer = BOSS_BANNER_TIME;
+		bossWarning.visible = hudOn;
+		bossWarning.alpha = 1;
+		bossWarning.animation.play("in", true);
+		alertTimer = ALERT_TIME;
+		layoutBossWarning();
+		state.remove(bossWarning, true);
+		state.add(bossWarning);
+		raiseCursor();
 		bossHud.startFlash();
-		raiseBanner();
 	}
 
-	function updateBossBanner():Void
+	function updateAlert(elapsed:Float):Void
 	{
-		var age = BOSS_BANNER_TIME - bannerTimer;
-		var p = age < BOSS_BANNER_DESC ? age / BOSS_BANNER_DESC : 1;
-		var ease = 1 - Math.pow(1 - p, 3);
-		bannerText.y = BOSS_BANNER_TOP + (BOSS_BANNER_REST - BOSS_BANNER_TOP) * ease;
-		bannerText.scale.set(1, 1);
-		bannerText.angle = 0;
-		bannerText.alpha = age < 0.4 ? age / 0.4 : 1;
+		if (alertTimer <= 0)
+			return;
+		alertTimer -= elapsed;
+		if (alertTimer <= 0)
+		{
+			alertTimer = 0;
+			bossWarning.visible = false;
+			return;
+		}
+		if (alertTimer <= ALERT_OUT && bossWarning.animation.name != "out")
+			bossWarning.animation.play("out", true);
+		layoutBossWarning();
+	}
+
+	function layoutBossWarning():Void
+	{
+		bossWarning.setPosition((FlxG.width - bossWarning.width) * 0.5,
+			(FlxG.height - bossWarning.height) * 0.5 + ALERT_LIFT);
 	}
 
 	public function trackBosses(pack:Array<Enemies>):Void
@@ -733,7 +873,8 @@ class Hud
 
 	public function showBanner(text:String):Void
 	{
-		bossSlide = false;
+		bannerFading = false;
+		bannerFadeTimer = 0;
 		bannerText.y = 48;
 		bannerText.text = text;
 		bannerText.visible = hudOn;
@@ -808,9 +949,9 @@ class Hud
 		deadText.visible = hudOn;
 	}
 
-	public function showRespawn():Void
+	public function showRespawn(wave:Int):Void
 	{
-		deadText.text = Lang.t("hud.respawning");
+		deadText.text = Lang.t("hud.respawning", [wave]);
 		deadText.visible = hudOn;
 	}
 
@@ -830,6 +971,38 @@ class Hud
 	{
 		art.set(s, name);
 		s.loadGraphic(uiArt(name));
+	}
+
+	function paintBossAlert():Void
+	{
+		var was = bossWarning.animation.name;
+		var at = bossWarning.animation.frameIndex;
+		bossWarning.loadGraphic(uiArt("boss_alert"), true, ALERT_W, ALERT_H);
+		bossWarning.animation.add("in", [0, 1, 2, 3, 4], ALERT_FPS, false);
+		bossWarning.animation.add("hold", [5, 6], ALERT_HOLD_FPS, true);
+		bossWarning.animation.add("out", [4, 3, 2, 1, 0], ALERT_FPS, false);
+		bossWarning.antialiasing = false;
+		bossWarning.scale.set(ALERT_SCALE, ALERT_SCALE);
+		bossWarning.updateHitbox();
+		layoutBossWarning();
+		if (was != null)
+			bossWarning.animation.play(was, true, false, at);
+	}
+
+	function paintGoodJob():Void
+	{
+		var was = goodJob.animation.name;
+		var at = goodJob.animation.frameIndex;
+		var x = goodJob.x;
+		var y = goodJob.y;
+		goodJob.loadGraphic(uiArt("good_job_display"), true, GOOD_JOB_W, GOOD_JOB_H);
+		goodJob.animation.add("pulse", [0, 1], GOOD_JOB_FPS, true);
+		goodJob.antialiasing = false;
+		goodJob.scale.set(DISPLAY_SCALE, DISPLAY_SCALE);
+		goodJob.updateHitbox();
+		goodJob.setPosition(x, y);
+		if (was != null)
+			goodJob.animation.play(was, true, false, at);
 	}
 
 	function makeSprite(x:Float, y:Float, name:String):FlxSprite
@@ -911,6 +1084,18 @@ class Hud
 
 	public function setTicks(filled:Float, keepPartial:Bool = false):Void
 	{
+		if (bossBarOn)
+		{
+			var span = filled < 0 ? 0 : (filled > 1 ? 1 : filled);
+			var w = Math.round(span * bossBarFill.frameWidth);
+			if (w == bossBarShown)
+				return;
+			bossBarShown = w;
+			bossBarClip.width = w;
+			bossBarFill.clipRect = bossBarClip;
+			return;
+		}
+
 		var n = ticksFor(filled, keepPartial);
 		if (n == tickShown)
 			return;
@@ -922,11 +1107,16 @@ class Hud
 	public function bossFraction():Float
 		return bossHud.fraction();
 
-	function makeSlotBack(fill:FlxSprite, name:String):FlxSprite
+	function makeSlotBack(fill:FlxSprite, name:String, solid:Bool = false):FlxSprite
 	{
 		var s = new FlxSprite(fill.x, fill.y);
-		s.loadGraphic(Paths.image("ui/" + name));
-		s.color = FlxColor.BLACK;
+		if (solid)
+			s.makeGraphic(fill.frameWidth, fill.frameHeight, FlxColor.BLACK);
+		else
+		{
+			s.loadGraphic(Paths.image("ui/" + name));
+			s.color = FlxColor.BLACK;
+		}
 		s.antialiasing = false;
 		s.scale.set(fill.scale.x, fill.scale.y);
 		s.cameras = [camUI];
@@ -966,8 +1156,11 @@ class Hud
 			s.setPosition(at.x, at.y);
 			at.put();
 		}
+		paintGoodJob();
+		paintBossAlert();
 		hpWidth = -1;
 		superWidth = -1;
+		bossBarShown = -1;
 	}
 
 	public function applyLanguage(wave:Int):Void

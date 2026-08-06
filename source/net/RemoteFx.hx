@@ -28,6 +28,8 @@ class RemoteFx
 	private var cfg = WeaponDataRegistry.get();
 	private var fx:Fx;
 	private var layers:RenderLayers;
+	private var director:EnemyDirector;
+	private var arena:systems.world.Arena;
 
 	private var slashes:FlxTypedGroup<SlashEffect>;
 	private var arrows:FlxTypedGroup<Arrow>;
@@ -60,10 +62,13 @@ class RemoteFx
 	private var yoyoTY:Float = 0;
 	private var yoyoAng:Float = 0;
 
-	public function new(state:FlxState, layers:RenderLayers, director:EnemyDirector, hits:HitPipeline, fx:Fx, avatar:RemoteAvatar)
+	public function new(state:FlxState, layers:RenderLayers, director:EnemyDirector, hits:HitPipeline, fx:Fx, avatar:RemoteAvatar,
+			arena:systems.world.Arena)
 	{
 		this.fx = fx;
 		this.layers = layers;
+		this.director = director;
+		this.arena = arena;
 		this.avatar = avatar;
 		avatar.fx = fx;
 
@@ -97,6 +102,32 @@ class RemoteFx
 		state.add(thrown);
 		state.add(storm.trail.group);
 		state.add(storm.superArrow);
+	}
+
+	function sweepBullets():Void
+	{
+		for (b in bullets.members)
+		{
+			if (b == null || !b.exists)
+				continue;
+
+			var cx = b.x + b.width / 2;
+			var cy = b.y + b.height / 2;
+			var px = cx + b.dirX * b.hitR;
+			var py = cy + b.dirY * b.hitR;
+			if (arena.wallAt(px, py) || systems.world.PropBlock.at(px, py))
+			{
+				fx.breakAt(px, py, true);
+				b.kill();
+				continue;
+			}
+
+			if (!b.pierces && director.firstInCircle(cx, cy, b.hitR) != null)
+			{
+				fx.impactAt(cx, cy);
+				b.kill();
+			}
+		}
 	}
 
 	public function superActivate(kind:Int):Void
@@ -273,6 +304,7 @@ class RemoteFx
 
 	public function update(elapsed:Float):Void
 	{
+		sweepBullets();
 		layers.adopt(cast bullets);
 		layers.adopt(cast arrows);
 		layers.adopt(cast rain.arrows);

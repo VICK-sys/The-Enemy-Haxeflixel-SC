@@ -59,11 +59,7 @@ class Peer
 		avatar.setReady(false);
 		avatar.setAfk(false);
 		avatar.clearDeath();
-		avatar.sprite.visible = false;
-		avatar.held.visible = false;
-		avatar.shadow.visible = false;
-		avatar.tag.visible = false;
-		avatar.note.visible = false;
+		avatar.hideAll();
 		if (fx != null)
 		{
 			fx.setHook(false, 0, 0, 0, 0, 0);

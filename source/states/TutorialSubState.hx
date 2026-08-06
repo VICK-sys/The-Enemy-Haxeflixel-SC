@@ -111,6 +111,7 @@ class TutorialSubState extends FlxSubState
 			case 0: [moveKeys(), bind(util.Controls.DASH)];
 			case 1: [bind(util.Controls.ATTACK), bind(util.Controls.SECOND)];
 			case 2: [bind(util.Controls.SUPER)];
+			case 5: [util.Controls.readyBindName(net.Net.active)];
 			default: null;
 		}
 	}

@@ -49,6 +49,8 @@ class HitPipeline
 
 	function route(e:Enemies, pushX:Float, pushY:Float, damage:Float, feedMeter:Bool, crit:Bool = false):Void
 	{
+		if (e.buried)
+			return;
 		damage += util.Levels.damageBonus();
 		if (owner != null && PropBlock.between(owner.x + owner.width / 2, owner.feetY, e.x + e.width / 2, e.feetY))
 		{
@@ -72,6 +74,8 @@ class HitPipeline
 	public function applyHit(e:Enemies, pushX:Float, pushY:Float, damage:Float, rewardable:Bool, feedMeter:Bool = true,
 			crit:Bool = false):Void
 	{
+		if (e.buried)
+			return;
 		var landed = damage < e.hp ? damage : e.hp;
 		var shrugged = e.isDead || e.buried;
 		e.takeHit(pushX, pushY, damage);

@@ -67,6 +67,13 @@ class PeerRoster
 				f(p.avatar);
 	}
 
+	public function eachLive(f:Peer->Void):Void
+	{
+		for (p in peers)
+			if (p != null && p.live && p.avatar != null)
+				f(p);
+	}
+
 	public function count():Int
 	{
 		var n = 0;

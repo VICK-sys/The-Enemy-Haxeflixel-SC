@@ -61,9 +61,11 @@ class WeaponPickSubState extends FlxSubState
 	static inline var ICON_TOP:Float = 40;
 	static inline var LABEL_TOP:Float = 200;
 	static inline var BLURB_TOP:Float = 240;
-	static inline var RECORD_TOP:Float = 8;
+	static inline var RECORD_TOP:Float = -2;
 	static inline var RECORD_LEFT:Float = 12;
 	static inline var RECORD_RIGHT:Float = 64;
+	static inline var RECORD_ALPHA:Float = 0.55;
+	static inline var HAMMER_ICON_DROP:Float = 5;
 
 	static inline var FLOAT_AMP:Float = 7;
 	static inline var FLOAT_SPEED:Float = 3.2;
@@ -165,6 +167,14 @@ class WeaponPickSubState extends FlxSubState
 		c.bg.makeGraphic(CARD_W, CARD_H, CARD);
 		ui(c.bg);
 
+		var best = util.Stats.weaponBest(i);
+		c.record = new FlxText(x + RECORD_LEFT, CARD_TOP + RECORD_TOP, CARD_W - RECORD_RIGHT,
+			Lang.t("weaponPick.record", [best > 0 ? Std.string(best) : "-"]));
+		c.record.setFormat(Lang.smallFont(), Lang.smallSize(), TEXT_DIM, LEFT);
+		c.record.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
+		c.record.alpha = RECORD_ALPHA;
+		ui(c.record);
+
 		for (d in OUTLINE_DIRS)
 		{
 			var o = art(i);
@@ -176,7 +186,7 @@ class WeaponPickSubState extends FlxSubState
 
 		c.icon = art(i);
 		c.icon.x = x + (CARD_W - c.icon.width) / 2;
-		c.icon.y = CARD_TOP + ICON_TOP;
+		c.icon.y = CARD_TOP + ICON_TOP + (i == 0 ? HAMMER_ICON_DROP : 0);
 		ui(c.icon);
 		c.baseY = c.icon.y;
 
@@ -192,13 +202,6 @@ class WeaponPickSubState extends FlxSubState
 		var num = new FlxText(x, CARD_TOP + 8, CARD_W - 12, "" + (slot + 1));
 		num.setFormat(Lang.smallFont(), Lang.smallSize(), TEXT_DIM, RIGHT);
 		ui(num);
-
-		var best = util.Stats.weaponBest(i);
-		c.record = new FlxText(x + RECORD_LEFT, CARD_TOP + RECORD_TOP, CARD_W - RECORD_RIGHT,
-			Lang.t("weaponPick.record", [best > 0 ? Std.string(best) : "-"]));
-		c.record.setFormat(Lang.smallFont(), Lang.smallSize(), TEXT_DIM, LEFT);
-		c.record.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
-		ui(c.record);
 
 		return c;
 	}

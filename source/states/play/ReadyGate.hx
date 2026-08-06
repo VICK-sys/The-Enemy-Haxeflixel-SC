@@ -132,23 +132,20 @@ class ReadyGate
 
 		prompt.visible = !open;
 		if (!open)
-			prompt.text = ready ? waitLabel() : Lang.t("ready.prompt", [util.Controls.bindName(util.Controls.ACCEPT)]);
+			prompt.text = ready ? waitLabel() : Lang.t("ready.prompt", [util.Controls.readyBindName(Net.active)]);
 		var press = open ? util.Controls.pilotAccepted() : util.Controls.acceptJustPressed();
 
 		if (ready)
 		{
-			if (Net.active && !status.dead && press)
+			if (Net.active && press)
 				unready();
 			return;
 		}
 
-		if (Net.active && status.dead)
-		{
-			markReady(true);
+		if (!Net.active && status.dead)
 			return;
-		}
 
-		if (status.dead || (blocked != null && blocked()))
+		if (blocked != null && blocked())
 			return;
 
 		if (press)
@@ -164,12 +161,11 @@ class ReadyGate
 		return Lang.t("ready.waiting", [1, (netSync == null ? 0 : netSync.peerCount()) + 1]);
 	}
 
-	function markReady(quiet:Bool = false):Void
+	function markReady():Void
 	{
 		ready = true;
-		bubble.visible = !quiet;
-		if (!quiet)
-			FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
+		bubble.visible = true;
+		FlxG.sound.play(Paths.sound("weapon/catch"), 0.5);
 
 		if (!Net.active)
 		{

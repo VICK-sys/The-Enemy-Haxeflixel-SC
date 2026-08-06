@@ -1,6 +1,7 @@
 package util;
 
 import flixel.FlxG;
+import flixel.sound.FlxSound;
 
 class Music
 {
@@ -9,6 +10,7 @@ class Music
 	static var current:String = null;
 	static var base:Float = 1;
 	static var hooked:Bool = false;
+	static var paused:Array<FlxSound> = [];
 
 	public static var held(default, null):Bool = false;
 
@@ -24,21 +26,35 @@ class Music
 
 	public static function hold():Void
 	{
+		if (held)
+			return;
 		held = true;
 		hook();
 		Muffle.set(true);
+		paused.resize(0);
 		for (s in FlxG.sound.list.members)
 			if (s != null && s.exists && s.playing)
-				s.pause();
+			{
+				if (s.autoDestroy)
+					s.stop();
+				else
+				{
+					s.pause();
+					paused.push(s);
+				}
+			}
 	}
 
 	public static function release():Void
 	{
+		if (!held)
+			return;
 		held = false;
 		Muffle.set(false);
-		for (s in FlxG.sound.list.members)
+		for (s in paused)
 			if (s != null && s.exists && !s.playing)
 				s.resume();
+		paused.resize(0);
 	}
 
 	public static function play(name:String, volume:Float, loop:Bool = true):Void
@@ -46,12 +62,12 @@ class Music
 		hook();
 		base = volume;
 		var m = FlxG.sound.music;
-		if (current == name && m != null)
+		if (current == name && m != null && m.exists)
 		{
 			m.volume = volume * Muffle.volumeScale();
 			m.pitch = 1;
 			if (!m.playing)
-				m.resume();
+				m.play();
 			return;
 		}
 		current = name;

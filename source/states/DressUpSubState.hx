@@ -21,23 +21,31 @@ class DressUpSubState extends LobbyPanel
 	static inline var BOX_W:Int = 250;
 	static inline var BOX_H:Int = 250;
 	static inline var FIELD_W:Int = 686;
-	static inline var FIELD_H:Int = 62;
+	static inline var FIELD_H:Int = 55;
 
 	static inline var MARGIN:Float = 44;
 	static inline var COL_GAP:Float = 36;
 	static inline var LABEL_GAP:Float = 26;
 	static inline var ARROW_IN:Float = 16;
-	static inline var TEXT_DROP:Float = 16;
-	static inline var ROW_NAME:Float = 112;
-	static inline var ROW_SKIN_Y:Float = 224;
-	static inline var ROW_GEAR_Y:Float = 330;
-	static inline var ROW_VOICE_Y:Float = 436;
+	static inline var TEXT_DROP:Float = 3;
+	static inline var NAME_TEXT_DROP:Float = 1;
+	static inline var COUNTER_DROP:Float = 7;
+	static inline var PREVIEW_Y:Float = 112;
+	static inline var ROW_NAME_Y:Float = 95;
+	static inline var LABEL_NAME_Y:Float = 112;
+	static inline var ROW_SKIN_Y:Float = 191;
+	static inline var LABEL_SKIN_Y:Float = 206;
+	static inline var ROW_GEAR_Y:Float = 282;
+	static inline var LABEL_GEAR_Y:Float = 297;
+	static inline var ROW_VOICE_Y:Float = 371;
+	static inline var LABEL_VOICE_Y:Float = 388;
 	static inline var ROW_COLOR_Y:Float = 528;
 	static inline var ROW_HINTS:Float = 612;
 	static inline var REPEAT_FIRST:Float = 0.30;
 	static inline var REPEAT_NEXT:Float = 0.09;
 	static inline var CARET_RATE:Float = 3.4;
-	static inline var SKIN_H:Int = 56;
+	static inline var BODY_H:Int = 43;
+	static inline var OPTION_H:Int = 49;
 	static inline var PREVIEW_SCALE:Float = 5;
 	static inline var GEAR_DX:Float = -21.25;
 	static inline var GEAR_DY:Float = 32.5;
@@ -54,11 +62,13 @@ class DressUpSubState extends LobbyPanel
 	private var preview:FlxSprite;
 	private var nameText:FlxText;
 	private var ghostText:FlxText;
+	private var nameField:FlxSprite;
 	private var caret:FlxSprite;
 	private var counter:FlxText;
 	private var skinText:FlxText;
 	private var gearText:FlxText;
 	private var voiceText:FlxText;
+	private var nameLabel:FlxText;
 	private var skinLabel:FlxText;
 	private var gearLabel:FlxText;
 	private var voiceLabel:FlxText;
@@ -78,6 +88,7 @@ class DressUpSubState extends LobbyPanel
 	private var shownSkin:Int = -1;
 	private var gear:Int = 0;
 	private var focus:Int = ROW_COLOR;
+	private var editingName:Bool = false;
 	private var held:Float = 0;
 	private var lastTurn:Int = 0;
 	private var blink:Float = 0;
@@ -99,7 +110,7 @@ class DressUpSubState extends LobbyPanel
 		gear = SaveData.playerGear();
 
 		var boxX = px + MARGIN;
-		var boxY = py + ROW_NAME;
+		var boxY = py + PREVIEW_Y;
 		well(boxX, boxY, BOX_W, BOX_H);
 
 		previewCx = boxX + BOX_W * 0.5;
@@ -117,39 +128,40 @@ class DressUpSubState extends LobbyPanel
 		dressPreview();
 
 		var colX = px + MARGIN + BOX_W + COL_GAP;
-		rowLabel(colX, py + ROW_NAME, FIELD_W, "lobby.nameLabel");
+		nameLabel = rowLabel(colX, py + LABEL_NAME_Y, FIELD_W, "lobby.nameLabel");
 
-		var fieldY = py + ROW_NAME;
-		well(colX, fieldY, FIELD_W, FIELD_H);
+		var fieldY = py + ROW_NAME_Y;
+		nameField = well(colX, fieldY, FIELD_W, FIELD_H);
 
-		ghostText = label(colX + 32, fieldY + 14, 0, Lang.t("online.defaultName"), Lang.bodySize(), LobbyPanel.DIM, LEFT);
+		ghostText = label(colX + 32, fieldY + NAME_TEXT_DROP, 0, Lang.t("online.defaultName"), Lang.bodySize(), LobbyPanel.DIM, LEFT);
 		ghostText.alpha = 0.35;
 
-		nameText = label(colX + 16, fieldY + 14, 0, "", Lang.bodySize(), FlxColor.WHITE, LEFT);
+		nameText = label(colX + 16, fieldY + NAME_TEXT_DROP, 0, "", Lang.bodySize(), FlxColor.WHITE, LEFT);
 
 		var nameMetrics = nameText.textField.getLineMetrics(0);
 		var capH = nameMetrics.ascent - nameMetrics.descent;
 		caret = plate(colX + 16, nameText.y + nameMetrics.ascent - capH, 3, capH, FlxColor.WHITE);
+		caret.visible = false;
 
-		counter = label(colX, fieldY + 20, FIELD_W - 16, "", Lang.smallSize(), LobbyPanel.DIM, RIGHT);
+		counter = label(colX, fieldY + COUNTER_DROP, FIELD_W - 16, "", Lang.smallSize(), LobbyPanel.DIM, RIGHT);
 
 		var skinY = py + ROW_SKIN_Y;
-		skinLabel = rowLabel(colX, skinY, FIELD_W, "lobby.skinLabel");
-		well(colX, skinY, FIELD_W, SKIN_H);
+		skinLabel = rowLabel(colX, py + LABEL_SKIN_Y, FIELD_W, "lobby.skinLabel");
+		well(colX, skinY, FIELD_W, BODY_H);
 		skinArrows.push(label(colX + ARROW_IN, skinY + TEXT_DROP, 0, "<", Lang.bodySize(), LobbyPanel.DIM, LEFT));
 		skinArrows.push(label(colX + FIELD_W - ARROW_IN - 16, skinY + TEXT_DROP, 0, ">", Lang.bodySize(), LobbyPanel.DIM, LEFT));
 		skinText = label(colX, skinY + TEXT_DROP, FIELD_W, "", Lang.bodySize(), FlxColor.WHITE, CENTER);
 
 		var gearY = py + ROW_GEAR_Y;
-		gearLabel = rowLabel(colX, gearY, FIELD_W, "lobby.gearLabel");
-		well(colX, gearY, FIELD_W, SKIN_H);
+		gearLabel = rowLabel(colX, py + LABEL_GEAR_Y, FIELD_W, "lobby.gearLabel");
+		well(colX, gearY, FIELD_W, OPTION_H);
 		gearArrows.push(label(colX + ARROW_IN, gearY + TEXT_DROP, 0, "<", Lang.bodySize(), LobbyPanel.DIM, LEFT));
 		gearArrows.push(label(colX + FIELD_W - ARROW_IN - 16, gearY + TEXT_DROP, 0, ">", Lang.bodySize(), LobbyPanel.DIM, LEFT));
 		gearText = label(colX, gearY + TEXT_DROP, FIELD_W, "", Lang.bodySize(), FlxColor.WHITE, CENTER);
 
 		var voiceY = py + ROW_VOICE_Y;
-		voiceLabel = rowLabel(colX, voiceY, FIELD_W, "lobby.voiceLabel");
-		well(colX, voiceY, FIELD_W, SKIN_H);
+		voiceLabel = rowLabel(colX, py + LABEL_VOICE_Y, FIELD_W, "lobby.voiceLabel");
+		well(colX, voiceY, FIELD_W, OPTION_H);
 		voiceArrows.push(label(colX + ARROW_IN, voiceY + TEXT_DROP, 0, "<", Lang.bodySize(), LobbyPanel.DIM, LEFT));
 		voiceArrows.push(label(colX + FIELD_W - ARROW_IN - 16, voiceY + TEXT_DROP, 0, ">", Lang.bodySize(), LobbyPanel.DIM, LEFT));
 		voiceText = label(colX, voiceY + TEXT_DROP, FIELD_W, "", Lang.bodySize(), FlxColor.WHITE, CENTER);
@@ -184,6 +196,7 @@ class DressUpSubState extends LobbyPanel
 			pick += STEPS;
 		placeRing();
 		refreshName();
+		FlxG.mouse.visible = true;
 
 		super.create();
 	}
@@ -249,18 +262,19 @@ class DressUpSubState extends LobbyPanel
 
 	function refreshFocus():Void
 	{
-		skinLabel.color = focus == ROW_SKIN ? FlxColor.WHITE : LobbyPanel.DIM;
-		gearLabel.color = focus == ROW_GEAR ? FlxColor.WHITE : LobbyPanel.DIM;
-		voiceLabel.color = focus == ROW_VOICE ? FlxColor.WHITE : LobbyPanel.DIM;
-		colorLabel.color = focus == ROW_COLOR ? FlxColor.WHITE : LobbyPanel.DIM;
+		nameLabel.color = editingName ? FlxColor.WHITE : LobbyPanel.DIM;
+		skinLabel.color = !editingName && focus == ROW_SKIN ? FlxColor.WHITE : LobbyPanel.DIM;
+		gearLabel.color = !editingName && focus == ROW_GEAR ? FlxColor.WHITE : LobbyPanel.DIM;
+		voiceLabel.color = !editingName && focus == ROW_VOICE ? FlxColor.WHITE : LobbyPanel.DIM;
+		colorLabel.color = !editingName && focus == ROW_COLOR ? FlxColor.WHITE : LobbyPanel.DIM;
 		for (a in skinArrows)
-			a.color = focus == ROW_SKIN ? FlxColor.WHITE : LobbyPanel.DIM;
+			a.color = !editingName && focus == ROW_SKIN ? FlxColor.WHITE : LobbyPanel.DIM;
 		for (a in gearArrows)
-			a.color = focus == ROW_GEAR ? FlxColor.WHITE : LobbyPanel.DIM;
+			a.color = !editingName && focus == ROW_GEAR ? FlxColor.WHITE : LobbyPanel.DIM;
 		for (a in voiceArrows)
-			a.color = focus == ROW_VOICE ? FlxColor.WHITE : LobbyPanel.DIM;
+			a.color = !editingName && focus == ROW_VOICE ? FlxColor.WHITE : LobbyPanel.DIM;
 		for (b in ringBars)
-			b.color = focus == ROW_COLOR ? FlxColor.WHITE : LobbyPanel.DIM;
+			b.color = !editingName && focus == ROW_COLOR ? FlxColor.WHITE : LobbyPanel.DIM;
 	}
 
 	function focusInput():Void
@@ -272,6 +286,7 @@ class DressUpSubState extends LobbyPanel
 			step = 1;
 		if (step == 0)
 			return;
+		editingName = false;
 		focus = (focus + step + ROWS) % ROWS;
 		refreshFocus();
 		util.MenuSfx.hover();
@@ -323,6 +338,29 @@ class DressUpSubState extends LobbyPanel
 		caret.x = nameText.x + (n == "" ? 0 : nameText.width);
 	}
 
+	function nameClickInput():Void
+	{
+		var m = FlxG.mouse.getViewPosition(camUI);
+		var over = m.x >= nameField.x && m.x < nameField.x + nameField.width
+			&& m.y >= nameField.y && m.y < nameField.y + nameField.height;
+		if (over)
+			ui.MenuCursor.markHover();
+		if (!FlxG.mouse.justPressed)
+			return;
+		editingName = over;
+		if (over)
+		{
+			blink = 0;
+		}
+		refreshFocus();
+	}
+
+	override public function close():Void
+	{
+		FlxG.mouse.visible = false;
+		super.close();
+	}
+
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
@@ -333,7 +371,6 @@ class DressUpSubState extends LobbyPanel
 			voiceClock -= elapsed;
 
 		blink += elapsed * CARET_RATE;
-		caret.visible = Math.sin(blink) > -0.2;
 
 		var closing = armed()
 			&& (FlxG.keys.justPressed.ENTER || FlxG.keys.justPressed.ESCAPE
@@ -343,9 +380,14 @@ class DressUpSubState extends LobbyPanel
 		previewGear.update(elapsed, previewCx + GEAR_DX + 20, previewCy + GEAR_DY - 11, false, 0, true, 0, 0, 0, "idle");
 
 		if (!closing)
+		{
 			focusInput();
-		colourInput(elapsed);
-		if (!closing)
+			nameClickInput();
+		}
+		if (!editingName)
+			colourInput(elapsed);
+		caret.visible = editingName && Math.sin(blink) > -0.2;
+		if (!closing && editingName)
 			nameInput(elapsed);
 
 		if (closing)

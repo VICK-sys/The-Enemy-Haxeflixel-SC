@@ -31,6 +31,7 @@ class ShopRound
 	private var done:Bool = false;
 	private var spentHere:Bool = false;
 	private var automatedHere:Bool = false;
+	private var localLeveling:Bool = false;
 	private var clock:Float = 0;
 	private var quorum:AckQuorum = new AckQuorum();
 
@@ -70,7 +71,20 @@ class ShopRound
 	}
 
 	public function updateShop(elapsed:Float):Void
+	{
 		shop.update(elapsed);
+		if (Net.active && netSync != null)
+			syncLocalLeveling(Std.isOfType(host.subState, LevelUpSubState));
+	}
+
+	function syncLocalLeveling(on:Bool):Void
+	{
+		netSync.leveling = on;
+		if (on == localLeveling)
+			return;
+		localLeveling = on;
+		Net.send({t: on ? "lvlin" : "lvlout"});
+	}
 
 	public function updateHold(elapsed:Float):Void
 	{
@@ -117,8 +131,6 @@ class ShopRound
 		screen.onSpent = syncScrap;
 		screen.closeCallback = onScreenClosed;
 		host.openPanel(screen);
-		if (Net.active)
-			Net.send({t: "lvlin"});
 	}
 
 	function syncScrap():Void
@@ -133,8 +145,6 @@ class ShopRound
 
 	function onScreenClosed():Void
 	{
-		if (Net.active)
-			Net.send({t: "lvlout"});
 		if (automatedHere)
 		{
 			automatedHere = false;
