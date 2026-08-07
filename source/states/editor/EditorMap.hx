@@ -97,10 +97,26 @@ class EditorMap
 	public static inline var MIN_SIDE:Int = 20;
 	public static inline var MAX_SIDE:Int = 400;
 
+	public function wallsPerTile():Int
+	{
+		var t = tileset();
+		if (t == null)
+			return 1;
+		var n = Std.int(DecorTiles.cellW(t) / cell);
+		return n < 1 ? 1 : n;
+	}
+
+	function snapSide(v:Int):Int
+	{
+		var step = wallsPerTile();
+		var up = Math.ceil(v / step) * step;
+		return clampSide(up);
+	}
+
 	public function resize(newCols:Int, newRows:Int):Bool
 	{
-		newCols = clampSide(newCols);
-		newRows = clampSide(newRows);
+		newCols = snapSide(newCols);
+		newRows = snapSide(newRows);
 		if (newCols == cols && newRows == rows)
 			return false;
 

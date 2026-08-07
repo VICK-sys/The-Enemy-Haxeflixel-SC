@@ -52,6 +52,10 @@ X drops the player spawn at the cursor, and K drops the shop. Both save with the
 
 The SIZE button under the sheet button steps the map through the sizes in `editor.json`. Add or edit entries there to get any size you want. A resize keeps everything that still fits, re-closes the outer ring, pulls the spawn and the shop back inside, and drops props that fell outside. It pushes an undo first, so Z takes it back with the content intact.
 
+A side rounds up to a whole number of floor tiles. A floor tile is several collision cells across, 8 of them at a 32 px tileset, and a map that ends part way through one leaves a strip of floor grid hanging past the wall ring with nothing behind it. Ask for 90 rows on a 32 px sheet and the map is 96. The sizes in `editor.json` are already whole tiles, so they pass through untouched.
+
+Zooming out is limited by the map rather than by a fixed number. `minZoom` in `editor.json` is the floor for a map small enough to need one; a map too big to fit at that zoom lowers the floor to whatever shows all of it. A 304 by 168 map therefore opens near 0.18 rather than stopping at 0.3 with its edges off screen.
+
 The map carries its own size. It saves in the slot, and the wall CSV already describes its own width and height, so an older map without the field opens at whatever its CSV says. The game reads the same CSV, so a custom size needs nothing on the play side.
 
 The collision grid stays finer than the tile grid, 16 px against 32. One solid tile therefore stamps a 2x2 block of collision cells, and a map drawn before the wall mode went away keeps whatever finer shape it already had. `WallTool` still owns that grid and draws it. It no longer takes input.

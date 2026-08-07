@@ -81,14 +81,27 @@ class EditorView
 
 	public function reset():Void
 	{
-		var fit = Math.min((FlxG.width - insetL) / (doc.cols * doc.cell), (FlxG.height - insetT - insetB) / (doc.rows * doc.cell));
-		zoom = clampZoom(fit);
+		zoom = clampZoom(fitZoom());
 		FlxG.camera.zoom = zoom;
 		center();
 	}
 
+	static inline var FIT_MARGIN:Float = 0.92;
+
+	function fitZoom():Float
+		return Math.min((FlxG.width - insetL) / doc.pixelW, (FlxG.height - insetT - insetB) / doc.pixelH) * FIT_MARGIN;
+
+	function minZoom():Float
+	{
+		var fit = fitZoom();
+		return fit < cfg.minZoom ? fit : cfg.minZoom;
+	}
+
 	function clampZoom(z:Float):Float
-		return z < cfg.minZoom ? cfg.minZoom : (z > cfg.maxZoom ? cfg.maxZoom : z);
+	{
+		var lo = minZoom();
+		return z < lo ? lo : (z > cfg.maxZoom ? cfg.maxZoom : z);
+	}
 
 	function center():Void
 	{
