@@ -12,6 +12,9 @@ class EditorHud
 {
 	public static inline var BAR:Int = 34;
 
+	static inline var SHEET_HEAD:Int = 54;
+	static inline var SHEET_LEADING:Int = -28;
+
 	static var KEYS:Array<String> = [
 		"P", "WHEEL", "SPACE-DRAG", "ARROWS", "0", "X", "CTRL+Z", "CTRL-DRAG", "CTRL+C", "CTRL+V", "Q", "DEL", "H", "C", "L",
 		"K", "1-5", "S", "ENTER", "ESC"
@@ -47,7 +50,7 @@ class EditorHud
 		hintBar.cameras = [cam];
 		state.add(hintBar);
 
-		hint = new FlxText(leftInset, FlxG.height - BAR + 8, canvasW, "");
+		hint = new FlxText(leftInset, FlxG.height - BAR + Lang.inkTop(Lang.smallFont(), Lang.smallSize(), BAR), canvasW, "");
 		hint.setFormat(Lang.smallFont(), Lang.smallSize(), 0xFFB8B8B8, CENTER);
 		hint.cameras = [cam];
 		state.add(hint);
@@ -59,7 +62,7 @@ class EditorHud
 		state.add(flashText);
 
 		var pw = 540;
-		var ph = 450;
+		var ph = 600;
 		var panelX = leftInset + (canvasW - pw) / 2;
 		var panelY = topInset + (FlxG.height - topInset - BAR - ph) / 2;
 
@@ -73,18 +76,22 @@ class EditorHud
 		sheet.cameras = [cam];
 		state.add(sheet);
 
-		sheetTitle = new FlxText(panelX, panelY + 14, pw, "CONTROLS");
-		sheetTitle.setFormat(Lang.bodyFont(), Lang.bodySize(), FlxColor.WHITE, CENTER);
+		sheetTitle = new FlxText(panelX, panelY + Lang.inkTop(Lang.titleFont(), Lang.titleSize(), SHEET_HEAD), pw, "CONTROLS");
+		sheetTitle.setFormat(Lang.titleFont(), Lang.titleSize(), FlxColor.WHITE, CENTER);
 		sheetTitle.cameras = [cam];
 		state.add(sheetTitle);
 
-		sheetKeys = new FlxText(panelX + 18, panelY + 54, 168, KEYS.join("\n"));
+		var listY = panelY + SHEET_HEAD - Lang.inkBand(Lang.smallFont(), Lang.smallSize())[0];
+
+		sheetKeys = new FlxText(panelX + 18, listY, 168, KEYS.join("\n"));
 		sheetKeys.setFormat(Lang.smallFont(), Lang.smallSize(), FlxColor.WHITE, RIGHT);
+		Lang.setLeading(sheetKeys, SHEET_LEADING);
 		sheetKeys.cameras = [cam];
 		state.add(sheetKeys);
 
-		sheetActions = new FlxText(panelX + 208, panelY + 54, pw - 222, ACTIONS.join("\n"));
+		sheetActions = new FlxText(panelX + 208, listY, pw - 222, ACTIONS.join("\n"));
 		sheetActions.setFormat(Lang.smallFont(), Lang.smallSize(), 0xFFB8B8B8, LEFT);
+		Lang.setLeading(sheetActions, SHEET_LEADING);
 		sheetActions.cameras = [cam];
 		state.add(sheetActions);
 

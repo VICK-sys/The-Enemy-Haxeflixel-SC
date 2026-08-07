@@ -71,6 +71,61 @@ class Lang
 	public static function fontFor(size:Int):String
 		return size == bodySize() ? bodyFont() : smallFont();
 
+	static var inkBands:Map<String, Array<Int>> = new Map();
+
+	public static function inkBand(font:String, size:Int):Array<Int>
+	{
+		var key = font + "|" + size;
+		if (inkBands.exists(key))
+			return inkBands.get(key);
+
+		var probe = new flixel.text.FlxText(0, 0, 240, "WALLS");
+		probe.setFormat(font, size, 0xFFFFFFFF, LEFT);
+		probe.drawFrame(true);
+		var bmp = probe.framePixels;
+		var top = -1;
+		var bottom = -1;
+		if (bmp != null)
+			for (y in 0...bmp.height)
+			{
+				var lit = false;
+				for (x in 0...bmp.width)
+					if ((bmp.getPixel32(x, y) >>> 24) > 8)
+					{
+						lit = true;
+						break;
+					}
+				if (lit)
+				{
+					if (top < 0)
+						top = y;
+					bottom = y;
+				}
+			}
+		probe.destroy();
+
+		var band = top < 0 ? [0, size] : [top, bottom - top + 1];
+		inkBands.set(key, band);
+		return band;
+	}
+
+	public static function inkTop(font:String, size:Int, boxH:Float):Float
+	{
+		var band = inkBand(font, size);
+		return (boxH - band[1]) * 0.5 - band[0];
+	}
+
+	public static function setLeading(t:flixel.text.FlxText, value:Int):Void
+	{
+		@:privateAccess
+		{
+			t._defaultFormat.leading = value;
+			t.textField.defaultTextFormat = t._defaultFormat;
+			t.textField.setTextFormat(t._defaultFormat);
+			t._regen = true;
+		}
+	}
+
 	public static function chatSize(scale:Float):Int
 	{
 		var steps = Std.int(SMALL_SIZE * scale / SMALL_STEP + 0.5);

@@ -71,12 +71,13 @@ class EditorChrome
 		line(sidebarW, 0, 1, FlxG.height, CHIP_EDGE);
 		line(sidebarW, topbarH, FlxG.width - sidebarW, 1, CHIP_EDGE);
 
-		var title = label(100, 0, sidebarW - 114, "MAP EDITOR", Lang.titleSize(), FlxColor.WHITE, LEFT, Lang.titleFont());
+		var title = boxLabel(100, 0, topbarH, sidebarW - 114, "MAP EDITOR", Lang.titleSize(), FlxColor.WHITE, LEFT,
+			Lang.titleFont());
 		title.bold = true;
 
 		line(palX - pad - 1, palY - pad - 1, Std.int(palW + pad * 2 + 2), Std.int(palH + pad * 2 + 2), CHIP_EDGE);
 		line(palX - pad, palY - pad, Std.int(palW + pad * 2), Std.int(palH + pad * 2), 0xFF0E0E0E);
-		palHint = label(palX, palY + palH / 2 - 10, palW, "", Lang.smallSize(), TEXT_DIM, CENTER);
+		palHint = boxLabel(palX, palY, palH, palW, "", Lang.smallSize(), TEXT_DIM, CENTER);
 
 		slotChip = chip(sidebarW + 12, 8, 108, "SLOT 1", function() if (onSlot != null) onSlot());
 		modeChip = chip(sidebarW + 128, 8, 300, "BRUSH 1X1", function() if (onModeChip != null) onModeChip());
@@ -117,7 +118,7 @@ class EditorChrome
 			ui(dot);
 			eyeDots.push(dot);
 
-			var l = label(54, y + 9, sidebarW - 70, names[i], Lang.smallSize(), FlxColor.WHITE, LEFT);
+			var l = boxLabel(54, y + 2, 36, sidebarW - 70, names[i], Lang.smallSize(), FlxColor.WHITE, LEFT);
 			rowLabels.push(l);
 
 			var mi = i;
@@ -160,6 +161,13 @@ class EditorChrome
 		return t;
 	}
 
+	function boxLabel(x:Float, boxY:Float, boxH:Float, w:Float, text:String, size:Int, color:Int, align:FlxTextAlign,
+			?font:String):FlxText
+	{
+		var use = font == null ? Lang.fontFor(size) : font;
+		return label(x, boxY + Lang.inkTop(use, size, boxH), w, text, size, color, align, use);
+	}
+
 	function chip(x:Int, y:Int, w:Int, text:String, action:Void->Void):Int
 	{
 		var edge = new FlxSprite(x - 1, y - 1);
@@ -172,7 +180,7 @@ class EditorChrome
 		ui(bg);
 		chipBgs.push(bg);
 
-		var l = label(x, y + 5, w, text, Lang.smallSize(), TEXT_DIM, CENTER);
+		var l = boxLabel(x, y, 28, w, text, Lang.smallSize(), TEXT_DIM, CENTER);
 		chipLabels.push(l);
 
 		hit(x, y, w, 28, action);
