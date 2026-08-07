@@ -5,7 +5,8 @@
 			"sheet": "props/repairShop",
 			"rect": [],
 			"scale": 4,
-			"hitbox": [9, 30, 98, 45]
+			"hitbox": [9, 30, 98, 45],
+			"owned": true
 		},
 		{
 			"name": "shop",

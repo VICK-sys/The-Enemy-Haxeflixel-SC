@@ -10,7 +10,8 @@ typedef PropData =
 	rect:Array<Int>,
 	scale:Float,
 	?hitbox:Array<Int>,
-	?layer:Int
+	?layer:Int,
+	?owned:Bool
 }
 
 typedef PropPlace =
@@ -80,6 +81,28 @@ class PropDataRegistry
 
 	public static function count():Int
 		return all().length;
+
+	public static function placeable():Array<PropData>
+	{
+		var out:Array<PropData> = [];
+		for (p in all())
+			if (p.owned != true)
+				out.push(p);
+		return out;
+	}
+
+	public static function placeableAt(i:Int):PropData
+	{
+		var list = placeable();
+		if (list.length == 0)
+			return null;
+		if (i < 0 || i >= list.length)
+			i = 0;
+		return list[i];
+	}
+
+	public static function placeableCount():Int
+		return placeable().length;
 
 	public static function byName(name:String):PropData
 	{

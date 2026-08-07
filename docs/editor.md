@@ -77,6 +77,10 @@ You can reach something already on the map only after you put the prop down. The
 
 The palette's selection highlight tracks the hand, not the last click. With nothing held there is no selected prop to show. The highlight goes out, and the panel stops claiming a choice that is not in effect.
 
+A prop marked `owned` in `props.json` stays out of the palette. The game builds it from the registry by name, so it is scenery that one system already places, and a second hand placed copy would be a decoration that does nothing. The repair shop is the case that exists: `Shop` builds it from the same entry, and the K key moves the real one.
+
+The spawn point and the shop spot draw as the sprites they stand for, the player at the spawn and the shop building at its spot, at slight transparency with the name above. They were coloured diamonds, which told you where the thing was but not how much room it takes. The shop is a wide building, so a spot that looked clear as a diamond could put the building through a wall.
+
 A drag pushes an undo snapshot the first time it moves something. A plain click pushes nothing. Selecting props to look at them therefore does not bury the undo history.
 
 ## Undo and the clipboard

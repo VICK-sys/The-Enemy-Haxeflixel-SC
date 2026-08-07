@@ -27,7 +27,7 @@ class PropPalette extends PalettePanel
 
 	public function build():Void
 	{
-		var n = PropDataRegistry.count();
+		var n = PropDataRegistry.placeableCount();
 		if (n == 0)
 			return;
 		frame();
@@ -43,7 +43,7 @@ class PropPalette extends PalettePanel
 
 		for (i in 0...n)
 		{
-			var s = Decor.make(PropDataRegistry.get(i).name);
+			var s = Decor.make(PropDataRegistry.placeableAt(i).name);
 			if (s == null)
 				continue;
 			var src = s.graphic.bitmap;
@@ -98,7 +98,7 @@ class PropPalette extends PalettePanel
 		if (col < 0 || col >= cols || row < 0)
 			return false;
 		var i = row * cols + col;
-		if (i < 0 || i >= PropDataRegistry.count())
+		if (i < 0 || i >= PropDataRegistry.placeableCount())
 			return false;
 		index = i;
 		redraw();

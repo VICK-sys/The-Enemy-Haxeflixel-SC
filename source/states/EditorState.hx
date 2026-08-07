@@ -24,6 +24,8 @@ import util.Paths;
 
 class EditorState extends FlxState
 {
+	static inline var MARK_ALPHA:Float = 0.75;
+
 	static inline var MODE_WALLS:Int = 0;
 	static inline var MODE_TILES:Int = 1;
 	static inline var MODE_PROPS:Int = 2;
@@ -102,9 +104,7 @@ class EditorState extends FlxState
 		insert(9, propTool.ghost);
 		insert(10, tileTool.marquee);
 
-		spawnMark = new FlxSprite();
-		spawnMark.makeGraphic(22, 22, 0xFF7CFC00);
-		spawnMark.angle = 45;
+		spawnMark = makeSpawnSprite();
 		insert(11, spawnMark);
 
 		spawnLabel = new FlxText(0, 0, 120, "SPAWN");
@@ -112,9 +112,7 @@ class EditorState extends FlxState
 		spawnLabel.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
 		insert(12, spawnLabel);
 
-		shopMark = new FlxSprite();
-		shopMark.makeGraphic(22, 22, 0xFFFFC24A);
-		shopMark.angle = 45;
+		shopMark = makeShopSprite();
 		insert(13, shopMark);
 
 		shopLabel = new FlxText(0, 0, 120, "SHOP");
@@ -216,17 +214,44 @@ class EditorState extends FlxState
 		wallTool.setThemeColor(ThemeDataRegistry.colorOf(t));
 	}
 
+	function makeSpawnSprite():FlxSprite
+	{
+		var s = new FlxSprite();
+		var hue = util.SaveData.playerHue();
+		s.frames = util.HuePalette.sparrow(util.Skins.of(util.SaveData.playerSkin()), hue);
+		s.animation.addByPrefix("idle", "Idle", 9, true);
+		s.animation.play("idle");
+		s.antialiasing = false;
+		s.scale.set(4, 4);
+		s.updateHitbox();
+		s.alpha = MARK_ALPHA;
+		return s;
+	}
+
+	function makeShopSprite():FlxSprite
+	{
+		var s = systems.world.Decor.make("repairShop");
+		if (s == null)
+		{
+			s = new FlxSprite();
+			s.makeGraphic(22, 22, 0xFFFFC24A);
+			s.angle = 45;
+		}
+		s.alpha = MARK_ALPHA;
+		return s;
+	}
+
 	function placeSpawnMark():Void
 	{
 		spawnMark.x = doc.spawnX - spawnMark.width / 2;
-		spawnMark.y = doc.spawnY - spawnMark.height / 2;
+		spawnMark.y = doc.spawnY - spawnMark.height;
 		spawnLabel.x = doc.spawnX - 60;
-		spawnLabel.y = doc.spawnY - 42;
+		spawnLabel.y = spawnMark.y - 34;
 
 		shopMark.x = doc.shopX - shopMark.width / 2;
-		shopMark.y = doc.shopY - shopMark.height / 2;
+		shopMark.y = doc.shopY - shopMark.height;
 		shopLabel.x = doc.shopX - 60;
-		shopLabel.y = doc.shopY - 42;
+		shopLabel.y = shopMark.y - 34;
 	}
 
 	function showPalettes():Void

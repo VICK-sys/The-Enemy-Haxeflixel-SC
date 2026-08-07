@@ -110,7 +110,7 @@ class PropTool
 
 	public function heldName():String
 	{
-		var p = PropDataRegistry.get(pal.index);
+		var p = PropDataRegistry.placeableAt(pal.index);
 		return p == null ? "NONE" : p.name;
 	}
 
@@ -140,7 +140,7 @@ class PropTool
 
 	public function refreshGhost():Void
 	{
-		var p = PropDataRegistry.get(pal.index);
+		var p = PropDataRegistry.placeableAt(pal.index);
 		if (p == null)
 		{
 			ghost.visible = false;
@@ -167,7 +167,7 @@ class PropTool
 
 	public function update(blocked:Bool):Void
 	{
-		if (PropDataRegistry.count() == 0)
+		if (PropDataRegistry.placeableCount() == 0)
 			return;
 
 		if (FlxG.keys.justPressed.Q)
@@ -215,10 +215,10 @@ class PropTool
 
 		if (FlxG.keys.justPressed.LBRACKET || FlxG.keys.justPressed.RBRACKET)
 		{
-			var n = PropDataRegistry.count();
+			var n = PropDataRegistry.placeableCount();
 			pal.select((pal.index + (FlxG.keys.justPressed.LBRACKET ? -1 : 1) + n) % n);
 			refreshGhost();
-			flash(PropDataRegistry.get(pal.index).name);
+			flash(PropDataRegistry.placeableAt(pal.index).name);
 		}
 		if (FlxG.keys.justPressed.F)
 			toggleFlip();
@@ -331,7 +331,7 @@ class PropTool
 
 	function place(x:Float, y:Float):Void
 	{
-		var p = PropDataRegistry.get(pal.index);
+		var p = PropDataRegistry.placeableAt(pal.index);
 		if (p == null)
 			return;
 		doc.pushUndo();
