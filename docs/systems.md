@@ -462,7 +462,7 @@ The map the editor asked the next run to use, as raw CSV plus a spawn point. Nul
 
 ### MapStore
 
-The editor's five map slots. They are JSON files next to the executable on desktop, and browser save on html5.
+The editor's five map slots. They are JSON files in a `maps` folder inside the application storage directory on desktop, and browser save on html5. Storage sits beside the save file rather than beside the executable, because the executable lives in the build output, and a clean build used to take every saved map with it. The first read after the move copies any slot still sitting next to the executable into the new folder. It copies rather than moves, and it never overwrites a slot that already exists in the new home, so a downgrade still finds the old files.
 
 ### MenuSlash
 

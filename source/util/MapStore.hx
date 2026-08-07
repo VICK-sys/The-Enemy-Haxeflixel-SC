@@ -26,8 +26,51 @@ class MapStore
 	public static inline var SLOTS:Int = 5;
 
 	#if sys
+	static inline var FOLDER:String = "maps";
+
+	static var cachedDir:String;
+	static var carried:Bool = false;
+
 	static function dir():String
-		return haxe.io.Path.join([haxe.io.Path.directory(Sys.programPath()), "maps"]);
+	{
+		if (cachedDir != null)
+			return cachedDir;
+		var root = lime.system.System.applicationStorageDirectory;
+		if (root == null || root == "")
+			root = haxe.io.Path.directory(Sys.programPath());
+		cachedDir = haxe.io.Path.join([root, FOLDER]);
+		carryOver();
+		return cachedDir;
+	}
+
+	static function besideExe():String
+		return haxe.io.Path.join([haxe.io.Path.directory(Sys.programPath()), FOLDER]);
+
+	static function carryOver():Void
+	{
+		if (carried)
+			return;
+		carried = true;
+
+		var from = besideExe();
+		if (from == cachedDir || !FileSystem.exists(from))
+			return;
+
+		try
+		{
+			if (!FileSystem.exists(cachedDir))
+				FileSystem.createDirectory(cachedDir);
+			for (slot in 1...SLOTS + 1)
+			{
+				var name = "slot" + slot + ".json";
+				var old = haxe.io.Path.join([from, name]);
+				var moved = haxe.io.Path.join([cachedDir, name]);
+				if (FileSystem.exists(old) && !FileSystem.exists(moved))
+					File.saveContent(moved, File.getContent(old));
+			}
+		}
+		catch (e:Dynamic) {}
+	}
 	#else
 	static var save:FlxSave;
 
@@ -39,6 +82,14 @@ class MapStore
 			save.bind("TheEnemyMaps");
 		}
 	}
+	#end
+
+	#if (sys && probe)
+	public static function probeDir():String
+		return dir();
+
+	public static function probeBesideExe():String
+		return besideExe();
 	#end
 
 	public static function load(slot:Int):StoredMap

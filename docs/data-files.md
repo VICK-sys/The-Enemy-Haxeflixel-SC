@@ -119,7 +119,7 @@ The map CSV holds `0` (open) and `1` (solid) tiles, 16 px each. Flixel auto-tili
 
 Solid interior tiles become pillars. They block movement and projectiles, and they break line of sight. Arena draws block sprites over them. You edit the stock arena in this CSV, and player maps come from the in-game editor instead.
 
-Editor maps ride the same format. `MapStore` keeps five slots. On desktop they are plain JSON files (`sx`, `sy`, `csv`) in a `maps/` folder next to the executable. That folder anchors to the executable's own path, not the working directory, so shortcuts cannot scatter them. Copy a file to share it. On html5 the slots live in the browser save.
+Editor maps ride the same format. `MapStore` keeps five slots. On desktop they are plain JSON files (`sx`, `sy`, `csv`) in a `maps` folder inside the application storage directory, which is the same place the save file goes. That folder does not depend on the working directory, so shortcuts cannot scatter them, and it survives a clean build. Copy a file to share it. On html5 the slots live in the browser save.
 
 Playing one sets `CustomArena`, a static the Arena constructor checks. When set, the raw CSV and spawn replace the stock ones, and the tilemap loader accepts them directly. Everything downstream works unchanged, because it all reads the tilemap generically. That covers pillars, pathfinding and boss obstacle clearing.
 
