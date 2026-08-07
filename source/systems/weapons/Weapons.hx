@@ -176,6 +176,10 @@ class Weapons
 		wasBlocked = inputBlocked;
 
 		held.charge = bow.charging ? bow.charge : (giga.engaged ? giga.progress : 0);
+		if (held.kind == HeldWeapon.REVOLVER && revolver.isReloading)
+			held.reloadPose(revolver.reloadProgress);
+		if (held.kind == HeldWeapon.BOW && bow.recovering)
+			held.reloadPose(bow.recoverProgress);
 		if (!superBusy || flurry.active)
 			held.update(elapsed);
 		if (!inputBlocked)
@@ -197,10 +201,6 @@ class Weapons
 		}
 		revolver.update(elapsed, held.handX(), held.handY(), gunAim.deg);
 		revolver.placeTwin(held.sprite, player.x + player.width * 0.5, player.y + player.height * 0.5, handX(), handY(), gunAim.dx, gunAim.dy);
-		if (held.kind == HeldWeapon.REVOLVER && revolver.isReloading)
-			held.reloadPose(revolver.reloadProgress);
-		if (held.kind == HeldWeapon.BOW && bow.recovering)
-			held.reloadPose(bow.recoverProgress);
 		hookAttack.update(elapsed);
 		throwAttack.update(elapsed);
 		if (status.dead && flurry.active)

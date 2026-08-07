@@ -28,6 +28,8 @@ class HeldWeapon
 	static inline var XBOW_RELOAD_START:Int = 11;
 	static inline var XBOW_RELOAD_FRAMES:Int = 11;
 	static inline var XBOW_SHOOT_CUT:Float = 0.2;
+
+	public static inline var XBOW_IDLE:Int = XBOW_RELOAD_START + XBOW_RELOAD_FRAMES - 1;
 	static inline var REV_KICK:Float = 16;
 	static inline var REV_BACK:Float = 11;
 	static inline var REV_TIME:Float = 0.4;
@@ -191,7 +193,7 @@ class HeldWeapon
 	{
 		if (kind == BOW)
 		{
-			sprite.animation.frameIndex = reloadP >= 0 ? bowFrame(reloadP) : 0;
+			sprite.animation.frameIndex = reloadP >= 0 ? bowFrame(reloadP) : XBOW_IDLE;
 			reloadP = -1;
 			return;
 		}
@@ -328,7 +330,10 @@ class HeldWeapon
 		if (kind == REVOLVER && reloadGfx)
 			sprite.loadGraphic(util.HuePalette.graphic("items/revolver_reload", util.SaveData.playerHue()), true, REV_CELL, REV_CELL);
 		else if (kind == BOW)
+		{
 			sprite.loadGraphic(util.HuePalette.graphic("items/crossbow_reload", util.SaveData.playerHue()), true, XBOW_CELL_W, XBOW_CELL_H);
+			sprite.animation.frameIndex = XBOW_IDLE;
+		}
 		else
 		{
 			var img = switch (kind)

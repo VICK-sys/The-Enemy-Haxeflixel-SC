@@ -444,7 +444,7 @@ class RemoteAvatar
 			held.animation.frameIndex = idx;
 		}
 		else if (weaponIdx == BOW_INDEX)
-			held.animation.frameIndex = rl >= 0 ? HeldWeapon.bowFrame(rl) : 0;
+			held.animation.frameIndex = rl >= 0 ? HeldWeapon.bowFrame(rl) : HeldWeapon.XBOW_IDLE;
 		held.visible = m.hv;
 		held.angle = m.ha;
 		held.flipX = m.hf;
