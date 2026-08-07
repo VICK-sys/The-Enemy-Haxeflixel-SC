@@ -7,8 +7,8 @@ typedef TilesetData =
 {
 	name:String,
 	image:String,
-	tileW:Int,
-	tileH:Int
+	?tileW:Int,
+	?tileH:Int
 }
 
 typedef TilesetSet =
@@ -18,6 +18,8 @@ typedef TilesetSet =
 
 class TilesetDataRegistry
 {
+	public static inline var DEFAULT_TILE:Int = 32;
+
 	static var data:TilesetSet;
 	static var merged:Array<TilesetData>;
 	static var mergedAt:Int = -1;
@@ -30,6 +32,13 @@ class TilesetDataRegistry
 		if (merged == null || mergedAt != Library.version)
 		{
 			merged = data.tilesets.concat(Library.tilesets);
+			for (t in merged)
+			{
+				if (t.tileW == null || t.tileW <= 0)
+					t.tileW = DEFAULT_TILE;
+				if (t.tileH == null || t.tileH <= 0)
+					t.tileH = DEFAULT_TILE;
+			}
 			mergedAt = Library.version;
 		}
 		return merged;

@@ -71,7 +71,7 @@ class LibraryPanel
 	private var entries:Array<String> = [];
 	private var page:Int = 0;
 	private var sel:Int = -1;
-	private var tileSize:Int = 24;
+	private var tileSize:Int = data.TilesetData.TilesetDataRegistry.DEFAULT_TILE;
 	private var typingTile:Bool = false;
 	private var tileBuf:String = "";
 	private var scaleIdx:Int = 1;

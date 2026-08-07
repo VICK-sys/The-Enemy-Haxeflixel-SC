@@ -2,9 +2,7 @@
 	"tilesets": [
 		{
 			"name": "Dirt and Stone",
-			"image": "tilesets/dirtStone",
-			"tileW": 32,
-			"tileH": 32
+			"image": "tilesets/dirtStone"
 		}
 	]
 }
