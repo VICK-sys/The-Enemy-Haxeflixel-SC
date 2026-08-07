@@ -4,8 +4,7 @@ F7 opens it from the main menu. It draws collision, paints a floor, places props
 
 - [Layout and chrome](#layout-and-chrome)
 - [The parts](#the-parts)
-- [Walls](#walls)
-- [Tiles](#tiles)
+- [Tiles and collision](#tiles-and-collision)
 - [Props](#props)
 - [Undo and the clipboard](#undo-and-the-clipboard)
 - [Importing art](#importing-art)
@@ -16,9 +15,9 @@ F7 opens it from the main menu. It draws collision, paints a floor, places props
 
 ## Layout and chrome
 
-The layout follows a desktop tile editor. A dark sidebar on the left holds the palette at the top, and a sheet button under it. Below that sit the three modes as clickable rows. Each row carries an eye toggle, which hides that layer in the editor view. Undo and clear sit at the bottom.
+The layout follows a desktop tile editor. A dark sidebar on the left holds the palette at the top, and a sheet button under it. Below that sit the two modes as clickable rows. Each row carries an eye toggle, which hides that layer in the editor view. Undo and clear sit at the bottom.
 
-A top bar carries the slot and a mode-sensitive chip on the left. The chip shows brush size in walls, solid in tiles, and the prop in hand in props. Controls, save and play sit on the right.
+A top bar carries the slot and a mode-sensitive chip on the left. The chip shows solid in tiles and the prop in hand in props. Controls, save and play sit on the right.
 
 Every chrome action is a keyboard shortcut too. The chips and rows call the same functions the keys call.
 
@@ -30,7 +29,7 @@ The editor stops painting while you hold space. Grabbing the view therefore neve
 
 The HUD sits on its own camera, so it does not shrink with the world. The editor reads the mouse position fresh from the camera. It does not use the per-frame cached value. That value lags one frame behind every zoom, and puts paint in the wrong cell.
 
-P cycles the three modes. The number keys hold five slots, and a switch autosaves. ENTER saves and plays the map. ESC saves and returns to the menu.
+P cycles the two modes. The number keys hold five slots, and a switch autosaves. ENTER saves and plays the map. ESC saves and returns to the menu.
 
 ## The parts
 
@@ -39,21 +38,21 @@ Each subsystem owns its own sprites, while the state owns the display order.
 - `EditorState` - the coordinator. It builds the parts in order: document and cameras first, then panels, then tools. The palettes must exist before anything can reference them. It adds their sprites in draw order, dispatches update to the active mode, and maps the keys onto their operations. It holds no editing logic of its own.
 - `EditorMap` - the map you edit. It holds collision, painted floor, props, spawn, shop spot and tileset, plus the CSV serialisation and the slot load and save. It also holds the rules that go with that data. The outer ring stays solid, the undo history lives here, and the floor clears when the tileset's cell size changes. Its `setWall` reports whether a cell actually changed, so strokes skip redundant redraws.
 - `EditorView` - the world camera: cursor-anchored zoom, panning, and the fresh mouse-to-world read.
-- `WallTool`, `TileTool`, `PropTool` - the three modes. Each holds its layer, its cursor ghost, and its input handling. Only `TileTool` reaches walls, and only through `WallTool.setCell`. That keeps the V-solid feature on a single write path.
+- `TileTool`, `PropTool` - the two modes. Each holds its layer, its cursor ghost, and its input handling. `WallTool` is no longer a mode. It keeps the collision grid and draws it, and `TileTool` is the only writer, through `WallTool.setCell`. That keeps collision on a single write path.
 - `TilePalette`, `PropPalette` - both sit on a shared `PalettePanel` base. That base owns the panel sprites and the hit-testing.
 - `EditorChrome` - the clickable frame: sidebar, top bar, chips, mode rows and eye toggles. It exposes one callback per control, so the state wires them straight onto the same functions the keys call. A click on any chrome region also blocks the tools from painting under it.
 - `EditorHud` - the one-line hint strip, the controls panel and the flash message.
 - `LibraryPanel`, `PreviewPane` - art import and hitbox editing. See [Importing art](#importing-art).
 
-## Walls
+## Tiles and collision
 
-The left button paints, and the right button erases. Hold SHIFT and drag for a filled box. B cycles the brush through 1x1, 2x2 and 3x3. X drops the player spawn at the cursor, and K drops the shop. Both show as a diamond and a label, green for the spawn and amber for the shop, and both save with the map. A map that never named a shop spot, including every map saved before the key existed, opens with the shop on the stock stage's spot. Z undoes, and C clears the interior. L copies the stock stage in as a starting point.
+Collision comes from the tiles you paint. There were two modes that wrote it, a wall mode that painted the collision grid on its own and the V-solid toggle in tile mode, and both wrote the same array. One way to author a thing is enough, so the wall mode is gone and V-solid is the way.
 
-The painted grid is the source of truth. The tilemap is only its picture. The editor patches it per cell while a stroke is live, then rebuilds it cleanly when the stroke ends. The autotile edges therefore stay exact.
+X drops the player spawn at the cursor, and K drops the shop. Both save with the map. A map that never named a shop spot, including every map saved before the key existed, opens with the shop on the stock stage's spot. Z undoes, and C clears the interior. L copies the stock stage in as a starting point.
+
+The collision grid stays finer than the tile grid, 16 px against 32. One solid tile therefore stamps a 2x2 block of collision cells, and a map drawn before the wall mode went away keeps whatever finer shape it already had. `WallTool` still owns that grid and draws it. It no longer takes input.
 
 The editor line-walks fast drags, so strokes have no gaps. The outer ring stays locked solid, so the arena is always closed.
-
-## Tiles
 
 A palette sits in the sidebar. It frames the sheet's used area, with grid lines drawn over it. Drag across it to pick a rectangular patch. A plain click gives a 1x1 patch. The `[` and `]` keys step one cell at a time. The wheel zooms the panel, and a right-drag or middle-drag inside it slides the sheet around.
 

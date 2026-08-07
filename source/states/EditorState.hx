@@ -26,10 +26,9 @@ class EditorState extends FlxState
 {
 	static inline var MARK_ALPHA:Float = 0.75;
 
-	static inline var MODE_WALLS:Int = 0;
-	static inline var MODE_TILES:Int = 1;
-	static inline var MODE_PROPS:Int = 2;
-	static var MODE_NAMES:Array<String> = ["WALL MODE", "TILE MODE", "PROP MODE"];
+	static inline var MODE_TILES:Int = 0;
+	static inline var MODE_PROPS:Int = 1;
+	static var MODE_NAMES:Array<String> = ["TILE MODE", "PROP MODE"];
 
 	public static var lastSlot:Int = 1;
 
@@ -53,9 +52,9 @@ class EditorState extends FlxState
 	private var shopLabel:FlxText;
 
 	private var slot:Int;
-	private var mode:Int = MODE_WALLS;
+	private var mode:Int = MODE_TILES;
 	private var leaving:Bool = false;
-	private var eyes:Array<Bool> = [true, true, true];
+	private var eyes:Array<Bool> = [true, true];
 	private var lastHeld:Bool = true;
 
 	private var isProps(get, never):Bool;
@@ -99,26 +98,24 @@ class EditorState extends FlxState
 		insert(4, propTool.boxes);
 		insert(5, propTool.outline);
 		insert(6, tileTool.ghost);
-		insert(7, wallTool.hover);
-		insert(8, wallTool.rectPreview);
-		insert(9, propTool.ghost);
-		insert(10, tileTool.marquee);
+		insert(7, propTool.ghost);
+		insert(8, tileTool.marquee);
 
 		spawnMark = makeSpawnSprite();
-		insert(11, spawnMark);
+		insert(9, spawnMark);
 
 		spawnLabel = new FlxText(0, 0, 120, "SPAWN");
 		spawnLabel.setFormat(util.Lang.smallFont(), util.Lang.smallSize(), 0xFF7CFC00, CENTER);
 		spawnLabel.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
-		insert(12, spawnLabel);
+		insert(10, spawnLabel);
 
 		shopMark = makeShopSprite();
-		insert(13, shopMark);
+		insert(11, shopMark);
 
 		shopLabel = new FlxText(0, 0, 120, "SHOP");
 		shopLabel.setFormat(util.Lang.smallFont(), util.Lang.smallSize(), 0xFFFFC24A, CENTER);
 		shopLabel.setBorderStyle(OUTLINE, FlxColor.BLACK, 2);
-		insert(14, shopLabel);
+		insert(12, shopLabel);
 
 		wireChrome();
 		refreshAll();
@@ -176,8 +173,7 @@ class EditorState extends FlxState
 		switch (mode)
 		{
 			case MODE_TILES: tileTool.toggleSolid();
-			case MODE_PROPS: propTool.setHeld(!propTool.held);
-			default: hud.flash(wallTool.cycleBrush(cfg.brush.maxSize));
+			default: propTool.setHeld(!propTool.held);
 		}
 	}
 
@@ -187,8 +183,9 @@ class EditorState extends FlxState
 		chrome.setEye(i, eyes[i]);
 		switch (i)
 		{
-			case 0: wallTool.map.visible = eyes[i];
-			case 1: tileTool.layer.visible = eyes[i];
+			case 0:
+				tileTool.layer.visible = eyes[i];
+				wallTool.map.visible = eyes[i];
 			default: propTool.group.visible = eyes[i];
 		}
 	}
@@ -259,7 +256,7 @@ class EditorState extends FlxState
 		tilePal.show(mode == MODE_TILES);
 		propPal.show(mode == MODE_PROPS);
 		propTool.showOverlays(mode == MODE_PROPS);
-		chrome.setPaletteHint(mode == MODE_WALLS ? "WALL MODE PAINTS WITH THE BRUSH" : "");
+		chrome.setPaletteHint("");
 	}
 
 	function hintLine():String
@@ -267,11 +264,9 @@ class EditorState extends FlxState
 		return switch (mode)
 		{
 			case MODE_TILES:
-				"LEFT PAINT   RIGHT ERASE   [ ] STEP   F SHEET   V SOLID   CTRL-DRAG SELECT   CTRL+C COPY   CTRL+V PASTE";
-			case MODE_PROPS:
-				propTool.held ? "LEFT PLACE   RIGHT DELETE   F FLIP   [ ] STEP   Q PUT DOWN TO EDIT PLACED PROPS   H HITBOX" : "LEFT PICK A PLACED PROP   DRAG TO MOVE   F FLIP   DEL REMOVE   Q PICK BACK UP   H HITBOX";
+				"LEFT PAINT   RIGHT ERASE   [ ] STEP   F SHEET   V SOLID   C CLEAR   L COPY STOCK STAGE   CTRL-DRAG SELECT";
 			default:
-				"LEFT PAINT   RIGHT ERASE   SHIFT BOX   B BRUSH   C CLEAR   L COPY STOCK STAGE";
+				propTool.held ? "LEFT PLACE   RIGHT DELETE   F FLIP   [ ] STEP   Q PUT DOWN TO EDIT PLACED PROPS   H HITBOX" : "LEFT PICK A PLACED PROP   DRAG TO MOVE   F FLIP   DEL REMOVE   Q PICK BACK UP   H HITBOX";
 		};
 	}
 
@@ -299,7 +294,7 @@ class EditorState extends FlxState
 	}
 
 	function cycleMode():Void
-		setMode((mode + 1) % 3);
+		setMode((mode + 1) % MODE_NAMES.length);
 
 	function hideCursors():Void
 	{
@@ -421,7 +416,7 @@ class EditorState extends FlxState
 		{
 			case MODE_TILES: "SOLID: " + (tileTool.solid ? "ON" : "OFF");
 			case MODE_PROPS: propTool.held ? "HOLDING: " + propTool.heldName() : "HANDS EMPTY";
-			default: "BRUSH " + wallTool.brush + "X" + wallTool.brush;
+			default: propTool.held ? "HOLDING: " + propTool.heldName() : "HANDS EMPTY";
 		});
 		var t = doc.tileset();
 		chrome.setSheet("SHEET: " + (t == null ? "NONE" : t.name), mode == MODE_TILES);
@@ -429,6 +424,7 @@ class EditorState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+
 		super.update(elapsed);
 
 		if (leaving)
@@ -450,8 +446,7 @@ class EditorState extends FlxState
 			switch (mode)
 			{
 				case MODE_TILES: tileTool.update(overUI);
-				case MODE_PROPS: propTool.update(overUI);
-				default: wallTool.update(cell.c, cell.r, overUI);
+				default: propTool.update(overUI);
 			}
 		}
 
@@ -473,8 +468,6 @@ class EditorState extends FlxState
 
 		if (FlxG.keys.justPressed.P)
 			cycleMode();
-		if (FlxG.keys.justPressed.B && mode == MODE_WALLS)
-			hud.flash(wallTool.cycleBrush(cfg.brush.maxSize));
 		if (FlxG.keys.justPressed.Z)
 			undo();
 

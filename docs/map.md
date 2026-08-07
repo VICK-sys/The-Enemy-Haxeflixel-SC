@@ -117,7 +117,7 @@ The editor is described in [editor.md](editor.md).
 | `TilePalette.hx` | tile selection, marquee and zoom | `pick`, `step`, `drag`, `indexAt` |
 | `PropPalette.hx` | prop selection and scrolling | `pick`, `select`, `scroll` |
 | `TileTool.hx` | painting tiles, copy and paste, and the solid flag | `update`, `copySelection`, `paste` |
-| `WallTool.hx` | wall painting and its brushes | `update`, `cycleBrush`, `setCell` |
+| `WallTool.hx` | the collision grid and its drawing | `rebuild`, `setCell`, `setThemeColor` |
 | `PropTool.hx` | placing props, their ghost, flip and hitboxes | `update`, `setHeld`, `toggleFlip` |
 | `LibraryPanel.hx` | importing art and editing hitboxes | `toggle`, `openHitbox`, `onAdded` |
 | `PreviewPane.hx` | the art preview and its box drag | `load`, `setBox`, `artBounds` |

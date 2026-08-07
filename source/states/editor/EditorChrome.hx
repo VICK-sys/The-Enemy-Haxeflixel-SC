@@ -97,9 +97,9 @@ class EditorChrome
 
 		sheetChip = chip(14, Std.int(palBottom + 10), sidebarW - 28, "SHEET", function() if (onSheet != null) onSheet());
 
-		var names = ["WALLS", "TILES", "PROPS"];
+		var names = ["TILES", "PROPS"];
 		var rowY = palBottom + 52;
-		for (i in 0...3)
+		for (i in 0...names.length)
 		{
 			var y = rowY + i * 46;
 			var edge = new FlxSprite(12, y);
@@ -133,7 +133,7 @@ class EditorChrome
 			hit(46, y, sidebarW - 58, 40, function() if (onMode != null) onMode(mi));
 		}
 
-		var by = Std.int(rowY + 3 * 46 + 14);
+		var by = Std.int(rowY + names.length * 46 + 14);
 		chip(14, by, Std.int((sidebarW - 36) / 2), "UNDO", function() if (onUndo != null) onUndo());
 		chip(Std.int(sidebarW / 2 + 4), by, Std.int((sidebarW - 36) / 2), "CLEAR", function() if (onClear != null) onClear());
 		chip(14, by + 42, sidebarW - 28, "ASSETS + HITBOXES", function() if (onLibrary != null) onLibrary());
@@ -263,7 +263,7 @@ class EditorChrome
 
 	public function setMode(active:Int):Void
 	{
-		for (i in 0...3)
+		for (i in 0...rowBgs.length)
 		{
 			rowEdges[i].visible = i == active;
 			rowBgs[i].color = i == active ? ROW_ACTIVE : ROW;
