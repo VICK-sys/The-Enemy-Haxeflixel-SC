@@ -148,6 +148,8 @@ The bow shot and the arrow rain trigger. It owns ArrowRain.
 
 A shot arrow dies on its first enemy hit or a wall. At full charge it becomes `piercing` and carries a hit list. It then passes through a line of enemies, hitting each once.
 
+Arrow speed is the `SPEED` base in `Arrow.hx` multiplied by `1 + power * speedBonus`. The base carries the uncharged shot and `speedBonus` carries the charge reward, so the two move together: raising the base without lowering the bonus speeds up every shot, not only the tap. A tap used to travel slowly enough to read as a different weapon from the charged shot, so the base went up and the bonus came down by the matching amount. The full charge still lands at the same speed it always did.
+
 Firing anything short of a full charge starts a `shotCooldown` that blocks the next charge, so tapping cannot be click-spammed. A full charge skips that timer. Holding for `fullTime` already paces the weapon, and the cooldown was only ever there to stop the tap.
 
 Arrow rain costs `rainCharge`. That meter runs 0 to 1, empties on use, and refills over `rechargeTime`. The HUD draws it as a blue bar through `Hud.setGauge`, and shows it only while you hold the bow.

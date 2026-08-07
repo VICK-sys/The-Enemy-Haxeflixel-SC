@@ -75,7 +75,7 @@
 		"fullMult": 1.8,
 		"sweetWindow": 0.25,
 		"sweetMult": 2.2,
-		"speedBonus": 0.8,
+		"speedBonus": 0.6,
 		"sizeBonus": 0.7,
 		"knockBonus": 1.5,
 		"shotCooldown": 1.0
