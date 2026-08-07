@@ -109,8 +109,12 @@ function Finalize-SingleExePackage
         }
     }
 
+    # The game writes these next to the exe while it runs. They are player data,
+    # not build output, so they are kept rather than reported or removed.
+    $runtimeData = @("maps", "library")
+
     $entries = @(Get-ChildItem -LiteralPath $windowsBin -Force)
-    $unexpected = @($entries | Where-Object { $_.FullName -ne $exe })
+    $unexpected = @($entries | Where-Object { $_.FullName -ne $exe -and $runtimeData -notcontains $_.Name })
     if ($unexpected.Count -gt 0)
     {
         $names = ($unexpected | Select-Object -ExpandProperty Name) -join ", "

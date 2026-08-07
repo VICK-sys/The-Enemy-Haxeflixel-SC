@@ -1,16 +1,10 @@
 {
 	"tilesets": [
 		{
-			"name": "Orange Ground Set",
-			"image": "tilesets/OK_ME_MATO",
-			"tileW": 24,
-			"tileH": 24
-		},
-		{
 			"name": "Dirt and Stone",
 			"image": "tilesets/dirtStone",
-			"tileW": 16,
-			"tileH": 16
+			"tileW": 32,
+			"tileH": 32
 		}
 	]
 }
