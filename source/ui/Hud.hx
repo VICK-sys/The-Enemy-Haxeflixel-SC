@@ -62,9 +62,7 @@ class Hud
 	static inline var TUBE_W:Float = 12;
 	static inline var TUBE_TOP:Float = 12;
 	static inline var TUBE_BOTTOM:Float = 54;
-	static inline var ARROW_ANGLE:Float = -90;
 	static inline var ARROW_TOP_OFFSET:Float = 25;
-	static inline var ARROW_LEFT_OFFSET:Float = -2;
 
 	static inline var DISPLAY_RIGHT:Float = 1280;
 	static inline var DISPLAY_TOP:Float = 0;
@@ -171,8 +169,6 @@ class Hud
 	private var hpWidth:Int = -1;
 	private var bulletPips:Array<FlxSprite> = [];
 	private var bulletsShown:Int = -1;
-	private var arrowPip:FlxSprite;
-	private var arrowShown:Bool = true;
 	private var capTop:FlxSprite;
 	private var capBottom:FlxSprite;
 	private var hpTop:Float = 0;
@@ -289,10 +285,6 @@ class Hud
 		capBottom.visible = false;
 		state.add(piece(capTop));
 		state.add(piece(capBottom));
-
-		arrowPip = makeUiSprite(0, 0, "ammo_arrow");
-		arrowPip.visible = false;
-		state.add(piece(arrowPip));
 
 		timeText = new FlxText(92, 588, 0, "");
 		timeText.setFormat(Lang.smallFont(), Lang.smallSize(), FlxColor.WHITE, LEFT);
@@ -927,7 +919,6 @@ class Hud
 			p.visible = false;
 		capTop.visible = false;
 		capBottom.visible = false;
-		arrowPip.visible = false;
 		for (p in bulletPips)
 			p.visible = false;
 		bulletsShown = -1;
@@ -1065,10 +1056,9 @@ class Hud
 				pip.scale.set(HP_SCALE, HP_SCALE);
 				pip.updateHitbox();
 			}
-			pip.angle = arrow ? ARROW_ANGLE : 0;
-			var step = Math.min((arrow ? pip.width : pip.height) + PIP_GAP, span / shown);
-			var base = arrow ? pipTop + ARROW_TOP_OFFSET + (pip.width - pip.height) * 0.5 : pipTop + (span - step * shown) * 0.5;
-			pip.setPosition(mid - pip.width * 0.5 - (arrow ? ARROW_LEFT_OFFSET : 0), base + (shown - 1 - i) * step);
+			var step = Math.min(pip.height + PIP_GAP, span / shown);
+			var base = arrow ? pipTop + ARROW_TOP_OFFSET : pipTop + (span - step * shown) * 0.5;
+			pip.setPosition(mid - pip.width * 0.5, base + (shown - 1 - i) * step);
 			pip.visible = true;
 		}
 	}
