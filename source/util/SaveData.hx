@@ -9,13 +9,31 @@ class SaveData
 
 	static var save:FlxSave;
 
+	static var RETIRED_KEYS:Array<String> = ["chatX", "chatY", "runValue"];
+
 	static function ensure():Void
 	{
 		if (save == null)
 		{
 			save = new FlxSave();
 			save.bind("TheEnemy");
+			dropRetired();
 		}
+	}
+
+	static function dropRetired():Void
+	{
+		if (save.data == null)
+			return;
+		var found = false;
+		for (key in RETIRED_KEYS)
+			if (Reflect.hasField(save.data, key))
+			{
+				Reflect.deleteField(save.data, key);
+				found = true;
+			}
+		if (found)
+			save.flush();
 	}
 
 	public static function bestWave():Int
@@ -402,18 +420,6 @@ class SaveData
 			save.flush();
 	}
 
-	public static function chatX():Float
-	{
-		ensure();
-		return save.data.chatX != null ? save.data.chatX : -1;
-	}
-
-	public static function chatY():Float
-	{
-		ensure();
-		return save.data.chatY != null ? save.data.chatY : -1;
-	}
-
 	public static function chatScale():Float
 	{
 		ensure();
@@ -429,14 +435,6 @@ class SaveData
 	{
 		ensure();
 		save.data.chatScale = Math.round(v * 100) / 100;
-		save.flush();
-	}
-
-	public static function setChatPos(x:Float, y:Float):Void
-	{
-		ensure();
-		save.data.chatX = x;
-		save.data.chatY = y;
 		save.flush();
 	}
 
