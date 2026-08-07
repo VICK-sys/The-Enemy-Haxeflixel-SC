@@ -38,6 +38,7 @@ typedef EditorData =
 	palette:EditorPaletteData,
 	ui:EditorUiData,
 	brush:EditorBrushData,
+	?sizes:Array<Array<Int>>,
 	flashTime:Float
 }
 

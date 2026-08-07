@@ -61,11 +61,17 @@ class DecorTiles
 		return full;
 	}
 
-	public static function cols(t:TilesetData):Int
-		return Math.ceil(ArenaDataRegistry.pixelWidth() / cellW(t));
+	public static function worldWidth():Int
+		return util.CustomArena.active && util.CustomArena.pixelW > 0 ? util.CustomArena.pixelW : ArenaDataRegistry.pixelWidth();
 
-	public static function rows(t:TilesetData):Int
-		return Math.ceil(ArenaDataRegistry.pixelHeight() / cellH(t));
+	public static function worldHeight():Int
+		return util.CustomArena.active && util.CustomArena.pixelH > 0 ? util.CustomArena.pixelH : ArenaDataRegistry.pixelHeight();
+
+	public static function cols(t:TilesetData, pixelW:Int = 0):Int
+		return Math.ceil((pixelW > 0 ? pixelW : worldWidth()) / cellW(t));
+
+	public static function rows(t:TilesetData, pixelH:Int = 0):Int
+		return Math.ceil((pixelH > 0 ? pixelH : worldHeight()) / cellH(t));
 
 	public static function blankCsv(t:TilesetData):String
 	{
@@ -80,10 +86,10 @@ class DecorTiles
 		return out.join("\n");
 	}
 
-	public static function parse(csv:String, t:TilesetData):Array<Int>
+	public static function parse(csv:String, t:TilesetData, pixelW:Int = 0, pixelH:Int = 0):Array<Int>
 	{
-		var w = cols(t);
-		var h = rows(t);
+		var w = cols(t, pixelW);
+		var h = rows(t, pixelH);
 		var grid = [for (i in 0...w * h) 0];
 		if (csv == null || csv == "")
 			return grid;
@@ -103,10 +109,10 @@ class DecorTiles
 		return grid;
 	}
 
-	public static function toCsv(grid:Array<Int>, t:TilesetData):String
+	public static function toCsv(grid:Array<Int>, t:TilesetData, pixelW:Int = 0, pixelH:Int = 0):String
 	{
-		var w = cols(t);
-		var h = rows(t);
+		var w = cols(t, pixelW);
+		var h = rows(t, pixelH);
 		var out = [];
 		for (r in 0...h)
 		{

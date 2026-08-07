@@ -6,7 +6,6 @@
 		"zoomStep": 1.15,
 		"panSpeed": 900
 	},
-
 	"palette": {
 		"width": 280,
 		"height": 250,
@@ -14,16 +13,35 @@
 		"propCell": 88,
 		"maxZoom": 8
 	},
-
 	"ui": {
 		"sidebar": 312,
 		"topbar": 44
 	},
-
 	"brush": {
 		"maxSize": 3,
 		"undoDepth": 30
 	},
-
-	"flashTime": 1.2
+	"flashTime": 1.2,
+	"sizes": [
+		[
+			60,
+			34
+		],
+		[
+			100,
+			56
+		],
+		[
+			160,
+			90
+		],
+		[
+			220,
+			124
+		],
+		[
+			300,
+			170
+		]
+	]
 }

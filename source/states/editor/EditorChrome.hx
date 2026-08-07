@@ -25,6 +25,7 @@ class EditorChrome
 	public var onSlot:Void->Void;
 	public var onModeChip:Void->Void;
 	public var onSheet:Void->Void;
+	public var onSize:Void->Void;
 	public var onMode:Int->Void;
 	public var onEye:Int->Void;
 	public var onUndo:Void->Void;
@@ -48,6 +49,7 @@ class EditorChrome
 	private var slotChip:Int;
 	private var modeChip:Int;
 	private var sheetChip:Int;
+	private var sizeChip:Int;
 	private var saveChip:Int;
 
 	private var rowBgs:Array<FlxSprite> = [];
@@ -96,9 +98,10 @@ class EditorChrome
 		chipLabels[play].color = PLAY_TEXT;
 
 		sheetChip = chip(14, Std.int(palBottom + 10), sidebarW - 28, "SHEET", function() if (onSheet != null) onSheet());
+		sizeChip = chip(14, Std.int(palBottom + 10 + 34), sidebarW - 28, "SIZE", function() if (onSize != null) onSize());
 
 		var names = ["TILES", "PROPS"];
-		var rowY = palBottom + 52;
+		var rowY = palBottom + 86;
 		for (i in 0...names.length)
 		{
 			var y = rowY + i * 46;
@@ -247,6 +250,9 @@ class EditorChrome
 
 	public function setPaletteHint(text:String):Void
 		palHint.text = text;
+
+	public function setSize(text:String):Void
+		chipLabels[sizeChip].text = text;
 
 	public function setSheet(text:String, shown:Bool):Void
 	{

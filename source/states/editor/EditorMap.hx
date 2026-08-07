@@ -19,6 +19,15 @@ class EditorMap
 {
 	public var cols(default, null):Int;
 	public var rows(default, null):Int;
+
+	public var pixelW(get, never):Int;
+	public var pixelH(get, never):Int;
+
+	function get_pixelW():Int
+		return cols * cell;
+
+	function get_pixelH():Int
+		return rows * cell;
 	public var cell(default, null):Int;
 
 	public var walls:Array<Bool>;
@@ -54,9 +63,9 @@ class EditorMap
 	function resetTileGrid(csv:String):Void
 	{
 		var t = tileset();
-		tiles = DecorTiles.parse(csv, t);
-		tilesW = t == null ? 0 : DecorTiles.cols(t);
-		tilesH = t == null ? 0 : DecorTiles.rows(t);
+		tiles = DecorTiles.parse(csv, t, pixelW, pixelH);
+		tilesW = t == null ? 0 : DecorTiles.cols(t, pixelW);
+		tilesH = t == null ? 0 : DecorTiles.rows(t, pixelH);
 	}
 
 	public function syncTileGrid():Bool
@@ -64,7 +73,7 @@ class EditorMap
 		var t = tileset();
 		if (t == null)
 			return false;
-		if (DecorTiles.cols(t) == tilesW && DecorTiles.rows(t) == tilesH)
+		if (DecorTiles.cols(t, pixelW) == tilesW && DecorTiles.rows(t, pixelH) == tilesH)
 			return false;
 		resetTileGrid(null);
 		dirty = true;
@@ -83,6 +92,71 @@ class EditorMap
 		tilesetIndex = 0;
 		resetTileGrid(null);
 		undoStack = [];
+	}
+
+	public static inline var MIN_SIDE:Int = 20;
+	public static inline var MAX_SIDE:Int = 400;
+
+	public function resize(newCols:Int, newRows:Int):Bool
+	{
+		newCols = clampSide(newCols);
+		newRows = clampSide(newRows);
+		if (newCols == cols && newRows == rows)
+			return false;
+
+		var oldWalls = walls;
+		var oldCols = cols;
+		var oldRows = rows;
+		var oldTiles = tiles;
+		var oldTileW = tilesW;
+		var oldTileH = tilesH;
+		var t = tileset();
+
+		cols = newCols;
+		rows = newRows;
+
+		walls = [for (i in 0...cols * rows) false];
+		var keepC = oldCols < cols ? oldCols : cols;
+		var keepR = oldRows < rows ? oldRows : rows;
+		for (r in 0...keepR)
+			for (c in 0...keepC)
+				walls[r * cols + c] = oldWalls[r * oldCols + c];
+		closeRing();
+
+		tiles = [for (i in 0...DecorTiles.cols(t, pixelW) * DecorTiles.rows(t, pixelH)) 0];
+		tilesW = t == null ? 0 : DecorTiles.cols(t, pixelW);
+		tilesH = t == null ? 0 : DecorTiles.rows(t, pixelH);
+		var tc = oldTileW < tilesW ? oldTileW : tilesW;
+		var tr = oldTileH < tilesH ? oldTileH : tilesH;
+		for (r in 0...tr)
+			for (c in 0...tc)
+				tiles[r * tilesW + c] = oldTiles[r * oldTileW + c];
+
+		clampMarks();
+		dirty = true;
+		return true;
+	}
+
+	function clampSide(v:Int):Int
+		return v < MIN_SIDE ? MIN_SIDE : (v > MAX_SIDE ? MAX_SIDE : v);
+
+	function clampMarks():Void
+	{
+		var w = pixelW - cell;
+		var h = pixelH - cell;
+		if (spawnX > w)
+			spawnX = w;
+		if (spawnY > h)
+			spawnY = h;
+		if (shopX > w)
+			shopX = w;
+		if (shopY > h)
+			shopY = h;
+		var kept:Array<PropPlace> = [];
+		for (p in props)
+			if (p.x <= pixelW && p.y <= pixelH)
+				kept.push(p);
+		props = kept;
 	}
 
 	public function closeRing():Void
@@ -177,7 +251,7 @@ class EditorMap
 	public function tileCsv():String
 	{
 		var t = tileset();
-		return t == null ? null : DecorTiles.toCsv(tiles, t);
+		return t == null ? null : DecorTiles.toCsv(tiles, t, pixelW, pixelH);
 	}
 
 	public function useTileset(i:Int):Void
@@ -229,6 +303,8 @@ class EditorMap
 			tileset: t == null ? null : t.name,
 			tiles: tileCsv(),
 			tileW: t == null ? 0 : t.tileW,
+			cols: cols,
+			rows: rows,
 			shopX: shopX,
 			shopY: shopY
 		});

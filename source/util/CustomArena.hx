@@ -10,6 +10,8 @@ class CustomArena
 	public static var shopSet:Bool = false;
 	public static var props:Array<data.PropData.PropPlace> = [];
 	public static var tileset:String = null;
+	public static var pixelW:Int = 0;
+	public static var pixelH:Int = 0;
 	public static var tiles:String = null;
 	public static var fromEditor:Bool = false;
 	public static var slot:Int = 0;
@@ -22,9 +24,23 @@ class CustomArena
 	public static function set(csv:String, sx:Float, sy:Float, props:Array<data.PropData.PropPlace>):Void
 	{
 		CustomArena.csv = csv;
+		measure(csv);
 		spawnX = sx;
 		spawnY = sy;
 		CustomArena.props = props == null ? [] : props;
+	}
+
+	static function measure(csv:String):Void
+	{
+		pixelW = 0;
+		pixelH = 0;
+		if (csv == null || csv == "")
+			return;
+		var lines = csv.split("
+");
+		var step = data.ArenaData.ArenaDataRegistry.get().tileSize;
+		pixelH = lines.length * step;
+		pixelW = lines[0].split(",").length * step;
 	}
 
 	public static function setTiles(setName:String, csv:String):Void
@@ -54,6 +70,8 @@ class CustomArena
 		csv = null;
 		props = [];
 		tileset = null;
+		pixelW = 0;
+		pixelH = 0;
 		tiles = null;
 		fromEditor = false;
 		slot = 0;

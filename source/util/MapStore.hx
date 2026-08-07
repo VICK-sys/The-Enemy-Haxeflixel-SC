@@ -17,6 +17,8 @@ typedef StoredMap =
 	?tileset:String,
 	?tiles:String,
 	?tileW:Int,
+	?cols:Int,
+	?rows:Int,
 	?shopX:Float,
 	?shopY:Float
 }

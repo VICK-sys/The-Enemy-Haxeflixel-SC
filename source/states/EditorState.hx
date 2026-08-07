@@ -133,6 +133,7 @@ class EditorState extends FlxState
 		chrome.onSlot = function() switchSlot(slot % 5 + 1);
 		chrome.onModeChip = modeChipAction;
 		chrome.onSheet = function() if (mode == MODE_TILES) tileTool.cycleSheet();
+		chrome.onSize = cycleSize;
 		chrome.onMode = setMode;
 		chrome.onEye = toggleEye;
 		chrome.onUndo = undo;
@@ -166,6 +167,36 @@ class EditorState extends FlxState
 				tilePal.build(doc.tileset());
 				propPal.build();
 		}
+	}
+
+	function sizeList():Array<Array<Int>>
+	{
+		var list = cfg.sizes;
+		if (list == null || list.length == 0)
+			list = [[doc.cols, doc.rows]];
+		return list;
+	}
+
+	function cycleSize():Void
+	{
+		var list = sizeList();
+		var at = -1;
+		for (i in 0...list.length)
+			if (list[i][0] == doc.cols && list[i][1] == doc.rows)
+				at = i;
+		var next = list[(at + 1) % list.length];
+
+		doc.pushUndo();
+		if (!doc.resize(next[0], next[1]))
+			return;
+		wallTool.rebuild();
+		applyTheme();
+		tileTool.rebuild();
+		propTool.rebuild();
+		tileTool.refreshGhost();
+		placeSpawnMark();
+		view.reset();
+		hud.flash("MAP IS NOW " + doc.cols + " X " + doc.rows + " (Z UNDOES)");
 	}
 
 	function modeChipAction():Void
@@ -420,6 +451,7 @@ class EditorState extends FlxState
 		});
 		var t = doc.tileset();
 		chrome.setSheet("SHEET: " + (t == null ? "NONE" : t.name), mode == MODE_TILES);
+		chrome.setSize("SIZE: " + doc.cols + " X " + doc.rows);
 	}
 
 	override public function update(elapsed:Float):Void

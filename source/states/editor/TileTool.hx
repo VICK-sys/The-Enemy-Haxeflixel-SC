@@ -197,8 +197,8 @@ class TileTool
 		if (!hasSel || t == null)
 			return false;
 
-		var gw = DecorTiles.cols(t);
-		var gh = DecorTiles.rows(t);
+		var gw = DecorTiles.cols(t, doc.pixelW);
+		var gh = DecorTiles.rows(t, doc.pixelH);
 		var cMin = Std.int(Math.max(0, Math.min(anchorC, headC)));
 		var rMin = Std.int(Math.max(0, Math.min(anchorR, headR)));
 		var cMax = Std.int(Math.min(gw - 1, Math.max(anchorC, headC)));
@@ -232,8 +232,8 @@ class TileTool
 		var m = EditorView.mouseWorld();
 		var c0 = Math.floor(m.x / DecorTiles.cellW(t));
 		var r0 = Math.floor(m.y / DecorTiles.cellH(t));
-		var w = DecorTiles.cols(t);
-		var h = DecorTiles.rows(t);
+		var w = DecorTiles.cols(t, doc.pixelW);
+		var h = DecorTiles.rows(t, doc.pixelH);
 		var stamped = clip != null;
 		var pw = stamped ? clipW : pal.selCols;
 		var ph = stamped ? clipH : pal.selRows;
