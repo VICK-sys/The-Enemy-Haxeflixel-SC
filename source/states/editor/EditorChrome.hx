@@ -79,13 +79,20 @@ class EditorChrome
 		line(palX - pad, palY - pad, Std.int(palW + pad * 2), Std.int(palH + pad * 2), 0xFF0E0E0E);
 		palHint = boxLabel(palX, palY, palH, palW, "", Lang.smallSize(), TEXT_DIM, CENTER);
 
-		slotChip = chip(sidebarW + 12, 8, 108, "SLOT 1", function() if (onSlot != null) onSlot());
-		modeChip = chip(sidebarW + 128, 8, 300, "BRUSH 1X1", function() if (onModeChip != null) onModeChip());
+		var slotW = chipWidth("SLOT 1 *", 108);
+		slotChip = chip(sidebarW + 12, 8, slotW, "SLOT 1", function() if (onSlot != null) onSlot());
+		modeChip = chip(sidebarW + 12 + slotW + CHIP_GAP, 8, 300, "BRUSH 1X1", function() if (onModeChip != null) onModeChip());
 
-		chip(FlxG.width - 336, 8, 110, "CONTROLS", function() if (onControls != null) onControls());
-		saveChip = chip(FlxG.width - 218, 8, 90, "SAVE", function() if (onSave != null) onSave());
-		var play = chip(FlxG.width - 120, 8, 108, "PLAY MAP", function() if (onPlay != null) onPlay());
-		chipBgs[play].color = PLAY_BG;
+		var playW = chipWidth("PLAY MAP", 108);
+		var saveW = chipWidth("SAVE *", 90);
+		var controlsW = chipWidth("CONTROLS", 110);
+		var playX = FlxG.width - CHIP_EDGE_GAP - playW;
+		var saveX = playX - CHIP_GAP - saveW;
+		var controlsX = saveX - CHIP_GAP - controlsW;
+
+		chip(controlsX, 8, controlsW, "CONTROLS", function() if (onControls != null) onControls());
+		saveChip = chip(saveX, 8, saveW, "SAVE", function() if (onSave != null) onSave());
+		var play = chip(playX, 8, playW, "PLAY MAP", function() if (onPlay != null) onPlay(), PLAY_BG);
 		chipLabels[play].color = PLAY_TEXT;
 
 		sheetChip = chip(14, Std.int(palBottom + 10), sidebarW - 28, "SHEET", function() if (onSheet != null) onSheet());
@@ -168,7 +175,20 @@ class EditorChrome
 		return label(x, boxY + Lang.inkTop(use, size, boxH), w, text, size, color, align, use);
 	}
 
-	function chip(x:Int, y:Int, w:Int, text:String, action:Void->Void):Int
+	static inline var CHIP_PAD:Int = 14;
+	static inline var CHIP_GAP:Int = 8;
+	static inline var CHIP_EDGE_GAP:Int = 12;
+
+	function chipWidth(text:String, min:Int):Int
+	{
+		var probe = new FlxText(0, 0, 0, text);
+		probe.setFormat(Lang.smallFont(), Lang.smallSize(), FlxColor.WHITE, LEFT);
+		var w = Math.ceil(probe.width) + CHIP_PAD * 2;
+		probe.destroy();
+		return w < min ? min : w;
+	}
+
+	function chip(x:Int, y:Int, w:Int, text:String, action:Void->Void, bgColor:Int = CHIP):Int
 	{
 		var edge = new FlxSprite(x - 1, y - 1);
 		edge.makeGraphic(w + 2, 30, CHIP_EDGE);
@@ -176,11 +196,12 @@ class EditorChrome
 		chipEdges.push(edge);
 
 		var bg = new FlxSprite(x, y);
-		bg.makeGraphic(w, 28, CHIP);
+		bg.makeGraphic(w, 28, bgColor);
 		ui(bg);
 		chipBgs.push(bg);
 
 		var l = boxLabel(x, y, 28, w, text, Lang.smallSize(), TEXT_DIM, CENTER);
+		l.wordWrap = false;
 		chipLabels.push(l);
 
 		hit(x, y, w, 28, action);
@@ -252,4 +273,5 @@ class EditorChrome
 
 	public function setEye(i:Int, on:Bool):Void
 		eyeDots[i].visible = on;
+
 }
